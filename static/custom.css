@@ -1,0 +1,119 @@
+:root {
+  /* --hot-pink: #ff0081; */
+  --hot-pink: #ED7253;
+  --purple: #5368e0;
+  --light-purple: #8c6ff7;
+  --search-bg: #f2f2f2;
+  --lime-green: #A4E053;
+  --xls-icon: #146c43;
+  --xlsx-icon: #146c43;
+  --pptx-icon: #ee6c45;
+  --pdf-icon: #dc3545;
+  --csv-icon: #146c43;
+  --md-icon: #5368e0;
+  --docx-icon: #0d6efd;
+  --numbers-icon: #63ee56;
+  --pages-icon: #fd9920;
+  --txt-icon: #5368e0;
+  --key-icon: #1e88f5;
+}
+
+/* html,
+body {
+  overflow: hidden !important;
+  background: -webkit-linear-gradient(to right, #E9E4F030, #D3CCE330);
+  background: linear-gradient(to right, #E9E4F030, #D3CCE330);
+} */
+
+.purple {
+  color: var(--purple) !important;
+}
+
+.drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+.grayscale {
+  /* filter: grayscale(.9); */
+  color: gray;
+}
+
+.page-icon {
+  color: var(--hot-pink);
+  font-size: xxx-large;
+}
+
+/* Styles that Svelte would mark as unused because they are meant for child components */
+.selected i {
+  color: white !important;
+}
+
+.w-90 {
+  width: 90% !important;
+}
+
+.spin-right::before {
+  transform-origin: 50% 50%;
+  animation: spin-right-animation 3s linear 0s infinite normal both running;
+}
+
+@keyframes spin-right-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+@keyframes breathing-circle {
+  0% {
+    transform: scale(1);
+    border-radius: 67% 33% 63% 37% / 46% 32% 68% 54%;
+    background-image: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%);
+    opacity: 0.7;
+  }
+  41% {
+    transform: scale(1.4);
+    border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    opacity: 0.9;
+  }
+  49% {
+    transform: scale(1.4);
+    border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    opacity: 0.92;
+  }
+  90% {
+    transform: scale(1);
+    border-radius: 67% 33% 63% 37% / 46% 32% 68% 54%;
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    border-radius: 67% 33% 63% 37% / 46% 32% 68% 54%;
+    opacity: 0.7;
+  }
+}

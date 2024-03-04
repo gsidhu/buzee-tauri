@@ -1,0 +1,384 @@
+<script lang="ts">
+	import moment from 'moment';
+	import { onMount } from 'svelte';
+	import { readable } from 'svelte/store';
+	import { documentsShown, shiftKeyPressed, compactViewMode } from '$lib/stores';
+	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
+	import FiletypeDropdown from '$lib/components/search/FiletypeDropdown.svelte';
+	import { createTable, Subscribe, Render } from 'svelte-headless-table';
+	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
+	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
+	import { clickRow } from '$lib/utils/fileUtils';
+	import PopoverIcon from '../ui/popoverIcon.svelte';
+	import { sendEvent } from '../../../utils/firebase';
+
+	function openFile(path: string) {
+		sendEvent('click:open_file');
+		window.electronAPI?.openFile(path);
+	}
+	function formatUpdatedTime(updatedTime: Date): string {
+		const updatedMoment = moment(updatedTime);
+		const today = moment();
+		const yesterday = moment().subtract(1, 'days');
+
+		if (updatedMoment.isSame(today, 'day')) {
+			// If the update was today, return the time
+			return updatedMoment.format('h:mm A');
+		} else if (updatedMoment.isSame(yesterday, 'day')) {
+			// If the update was yesterday, return 'Yesterday'
+			return 'Yesterday';
+		} else {
+			// Otherwise, return the date
+			return updatedMoment.format('YYYY-MM-DD');
+		}
+	}
+
+	function formatPath(path: string): string {
+		const parts = path.split('/'); // Split the path into components
+		const length = parts.length;
+
+		if (length > 3) {
+			// Take the two directories just before the file name and prepend '...'
+			return '.../' + parts.slice(length - 3, length - 1).join('/') + '/';
+		} else {
+			// If the path is already short, return it as is
+			return path;
+		}
+	}
+
+	function showContextMenu(
+		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
+		result: SearchResult
+	) {
+		sendEvent('right_click:result_context_menu');
+		clickRow(e, $shiftKeyPressed);
+		window.menuAPI?.showResultsContextMenu(result);
+	}
+
+	const table = createTable(readable($documentsShown), {
+		resize: addResizedColumns(),
+		sort: addSortBy({ disableMultiSort: true }),
+		hideCols: addHiddenColumns()
+	});
+
+	const columns = table.createColumns([
+		table.column({
+			header: 'Type',
+			accessor: 'type',
+			plugins: {
+				resize: {
+					initialWidth: 20,
+					minWidth: 20,
+					maxWidth: 20
+				},
+				sort: { disable: false }
+			}
+		}),
+		table.column({
+			header: 'Name',
+			accessor: 'name',
+			plugins: {
+				resize: {
+					initialWidth: 250,
+					minWidth: 150,
+					maxWidth: 500
+				}
+			}
+		}),
+		table.column({
+			header: 'Size',
+			accessor: 'size',
+			plugins: {
+				resize: {
+					initialWidth: 100,
+					minWidth: 100,
+					maxWidth: 150
+				}
+			}
+		}),
+		table.column({
+			header: 'Last Modifed',
+			accessor: 'last_modified',
+			id: 'lastModified',
+			cell: ({ value }) => formatUpdatedTime(value) ?? value,
+			plugins: {
+				resize: {
+					initialWidth: 125,
+					minWidth: 125,
+					maxWidth: 150
+				}
+			}
+		}),
+		table.column({
+			header: 'Location',
+			accessor: 'path',
+			plugins: {
+				resize: {
+					initialWidth: 200,
+					minWidth: 50,
+					maxWidth: 500
+				}
+			}
+		})
+	]);
+
+	function showTableHeaderContextMenu(option: string) {
+		window.menuAPI?.showTableHeaderMenu(option, ids, labels, hideForId);
+	}
+
+	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
+		table.createViewModel(columns);
+	const { hiddenColumnIds } = pluginStates.hideCols;
+	const ids = flatColumns.map((c) => c.id);
+	const labels = flatColumns.map((c) => c.header);
+	let hideForId: Record<string, boolean> = Object.fromEntries(ids.map((id) => [id, false]));
+	$: $hiddenColumnIds = Object.entries(hideForId)
+		.filter(([, hide]) => hide)
+		.map(([id]) => id);
+
+	// HACK: hide size column by default
+	hideForId['size'] = true;
+
+	onMount(() => {
+		resetColumnSize();
+
+		window.electronAPI?.resetTableColWidths(() => {
+			resetColumnSize();
+		});
+		window.electronAPI?.showHideColumn((id: string, hide: boolean) => {
+			let falseCount = Object.values(hideForId).filter((value) => value === false).length;
+			if (falseCount <= 2 && hide) {
+				return;
+			}
+			console.log(id, hide);
+
+			hideForId[id] = hide;
+			// HACK: if no columns are hidden after this, reset the column size
+			falseCount = Object.values(hideForId).filter((value) => value === false).length;
+			if (falseCount === ids.length) {
+				// window.location.reload();
+				resetColumnSize();
+			}
+		});
+	});
+</script>
+
+<table {...$tableAttrs}>
+	<thead id="real-thead">
+		{#each $headerRows as headerRow (headerRow.id)}
+			<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
+				<tr {...rowAttrs}>
+					{#each headerRow.cells as cell (cell.id)}
+						<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
+							<th
+								{...attrs}
+								class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
+								role="button"
+								tabindex="0"
+								use:props.resize
+								on:click={props.sort.toggle}
+								class:sorted={props.sort.order !== undefined}
+								on:contextmenu={() => showTableHeaderContextMenu(cell.id)}
+							>
+								{#if cell.id === 'type'}
+									<!-- <FiletypeDropdown searchBar={false} /> -->
+								{:else}
+									<Render of={cell.render()} />
+								{/if}
+								{#if props.sort.order === 'asc'}
+									<i class="bi bi-caret-up-fill" />
+								{:else if props.sort.order === 'desc'}
+									<i class="bi bi-caret-down-fill" />
+								{/if}
+								{#if !props.resize.disabled}
+									<button
+										aria-hidden="false"
+										tabindex="-1"
+										class="resizer"
+										on:click|stopPropagation
+										use:props.resize.drag
+										use:props.resize.reset
+									/>
+								{/if}
+							</th>
+						</Subscribe>
+					{/each}
+				</tr>
+			</Subscribe>
+		{/each}
+	</thead>
+	{#key $documentsShown.length}
+		{#if $documentsShown.length > 0}
+			<tbody {...$tableBodyAttrs}>
+				{#each $rows as row (row.id)}
+					<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+						<tr
+							{...rowAttrs}
+							id={stringToHash($documentsShown[Number(row.id)].path)}
+							class={`table-row result-${Number(row.id)}`}
+							role="button"
+							tabindex="0"
+							on:focus={(e) => clickRow(e, $shiftKeyPressed)}
+							on:click={(e) => clickRow(e, $shiftKeyPressed)}
+							on:contextmenu={(e) => showContextMenu(e, $documentsShown[Number(row.id)])}
+							on:dblclick={() => openFile($documentsShown[Number(row.id)].path)}
+						>
+							{#each row.cells as cell (cell.id)}
+								<Subscribe attrs={cell.attrs()} let:attrs>
+									<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}>
+										{#if cell.id === 'type'}
+											<FileTypeIcon filetype={String(cell.render())} />
+										{:else if cell.id === 'size'}
+											<span>{readableFileSize(Number(cell.render()))}</span>
+										{:else if cell.id === 'path'}
+											<PopoverIcon
+												label={formatPath(String(cell.render()))}
+												title={String(cell.render())}
+												showIcon={false}
+												showText={true}
+												marginClass="m-0"
+												paddingClass="p-0"
+												isBtn={false}
+											/>
+										{:else}
+											<span><Render of={cell.render()} /></span>
+										{/if}
+									</td>
+								</Subscribe>
+							{/each}
+						</tr>
+					</Subscribe>
+				{/each}
+			</tbody>
+		{/if}
+	{/key}
+</table>
+
+{#if $documentsShown.length <= 0}
+	<div class="d-flex flex-column px-4 py-2 mx-auto align-items-center justify-content-center">
+		<img class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
+		<h3>No Results</h3>
+		<div class="d-flex flex-column text-light-emphasis text-center small gap-2">
+			<span>Try modifying your query? You can be more specific like –</span>
+			<span><code>last year "annual report" -pdf</code></span>
+			<a href="/tips" class="purple">View all tips and shortcuts</a>
+		</div>
+	</div>
+{/if}
+
+<style lang="scss">
+	table {
+		border-spacing: 0;
+		width: 100%;
+		position: relative;
+	}
+	tr {
+		cursor: default;
+	}
+	td {
+		position: relative;
+		overflow: hidden;
+		span {
+			display: block;
+			width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+	// regular padding
+	td {
+		font-size: 0.9rem;
+		padding: 8px;
+	}
+	// compact padding
+	td.compact-view,
+	th.compact-view {
+		font-size: 0.8rem;
+		padding: 4px !important;
+	}
+	th {
+		// border-bottom: 1px solid var(--light-purple);
+		text-align: center;
+		font-size: 0.9rem !important;
+		font-weight: 600;
+		padding: 4px 4px !important;
+	}
+	th:last-of-type {
+		overflow-x: clip;
+	}
+	.type-col,
+	.size-col,
+	.lastModified-col {
+		text-align: center;
+	}
+	// banded rows
+	tr:not(.selected):nth-of-type(2n + 1) > td {
+		background-color: #d3d3d340;
+	}
+	// selected row
+	.selected {
+		background-color: var(--purple) !important;
+		color: white;
+		.pinned,
+		.pin {
+			color: white;
+		}
+	}
+	// pinned rows
+	.pinned {
+		color: var(--hot-pink);
+	}
+	.pin {
+		color: var(--bs-body-color);
+	}
+	.pin:hover {
+		color: var(--hot-pink);
+	}
+	// resize column handle
+	th {
+		position: relative; // need this to position the resizer
+	}
+	th .resizer {
+		position: absolute;
+		top: 0%;
+		bottom: 0;
+		right: -4px;
+		width: 4px;
+		height: 100%;
+		background: black;
+		// background: transparent;
+		cursor: col-resize;
+		z-index: 1;
+		opacity: 0.05;
+
+		&:hover {
+			top: 0;
+			height: 100%;
+			width: 8px;
+			background: var(--purple);
+			opacity: 1;
+		}
+	}
+	button.resizer {
+		border: none;
+		padding: 0;
+	}
+
+	// table head fixed
+	thead,
+	tbody tr {
+		display: table;
+		width: 100%;
+		table-layout: fixed; /* even columns width , fix width of table too*/
+	}
+
+	tbody {
+		display: block;
+		overflow-y: scroll;
+		overflow-x: auto !important;
+		max-height: calc(
+			100vh - 100px
+		); /* set maximum height so rows don't hide outside the viewport; 100px is roughly the height of the topbar + thead + statusbar */
+	}
+</style>
