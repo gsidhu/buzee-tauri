@@ -20,3 +20,5 @@ open = "5.1.1"
 dotenvy = "0.15.7"
 dirs = "5.0.1"
 diesel = { version = "2.1.4", features = ["sqlite"] }
+chrono = "0.4.26"
+notify = "4.0.17"

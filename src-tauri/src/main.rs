@@ -5,7 +5,7 @@ mod error_type;
 mod ipc;
 mod housekeeping;
 mod database;
-mod schema;
+mod utils;
 
 fn main() {
   housekeeping::initialize();

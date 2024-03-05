@@ -1,5 +1,6 @@
 # Logbook
 
+- Added FTS table and triggers. + scaffolding code for file watcher
 - Set up database and app folder in user's documents. Getting some sense of project structure. Feeling happy.
 - Learning from Archive_Cat and Orange to set up the database using `diesel` and a file watcher.
 - Copied the `tauri.conf.json` from the Tauri 2.0 beta project to the SvelteKit project. Added the following dependencies to package.json –
