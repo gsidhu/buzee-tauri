@@ -1,50 +1,53 @@
-// use crate::utils::*;
-// use crate::database::*;
-// use crate::database::models::SearchResult;
+use diesel::SqliteConnection;
+use diesel::RunQueryDsl;
 
-// Have to use raw SQL queries for searching the FTS tables because –
-// "TypeORM's addOrderBy/orderBy methods expect the first argument to be
-// a column name or an alias, not a function call. Unfortunately, TypeORM does
-// not support function calls in the addOrderBy method."
-
+use crate::database::models::SearchResult;
 // Return documents from the document_fts Index that match the given search query (name and type)
 // bm25(document_fts, 10) is the ranking function which gives 10x weight to the file name (first column)
-// pub fn search_fts_index(
-//   query: String,
-//   page: int,
-//   limit: int,
-//   filetype: Optional(String),
-//   date_limit: Optional(DateLimit)
-// ) -> Vec<SearchResult> {
-//     let con = establish_connection();
-//     let mut where_condition: &str;
-//     // Add type(s)
-//     if (filetype && filetype.indexOf(",") < 0) {
-//       where_condition = format!("filetype IN (" + "{}" + ")", FileType::new(type).name);
-//     }
-//     if (filetype && filetype.indexOf(",") > -1) {
-//       where_condition = format!("filetype IN ({})", FileType::new(type).name);
-//     }
-//     // Add date limit 
-//     if (date_limit) {
-//       if (where_condition.length > 0) {
-//         where_condition += r#" AND "#;
-//       }
-//       where_condition += r#"last_modified >= date('${dateLimit.start}') 
-//       AND last_modified <= date('${dateLimit.end}') "#;
-//     }
-//     let inner_query : &str = r#"
-//         SELECT d.id, d.name, d.path, d.size, d.type, d.last_modified
-//         FROM document d
-//         JOIN (
-//             SELECT DISTINCT document_id
-//             FROM document_fts
-//             WHERE ${query !== '' ? `document_fts MATCH '${query}'` : ''} ${whereCondition.length > 0 ? ((query !== '') ? `AND ${whereCondition}` : `${whereCondition}`) : ''}
-//             ORDER BY bm25(document_fts, 10)
-//             LIMIT ${limit} OFFSET ${page * limit}
-//         ) t ON d.id = t.document_id
-//     "#;
 
-//     let search_results = diesel::sql_query(inner_query.to_string()).execute(&mut con)?;
-//     Ok(search_results)
-// }
+pub fn search_fts_index(
+    query: &str,
+    page: i32,
+    limit: i32,
+    file_type: Option<&str>,
+    mut conn: SqliteConnection,
+) -> Result<Vec<SearchResult>, diesel::result::Error> {
+    let mut where_condition = ""; // Initialize where_condition
+
+    // Add type(s)
+    if let Some(file_type) = file_type {
+        if !file_type.contains(",") {
+            where_condition = &format!(r#" AND filetype IN ('{}')"#, file_type);
+        } else {
+            where_condition = &format!(r#" AND filetype IN ({})"#, file_type.replace(",", "','"));
+        }
+    }
+
+    let inner_query = format!(
+        r#"
+        SELECT d.name, d.path, d.size, d.file_type, d.last_modified, d.last_opened, d.created_at
+        FROM document d
+        JOIN (
+            SELECT DISTINCT path
+            FROM document_fts
+            WHERE {match_clause}
+            ORDER BY bm25(document_fts, 10)
+            LIMIT {limit} OFFSET {offset}
+        ) t ON d.path = t.path
+        "#,
+        match_clause = if !query.is_empty() {
+            format!("document_fts MATCH '{}'", query)
+        } else {
+            "".to_string()
+        },
+        limit = limit,
+        offset = page * limit
+    );
+
+    println!("inner_query: {}", inner_query);
+
+    let search_results: Vec<SearchResult> = diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
+
+    println!("search_results: {:?}", search_results);
+    Ok(search_results)
+}

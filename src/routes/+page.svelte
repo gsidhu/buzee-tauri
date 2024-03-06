@@ -31,6 +31,12 @@
 		});
 	}
 
+	function runSearch() {
+		invoke("run_search", { query: "gurjot", page: 0, limit: 50, file_type: "docx" }).then((res) => {
+			console.log(res);
+		});
+	}
+
 	onMount(async () => {
 		// Load the first page of documents whenever the app loads
 		// TODO: Replace this with pinned documents later
@@ -46,3 +52,4 @@
 <button class="btn btn-primary" on:click={() => openFileFolder()}>Open File Folder</button>
 <button class="btn btn-primary" on:click={() => runFileWatcher()}>Run File Watcher</button>
 
+<button class="btn btn-primary" on:click={() => runSearch()}>Run Search</button>

@@ -3,6 +3,7 @@
 
 extern crate diesel;
 extern crate chrono;
+extern crate serde_json;
 
 mod utils;
 mod error_type;

@@ -7,7 +7,7 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
     "path" text NOT NULL,
     "size" integer,
     "file_type" varchar NOT NULL,
-    "content" text,
+    "file_content" text,
     "last_modified" datetime NOT NULL,
     "last_opened" datetime NOT NULL DEFAULT (datetime('now'))
   )
@@ -18,11 +18,10 @@ pub const CREATE_DOCUMENT_FTS : &str = r#"
   USING fts5(
     path,
     name,
-    content,
+    file_content,
     file_type,
-    last_modified,
-    document_id UNINDEXED,
-    content=text,
+    id UNINDEXED,
+    content=document,
     tokenize='porter ascii'
   )
 "#;
@@ -30,23 +29,22 @@ pub const CREATE_DOCUMENT_FTS : &str = r#"
 pub const TRIGGER_DOCUMENT_INSERT : &str = r#"
   CREATE TRIGGER IF NOT EXISTS document_insert 
   AFTER INSERT ON document 
-  BEGIN INSERT INTO document_fts
-  (
-    path,
-    name,
-    content,
-    file_type,
-    last_modified,
-    document_id
-  )
-  VALUES (
-    new.path,
-    new.name,
-    new.content,
-    new.file_type,
-    new.last_modified,
-    new.id
-  ); 
+  BEGIN 
+    INSERT INTO document_fts
+    (
+      path,
+      name,
+      file_content,
+      file_type,
+      id
+    )
+    VALUES (
+      new.path,
+      new.name,
+      new.file_content,
+      new.file_type,
+      new.id
+    ); 
   END;
 "#;
 
@@ -55,33 +53,31 @@ pub const TRIGGER_DOCUMENT_UPDATE : &str = r#"
   AFTER UPDATE ON document 
   BEGIN 
     DELETE FROM document_fts
-    WHERE document_id = old.id;
+    WHERE id = old.id;
     
     INSERT INTO document_fts
     (
       path,
       name,
-      content,
+      file_content,
       file_type,
-      last_modified,
-      document_id
+      id
     )
     VALUES (
       new.path,
       new.name,
-      new.content,
+      new.file_content,
       new.file_type,
-      new.last_modified,
       new.id
     ); 
   END;
 "#;
 
 pub const TRIGGER_DOCUMENT_DELETE : &str = r#"
-  CREATE TRIGGER document_delete
+  CREATE TRIGGER IF NOT EXISTS document_delete
   AFTER DELETE ON document
   BEGIN
     DELETE FROM document_fts
-    WHERE document_id = old.id;
+    WHERE id = old.id;
   END
 "#;

@@ -1,6 +1,10 @@
 // Inter-Process Communication between Rust and SvelteKit
 
 use crate::error_type::Error; // Import the Error type
+use crate::database::establish_connection;
+use crate::database::search::search_fts_index;
+use crate::database::models::SearchResult;
+use diesel::SqliteConnection;
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
 use crate::indexing::walk_directory;
 use crate::housekeeping;
@@ -19,15 +23,32 @@ fn open_file_folder(file_path: String, window: tauri::Window) -> Result<String, 
 fn run_file_watcher_script() -> Result<String, Error> {
   println!("File watcher started");
   let home_directory = housekeeping::get_home_directory().unwrap();
-  walk_directory(&home_directory);
+  println!("Home directory: {}", home_directory);
+  std::thread::spawn(move || {
+    walk_directory(&home_directory);
+  });
   Ok("File watcher started".into())
+}
+
+// Run search
+#[tauri::command]
+fn run_search(
+  query: &str,
+  page: i32,
+  limit: i32,
+  file_type: Option<&str>,
+) -> Result<Vec<SearchResult>, Error> {
+  let conn: SqliteConnection = establish_connection();
+  let search_results = search_fts_index(query, page, limit, file_type, conn).unwrap();
+  Ok(search_results)
 }
 
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       open_file_folder,
-      run_file_watcher_script
+      run_file_watcher_script,
+      run_search
     ])
     .plugin(tauri_plugin_shell::init())
     .run(tauri::generate_context!())

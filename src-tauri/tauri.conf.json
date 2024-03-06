@@ -1,7 +1,7 @@
 {
   "productName": "buzee-tauri",
   "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "inc.buzilla.buzee",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:5173",

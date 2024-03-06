@@ -8,7 +8,7 @@ table! {
       path -> Text,
       size -> Nullable<Double>,
       file_type -> Text,
-      content -> Nullable<Text>,
+      file_content -> Nullable<Text>,
       last_modified -> Text,
       last_opened -> Text
   }
