@@ -6,7 +6,7 @@ use queries::{DOCUMENT_TABLE_CREATE_STATEMENT, CREATE_DOCUMENT_FTS, TRIGGER_DOCU
 
 const DB_NAME: &str = r#"buzee.db"#;
 
-pub mod crud;
+// pub mod crud;
 pub mod schema;
 pub mod models;
 mod queries;
@@ -17,8 +17,7 @@ pub fn establish_connection() -> SqliteConnection {
 
   let database_url = format!("sqlite://{}/{}/{}", app_dir, APP_DIRECTORY, DB_NAME);
 
-  SqliteConnection::establish(&database_url)
-      .unwrap_or_else(|_| panic!("Error connecting to the database: {}", database_url))
+  SqliteConnection::establish(&database_url).unwrap()
 }
 
 // Create all tables and triggers in the db if they don't exist

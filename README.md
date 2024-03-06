@@ -16,3 +16,6 @@ Rust implementation of Buzee. Hopefully it'll be faster, lighter and more reliab
 - On first load
   - User runs through onboarding and gives permission to scan full disk
   - File watcher
+
+- Run `compromise` on the search query in the front-end.
+  - Any other necessary npm packages could be added to the front-end as well.

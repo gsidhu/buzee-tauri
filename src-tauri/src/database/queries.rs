@@ -6,10 +6,10 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
     "name" text NOT NULL,
     "path" text NOT NULL,
     "size" integer,
-    "filetype" varchar NOT NULL,
+    "file_type" varchar NOT NULL,
     "content" text,
     "last_modified" datetime NOT NULL,
-    "updated_at" datetime NOT NULL DEFAULT (datetime('now'))
+    "last_opened" datetime NOT NULL DEFAULT (datetime('now'))
   )
 "#;
 
@@ -19,7 +19,7 @@ pub const CREATE_DOCUMENT_FTS : &str = r#"
     path,
     name,
     content,
-    type,
+    file_type,
     last_modified,
     document_id UNINDEXED,
     content=text,
@@ -35,7 +35,7 @@ pub const TRIGGER_DOCUMENT_INSERT : &str = r#"
     path,
     name,
     content,
-    type,
+    file_type,
     last_modified,
     document_id
   )
@@ -43,7 +43,7 @@ pub const TRIGGER_DOCUMENT_INSERT : &str = r#"
     new.path,
     new.name,
     new.content,
-    new.type,
+    new.file_type,
     new.last_modified,
     new.id
   ); 
@@ -62,7 +62,7 @@ pub const TRIGGER_DOCUMENT_UPDATE : &str = r#"
       path,
       name,
       content,
-      type,
+      file_type,
       last_modified,
       document_id
     )
@@ -70,7 +70,7 @@ pub const TRIGGER_DOCUMENT_UPDATE : &str = r#"
       new.path,
       new.name,
       new.content,
-      new.type,
+      new.file_type,
       new.last_modified,
       new.id
     ); 

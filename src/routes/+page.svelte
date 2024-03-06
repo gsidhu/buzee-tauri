@@ -20,7 +20,13 @@
 	}
 
 	function openFileFolder() {
-		invoke('open_file_folder', { filePath: '/Users/thatgurjot/Documents/' }).then((res) => {
+		invoke("open_file_folder", { filePath: "/Users/thatgurjot/Documents/" }).then((res) => {
+			console.log(res);
+		});
+	}
+
+	function runFileWatcher() {
+		invoke("run_file_watcher_script").then((res) => {
 			console.log(res);
 		});
 	}
@@ -38,4 +44,5 @@
 </script>
 
 <button class="btn btn-primary" on:click={() => openFileFolder()}>Open File Folder</button>
+<button class="btn btn-primary" on:click={() => runFileWatcher()}>Run File Watcher</button>
 

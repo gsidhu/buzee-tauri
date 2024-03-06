@@ -19,6 +19,7 @@ thiserror = "1.0"
 open = "5.1.1"
 dotenvy = "0.15.7"
 dirs = "5.0.1"
-diesel = { version = "2.1.4", features = ["sqlite"] }
+diesel = { version = "2.1.4", features = ["sqlite", "chrono", "time"] }
 chrono = "0.4.26"
 notify = "4.0.17"
+jwalk = "0.8.1"

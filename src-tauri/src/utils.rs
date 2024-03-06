@@ -1,42 +1,59 @@
-// // use std::fmt::{self, Debug};
+// use std::fmt::{self, Debug};
 
-// #[derive(Debug)]
-// struct FileType {
-//   name: String,
+// struct DateTime {
+//   start_date: String,
+//   end_date: String,
+//   text: String
 // }
 
-// impl FileType {
+// impl DateTime {
 //   fn new(name: &str) -> Self {
-//     FileType {
-//       name: name.to_string(),
+//     DateTime {
+//       start_date: start_date.to_string(),
+//       end_date: end_date.to_string(),
+//       text: text.to_string(),
 //     }
 //   }
 // }
-// // struct DateTime {
-// //   start_date: String,
-// //   end_date: String,
-// //   text: String
-// // }
+use std::fs;
+use std::io;
+use std::path::Path;
 
-// // impl DateTime {
-// //   fn new(name: &str) -> Self {
-// //     DateTime {
-// //       start_date: start_date.to_string(),
-// //       end_date: end_date.to_string(),
-// //       text: text.to_string(),
-// //     }
-// //   }
-// // }
+pub fn get_metadata(path: &Path) -> io::Result<fs::Metadata> {
+  println!("Getting metadata for path: {:?}", path);
+  let metadata = fs::metadata(path)?;
+  Ok(metadata)
+}
 
-// pub fn get_file_ext(file_name: &str) -> &str {
-//   if !file_name.contains(".") {
-//     return "";
-//   }
-//   file_name.split(".").last().unwrap_or("")
-// }
+pub fn list_dir_contents(str: &str) -> Vec<String> {
+  if let Ok(paths) = std::fs::read_dir(str) {
+    return paths
+      .into_iter()
+      .map(|x| x.unwrap().path().to_str().unwrap().to_string())
+      .collect();
+  }
+  vec![]
+}
 
-// pub fn get_filename_from_path(x: String) -> String {
-//   let path = std::path::Path::new(&x);
-//   let file_stem = path.file_stem().unwrap();
-//   file_stem.to_str().unwrap().to_string()
-// }
+#[cfg(windows)]
+pub unsafe fn get_win32_ready_drives() -> Vec<String> {
+  let mut logical_drives = Vec::with_capacity(5);
+  let mut bitfield = kernel32::GetLogicalDrives();
+  let mut drive = 'A';
+
+  while bitfield != 0 {
+    if bitfield & 1 == 1 {
+      let strfulldl = drive.to_string() + ":/";
+      let cstrfulldl = CString::new(strfulldl.clone()).unwrap();
+      let x = kernel32::GetDriveTypeA(cstrfulldl.as_ptr());
+      if x == 3 || x == 2 {
+        logical_drives.push(strfulldl);
+        // println!("drive {0} is {1}", strfdl, x);
+      }
+    }
+    drive = std::char::from_u32((drive as u32) + 1).unwrap();
+    bitfield >>= 1;
+  }
+  logical_drives.sort_by(|x1, x2| x2.cmp(x1));
+  logical_drives
+}

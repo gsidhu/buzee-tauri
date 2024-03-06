@@ -17,6 +17,14 @@ pub fn get_documents_directory() -> Option<String> {
   }
 }
 
+pub fn get_home_directory() -> Option<String> {
+  if let Some(home_dir) = dirs::home_dir() {
+    Some(home_dir.to_string_lossy().to_string())
+  } else {
+    None
+  }
+}
+
 // Create the app directory in the documents directory
 // In case it doesn't exist
 pub fn create_app_directory_if_not_exists() -> Result<(), std::io::Error> {

@@ -1,5 +1,6 @@
 # Logbook
 
+- Turns out file watcher is not what I needed. I needed indexing. Added that. Documents are now getting added to the database.
 - Added FTS table and triggers. + scaffolding code for file watcher
 - Set up database and app folder in user's documents. Getting some sense of project structure. Feeling happy.
 - Learning from Archive_Cat and Orange to set up the database using `diesel` and a file watcher.
