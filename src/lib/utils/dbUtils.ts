@@ -17,7 +17,7 @@ export async function searchDocuments(query:string, page:number, limit:number, t
   
   if (type === "any") type = undefined;
   // const results = await window.dbAPI?.searchDocuments(query, page, limit, type);
-  const results: SearchResult[] = await invoke("run_search", { query: query, page: page, limit: limit, fileType: type });
+  const results: SearchResult[] = await invoke("run_search", { query: query, page: page, limit: limit, fileType: type, dateLimit: dateLimit});
   console.log("search results:", results);
   return results;
 }

@@ -1,6 +1,6 @@
 // Inter-Process Communication between Rust and SvelteKit
 
-use crate::custom_types::Error; // Import the Error type
+use crate::custom_types::{Error, DateLimit}; // Import the Error type
 use crate::database::establish_connection;
 use crate::database::search::search_fts_index;
 use crate::database::models::SearchResult;
@@ -47,10 +47,11 @@ fn run_search(
   page: i32,
   limit: i32,
   file_type: Option<String>,
+  date_limit: Option<DateLimit>
 ) -> Result<Vec<SearchResult>, Error> {
-  println!("run_search: query: {}, page: {}, limit: {}, filetype: {:?}", query, page, limit, file_type);
+  println!("run_search: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}", query, page, limit, file_type, date_limit);
   let conn: SqliteConnection = establish_connection();
-  let search_results = search_fts_index(query, page, limit, file_type, conn).unwrap();
+  let search_results = search_fts_index(query, page, limit, file_type, date_limit, conn).unwrap();
   Ok(search_results)
 }
 

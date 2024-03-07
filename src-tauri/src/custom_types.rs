@@ -1,3 +1,5 @@
+use serde::{Serialize, Deserialize};
+
 // create the error type that represents all errors possible in our program
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -13,4 +15,12 @@ impl serde::Serialize for Error {
   {
     serializer.serialize_str(self.to_string().as_ref())
   }
+}
+
+// DateLimit struct
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DateLimit {
+  pub start: String,
+  pub end: String,
+  pub text: String
 }
