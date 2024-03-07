@@ -25,8 +25,8 @@
 		});
 	}
 
-	function runFileWatcher() {
-		invoke("run_file_watcher_script").then((res) => {
+	function runFileIndexing() {
+		invoke("run_file_indexing").then((res) => {
 			console.log(res);
 		});
 	}
@@ -50,6 +50,6 @@
 </script>
 
 <button class="btn btn-primary" on:click={() => openFileFolder()}>Open File Folder</button>
-<button class="btn btn-primary" on:click={() => runFileWatcher()}>Run File Watcher</button>
+<button class="btn btn-primary" on:click={() => runFileIndexing()}>Run File Indexing</button>
 
 <button class="btn btn-primary" on:click={() => runSearch()}>Run Search</button>

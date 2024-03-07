@@ -21,10 +21,11 @@ fn get_all_forbidden_directories() -> Vec<&'static str> {
   all_forbidden_directories
 }
 
-pub fn walk_directory(path: &str) {
+pub fn walk_directory(path: &str) -> usize {
   let mut connection = establish_connection();
   let mut files_array: Vec<DocumentItem> = vec![];
   let all_forbidden_directories = get_all_forbidden_directories();
+  let mut files_added = 0;
   for entry in WalkDir::new(path) {
       let entry = entry.unwrap();
       let path = entry.path();
@@ -97,15 +98,18 @@ pub fn walk_directory(path: &str) {
       if files_array.len() == 100 {
         let cloned_files_array = files_array.clone();
         add_files_to_database(cloned_files_array, &mut connection);
+        files_added += files_array.len();
         files_array.clear();
       }
     // process the leftover files after the loop ends
     if files_array.len() > 0 {
       let cloned_files_array = files_array.clone();
       add_files_to_database(cloned_files_array, &mut connection);
+      files_added += files_array.len();
       files_array.clear();
     }
   }
+  (files_added)
 }
 
 use crate::database::schema::document;

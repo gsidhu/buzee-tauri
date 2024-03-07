@@ -1,5 +1,7 @@
 # Logbook
 
+- Counting the number of files added and letting front-end know when indexing is done.
+- Made file indexing thread async using `tokio` crate.
 - Storing UNIX timestamps as BIGINT/i64 instead of strings.
 - Search with file type filter works.
 - File search works.
@@ -26,3 +28,4 @@
   - The date query should run first and then the full-text search query
 - Make file indexing thread return counts of files indexed and emit a signal when done
 - Connect frontend UI to Tauri commands and responses
+- Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))

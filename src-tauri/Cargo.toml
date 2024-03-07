@@ -23,3 +23,4 @@ diesel = { version = "2.1.4", features = ["sqlite", "chrono", "time"] }
 chrono = "0.4.26"
 notify = "4.0.17"
 jwalk = "0.8.1"
+tokio = { version = "1.36.0", features = ["full"] }
