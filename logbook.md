@@ -1,5 +1,6 @@
 # Logbook
 
+- Storing UNIX timestamps as BIGINT/i64 instead of strings.
 - Search with file type filter works.
 - File search works.
 - Turns out file watcher is not what I needed. I needed indexing. Added that. Documents are now getting added to the database.

@@ -2,14 +2,14 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE TABLE IF NOT EXISTS "document" 
   (
     "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
-    "created_at" datetime NOT NULL DEFAULT (datetime('now')),
+    "created_at" BIGINT NOT NULL,
     "name" text NOT NULL,
     "path" text NOT NULL,
     "size" integer,
     "file_type" varchar NOT NULL,
     "file_content" text,
-    "last_modified" datetime NOT NULL,
-    "last_opened" datetime NOT NULL DEFAULT (datetime('now'))
+    "last_modified" BIGINT NOT NULL,
+    "last_opened" BIGINT NOT NULL
   )
 "#;
 

@@ -1,4 +1,4 @@
-// use crate::error_type::Error;
+// use crate::custom_types::Error;
 use diesel::prelude::*;
 use diesel::SqliteConnection;
 use crate::housekeeping::{get_documents_directory, APP_DIRECTORY};

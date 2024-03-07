@@ -1,6 +1,6 @@
 // Inter-Process Communication between Rust and SvelteKit
 
-use crate::error_type::Error; // Import the Error type
+use crate::custom_types::Error; // Import the Error type
 use crate::database::establish_connection;
 use crate::database::search::search_fts_index;
 use crate::database::models::SearchResult;

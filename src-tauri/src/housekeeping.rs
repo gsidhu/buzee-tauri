@@ -1,4 +1,4 @@
-// use crate::error_type::Error; // Import the Error type
+// use crate::custom_types::Error; // Import the Error type
 use dirs::document_dir;
 use crate::database::create_tables_if_not_exists;
 use crate::database::establish_connection;

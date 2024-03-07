@@ -81,14 +81,14 @@ pub fn walk_directory(path: &str) {
       }
 
       let file_item = DocumentItem {
-        created_at: created_at.to_string(),
+        created_at: created_at as i64,
         name: filename.to_string(),
         path: path.to_str().unwrap().to_string(),
         size: Some(filesize as f64),
         file_type: extension.unwrap().to_string(),
         file_content: None,
-        last_modified: last_modified_secs.to_string(),
-        last_opened: last_opened.to_string(),
+        last_modified: last_modified_secs as i64,
+        last_opened: last_opened as i64
       };
 
       files_array.push(file_item);
