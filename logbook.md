@@ -1,5 +1,6 @@
 # Logbook
 
+- Added compromise to frontend. Works well but should add feedback to the user about what it is parsing. Maybe in light grey text under the search bar?
 - Connect file indexing and search to front-end. Cleaning up electron IPC code remains.
 - Counting the number of files added and letting front-end know when indexing is done.
 - Made file indexing thread async using `tokio` crate.

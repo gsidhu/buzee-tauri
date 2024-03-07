@@ -75,7 +75,8 @@
 	}
 
 	onMount(async () => {
-		isMac = await window.constants?.isMac();
+		// isMac = await window.constants?.isMac();
+		isMac = true;
 		window.electronAPI?.setNumDocs(async (numDocs: number) => {
 			numFiles = numDocs;
 			showingResults = numFiles > 20;
@@ -97,10 +98,11 @@
 			syncStatus = status;
 		});
 		// Get the sync status on each mount
-		syncStatus = await window.dbAPI?.getBackgroundTextProcessRunningStatus();
+		// syncStatus = await window.dbAPI?.getBackgroundTextProcessRunningStatus();
 		// Set the app mode
 		//// on renderer launch
-		appMode = await window.electronAPI?.getAppMode();
+		// appMode = await window.electronAPI?.getAppMode();
+		appMode = "window";
 		//// on function call (defunct cuz renderer is reloaded on mode change)
 		window.electronAPI?.setAppMode(async (mode: string) => {
 			console.log('setAppMode', mode);

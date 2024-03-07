@@ -13,36 +13,38 @@
 	}
 
 	onMount(async () => {
-		isMac = await window.constants?.isMac();
-    appMode = await window.electronAPI?.getAppMode();
-		// Grayscale contents when window blurs
-    window.electronAPI?.windowBlurred(async () => {
-      windowBlurred = true;
-    })
-    // Remove grayscale when window is in focus
-    window.electronAPI?.windowFocussed(async () => {
-      windowBlurred = false;
-    })
-		window.navigationAPI?.showSettingsPage(() => {
-      sendEvent("goto:settings");
-      goto("/settings");
-    });
-		window.navigationAPI?.showUninstallPage(() => {
-      sendEvent("goto:uninstall");
-      goto("/uninstall");
-    });
-		window.navigationAPI?.showStatsPage(() => {
-      sendEvent("goto:stats");
-      goto("/stats");
-    });
-		window.navigationAPI?.showDeepBreathingPage(() => {
-      sendEvent("goto:deep_breathing");
-      goto("/deep-breathing");
-    });
-		window.navigationAPI?.showTips(() => {
-      sendEvent("goto:tips");
-      goto("/tips");
-    });
+		// isMac = await window.constants?.isMac();
+    // appMode = await window.electronAPI?.getAppMode();
+    isMac = true;
+    appMode = "window";
+		// // Grayscale contents when window blurs
+    // window.electronAPI?.windowBlurred(async () => {
+    //   windowBlurred = true;
+    // })
+    // // Remove grayscale when window is in focus
+    // window.electronAPI?.windowFocussed(async () => {
+    //   windowBlurred = false;
+    // })
+		// window.navigationAPI?.showSettingsPage(() => {
+    //   sendEvent("goto:settings");
+    //   goto("/settings");
+    // });
+		// window.navigationAPI?.showUninstallPage(() => {
+    //   sendEvent("goto:uninstall");
+    //   goto("/uninstall");
+    // });
+		// window.navigationAPI?.showStatsPage(() => {
+    //   sendEvent("goto:stats");
+    //   goto("/stats");
+    // });
+		// window.navigationAPI?.showDeepBreathingPage(() => {
+    //   sendEvent("goto:deep_breathing");
+    //   goto("/deep-breathing");
+    // });
+		// window.navigationAPI?.showTips(() => {
+    //   sendEvent("goto:tips");
+    //   goto("/tips");
+    // });
   });
 </script>
 
