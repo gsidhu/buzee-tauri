@@ -51,9 +51,9 @@
 <KeyboardListeners />
 <main class={`min-vh-100 main-container ${windowBlurred ? "grayscale" : ""}`}>
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-  <!-- {#if isMac && appMode==="window"}
+  {#if !isMac && appMode==="window"}
     <div class="w-100 fixed-top drag" style="height: 30px;" on:dblclick={() => maximiseWindow()}></div>
-  {/if} -->
+  {/if}
 	<slot />
 </main>
 

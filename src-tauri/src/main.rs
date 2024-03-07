@@ -1,8 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-extern crate diesel;
 extern crate chrono;
+extern crate dotext;
+extern crate diesel;
+extern crate lopdf;
 extern crate serde_json;
 
 mod utils;
@@ -11,6 +13,9 @@ mod ipc;
 mod housekeeping;
 mod database;
 mod indexing;
+mod text_extraction;
+// mod context_menu;
+// mod window;
 // mod file_watch;
 
 fn main() {

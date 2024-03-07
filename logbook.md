@@ -1,5 +1,6 @@
 # Logbook
 
+- Created new module for text_extraction. Supports MS Office, `txt` and `md` files. PDFs are going to be difficult perhaps.
 - Added Tauri commands for handling `O` and `Enter` keys.
 - Loading recently opened files on startup.
 - Date search added to backend.
@@ -29,8 +30,11 @@
 - Installed rust, rustup, cargo, and rustc using [the prerequisites guide](https://tauri.app/v1/guides/getting-started/prerequisites)
 
 ## TODO
-- Convert SQLite time columns from string to timestamp when searching (`SELECT * FROM documents_fts WHERE CAST(created_at AS INTEGER) > 1507009324;`)
-  - The date query should run first and then the full-text search query
-- Make file indexing thread return counts of files indexed and emit a signal when done
-- Connect frontend UI to Tauri commands and responses
+- Figure out how to get a reference to the main window so it can be shown/hidden/minimised etc.
+- Figure out how to add app menu and context menus.
+- Add a tray icon and menubar window.
+- Set up cron job to index every hour.
+- Add file content parsing.
 - Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
+- Fix unnecessary file indexing. Ignore "Alias" and shortcut files.
+- Add graceful error handling instead of panic.

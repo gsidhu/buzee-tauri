@@ -39,7 +39,8 @@ async fn run_file_indexing() -> Result<String, Error> {
   let (sender, mut receiver) = mpsc::channel::<usize>(1);
 
   tokio::spawn(async move {
-    let files_added = walk_directory(&home_directory);
+    // let files_added = walk_directory(&home_directory);
+    let files_added = walk_directory("/Users/thatgurjot/Independent/Ignus");
     sender.send(files_added).await.expect("Failed to send data through channel");
   });
 
@@ -73,6 +74,29 @@ fn get_recent_docs() -> Result<Vec<SearchResult>, Error> {
   Ok(search_results)
 }
 
+// Open QuickLook (MacOS) or Peek (Windows)
+// #[tauri::command]
+// fn open_quicklook(file_path: String) -> Result<String, Error> {
+//   println!("Opening QuickLook for {}", file_path);
+//   let _ = open::that_with(&file_path, |path| {
+//     if cfg!(target_os = "macos") {
+//       format!("qlmanage -p {}", path)
+//     } else {
+//       format!("powershell -c \"Invoke-Item '{}'\"", path)
+//     }
+//   });
+//   Ok("Opened QuickLook!".into())
+// }
+
+// Add global shortcut to hide or show the window
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
+// use tauri::Manager;
+// use crate::window::hide_or_show_window;
+
+fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
+  Shortcut::new(Some(modifier), key)
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -83,6 +107,25 @@ pub fn initialize() {
       get_recent_docs
     ])
     .plugin(tauri_plugin_shell::init())
+    .setup(|app| {
+      #[cfg(desktop)]
+      {
+        let global_shortcut = get_global_shortcut(Modifiers::ALT, Code::Space);
+        app.handle().plugin(
+            tauri_plugin_global_shortcut::Builder::with_handler(move |_app, shortcut| {
+                println!("{:?}", shortcut);
+                if shortcut == &global_shortcut {
+                  println!("Alt+Space Detected!");
+                  // let main_window = app.get_webview_window("main").unwrap();
+                  // hide_or_show_window(main_window);
+                }
+            })
+            .build(),
+        )?;
+        app.global_shortcut().register(global_shortcut)?;
+      }
+      Ok(())
+  })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

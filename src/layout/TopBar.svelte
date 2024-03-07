@@ -28,7 +28,7 @@
 </script>
 
 <div class={`d-flex flex-row justify-content-between align-items-center gap-4 
-        px-3 ${isMac && appMode==="window" ? "pb-2 pt-45 drag" : "py-2"}
+        px-3 ${!isMac && appMode==="window" ? "pb-2 pt-45 drag" : "py-2"}
     `}>
   {#if onSearchPage}
     <SearchBar />
