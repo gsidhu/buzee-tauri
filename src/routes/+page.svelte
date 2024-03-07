@@ -44,12 +44,12 @@
 
 		getUserPreferences().then((res) => {
 			// reroute(res.onboardingDone);
-			// reroute(true);
+			reroute(true);
 		});
 	});
 </script>
 
-<button class="btn btn-primary" on:click={() => openFileFolder()}>Open File Folder</button>
+<!-- <button class="btn btn-primary" on:click={() => openFileFolder()}>Open File Folder</button>
 <button class="btn btn-primary" on:click={() => runFileIndexing()}>Run File Indexing</button>
 
-<button class="btn btn-primary" on:click={() => runSearch()}>Run Search</button>
+<button class="btn btn-primary" on:click={() => runSearch()}>Run Search</button> -->

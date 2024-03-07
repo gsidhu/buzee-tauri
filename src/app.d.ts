@@ -39,11 +39,11 @@ declare global {
   type DropdownItemsArray = DropdownOrButtonItem[];
 
   interface SearchResult {
-    id: number,
+    // id: number,
     name: string,
     path: string,
     size: number,
-    type: string,
+    file_type: string,
     last_modified: Date,
     // pinned: boolean,
   }

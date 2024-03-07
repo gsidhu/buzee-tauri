@@ -42,7 +42,8 @@
 
 	onMount(async () => {
 		// Get list of available extensions from main process
-		allowedExtensions = await window.electronAPI?.getAvailableExtensions();
+		// allowedExtensions = await window.electronAPI?.getAvailableExtensions();
+		allowedExtensions = ['csv', 'docx', 'key', 'md', 'numbers', 'pages', 'pdf', 'pptx', 'txt', 'xlsx', 'xls'];
 		console.log('allowedExtensions:', allowedExtensions);
 	});
 </script>

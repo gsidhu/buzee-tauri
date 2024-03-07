@@ -9,8 +9,10 @@
   var isMac: boolean = false;
 
   onMount(async () => {
-    isMac = await window.constants?.isMac();
-    appMode = await window.electronAPI?.getAppMode();
+    // isMac = await window.constants?.isMac();
+    // appMode = await window.electronAPI?.getAppMode();
+    isMac = true;
+    appMode = "window";
 		// add an event listener to every time the page changes
 		page.subscribe((value) => {
 			const route = value.url.pathname;

@@ -5,7 +5,9 @@
 	import { documentsShown, shiftKeyPressed, compactViewMode } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
 	import FiletypeDropdown from '$lib/components/search/FiletypeDropdown.svelte';
+	// @ts-ignore
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
+	// @ts-ignore
 	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
@@ -16,8 +18,9 @@
 		sendEvent('click:open_file');
 		window.electronAPI?.openFile(path);
 	}
-	function formatUpdatedTime(updatedTime: Date): string {
-		const updatedMoment = moment(updatedTime);
+	function formatUpdatedTime(unixTime: number): string {
+		let unixToJs = new Date(unixTime*1000);
+		const updatedMoment = moment(unixToJs);
 		const today = moment();
 		const yesterday = moment().subtract(1, 'days');
 
@@ -64,7 +67,7 @@
 	const columns = table.createColumns([
 		table.column({
 			header: 'Type',
-			accessor: 'type',
+			accessor: 'file_type',
 			plugins: {
 				resize: {
 					initialWidth: 20,
@@ -100,7 +103,20 @@
 			header: 'Last Modifed',
 			accessor: 'last_modified',
 			id: 'lastModified',
-			cell: ({ value }) => formatUpdatedTime(value) ?? value,
+			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
+			plugins: {
+				resize: {
+					initialWidth: 125,
+					minWidth: 125,
+					maxWidth: 150
+				}
+			}
+		}),
+		table.column({
+			header: 'Last Opened',
+			accessor: 'last_opened',
+			id: 'lastOpened',
+			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
 			plugins: {
 				resize: {
 					initialWidth: 125,
@@ -129,15 +145,16 @@
 	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
 		table.createViewModel(columns);
 	const { hiddenColumnIds } = pluginStates.hideCols;
-	const ids = flatColumns.map((c) => c.id);
-	const labels = flatColumns.map((c) => c.header);
-	let hideForId: Record<string, boolean> = Object.fromEntries(ids.map((id) => [id, false]));
+	const ids = flatColumns.map((c: any) => c.id);
+	const labels = flatColumns.map((c: any) => c.header);
+	let hideForId: Record<string, boolean> = Object.fromEntries(ids.map((id: any) => [id, false]));
 	$: $hiddenColumnIds = Object.entries(hideForId)
 		.filter(([, hide]) => hide)
 		.map(([id]) => id);
 
 	// HACK: hide size column by default
 	hideForId['size'] = true;
+	// hideForId['lastOpened'] = true;
 
 	onMount(() => {
 		resetColumnSize();
@@ -180,7 +197,7 @@
 								class:sorted={props.sort.order !== undefined}
 								on:contextmenu={() => showTableHeaderContextMenu(cell.id)}
 							>
-								{#if cell.id === 'type'}
+								{#if cell.id === 'file_type'}
 									<!-- <FiletypeDropdown searchBar={false} /> -->
 								{:else}
 									<Render of={cell.render()} />
@@ -226,7 +243,7 @@
 							{#each row.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs>
 									<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}>
-										{#if cell.id === 'type'}
+										{#if cell.id === 'file_type'}
 											<FileTypeIcon filetype={String(cell.render())} />
 										{:else if cell.id === 'size'}
 											<span>{readableFileSize(Number(cell.render()))}</span>
@@ -309,7 +326,8 @@
 	}
 	.type-col,
 	.size-col,
-	.lastModified-col {
+	.lastModified-col,
+	.lastOpened-col {
 		text-align: center;
 	}
 	// banded rows

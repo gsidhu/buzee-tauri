@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { invoke } from "@tauri-apps/api/core";
   import { onMount } from 'svelte';
   import { fly } from 'svelte/transition';
   import { dbCreationInProgress } from '$lib/stores';
@@ -8,7 +9,8 @@
   let showWaiting = false;
   async function startFileScan() {
     $dbCreationInProgress = true;
-    window.dbAPI?.startFileScan();
+    // window.dbAPI?.startFileScan();
+    invoke("run_file_indexing")
     showWaiting = true;
 	}
 

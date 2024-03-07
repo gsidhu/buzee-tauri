@@ -1,5 +1,6 @@
 # Logbook
 
+- Connect file indexing and search to front-end. Cleaning up electron IPC code remains.
 - Counting the number of files added and letting front-end know when indexing is done.
 - Made file indexing thread async using `tokio` crate.
 - Storing UNIX timestamps as BIGINT/i64 instead of strings.

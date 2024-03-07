@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { invoke } from "@tauri-apps/api/core";
   import { fly, fade } from 'svelte/transition';
 	import ConfettiButton from "../ui/confettiButton.svelte";
 	import Permissions from "./permissions.svelte";
@@ -8,10 +9,10 @@
   let showPermissions = false;
 
   onMount(() => {
-    window.dbAPI?.getDBStats(async (result: DBStat[]) => {
-      await window.electronAPI?.setOnboardingDone();
-      processingDone = true;
-    });
+    // window.dbAPI?.getDBStats(async (result: DBStat[]) => {
+    //   await window.electronAPI?.setOnboardingDone();
+    //   processingDone = true;
+    // });
   })
 </script>
 

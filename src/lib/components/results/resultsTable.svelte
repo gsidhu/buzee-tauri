@@ -5,13 +5,13 @@
 
 	onMount(async () => {
 		if (typeof window !== 'undefined') {
-			await window.electronAPI.disableScroll();
+			// await window.electronAPI.disableScroll();
 		}
 	});
 
 	onDestroy(async () => {
 		if (typeof window !== 'undefined') {
-			await window.electronAPI.enableScroll();
+			// await window.electronAPI.enableScroll();
 		}
 	});
 </script>
