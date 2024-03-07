@@ -32,7 +32,7 @@
 	}
 
 	function runSearch() {
-		invoke("run_search", { query: "gurjot", page: 0, limit: 50, file_type: "docx" }).then((res) => {
+		invoke("run_search", { query: "gurjot", page: 0, limit: 10, fileType: "xlsx, pdf" }).then((res) => {
 			console.log(res);
 		});
 	}

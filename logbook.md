@@ -1,5 +1,6 @@
 # Logbook
 
+- Search with file type filter works.
 - File search works.
 - Turns out file watcher is not what I needed. I needed indexing. Added that. Documents are now getting added to the database.
 - Added FTS table and triggers. + scaffolding code for file watcher
@@ -18,3 +19,9 @@
 - On the side, set up a Tauri 2.0-beta project with vanilla HTML [using this guide](https://beta.tauri.app/guides/create/)
 - Set up a barebones SvelteKit project with Tauri using [the quick start guide](https://tauri.app/v1/guides/getting-started/setup/sveltekit)
 - Installed rust, rustup, cargo, and rustc using [the prerequisites guide](https://tauri.app/v1/guides/getting-started/prerequisites)
+
+## TODO
+- Convert SQLite time columns from string to timestamp when searching (`SELECT * FROM documents_fts WHERE CAST(created_at AS INTEGER) > 1507009324;`)
+  - The date query should run first and then the full-text search query
+- Make file indexing thread return counts of files indexed and emit a signal when done
+- Connect frontend UI to Tauri commands and responses

@@ -33,11 +33,12 @@ fn run_file_watcher_script() -> Result<String, Error> {
 // Run search
 #[tauri::command]
 fn run_search(
-  query: &str,
+  query: String,
   page: i32,
   limit: i32,
-  file_type: Option<&str>,
+  file_type: Option<String>,
 ) -> Result<Vec<SearchResult>, Error> {
+  println!("run_search: query: {}, page: {}, limit: {}, filetype: {:?}", query, page, limit, file_type);
   let conn: SqliteConnection = establish_connection();
   let search_results = search_fts_index(query, page, limit, file_type, conn).unwrap();
   Ok(search_results)
