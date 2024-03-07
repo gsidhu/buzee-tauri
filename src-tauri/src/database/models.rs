@@ -9,7 +9,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
-#[table_name = "document"]
+#[diesel(table_name = document)]
 pub struct DocumentItem {
     pub created_at: i64,
     pub name: String,
@@ -22,7 +22,7 @@ pub struct DocumentItem {
 }
 
 #[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
-#[table_name = "document"]
+#[diesel(table_name = document)]
 pub struct SearchResult {
     pub created_at: i64,
     pub name: String,

@@ -109,7 +109,8 @@ pub fn walk_directory(path: &str) -> usize {
       files_array.clear();
     }
   }
-  (files_added)
+  // return number of files_added
+  files_added
 }
 
 use crate::database::schema::document;

@@ -1,5 +1,4 @@
 use crate::custom_types::DateLimit;
-use diesel::dsl::date;
 use diesel::SqliteConnection;
 use diesel::RunQueryDsl;
 use crate::database::models::SearchResult;
@@ -74,5 +73,27 @@ pub fn search_fts_index(
     let search_results: Vec<SearchResult> = diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
 
     println!("search_results: {:?}", search_results);
+    Ok(search_results)
+}
+
+// Get recently opened documents
+pub fn get_recently_opened_docs(
+    limit: i32,
+    mut conn: SqliteConnection,
+) -> Result<Vec<SearchResult>, diesel::result::Error> {
+    let search_results: Vec<SearchResult> = diesel::sql_query(
+        format!(
+            r#"
+        SELECT name, path, size, file_type, last_modified, last_opened, created_at
+        FROM document
+        ORDER BY last_opened DESC
+        LIMIT {}
+        "#,
+            limit
+        )
+        .as_str(),
+    )
+    .load::<SearchResult>(&mut conn)?;
+
     Ok(search_results)
 }

@@ -2,7 +2,7 @@
 
 use crate::custom_types::{Error, DateLimit}; // Import the Error type
 use crate::database::establish_connection;
-use crate::database::search::search_fts_index;
+use crate::database::search::{search_fts_index, get_recently_opened_docs};
 use crate::database::models::SearchResult;
 use diesel::SqliteConnection;
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
@@ -10,13 +10,23 @@ use crate::indexing::walk_directory;
 use crate::housekeeping;
 use tokio::sync::mpsc;
 
-// Open the folder from the filepath
+// Open a file (in default app) or a folder from the path
 #[tauri::command]
-fn open_file_folder(file_path: String, window: tauri::Window) -> Result<String, Error> {
+fn open_file_or_folder(file_path: String, window: tauri::Window) -> Result<String, Error> {
   println!("Window {} invoked this command to open {}", window.label(), file_path);
   let _ = open::that(file_path);
   // If it worked
-  Ok("This worked!".into())
+  Ok("Opened the file or folder!".into())
+}
+
+// Open the folder containing the file from the filepath
+#[tauri::command]
+fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
+  println!("Opening file folder for {}", file_path);
+  let path = std::path::PathBuf::from(file_path);
+  let dir = path.parent().unwrap();
+  let _ = open::that(dir);
+  Ok("Opened the folder!".into())
 }
 
 // Run the file watcher script
@@ -55,12 +65,22 @@ fn run_search(
   Ok(search_results)
 }
 
+// Get recently opened documents
+#[tauri::command]
+fn get_recent_docs() -> Result<Vec<SearchResult>, Error> {
+  let conn: SqliteConnection = establish_connection();
+  let search_results = get_recently_opened_docs(50, conn).unwrap();
+  Ok(search_results)
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
-      open_file_folder,
+      open_file_or_folder,
+      open_folder_containing_file,
       run_file_indexing,
-      run_search
+      run_search,
+      get_recent_docs
     ])
     .plugin(tauri_plugin_shell::init())
     .run(tauri::generate_context!())

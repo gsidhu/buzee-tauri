@@ -4,7 +4,9 @@ import { extractDate } from "./compromise";
 export async function getDocumentsFromDB(page:number, limit:number, type?:string) {
   if (type === "any") type = undefined;
   console.log("getting documents from db of type", type);
-  return await window.dbAPI?.getAllDocumentsPaginated(page, limit, type? type: undefined);
+  // return await window.dbAPI?.getAllDocumentsPaginated(page, limit, type? type: undefined);
+  const results: SearchResult[] = await invoke("get_recent_docs");
+  return results;
 }
 
 export async function searchDocuments(query:string, page:number, limit:number, type?:string) {

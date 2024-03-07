@@ -1,5 +1,7 @@
 # Logbook
 
+- Added Tauri commands for handling `O` and `Enter` keys.
+- Loading recently opened files on startup.
 - Date search added to backend.
 - Added compromise to frontend. Works well but should add feedback to the user about what it is parsing. Maybe in light grey text under the search bar?
 - Connect file indexing and search to front-end. Cleaning up electron IPC code remains.
