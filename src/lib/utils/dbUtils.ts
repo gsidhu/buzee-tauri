@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { extractDate } from "./compromise";
+import { extractDate, cleanSearchQuery } from "./queryParsing";
 
 export async function getDocumentsFromDB(page:number, limit:number, type?:string) {
   if (type === "any") type = undefined;
@@ -13,6 +13,7 @@ export async function searchDocuments(query:string, page:number, limit:number, t
   if (dateLimit) {
     query = dateLimit.text;
   }
+  query = cleanSearchQuery(query);
   console.log(query);
   console.log(dateLimit);
   

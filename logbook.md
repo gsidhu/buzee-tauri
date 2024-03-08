@@ -1,5 +1,6 @@
 # Logbook
 
+- Remove punctuation from query before searching. Append `*` to the end of each word unless it is double-quoted.
 - Added non-document file types. Have to add front-end support for it.
 - Fixed: Forbidden folders and unnecessary files are now ignored.
 - Made global_shortcut and window hiding/showing work.
@@ -43,3 +44,9 @@
 - Fix unnecessary file indexing. Ignore "Alias" and shortcut files.
 - Add graceful error handling instead of panic.
 - Disable right-click context menu in the webview.
+
+- Restructure database.
+  - Add last_parsed column to document table.
+  - Create a new table for storing file_content in chunks. Connect it to the document table using a foreign key.
+  - Keep one FTS table connected to the text table. No need for FTS table for document.
+  - Rewrite the search query to use the new tables.

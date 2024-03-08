@@ -133,29 +133,34 @@ pub fn walk_directory(path: &str) -> usize {
   files_added
 }
 
+// pub fn parse_content_from_file(path: &str) -> usize {
+//   // get file paths, extensions, file_content, last_modified, last_opened from all rows in the database
+//   let files_data = document::table
+//     .select((document::path, document::file_type, document::file_content, document::last_modified, document::last_opened))
+//     .load::<(String, String, Option<String>, i64, i64)>(connection)
+//     .unwrap();
+
+//   for (path, file_type, file_content, last_modified, last_opened) in files_data {
+//     // for each file, if the extension is in DOCUMENT_FILETYPES
+//     // extract the text from path and update file_content
+//     if DOCUMENT_FILETYPES.contains(&file_type.as_str()) {
+//       let extracted_text = extract_text_from_file(&path);
+//       // update the file_content in the database
+//       let _ = diesel::update(document::table.filter(document::path.eq(&path)))
+//         .set(document::file_content.eq(extracted_text))
+//         .execute(connection)
+//         .unwrap();
+//     }
+//   }
+
+//   // pass the files to handle_existing_files for updating the database
+// }
+
 use crate::database::schema::document;
 use crate::database::establish_connection;
 use diesel::{SqliteConnection, RunQueryDsl, QueryDsl, ExpressionMethods}; // Import the RunQueryDsl trait
 
 pub fn add_files_to_database(files_array: Vec<DocumentItem>, connection: &mut SqliteConnection) {
-  // println!("Adding files to database: {}", files_array[0].name);
-  // let mut files_to_add: Vec<DocumentItem> = vec![];
-
-  // for file in files_array {
-  //   let file_exists = select(exists(document::table.filter(document::path.eq(&file.path))))
-  //     .get_result(connection)
-  //     .unwrap();
-  //   if file_exists {
-  //     handle_existing_file(file, connection);
-  //   } else {
-  //     files_to_add.push(file);
-  //   }
-  // }
-  // let _ = diesel::insert_into(document::table)
-  //   .values(&files_to_add)
-  //   .execute(connection)
-  //   .unwrap();
-
   let files_array_clone = files_array.clone();
   // collect all file paths from files_array
   let file_paths: Vec<_> = files_array.iter().map(|file| &file.path).collect();

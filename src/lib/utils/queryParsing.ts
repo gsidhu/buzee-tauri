@@ -79,3 +79,38 @@ function getDefaultDateFormat() {
   const isMonthFirst = dateString.startsWith('2') || dateString.startsWith('02'); // check if if 10/2 or 2/10
   return isMonthFirst ? 'MM/DD' : 'DD/MM';
 }
+
+// Use '*' token to search even if word is not complete
+// Examples – `hello world` will search for `hello* world*`
+// `hello "world"` will search for `hello* "world"`
+// `dear "star wars" fan` will search for `dear* "star wars" fan*`
+export function cleanSearchQuery(value: string): string {
+  // remove hyphens and brackets from the search query
+  value = value.replace(/[[\]{}()*+?.,\\^$|#\s]/g, " ");
+  // Split the input string into segments by space, but keep quoted strings together
+  const segments = value.match(/"[^"]+"|\S+/g) || [];
+
+  // Process each segment
+  const processedSegments = segments.map(segment => {
+    // If the segment is a quoted string, remove the quotes and don't add '*'
+    if (segment.startsWith('"') && segment.endsWith('"')) {
+      return segment.substring(1, segment.length - 1);
+    }
+
+    // If the segment has a - in front of it, replace the - with NOT and don't add '*'
+    if (segment.startsWith('-')) {
+      return `NOT ${segment.substring(1)}`;
+    }
+
+    // If the segment is a word, add '*'
+    if (segment.match(/^[a-zA-Z0-9]+$/)) {
+      return `${segment}*`;
+    }
+
+    // Otherwise, return the segment as is
+    return segment;
+  });
+
+  // Join the processed segments back together with spaces
+  return processedSegments.join(' ');
+}
