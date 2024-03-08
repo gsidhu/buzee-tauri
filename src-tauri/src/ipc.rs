@@ -107,10 +107,11 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
 
 // Add global shortcut to hide or show the window
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
-// use tauri::Manager;
-// use crate::window::hide_or_show_window;
+use tauri::Manager;
+use crate::window::hide_or_show_window;
 
 fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
+  // TODO: Modify this so it pulls values from user settings instead of args
   Shortcut::new(Some(modifier), key)
 }
 
@@ -126,25 +127,25 @@ pub fn initialize() {
       open_quicklook
     ])
     .plugin(tauri_plugin_shell::init())
-    .setup(|app| {
-      #[cfg(desktop)]
-      {
-        let global_shortcut = get_global_shortcut(Modifiers::ALT, Code::Space);
-        app.handle().plugin(
-            tauri_plugin_global_shortcut::Builder::with_handler(move |_app, shortcut| {
-                println!("{:?}", shortcut);
-                if shortcut == &global_shortcut {
-                  println!("Alt+Space Detected!");
-                  // let main_window = app.get_webview_window("main").unwrap();
-                  // hide_or_show_window(main_window);
-                }
-            })
-            .build(),
-        )?;
-        app.global_shortcut().register(global_shortcut)?;
-      }
-      Ok(())
-  })
+      .setup(|app| {
+        #[cfg(desktop)]
+        {
+          app.handle().plugin(
+              tauri_plugin_global_shortcut::Builder::with_handler(|_app, shortcut| {
+                  let global_shortcut = get_global_shortcut(Modifiers::ALT, Code::Space);
+                  println!("{:?}", shortcut);
+                  if shortcut == &global_shortcut {
+                    println!("Alt+Space Detected!");
+                    let main_window = _app.get_webview_window("main").unwrap();
+                    hide_or_show_window(main_window);
+                  }
+              })
+              .build(),
+          )?;
+          app.global_shortcut().register(get_global_shortcut(Modifiers::ALT, Code::Space))?;
+        }
+        Ok(())
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

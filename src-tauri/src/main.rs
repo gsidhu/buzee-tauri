@@ -15,7 +15,7 @@ mod database;
 mod indexing;
 mod text_extraction;
 // mod context_menu;
-// mod window;
+mod window;
 // mod file_watch;
 
 fn main() {

@@ -1,5 +1,6 @@
 # Logbook
 
+- Made global_shortcut and window hiding/showing work.
 - Added QuickLook preview for Mac. Have to test for Windows.
 - Setting allowed_filetypes in `indexing` and passing that wherever needed in backend or frontend.
 - Created new module for text_extraction. Supports MS Office, `txt` and `md` files. PDFs are going to be difficult perhaps.
@@ -32,7 +33,6 @@
 - Installed rust, rustup, cargo, and rustc using [the prerequisites guide](https://tauri.app/v1/guides/getting-started/prerequisites)
 
 ## TODO
-- Figure out how to get a reference to the main window so it can be shown/hidden/minimised etc.
 - Figure out how to add app menu and context menus.
 - Add a tray icon and menubar window.
 - Set up cron job to index every hour.
