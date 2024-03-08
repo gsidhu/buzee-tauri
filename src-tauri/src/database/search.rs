@@ -48,6 +48,7 @@ pub fn search_fts_index(
             LIMIT {limit} OFFSET {offset}
         ) t ON d.path = t.path
         {where_date_limit}
+        ORDER BY last_modified DESC
         "#,
         match_clause = if !query.is_empty() {
             format!("document_fts MATCH '{}'", query)
@@ -78,22 +79,39 @@ pub fn search_fts_index(
 
 // Get recently opened documents
 pub fn get_recently_opened_docs(
+    page: i32,
     limit: i32,
+    file_type: Option<String>,
     mut conn: SqliteConnection,
 ) -> Result<Vec<SearchResult>, diesel::result::Error> {
-    let search_results: Vec<SearchResult> = diesel::sql_query(
-        format!(
-            r#"
-        SELECT name, path, size, file_type, last_modified, last_opened, created_at
-        FROM document
-        ORDER BY last_opened DESC
-        LIMIT {}
-        "#,
-            limit
-        )
-        .as_str(),
-    )
-    .load::<SearchResult>(&mut conn)?;
+    // Add file type(s)
+    let where_file_type = if let Some(file_type) = file_type {
+        if !file_type.contains(",") {
+            format!(r#" WHERE file_type IN ('{}')"#, file_type)
+        } else {
+            format!(r#" WHERE file_type IN ('{}')"#, file_type.replace(",", "','").replace("' ", "'"))
+        }
+    } else {
+        "".to_string()
+    };
+
+    let inner_query = format!(
+        r#"
+    SELECT name, path, size, file_type, last_modified, last_opened, created_at
+    FROM document {where_file_type}
+    ORDER BY last_opened DESC
+    LIMIT {limit} OFFSET {offset}
+    "#,
+        where_file_type = if !where_file_type.is_empty() {
+            where_file_type
+        } else {
+            "".to_string()
+        },
+        limit = limit,
+        offset = page * limit
+    );
+    println!("inner_query: {}", inner_query);
+    let search_results: Vec<SearchResult> = diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
 
     Ok(search_results)
 }

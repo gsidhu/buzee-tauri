@@ -6,9 +6,16 @@ use crate::database::search::{search_fts_index, get_recently_opened_docs};
 use crate::database::models::SearchResult;
 use diesel::SqliteConnection;
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
-use crate::indexing::walk_directory;
+use crate::indexing::{walk_directory, ALLOWED_FILETYPES};
 use crate::housekeeping;
 use tokio::sync::mpsc;
+
+// Get allowed filetypes
+#[tauri::command]
+fn get_allowed_filetypes() -> Result<Vec<String>, Error> {
+  // Convert ALLOWED_FILETYPES to Vec<String>
+  Ok(ALLOWED_FILETYPES.iter().map(|s| s.to_string()).collect())
+}
 
 // Open a file (in default app) or a folder from the path
 #[tauri::command]
@@ -68,25 +75,35 @@ fn run_search(
 
 // Get recently opened documents
 #[tauri::command]
-fn get_recent_docs() -> Result<Vec<SearchResult>, Error> {
+fn get_recent_docs(
+  page: i32,
+  limit: i32,
+  file_type: Option<String>
+) -> Result<Vec<SearchResult>, Error> {
   let conn: SqliteConnection = establish_connection();
-  let search_results = get_recently_opened_docs(50, conn).unwrap();
+  let search_results = get_recently_opened_docs(page, limit, file_type, conn).unwrap();
   Ok(search_results)
 }
 
 // Open QuickLook (MacOS) or Peek (Windows)
-// #[tauri::command]
-// fn open_quicklook(file_path: String) -> Result<String, Error> {
-//   println!("Opening QuickLook for {}", file_path);
-//   let _ = open::that_with(&file_path, |path| {
-//     if cfg!(target_os = "macos") {
-//       format!("qlmanage -p {}", path)
-//     } else {
-//       format!("powershell -c \"Invoke-Item '{}'\"", path)
-//     }
-//   });
-//   Ok("Opened QuickLook!".into())
-// }
+#[tauri::command]
+fn open_quicklook(file_path: String) -> Result<String, Error> {
+  println!("Opening QuickLook for {}", file_path);
+  #[cfg(target_os = "macos")]
+  let _ = std::process::Command::new("qlmanage")
+    .arg("-p")
+    .arg(file_path)
+    .output();
+  #[cfg(windows)]
+  let _ = std::process::Command::new("cmd")
+    .arg("/C")
+    .arg("start")
+    .arg("powershell")
+    .arg("peek")
+    .arg(file_path)
+    .output();
+  Ok("Opened QuickLook!".into())
+}
 
 // Add global shortcut to hide or show the window
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
@@ -100,11 +117,13 @@ fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
+      get_allowed_filetypes,
       open_file_or_folder,
       open_folder_containing_file,
       run_file_indexing,
       run_search,
-      get_recent_docs
+      get_recent_docs,
+      open_quicklook
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {

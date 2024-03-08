@@ -6,7 +6,7 @@ use crate::text_extraction::extract_text_from_file;
 use std::time::UNIX_EPOCH;
 // use crate::chrono;
 
-const ALLOWED_FILETYPES: [&str; 11] = ["csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls"];
+pub const ALLOWED_FILETYPES: [&str; 11] = ["csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls"];
 const FORBIDDEN_DIRECTORIES: [&str; 6] = [".git", "node_modules", "venv", "node_modules", "bower_components", "pycache"];
 const WINDOWS_FORBIDDEN_DIRECTORIES: [&str; 6] = ["$RECYCLE.BIN", "System Volume Information", "AppData", "ProgramData", "Windows", "Program Files"];
 // const MAC_FORBIDDEN_DIRECTORIES: [&str; 6] = ["Library", "System", "bin", "usr", "sbin", "dev"];

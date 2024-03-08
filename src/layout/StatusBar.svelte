@@ -77,26 +77,26 @@
 	onMount(async () => {
 		// isMac = await window.constants?.isMac();
 		isMac = true;
-		window.electronAPI?.setNumDocs(async (numDocs: number) => {
-			numFiles = numDocs;
-			showingResults = numFiles > 20;
-			$resultsPerPage = numDocs;
-			$searchInProgress = true;
-			if ($searchQuery === '') {
-				$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, $filetypeShown.slice(1));
-			} else {
-				$documentsShown = await searchDocuments(
-					$searchQuery,
-					$resultsPageShown,
-					$resultsPerPage,
-					$filetypeShown.slice(1)
-				);
-			}
-			$searchInProgress = false;
-		});
-		window.electronAPI?.setBackgroundTextProcessRunningStatus(async (status: boolean) => {
-			syncStatus = status;
-		});
+		// window.electronAPI?.setNumDocs(async (numDocs: number) => {
+		// 	numFiles = numDocs;
+		// 	showingResults = numFiles > 20;
+		// 	$resultsPerPage = numDocs;
+		// 	$searchInProgress = true;
+		// 	if ($searchQuery === '') {
+		// 		$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, $filetypeShown.slice(1));
+		// 	} else {
+		// 		$documentsShown = await searchDocuments(
+		// 			$searchQuery,
+		// 			$resultsPageShown,
+		// 			$resultsPerPage,
+		// 			$filetypeShown.slice(1)
+		// 		);
+		// 	}
+		// 	$searchInProgress = false;
+		// });
+		// window.electronAPI?.setBackgroundTextProcessRunningStatus(async (status: boolean) => {
+		// 	syncStatus = status;
+		// });
 		// Get the sync status on each mount
 		// syncStatus = await window.dbAPI?.getBackgroundTextProcessRunningStatus();
 		// Set the app mode
@@ -104,30 +104,30 @@
 		// appMode = await window.electronAPI?.getAppMode();
 		appMode = "window";
 		//// on function call (defunct cuz renderer is reloaded on mode change)
-		window.electronAPI?.setAppMode(async (mode: string) => {
-			console.log('setAppMode', mode);
-			appMode = mode;
-		});
+		// window.electronAPI?.setAppMode(async (mode: string) => {
+		// 	console.log('setAppMode', mode);
+		// 	appMode = mode;
+		// });
 		// Refresh documentsShown when a doc is deleted
-		window.electronAPI?.docDeleted(async (filepath: string) => {
-			console.log('docDeleted', filepath);
-			$documentsShown.splice(
-				$documentsShown.findIndex((doc) => doc.path === filepath),
-				1
-			);
-		});
-		window.dbAPI?.getDBStats(async (result: DBStat[]) => {
-			// set these variables only during onboarding
-			page.subscribe((value) => {
-			const route = value.url.pathname;
-				if (route) {
-					if (route === '/onboarding') {
-						dbReady = true;
-						$dbCreationInProgress = false;
-					}
-				}
-			});
-		});
+		// window.electronAPI?.docDeleted(async (filepath: string) => {
+		// 	console.log('docDeleted', filepath);
+		// 	$documentsShown.splice(
+		// 		$documentsShown.findIndex((doc) => doc.path === filepath),
+		// 		1
+		// 	);
+		// });
+		// window.dbAPI?.getDBStats(async (result: DBStat[]) => {
+		// 	// set these variables only during onboarding
+		// 	page.subscribe((value) => {
+		// 	const route = value.url.pathname;
+		// 		if (route) {
+		// 			if (route === '/onboarding') {
+		// 				dbReady = true;
+		// 				$dbCreationInProgress = false;
+		// 			}
+		// 		}
+		// 	});
+		// });
 	});
 </script>
 

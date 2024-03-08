@@ -1,5 +1,7 @@
 # Logbook
 
+- Added QuickLook preview for Mac. Have to test for Windows.
+- Setting allowed_filetypes in `indexing` and passing that wherever needed in backend or frontend.
 - Created new module for text_extraction. Supports MS Office, `txt` and `md` files. PDFs are going to be difficult perhaps.
 - Added Tauri commands for handling `O` and `Enter` keys.
 - Loading recently opened files on startup.
@@ -38,3 +40,4 @@
 - Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
 - Fix unnecessary file indexing. Ignore "Alias" and shortcut files.
 - Add graceful error handling instead of panic.
+- Disable right-click context menu in the webview.

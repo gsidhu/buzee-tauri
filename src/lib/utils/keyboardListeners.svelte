@@ -87,7 +87,8 @@
 			if (e.code === 'Space') {
 				e.preventDefault();
 				sendEvent(eventPrefix + 'openQuickLook');
-				window.electronAPI?.openQuickLook(result.path);
+				// window.electronAPI?.openQuickLook(result.path);
+				invoke("open_quicklook", { filePath: result.path })
 			} else if (e.code === 'Enter') {
 				e.preventDefault();
 				sendEvent(eventPrefix + 'openFile');

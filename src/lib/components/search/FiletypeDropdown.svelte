@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { invoke } from '@tauri-apps/api/core';
 	// TOOD: Get allowedExtensions from the main process
 	import {
 		documentsShown,
@@ -42,8 +43,10 @@
 
 	onMount(async () => {
 		// Get list of available extensions from main process
-		// allowedExtensions = await window.electronAPI?.getAvailableExtensions();
-		allowedExtensions = ['csv', 'docx', 'key', 'md', 'numbers', 'pages', 'pdf', 'pptx', 'txt', 'xlsx', 'xls'];
+		invoke('get_allowed_filetypes').then((res) => {
+			// @ts-ignore
+			allowedExtensions = res;
+		});
 		console.log('allowedExtensions:', allowedExtensions);
 	});
 </script>
