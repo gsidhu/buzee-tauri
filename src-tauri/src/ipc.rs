@@ -6,15 +6,16 @@ use crate::database::search::{search_fts_index, get_recently_opened_docs};
 use crate::database::models::SearchResult;
 use diesel::SqliteConnection;
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
-use crate::indexing::{walk_directory, ALLOWED_FILETYPES};
+use crate::indexing::{walk_directory, all_allowed_filetypes};
 use crate::housekeeping;
 use tokio::sync::mpsc;
 
 // Get allowed filetypes
 #[tauri::command]
 fn get_allowed_filetypes() -> Result<Vec<String>, Error> {
+  let allowed_filetypes = all_allowed_filetypes();
   // Convert ALLOWED_FILETYPES to Vec<String>
-  Ok(ALLOWED_FILETYPES.iter().map(|s| s.to_string()).collect())
+  Ok(allowed_filetypes.iter().map(|s| s.to_string()).collect())
 }
 
 // Open a file (in default app) or a folder from the path
@@ -47,7 +48,7 @@ async fn run_file_indexing() -> Result<String, Error> {
 
   tokio::spawn(async move {
     // let files_added = walk_directory(&home_directory);
-    let files_added = walk_directory("/Users/thatgurjot/Independent/Ignus");
+    let files_added = walk_directory(&home_directory);
     sender.send(files_added).await.expect("Failed to send data through channel");
   });
 

@@ -4,21 +4,34 @@ use crate::database::models::DocumentItem;
 use crate::utils::get_metadata;
 use crate::text_extraction::extract_text_from_file;
 use std::time::UNIX_EPOCH;
-// use crate::chrono;
+use crate::housekeeping::get_home_directory;
 
-pub const ALLOWED_FILETYPES: [&str; 11] = ["csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls"];
-const FORBIDDEN_DIRECTORIES: [&str; 6] = [".git", "node_modules", "venv", "node_modules", "bower_components", "pycache"];
-const WINDOWS_FORBIDDEN_DIRECTORIES: [&str; 6] = ["$RECYCLE.BIN", "System Volume Information", "AppData", "ProgramData", "Windows", "Program Files"];
-// const MAC_FORBIDDEN_DIRECTORIES: [&str; 6] = ["Library", "System", "bin", "usr", "sbin", "dev"];
+const DOCUMENT_FILETYPES: [&str; 11] = ["csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls"];
+const IMAGE_FILETYPES: [&str; 5] = ["jpg", "jpeg", "png", "gif", "svg"];
+const BOOK_FILETYPES: [&str; 3] = ["epub", "mobi", "azw3"];
+const AUDIO_FILETYPES: [&str; 5] = ["mp3", "wav", "aac", "flac", "ogg"];
+const VIDEO_FILETYPES: [&str; 5] = ["mp4", "mkv", "avi", "mov", "wmv"];
 
-fn get_all_forbidden_directories() -> Vec<&'static str> {
-  let mut all_forbidden_directories: Vec<&str> = vec![];
-  all_forbidden_directories.extend(FORBIDDEN_DIRECTORIES.iter());
-  if cfg!(windows) {
-    all_forbidden_directories.extend(WINDOWS_FORBIDDEN_DIRECTORIES.iter());
-  // } else if cfg!(mac) {
-  //   all_forbidden_directories.extend(MAC_FORBIDDEN_DIRECTORIES.iter());
-  }
+pub fn all_allowed_filetypes() -> Vec<String> {
+  let mut allowed_filetypes: Vec<String> = vec![];
+  allowed_filetypes.extend(DOCUMENT_FILETYPES.iter().map(|&s| s.to_string()));
+  allowed_filetypes.extend(IMAGE_FILETYPES.iter().map(|&s| s.to_string()));
+  allowed_filetypes.extend(BOOK_FILETYPES.iter().map(|&s| s.to_string()));
+  allowed_filetypes.extend(AUDIO_FILETYPES.iter().map(|&s| s.to_string()));
+  allowed_filetypes.extend(VIDEO_FILETYPES.iter().map(|&s| s.to_string()));
+  allowed_filetypes
+}
+
+fn get_all_forbidden_directories() -> Vec<String> {
+  let home_dir: String = get_home_directory().unwrap();
+  let forbidden_directories: [&str; 6] = [".git", "node_modules", "venv", "node_modules", "bower_components", "pycache"];
+  let windows_forbidden_directories: [&str; 6] = ["$RECYCLE.BIN", "System Volume Information", "AppData", "ProgramData", "Windows", "Program Files"];
+  let mac_forbidden_directories: [&str; 2] = [&format!("{}/Library", home_dir), &format!("{}/Applications", home_dir)];
+  let mut all_forbidden_directories: Vec<String> = vec![];
+  all_forbidden_directories.extend(forbidden_directories.iter().map(|&s| s.to_string()));
+  all_forbidden_directories.extend(windows_forbidden_directories.iter().map(|&s| s.to_string()));
+  all_forbidden_directories.extend(mac_forbidden_directories.iter().map(|&s| s.to_string()));
+  println!("Mac forbidden directories: {:?}", all_forbidden_directories);
   all_forbidden_directories
 }
 
@@ -27,40 +40,43 @@ pub fn walk_directory(path: &str) -> usize {
   let mut files_array: Vec<DocumentItem> = vec![];
   let all_forbidden_directories = get_all_forbidden_directories();
   let mut files_added = 0;
+  let allowed_filetypes = all_allowed_filetypes();
   for entry in WalkDir::new(path) {
       let entry = entry.unwrap();
       let path = entry.path();
-
+      
       // if the path contains any of the forbidden directories, continue
-      if all_forbidden_directories.iter().any(|&dir| path.to_str().unwrap().contains(dir)) {
+      if all_forbidden_directories.iter().any(|dir| path.to_str().unwrap().contains(&*dir)) {
         // println!("ignoring directory");
-        continue;
-      }
-      // if the path does not contain any of the allowed filetypes, continue
-      if !ALLOWED_FILETYPES.iter().any(|&dir| path.to_str().unwrap().contains(dir)) {
-        // println!("ignoring file type");
         continue;
       }
       // if the path does not exist or is not a file, continue
       if !path.exists() || !path.is_file() {
-        // println!("ghost file");
+        println!("Folder maybe?: {}", path.to_str().unwrap());
         continue;
       }
-      // if path starts with a dot or ~$, continue
-      if path.to_str().unwrap().starts_with(".") || path.to_str().unwrap().starts_with("~$") {
+
+      let filename = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+      let mut extension = path.extension().and_then(|s| s.to_str());
+
+      // if extension is not in allowed filetypes, continue
+      if extension.is_none() || !allowed_filetypes.contains(&extension.unwrap().to_string()) {
+        // println!("ignoring file");
+        continue;
+      }
+      // if filename starts with a dot or ~$, continue
+      if filename.starts_with(".") || filename.starts_with("~$") {
         // println!("ignoring file");
         continue;
       }
       
       let metadata = get_metadata(&path).unwrap();
-
-      if metadata.is_symlink() {
+      // if metadata is a symlink or shortcut file, continue
+      if metadata.file_type().is_symlink() {
         // println!("ignoring shortcut");
         continue;
       }
 
-      let filename = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
-      let mut extension = path.extension().and_then(std::ffi::OsStr::to_str);
       let is_folder = metadata.is_dir();
       if is_folder {
         extension = Some("folder");
@@ -79,11 +95,11 @@ pub fn walk_directory(path: &str) -> usize {
       }
       // If ALLOWED_FILETYPES does not contain `extension`, continue
       let mut file_content: Option<String> = None;
-      if extension.unwrap() == "txt" || extension.unwrap() == "md" || extension.unwrap() == "docx" || extension.unwrap() == "pptx" {
-        if !filename.contains("~$") {
-          file_content = Some(extract_text_from_file(path.to_str().unwrap().to_string()));
-        }
-      }
+      // if extension.unwrap() == "txt" || extension.unwrap() == "md" || extension.unwrap() == "docx" || extension.unwrap() == "pptx" {
+      //   if !filename.contains("~$") || !filename.contains(".tmp") || !filename.contains(".temp")  {
+      //     file_content = Some(extract_text_from_file(path.to_str().unwrap().to_string()));
+      //   }
+      // }
 
       let file_item = DocumentItem {
         created_at: created_at as i64,

@@ -1,5 +1,7 @@
 # Logbook
 
+- Added non-document file types. Have to add front-end support for it.
+- Fixed: Forbidden folders and unnecessary files are now ignored.
 - Made global_shortcut and window hiding/showing work.
 - Added QuickLook preview for Mac. Have to test for Windows.
 - Setting allowed_filetypes in `indexing` and passing that wherever needed in backend or frontend.
