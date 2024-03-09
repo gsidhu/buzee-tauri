@@ -1,10 +1,10 @@
 use dotext::*;
 use std::io::Read;
+use std::error::Error;
 
-pub fn extract(file: &String) -> String {
-  let mut file_buffer = Pptx::open(file).expect("Cannot open file");
+pub fn extract(file: &String) -> Result<String, Box<dyn Error>> {
+  let mut file_buffer = Pptx::open(file)?;
   let mut text = String::new();
-  let _ = file_buffer.read_to_string(&mut text);
-  // println!("Text: {}", text);
-  text
+  file_buffer.read_to_string(&mut text)?;
+  Ok(text)
 }

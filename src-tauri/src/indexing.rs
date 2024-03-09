@@ -1,8 +1,7 @@
 // use crate::database::crud::add_files_to_database;
 use jwalk::WalkDir;
-use crate::database::models::DocumentItem;
+use crate::{database::models::DocumentItem, text_extraction::Extractor};
 use crate::utils::get_metadata;
-use crate::text_extraction::extract_text_from_file;
 use std::time::UNIX_EPOCH;
 use crate::housekeeping::get_home_directory;
 
@@ -139,12 +138,20 @@ pub fn walk_directory(path: &str) -> usize {
 //     .select((document::path, document::file_type, document::file_content, document::last_modified, document::last_opened))
 //     .load::<(String, String, Option<String>, i64, i64)>(connection)
 //     .unwrap();
-
+//   let extractor: Extractor = Extractor::new();
 //   for (path, file_type, file_content, last_modified, last_opened) in files_data {
 //     // for each file, if the extension is in DOCUMENT_FILETYPES
 //     // extract the text from path and update file_content
 //     if DOCUMENT_FILETYPES.contains(&file_type.as_str()) {
-//       let extracted_text = extract_text_from_file(&path);
+//       let extracted_text = extractor.extract_text_from_file(path);
+//       let extracted_text = match extracted_text {
+//         Ok(text) => text,
+//         Err(e) => {
+//           eprintln!("Error extracting text: {}", e);
+//           // Update the Db to not parse this file again.
+//           continue;
+//         }
+//       };
 //       // update the file_content in the database
 //       let _ = diesel::update(document::table.filter(document::path.eq(&path)))
 //         .set(document::file_content.eq(extracted_text))
@@ -158,7 +165,7 @@ pub fn walk_directory(path: &str) -> usize {
 
 use crate::database::schema::document;
 use crate::database::establish_connection;
-use diesel::{SqliteConnection, RunQueryDsl, QueryDsl, ExpressionMethods}; // Import the RunQueryDsl trait
+use diesel::{connection, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection}; // Import the RunQueryDsl trait
 
 pub fn add_files_to_database(files_array: Vec<DocumentItem>, connection: &mut SqliteConnection) {
   let files_array_clone = files_array.clone();
