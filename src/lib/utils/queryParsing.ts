@@ -85,8 +85,10 @@ function getDefaultDateFormat() {
 // `hello "world"` will search for `hello* "world"`
 // `dear "star wars" fan` will search for `dear* "star wars" fan*`
 export function cleanSearchQuery(value: string): string {
-  // remove hyphens and brackets from the search query
+  // remove punctuation from the search query
   value = value.replace(/[[\]{}()*+?.,\\^$|#\s]/g, " ");
+  // TODO: put double quotes on punctuation marks to make them work with the MATCH query
+  
   // Split the input string into segments by space, but keep quoted strings together
   const segments = value.match(/"[^"]+"|\S+/g) || [];
 
@@ -106,6 +108,9 @@ export function cleanSearchQuery(value: string): string {
     if (segment.match(/^[a-zA-Z0-9]+$/)) {
       return `${segment}*`;
     }
+
+    // BUGFIX: Sometimes doublequote becomes “ or ”
+    segment = segment.replace('“', '"').replace('”', '"')
 
     // Otherwise, return the segment as is
     return segment;

@@ -36,17 +36,29 @@
 - Installed rust, rustup, cargo, and rustc using [the prerequisites guide](https://tauri.app/v1/guides/getting-started/prerequisites)
 
 ## TODO
-- Figure out how to add app menu and context menus.
-- Add a tray icon and menubar window.
-- Set up cron job to index every hour.
-- Add file content parsing.
-- Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
-- Fix unnecessary file indexing. Ignore "Alias" and shortcut files.
-- Add graceful error handling instead of panic.
-- Disable right-click context menu in the webview.
 
-- Restructure database.
+### Database
+- Restructure database:
   - Add last_parsed column to document table.
+  - Add folders to the document table by splitting paths. Set extension as "folder" and file_content as None.
   - Create a new table for storing file_content in chunks. Connect it to the document table using a foreign key.
   - Keep one FTS table connected to the text table. No need for FTS table for document.
   - Rewrite the search query to use the new tables.
+
+### Backend
+- Allow searching by created_at, last_modified or last_opened.
+- Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
+- Add a tray icon and menubar window.
+- Figure out how to add app menu and context menus.
+- Set up cron job to index every hour.
+- Add graceful error handling instead of panic.
+- Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
+- Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
+
+### Front-end
+- Connect loading spinners to the backend.
+- Show feedback to the user about what dates are being parsed. Maybe as a popover button?
+- Allow searching by created_at, last_modified or last_opened.
+- Add icons for new file types.
+- Disable default right-click context menu.
+- Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax

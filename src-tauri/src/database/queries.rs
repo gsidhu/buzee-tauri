@@ -9,6 +9,25 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
     "file_type" varchar NOT NULL,
     "file_content" text,
     "last_modified" BIGINT NOT NULL,
+    "last_opened" BIGINT,
+    "last_synced" BIGINT,
+    "is_pinned" BOOLEAN NOT NULL DEFAULT 0,
+    "frecency_rank" REAL NOT NULL DEFAULT 0,
+    "frecency_last_accessed" BIGINT
+  )
+"#;
+
+pub const TEXT_TABLE_CREATE_STATEMENT : &str = r#"
+  CREATE TABLE IF NOT EXISTS "text" 
+  (
+    "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
+    "created_at" BIGINT NOT NULL,
+    "name" text NOT NULL,
+    "path" text NOT NULL,
+    "size" integer,
+    "file_type" varchar NOT NULL,
+    "file_content" text,
+    "last_modified" BIGINT NOT NULL,
     "last_opened" BIGINT NOT NULL
   )
 "#;

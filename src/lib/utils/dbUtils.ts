@@ -22,5 +22,6 @@ export async function searchDocuments(query:string, page:number, limit:number, t
     ? await getDocumentsFromDB(page, limit, type)
     : await invoke("run_search", { query: query, page: page, limit: limit, fileType: type, dateLimit: dateLimit});
   console.log("search results:", results);
+  // const results: SearchResult[] = [];
   return results;
 }

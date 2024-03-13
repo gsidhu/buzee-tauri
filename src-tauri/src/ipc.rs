@@ -90,6 +90,7 @@ fn get_recent_docs(
 #[tauri::command]
 fn open_quicklook(file_path: String) -> Result<String, Error> {
   println!("Opening QuickLook for {}", file_path);
+
   #[cfg(target_os = "macos")]
   let _ = std::process::Command::new("qlmanage")
     .arg("-p")
