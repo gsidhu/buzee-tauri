@@ -1,37 +1,7 @@
-// use tauri::menu::{Menu, MenuItem, Submenu};
-
-// pub fn initialize() {
-//   // here `"quit".to_string()` defines the menu item id, and the second parameter is the menu item label.
-//   let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-//   let close = CustomMenuItem::new("close".to_string(), "Close");
-//   let submenu = Submenu::new("File", Menu::new().add_item(quit).add_item(close));
-//   let menu = Menu::new()
-//     .add_native_item(MenuItem::Copy)
-//     .add_item(CustomMenuItem::new("hide", "Hide"))
-//     .add_submenu(submenu);
-// }
-
-// use tauri::menu::MenuBuilder;
-
-// tauri::Builder::default()
-//     .setup(|app| {
-//         let menu = MenuBuilder::new(app)
-//             .copy()
-//             .paste()
-//             .separator()
-//             .undo()
-//             .redo()
-//             .text("open-url", "Open URL")
-//             .check("toggle", "Toggle")
-//             .icon("show-app", "Show App", app.default_window_icon().cloned().unwrap())
-//             .build()?;
-//         Ok(())
-//     })
-
-use crate::custom_types::Payload; // Import the Error type
+use crate::custom_types::Payload;
+// Import the Error type
 use tauri::{
-  menu::{Menu, MenuItem},
-  Manager, Window,
+  menu::{Menu, MenuEvent, MenuItem}, Manager, WebviewWindow, Window
 };
 
 pub fn searchresult_context_menu(window: &Window) {
@@ -67,14 +37,41 @@ pub fn statusbar_context_menu(window: &Window) {
 
 // use muda::MenuEvent;
 // Use the MenuEvent::receiver to listen to click events on the menu items
-pub fn initialize_receiver(window: &Window) {
-  // window.listen(event, move |event| {
-  //   println!("window just loaded a component");
-  //   let menu_channel = MenuEvent::receiver();
-  //   if let Ok(event) = menu_channel.try_recv() {
-  //     println!("Received menu event: {:?}", event.id)
-  //   }
-  // });
+pub fn contextmenu_receiver(window: &WebviewWindow, event: MenuEvent) {
+  // window.emit("menu-ready", Payload { message: "Yo whaddup?".into() }).unwrap();
 
-  window.emit("menu-ready", Payload { message: "Yo whaddup?".into() }).unwrap();
+  // match event.id {
+  //   _ if event.id == open_file.id() => {
+  //     println!("Save menu item activated");
+  //   },
+  //   "open" => {
+  //     window.emit("open-file", Payload { message: "Open File".into() }).unwrap();
+  //   }
+  //   "open_folder" => {
+  //     window.emit("open-folder", Payload { message: "Open Folder".into() }).unwrap();
+  //   }
+  //   "copy" => {
+  //     window.emit("copy-file-name", Payload { message: "Copy File Name".into() }).unwrap();
+  //   }
+  //   "copy_path" => {
+  //     window.emit("copy-file-location", Payload { message: "Copy File Location".into() }).unwrap();
+  //   }
+  //   "document_stats" => {
+  //     window.emit("document-stats", Payload { message: "Document Stats".into() }).unwrap();
+  //   }
+  //   "deep_breathing" => {
+  //     window.emit("deep-breathing", Payload { message: "Deep Breathing".into() }).unwrap();
+  //   }
+  //   "tips_and_shortcuts" => {
+  //     window.emit("tips-and-shortcuts", Payload { message: "Tips & Shortcuts".into() }).unwrap();
+  //   }
+  //   "quit" => {
+  //     window.emit("quit", Payload { message: "Quit".into() }).unwrap();
+  //   }
+  //   #[cfg(target_os = "macos")]
+  //   "preview" => {
+  //     window.emit("show-preview", Payload { message: "Show Preview".into() }).unwrap();
+  //   }
+  //   _ => println!("Invalid context menu option"),
+  // }
 }

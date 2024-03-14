@@ -1,5 +1,6 @@
 # Logbook
 
+- Context menu receiver is working. Now to add the functionality.
 - Added infinite scroll to search results. The UI is a bit wonky.
 - Loading 100 results on each search (in two pages).
 - Can now emit events from the backend and listen to them in the frontend.
@@ -38,6 +39,9 @@
 - On the side, set up a Tauri 2.0-beta project with vanilla HTML [using this guide](https://beta.tauri.app/guides/create/)
 - Set up a barebones SvelteKit project with Tauri using [the quick start guide](https://tauri.app/v1/guides/getting-started/setup/sveltekit)
 - Installed rust, rustup, cargo, and rustc using [the prerequisites guide](https://tauri.app/v1/guides/getting-started/prerequisites)
+
+# Notes
+- [For notarization on MacOS, don't use relative paths and set all the variables in the .env file](https://discord.com/channels/616186924390023171/1217839724719509576)
 
 # TODO
 
