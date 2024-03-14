@@ -1,5 +1,7 @@
 # Logbook
 
+- Added infinite scroll to search results. The UI is a bit wonky.
+- Loading 100 results on each search (in two pages).
 - Can now emit events from the backend and listen to them in the frontend.
 - Context menu shows up but clicks are not received at the backend.
 - Remove punctuation from query before searching. Append `*` to the end of each word unless it is double-quoted.

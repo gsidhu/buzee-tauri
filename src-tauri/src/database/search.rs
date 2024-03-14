@@ -73,7 +73,7 @@ pub fn search_fts_index(
 
     let search_results: Vec<SearchResult> = diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
 
-    println!("search_results: {:?}", search_results);
+    // println!("search_results: {:?}", search_results);
     Ok(search_results)
 }
 

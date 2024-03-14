@@ -17,13 +17,14 @@
 	import { sendEvent } from '../../../utils/firebase';
 
 	async function triggerSearch() {
+		$resultsPageShown = 0; // reset the page number on each new search
 		$searchInProgress = true;
 		sendEvent('search-triggered', {
 			searchQuery: $searchQuery,
 			filetypeShown: $filetypeShown.slice(1),
 			resultsPageShown: $resultsPageShown
 		});
-		const results = await searchDocuments(
+		let results = await searchDocuments(
 			$searchQuery,
 			$resultsPageShown,
 			$resultsPerPage,
@@ -32,13 +33,24 @@
 		sendEvent('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
 		$documentsShown = results;
 		$searchInProgress = false;
-		// $resultsPageShown += 1;
-		// if ($resultsPageShown === 1) {
-		//   $documentsShown = results;
-		// } else {
-		//   $documentsShown = [...$documentsShown, ...results];
-		// }
 		// searchInputRef.blur();
+
+		setTimeout(() => {}, 1000);
+		results = await getMoreResults();
+		if (results.length > 0) {
+			$documentsShown = [...$documentsShown, ...results];
+		}
+	}
+
+	async function getMoreResults() {
+		$resultsPageShown += 1;
+		const results = await searchDocuments(
+			$searchQuery,
+			$resultsPageShown,
+			$resultsPerPage,
+			$filetypeShown.slice(1)
+		);
+		return results;
 	}
 
 	function clearSearchQuery() {
@@ -58,6 +70,18 @@
 		if (highlightSearchBar) {
 			searchInputRef.focus();
 		}
+
+		window.onscroll = () => {
+        let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+        if (bottomOfWindow) {
+					console.log('bottom of window');
+          getMoreResults().then((results) => {
+						if (results.length > 0) {
+							$documentsShown = [...$documentsShown, ...results];
+						}
+					});
+        }
+      }
 	});
 </script>
 

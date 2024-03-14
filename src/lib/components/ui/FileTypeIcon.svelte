@@ -23,6 +23,12 @@
 	<i class={`bi bi-file-earmark-richtext-fill ${color ? 'pages-icon' : ''}`} title="Apple Pages (.pages)"></i>
 {:else if filetype === 'key'}
 	<i class={`bi bi-file-earmark-slides-fill ${color ? 'keynote-icon' : ''}`} title="Apple Keynote (.key)"></i>
+{:else if ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(filetype)}
+	<i class={`bi bi-file-earmark-image ${color ? 'keynote-icon' : ''}`} title="Image"></i>
+{:else if ['mp3', 'wav', 'flac', 'm4a', 'aac', 'ogg', 'wma', 'aiff'].includes(filetype)}
+	<i class={`bi bi-file-earmark-music-fill ${color ? 'pages-icon' : ''}`} title="Audio"></i>
+{:else if ['mp4', 'mkv', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mpg', 'mpeg', '3gp', '3g2'].includes(filetype)}
+	<i class={`bi bi-film ${color ? 'pdf-icon' : ''}`} title="Video"></i>
 {/if}
 
 <style>
