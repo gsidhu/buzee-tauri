@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { invoke } from '@tauri-apps/api/core';
 	import moment from 'moment';
 	import { onMount } from 'svelte';
 	import { readable } from 'svelte/store';
@@ -55,7 +56,10 @@
 	) {
 		sendEvent('right_click:result_context_menu');
 		clickRow(e, $shiftKeyPressed);
-		window.menuAPI?.showResultsContextMenu(result);
+		// window.menuAPI?.showResultsContextMenu(result);
+		invoke("open_context_menu", {option:"searchresult"}).then((res) => {
+      console.log("context:", res);
+    });
 	}
 
 	const table = createTable(readable($documentsShown), {

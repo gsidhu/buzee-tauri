@@ -3,6 +3,9 @@
 	import { goto } from '$app/navigation';
 	import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
   import { sendEvent } from '../utils/firebase';
+  import { invoke } from "@tauri-apps/api/core";
+	import { listen } from '@tauri-apps/api/event';
+
 	var appMode: string = "menubar";
   var isMac: boolean = false;
 	let windowBlurred: boolean = false;
@@ -12,7 +15,21 @@
 		await window.electronAPI.maximiseWindow();
 	}
 
+  async function startSerialEventListener() {
+		await listen<Payload>('event-name', (event: any) => {
+			console.log("Event triggered from rust!\nPayload: " + event.payload.message);
+		});
+	}
+
+	
+  function buttonClick() {
+    invoke("test_app_handle").then((res) => {
+      console.log("hi:", res);
+    });
+  }
+
 	onMount(async () => {
+    startSerialEventListener();
 		// isMac = await window.constants?.isMac();
     // appMode = await window.electronAPI?.getAppMode();
     isMac = true;

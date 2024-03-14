@@ -5,6 +5,7 @@ extern crate chrono;
 extern crate dotext;
 extern crate diesel;
 extern crate lopdf;
+extern crate muda;
 extern crate serde_json;
 
 mod utils;
@@ -14,7 +15,7 @@ mod housekeeping;
 mod database;
 mod indexing;
 mod text_extraction;
-// mod context_menu;
+mod context_menu;
 mod window;
 // mod file_watch;
 

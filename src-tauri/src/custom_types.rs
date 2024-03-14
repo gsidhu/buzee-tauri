@@ -24,3 +24,9 @@ pub struct DateLimit {
   pub end: String,
   pub text: String
 }
+
+// Payload for IPC events
+#[derive(Clone, serde::Serialize)]
+pub struct Payload {
+  pub message: String,
+}

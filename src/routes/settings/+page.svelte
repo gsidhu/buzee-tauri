@@ -58,16 +58,17 @@
 	}
 
 	onMount(() => {
-		isMac = window.constants.isMac();
-		isWin = window.constants.isWin();
-		getUserPreferences().then((res) => {
-			userPreferences = res;
-			console.log(userPreferences);
-			showInDock = userPreferences.showInDock; 
-			launchAtStartup = userPreferences.launchAtStartup;
-			globalShortcutsEnabled = userPreferences.globalShortcutsEnabled;
-			automaticBackgroundSyncEnabled = userPreferences.automaticBackgroundSync;
-		});
+		// isMac = window.constants.isMac();
+		// isWin = window.constants.isWin();
+		isMac = true;
+		// getUserPreferences().then((res) => {
+		// 	userPreferences = res;
+		// 	console.log(userPreferences);
+		// 	showInDock = userPreferences.showInDock; 
+		// 	launchAtStartup = userPreferences.launchAtStartup;
+		// 	globalShortcutsEnabled = userPreferences.globalShortcutsEnabled;
+		// 	automaticBackgroundSyncEnabled = userPreferences.automaticBackgroundSync;
+		// });
 	});
 </script>
 

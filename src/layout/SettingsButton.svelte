@@ -2,12 +2,14 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
 	import { sendEvent } from '../utils/firebase';
+	import { goto } from '$app/navigation';
 
   var onSearchPage: boolean = false;
 
   function openSettingsMenu() {
     sendEvent("click:settings_button_click");
-    window.menuAPI?.showSettingsMenu();
+    goto('/settings');
+    // window.menuAPI?.showSettingsMenu();
   }
 
   onMount(() => {
@@ -32,7 +34,7 @@
       <i id="settings-button" class="bi bi-gear" aria-label="Settings" aria-hidden="true"/>
     </button>
   {:else}
-    <a href="/" id="search-button" class="d-block link-dark" title="Back to Search">
+    <a href="/search" id="search-button" class="d-block link-dark" title="Back to Search">
       <i class="bi bi-arrow-left-short" aria-label="Back"></i>
       <i class="bi bi-search" aria-label="Search"/>
     </a>

@@ -65,6 +65,10 @@ declare global {
     end: string,
     text: string
   }
+
+  type Payload = {
+    message: string;
+  };
 }
 
 export {};

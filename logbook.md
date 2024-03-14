@@ -1,5 +1,7 @@
 # Logbook
 
+- Can now emit events from the backend and listen to them in the frontend.
+- Context menu shows up but clicks are not received at the backend.
 - Remove punctuation from query before searching. Append `*` to the end of each word unless it is double-quoted.
 - Added non-document file types. Have to add front-end support for it.
 - Fixed: Forbidden folders and unnecessary files are now ignored.
@@ -35,25 +37,28 @@
 - Set up a barebones SvelteKit project with Tauri using [the quick start guide](https://tauri.app/v1/guides/getting-started/setup/sveltekit)
 - Installed rust, rustup, cargo, and rustc using [the prerequisites guide](https://tauri.app/v1/guides/getting-started/prerequisites)
 
-## TODO
+# TODO
+
+## Stage I: Indexing and Searching
+> Stage I is a powerful desktop search tool. It will help people find documents and files more quickly on their computer. (Think of it as a replacement for Spotlight on Mac or Everything on Windows.)
 
 ### Database
 - Restructure database:
-  - Add last_parsed column to document table.
-  - Add folders to the document table by splitting paths. Set extension as "folder" and file_content as None.
-  - Create a new table for storing file_content in chunks. Connect it to the document table using a foreign key.
-  - Keep one FTS table connected to the text table. No need for FTS table for document.
+  - Add `last_parsed` column to document table.
+  - Add `folders` to the document table by splitting paths. Set extension as `"folder"` and `file_content` as None.
+  - Create a new table for storing file_content in **chunks**. Connect it to the `document` table using a foreign key.
+  - Keep **one FTS table** connected to the `text` table. No need for FTS table for `document`.
   - Rewrite the search query to use the new tables.
 
 ### Backend
-- Allow searching by created_at, last_modified or last_opened.
+- Allow searching by `created_at`, `last_modified` or `last_opened`.
 - Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
-- Add a tray icon and menubar window.
 - Figure out how to add app menu and context menus.
 - Set up cron job to index every hour.
 - Add graceful error handling instead of panic.
 - Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
 - Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
+- Add a tray icon and menubar window.
 
 ### Front-end
 - Connect loading spinners to the backend.

@@ -51,6 +51,10 @@ Another closely related software is [ArchiveBox](https://archivebox.io/) but it 
 
 What sets Buzee apart is that it is privacy-first and prioritises desktop and offline usage. It is a desktop app (a software, as we used to call them) that runs and stores all data on your device. No data is sent to any server.
 
+It may seem that apps like Notion, Obsidian, Anytype or Capacities are similar to Buzee. But they are not. They are note-taking or personal knowledge management apps. They are not designed to be a search tool for all your data. You can't search your emails, your cloud storage, your browser history, or your media library from them. Plus, most of these apps are cloud-first. 
+
+Most importantly, these apps position themselves as an all-in-one _replacement_ for your existing apps. Buzee is not a replacement, it is a companion.
+
 ### Why no AI or Collaboration features?
 Generative AI or AI-powered classification of unorganised data are hard problems when it comes to privacy, quality, and personalisation. It would be ideal if Buzee could –
 * Automatically classify and tag your data. For e.g. to create profiles of your projects or clients.
@@ -103,10 +107,3 @@ Wherever possible, Buzee will leverage native APIs and system features to provid
 * **Shopping**: Amazon, eBay, Etsy, etc.
 * **Books**: Kindle, Audible, Goodreads, Apple Books, etc.
 * **Sites and Feeds**: RSS Feeds, Newsletters, Blogs, Wikipedia, etc.
-
----
-
-# Current Status
-Porting from Electron version to Tauri is WIP.
-
-Database needs to be rewritten

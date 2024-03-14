@@ -15,6 +15,7 @@
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
 	import { sendEvent } from '../utils/firebase';
 	import { page } from '$app/stores';
+	import { invoke } from '@tauri-apps/api/core';
 
 	export let onboardingDone = false;
 	let darkMode = false;
@@ -28,7 +29,10 @@
 
 	function showStatusBarMenu(option: string) {
 		sendEvent('click:showStatusBarMenu', { option, ...defaultData });
-		window.menuAPI?.showStatusBarMenu(option);
+		// window.menuAPI?.showStatusBarMenu(option);
+		invoke("open_context_menu", {option:"statusbar"}).then((res) => {
+      console.log("context:", res);
+    });
 	}
 
 	function reCalculateOnDocsShownChange() {

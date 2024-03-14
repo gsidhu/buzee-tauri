@@ -1,13 +1,14 @@
 // Inter-Process Communication between Rust and SvelteKit
 
-use crate::custom_types::{Error, DateLimit}; // Import the Error type
+use crate::custom_types::{Payload, Error, DateLimit}; // Import the Error type
 use crate::database::establish_connection;
 use crate::database::search::{search_fts_index, get_recently_opened_docs};
 use crate::database::models::SearchResult;
 use diesel::SqliteConnection;
+use jwalk::rayon::option;
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
 use crate::indexing::{walk_directory, all_allowed_filetypes};
-use crate::housekeeping;
+use crate::{context_menu, housekeeping};
 use tokio::sync::mpsc;
 
 // Get allowed filetypes
@@ -117,6 +118,29 @@ fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
   Shortcut::new(Some(modifier), key)
 }
 
+// Send message to frontend
+#[tauri::command]
+async fn test_app_handle(app: tauri::AppHandle) {
+  app.emit("event-name", Payload { message: "Tauri is awesome!".into() }).unwrap();
+}
+
+// App Menu
+use tauri::menu::Menu;
+
+// Import context menu commands
+#[cfg(desktop)]
+use crate::context_menu::{initialize_receiver, searchresult_context_menu, statusbar_context_menu};
+
+#[tauri::command]
+fn open_context_menu(window: tauri::Window, option: String) {
+  initialize_receiver(&window);
+  match option.as_str() {
+    "searchresult" => searchresult_context_menu(&window),
+    "statusbar" => statusbar_context_menu(&window),
+    _ => println!("Invalid context menu option")
+  }
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -126,7 +150,9 @@ pub fn initialize() {
       run_file_indexing,
       run_search,
       get_recent_docs,
-      open_quicklook
+      open_quicklook,
+      open_context_menu,
+      test_app_handle
     ])
     .plugin(tauri_plugin_shell::init())
       .setup(|app| {
@@ -146,7 +172,11 @@ pub fn initialize() {
           )?;
           app.global_shortcut().register(get_global_shortcut(Modifiers::ALT, Code::Space))?;
         }
+
         Ok(())
+    })
+    .menu(|app_handle| {
+      Menu::default(app_handle)
     })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
