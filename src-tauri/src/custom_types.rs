@@ -26,7 +26,18 @@ pub struct DateLimit {
 }
 
 // Payload for IPC events
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Serialize)]
 pub struct Payload {
   pub message: String,
+}
+
+// Define a struct equivalent to this Typescript interface:
+// interface DBStat {
+//   type: string,
+//   count: number
+// }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DBStat {
+  pub file_type: String,
+  pub count: i64
 }

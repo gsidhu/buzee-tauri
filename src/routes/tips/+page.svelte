@@ -6,8 +6,9 @@
   let isWin = false;
 
   onMount(() => {
-    isMac = window.constants?.isMac();
-    isWin = window.constants?.isWin();
+    isMac = true;
+    // isMac = window.constants?.isMac();
+    // isWin = window.constants?.isWin();
   })
 
 </script>

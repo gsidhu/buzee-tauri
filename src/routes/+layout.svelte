@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
+  import EventListeners from '$lib/utils/eventListeners.svelte';
   import { sendEvent } from '../utils/firebase';
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
@@ -21,7 +22,6 @@
 		});
 	}
 
-	
   function buttonClick() {
     invoke("test_app_handle").then((res) => {
       console.log("hi:", res);
@@ -66,7 +66,9 @@
 </script>
 
 <KeyboardListeners />
+<EventListeners />
 <main class={`min-vh-100 main-container ${windowBlurred ? "grayscale" : ""}`}>
+  <!-- <button on:click={buttonClick}>Test</button> -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
   {#if !isMac && appMode==="window"}
     <div class="w-100 fixed-top drag" style="height: 30px;" on:dblclick={() => maximiseWindow()}></div>

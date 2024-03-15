@@ -56,7 +56,7 @@ declare global {
   }
 
   interface DBStat {
-    type: string,
+    file_type: string,
     count: number
   }
 

@@ -1,10 +1,13 @@
-use crate::custom_types::DateLimit;
-use diesel::SqliteConnection;
-use diesel::RunQueryDsl;
+use crate::custom_types::{DateLimit, DBStat};
 use crate::database::models::SearchResult;
+use crate::indexing::all_allowed_filetypes;
+use diesel::ExpressionMethods;
+use diesel::QueryDsl;
+use diesel::RunQueryDsl;
+use diesel::SqliteConnection;
+
 // Return documents from the document_fts Index that match the given search query (name and type)
 // bm25(document_fts, 10) is the ranking function which gives 10x weight to the file name (first column)
-
 pub fn search_fts_index(
     query: String,
     page: i32,
@@ -13,13 +16,19 @@ pub fn search_fts_index(
     date_limit: Option<DateLimit>,
     mut conn: SqliteConnection,
 ) -> Result<Vec<SearchResult>, diesel::result::Error> {
-    println!("search_fts_index: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}", query, page, limit, file_type, date_limit);
+    println!(
+        "search_fts_index: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
+        query, page, limit, file_type, date_limit
+    );
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
         if !file_type.contains(",") {
             format!(r#" AND file_type IN ('{}')"#, file_type)
         } else {
-            format!(r#" AND file_type IN ('{}')"#, file_type.replace(",", "','").replace("' ", "'"))
+            format!(
+                r#" AND file_type IN ('{}')"#,
+                file_type.replace(",", "','").replace("' ", "'")
+            )
         }
     } else {
         "".to_string()
@@ -71,7 +80,8 @@ pub fn search_fts_index(
 
     println!("inner_query: {}", inner_query);
 
-    let search_results: Vec<SearchResult> = diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
+    let search_results: Vec<SearchResult> =
+        diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
 
     // println!("search_results: {:?}", search_results);
     Ok(search_results)
@@ -89,7 +99,10 @@ pub fn get_recently_opened_docs(
         if !file_type.contains(",") {
             format!(r#" WHERE file_type IN ('{}')"#, file_type)
         } else {
-            format!(r#" WHERE file_type IN ('{}')"#, file_type.replace(",", "','").replace("' ", "'"))
+            format!(
+                r#" WHERE file_type IN ('{}')"#,
+                file_type.replace(",", "','").replace("' ", "'")
+            )
         }
     } else {
         "".to_string()
@@ -111,7 +124,26 @@ pub fn get_recently_opened_docs(
         offset = page * limit
     );
     println!("inner_query: {}", inner_query);
-    let search_results: Vec<SearchResult> = diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
+    let search_results: Vec<SearchResult> =
+        diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
 
     Ok(search_results)
+}
+
+// Get the counts for all file_types from the document table
+pub fn get_counts_for_all_filetypes(
+    mut conn: SqliteConnection,
+) -> Result<Vec<DBStat>, diesel::result::Error> {
+  use crate::database::schema::document::dsl::*;
+
+  let all_filetypes = all_allowed_filetypes();
+  let mut counts: Vec<DBStat> = Vec::new();
+  for doctype in all_filetypes {
+    let count = document.filter(file_type.eq(doctype.to_string())).count().get_result(&mut conn)?;
+    counts.push(DBStat {
+        file_type: doctype.to_string(),
+        count: count,
+    });
+  }
+  Ok(counts)
 }

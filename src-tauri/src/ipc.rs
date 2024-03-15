@@ -1,9 +1,9 @@
 // Inter-Process Communication between Rust and SvelteKit
 
-use crate::custom_types::{DateLimit, Error, Payload}; // Import the Error type
+use crate::custom_types::{DateLimit, DBStat, Error, Payload}; // Import the Error type
 use crate::database::establish_connection;
 use crate::database::models::SearchResult;
-use crate::database::search::{get_recently_opened_docs, search_fts_index};
+use crate::database::search::{get_recently_opened_docs, search_fts_index, get_counts_for_all_filetypes};
 use crate::indexing::{all_allowed_filetypes, walk_directory};
 use crate::{context_menu, housekeeping};
 use diesel::SqliteConnection;
@@ -97,6 +97,14 @@ fn get_recent_docs(
     Ok(search_results)
 }
 
+// Get DB Stats
+#[tauri::command]
+fn get_db_stats() -> Result<Vec<DBStat>, Error> {
+  let conn: SqliteConnection = establish_connection();
+  let db_stats = get_counts_for_all_filetypes(conn).unwrap();
+  Ok(db_stats)
+}
+
 // Open QuickLook (MacOS) or Peek (Windows)
 #[tauri::command]
 fn open_quicklook(file_path: String) -> Result<String, Error> {
@@ -165,6 +173,7 @@ pub fn initialize() {
             run_file_indexing,
             run_search,
             get_recent_docs,
+            get_db_stats,
             open_quicklook,
             open_context_menu,
             test_app_handle
@@ -185,10 +194,13 @@ pub fn initialize() {
                     })
                     .build(),
                 )?;
-                app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
-                  println!("menu event: {:?}", event);
-                  // contextmenu_receiver(&app.get_webview_window("main").unwrap(), event);
-                });
+            }
+            {
+              app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
+                println!("menu event: {:?}", event);
+                // let main_window = app_handle.get_webview_window("main").unwrap();
+                contextmenu_receiver(app_handle, event);
+              });
             }
             Ok(())
         })

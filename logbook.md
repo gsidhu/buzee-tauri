@@ -1,5 +1,7 @@
 # Logbook
 
+- Added command, types and function for DB Stats. The results are logged but don't render. The function is sloppy because of Rust's type system (couldn't use `group by` with `count`, instead calling a count statement for each file_type).
+- Added page navigation functionality to context menu receiver using emit events.
 - Context menu receiver is working. Now to add the functionality.
 - Added infinite scroll to search results. The UI is a bit wonky.
 - Loading 100 results on each search (in two pages).
@@ -42,6 +44,7 @@
 
 # Notes
 - [For notarization on MacOS, don't use relative paths and set all the variables in the .env file](https://discord.com/channels/616186924390023171/1217839724719509576)
+- [Disable keyboard shortcuts on Windows webview2](https://discord.com/channels/616186924390023171/1126997012647264306/1128359828453085274)
 
 # TODO
 
