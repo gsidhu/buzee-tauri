@@ -5,11 +5,18 @@ use crate::database::establish_connection;
 use crate::database::models::SearchResult;
 use crate::database::search::{get_recently_opened_docs, search_fts_index, get_counts_for_all_filetypes};
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::{context_menu, housekeeping};
+use crate::housekeeping;
 use diesel::SqliteConnection;
-use jwalk::rayon::option;
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
 use tokio::sync::mpsc;
+use crate::window::hide_or_show_window;
+use tauri::Manager;
+use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
+// App Menu
+use tauri::menu::Menu;
+// Import context menu commands
+#[cfg(desktop)]
+use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu};
 
 // Get allowed filetypes
 #[tauri::command]
@@ -127,10 +134,6 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
 }
 
 // Add global shortcut to hide or show the window
-use crate::window::hide_or_show_window;
-use tauri::Manager;
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
-
 fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
     // TODO: Modify this so it pulls values from user settings instead of args
     Shortcut::new(Some(modifier), key)
@@ -148,13 +151,7 @@ async fn test_app_handle(app: tauri::AppHandle) {
     .unwrap();
 }
 
-// App Menu
-use tauri::menu::Menu;
-
-// Import context menu commands
-#[cfg(desktop)]
-use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu};
-
+// Context Menu
 #[tauri::command]
 fn open_context_menu(window: tauri::Window, option: String) {
     match option.as_str() {

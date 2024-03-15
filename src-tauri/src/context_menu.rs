@@ -1,7 +1,7 @@
-use crate::custom_types::Payload;
+use crate::{custom_types::Payload, database::models::SearchResult};
 // Import the Error type
 use tauri::{
-  menu::{Menu, MenuEvent, MenuId, MenuItem}, Manager, WebviewWindow, Window
+  menu::{Menu, MenuEvent, MenuId, MenuItem}, Manager, Window
 };
 
 pub fn searchresult_context_menu(window: &Window) {
@@ -12,8 +12,6 @@ pub fn searchresult_context_menu(window: &Window) {
 
     &MenuItem::with_id(manager, "open", "Open File", true, None::<&str>).unwrap(),
     &MenuItem::with_id(manager, "open_folder", "Open Folder", true, None::<&str>).unwrap(),
-    &MenuItem::with_id(manager, "copy", "Copy File Name", true, None::<&str>).unwrap(),
-    &MenuItem::with_id(manager, "copy_path", "Copy File Location", true, None::<&str>).unwrap(),
   ]).unwrap();
 
   window.popup_menu(&context_menu).unwrap();
@@ -26,8 +24,7 @@ pub fn statusbar_context_menu(window: &Window) {
         &[
           &MenuItem::with_id(manager, "document_stats", "Document Stats", true, None::<&str>).unwrap(),
           &MenuItem::with_id(manager, "deep_breathing", "Deep Breathing", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(manager, "tips_and_shortcuts", "Tips && Shortcuts", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(manager, "quit", "Quit", true, None::<&str>).unwrap()
+          &MenuItem::with_id(manager, "tips_and_shortcuts", "Tips && Shortcuts", true, None::<&str>).unwrap()
         ],
     )
     .unwrap();
@@ -53,16 +50,10 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
 
   match event_id_string {
     "open" => {
-      app.emit("open-file", Payload { message: "Open File".into() }).unwrap();
+      app.emit("open", Payload { message: "Open File".into() }).unwrap();
     }
     "open_folder" => {
       app.emit("open-folder", Payload { message: "Open Folder".into() }).unwrap();
-    }
-    "copy" => {
-      app.emit("copy-file-name", Payload { message: "Copy File Name".into() }).unwrap();
-    }
-    "copy_path" => {
-      app.emit("copy-file-location", Payload { message: "Copy File Location".into() }).unwrap();
     }
     "document_stats" => {
       app.emit("document-stats", Payload { message: "Document Stats".into() }).unwrap();
@@ -72,9 +63,6 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
     }
     "tips_and_shortcuts" => {
       app.emit("tips-and-shortcuts", Payload { message: "Tips & Shortcuts".into() }).unwrap();
-    }
-    "quit" => {
-      app.emit("quit", Payload { message: "Quit".into() }).unwrap();
     }
     #[cfg(target_os = "macos")]
     "preview" => {

@@ -145,14 +145,7 @@
 	<!-- Left end -->
 	<div class="col px-0 d-flex flex-row justify-content-start" id="status-bar-left">
 		{#if onboardingDone}
-			<button
-				type="button"
-				class="px-1 mx-1 status-item"
-				title="Set how many documents to show"
-				on:click={() => showStatusBarMenu('numDocs')}
-			>
-				Showing {numFiles} docs
-			</button>
+			Showing {numFiles} docs
 		{:else if dbReady}
 			<div>Scan complete</div>
 		{:else if $dbCreationInProgress}

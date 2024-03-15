@@ -6,6 +6,8 @@
 	import { sendEvent } from '../../utils/firebase';
 	import { goto } from '$app/navigation';
 
+	const isMac = true;
+
 	const allowedKeys = [
 		'Space',
 		'Enter',
@@ -94,9 +96,10 @@
 				sendEvent(eventPrefix + 'openFile');
 				// window.electronAPI?.openFile(result.path);
 				invoke("open_file_or_folder", { filePath: result.path })
-			} else if (e.code === 'ArrowDown' && $metaKeyPressed && window?.constants?.isMac) {
+			} else if (e.code === 'ArrowDown' && $metaKeyPressed && isMac) {
 				e.preventDefault();
-				window.electronAPI?.openFile(result.path);
+				// window.electronAPI?.openFile(result.path);
+				invoke("open_file_or_folder", { filePath: result.path })
 			} else if (e.code === 'KeyO') {
 				e.preventDefault();
 				// window.electronAPI?.openFileFolder(result.path);

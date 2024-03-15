@@ -42,9 +42,9 @@ declare global {
     // id: number,
     name: string,
     path: string,
-    size: number,
-    file_type: string,
-    last_modified: Date,
+    // size: number,
+    // file_type: string,
+    // last_modified: Date,
     // pinned: boolean,
   }
 

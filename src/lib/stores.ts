@@ -34,6 +34,7 @@ let storedDocumentsShown: SearchResult[] = [];
 // let storedDBStats = {};
 // let storedCurrentCollection = 'Everything';
 // let currentUser = null;
+let storedSelectedResult: SearchResult = {name: '', path: ''};
 
 // 2. Set the stored value or a sane default.
 export const pinMode = writable(false)
@@ -45,6 +46,7 @@ export const resultsPageShown = writable(0)
 export const resultsPerPage = writable(50)
 export const promptUser = writable("")
 export const compactViewMode = writable(storedCompactViewMode || false)
+export const selectedResult = writable(storedSelectedResult || {})
 // export const searchTrigger = writable(storedSearchTrigger || false)
 // export const searchResults = writable(storedSearchResults || '')
 // export const searchHistory = writable(storedSearchHistory || '')

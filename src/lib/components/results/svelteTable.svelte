@@ -3,7 +3,7 @@
 	import moment from 'moment';
 	import { onMount } from 'svelte';
 	import { readable } from 'svelte/store';
-	import { documentsShown, shiftKeyPressed, compactViewMode } from '$lib/stores';
+	import { documentsShown, shiftKeyPressed, compactViewMode, selectedResult } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
 	import FiletypeDropdown from '$lib/components/search/FiletypeDropdown.svelte';
 	// @ts-ignore
@@ -17,7 +17,7 @@
 
 	function openFile(path: string) {
 		sendEvent('click:open_file');
-		window.electronAPI?.openFile(path);
+		invoke('open_file_or_folder', { filePath: path });
 	}
 	function formatUpdatedTime(unixTime: number): string {
 		let unixToJs = new Date(unixTime*1000);
@@ -57,6 +57,7 @@
 		sendEvent('right_click:result_context_menu');
 		clickRow(e, $shiftKeyPressed);
 		// window.menuAPI?.showResultsContextMenu(result);
+		$selectedResult = result;
 		invoke("open_context_menu", {option:"searchresult"}).then((res) => {
       console.log("context:", res);
     });
