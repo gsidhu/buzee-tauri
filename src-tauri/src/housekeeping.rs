@@ -1,6 +1,6 @@
 // use crate::custom_types::Error; // Import the Error type
 use dirs::document_dir;
-use crate::database::create_tables_if_not_exists;
+use crate::database::{enable_fts_and_foreign_keys, create_tables_if_not_exists};
 use crate::database::establish_connection;
 // use std::path::PathBuf;
 
@@ -38,5 +38,6 @@ pub fn initialize() -> () {
   println!("Initializing app directory");
   create_app_directory_if_not_exists().unwrap();
   println!("Initializing database");
+  enable_fts_and_foreign_keys(establish_connection()).unwrap();
   create_tables_if_not_exists(establish_connection()).unwrap();
 }

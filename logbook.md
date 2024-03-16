@@ -1,5 +1,6 @@
 # Logbook
 
+- Created new database schema. Hopefully is more robust for future scale.
 - Results row context menu options now work. It gets ping ponged between backend and frontend but have to use it till I figure out how to send data to the menuevent::receiver.
 - Added command, types and function for DB Stats. The results are logged but don't render. The function is sloppy because of Rust's type system (couldn't use `group by` with `count`, instead calling a count statement for each file_type).
 - Added page navigation functionality to context menu receiver using emit events.
