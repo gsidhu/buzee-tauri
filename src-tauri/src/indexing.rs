@@ -28,14 +28,20 @@ pub fn all_allowed_filetypes() -> Vec<String> {
 
 fn get_all_forbidden_directories() -> Vec<String> {
   let home_dir: String = get_home_directory().unwrap();
-  let forbidden_directories: [&str; 6] = [".git", "node_modules", "venv", "node_modules", "bower_components", "pycache"];
-  let windows_forbidden_directories: [&str; 6] = ["$RECYCLE.BIN", "System Volume Information", "AppData", "ProgramData", "Windows", "Program Files"];
-  let mac_forbidden_directories: [&str; 2] = [&format!("{}/Library", home_dir), &format!("{}/Applications", home_dir)];
   let mut all_forbidden_directories: Vec<String> = vec![];
+  let forbidden_directories: [&str; 4] = ["node_modules", "venv", "bower_components", "pycache"];
   all_forbidden_directories.extend(forbidden_directories.iter().map(|&s| s.to_string()));
-  all_forbidden_directories.extend(windows_forbidden_directories.iter().map(|&s| s.to_string()));
-  all_forbidden_directories.extend(mac_forbidden_directories.iter().map(|&s| s.to_string()));
-  println!("Mac forbidden directories: {:?}", all_forbidden_directories);
+  #[cfg(target_os = "windows")]
+  {
+    let windows_forbidden_directories: [&str; 6] = ["$RECYCLE.BIN", "System Volume Information", "AppData", "ProgramData", "Windows", "Program Files"];
+    all_forbidden_directories.extend(windows_forbidden_directories.iter().map(|&s| s.to_string()));
+  }
+  #[cfg(target_os = "macos")]
+  {
+    let mac_forbidden_directories: [&str; 2] = [&format!("{}/Library", home_dir), &format!("{}/Applications", home_dir)];
+    all_forbidden_directories.extend(mac_forbidden_directories.iter().map(|&s| s.to_string()));
+  }
+  println!("Forbidden directories: {:?}", all_forbidden_directories);
   all_forbidden_directories
 }
 
@@ -49,7 +55,7 @@ fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), 
         // let exclude_path = guard.exclude_index_path();
 
         // if exclude_path.iter().any(|x| curr_path.starts_with(x))
-        if skip_path.iter().any(|x| curr_path.starts_with(x)) {
+        if skip_path.iter().any(|x| curr_path.contains(x)) {
           info!("skip path {}", curr_path);
           dir_entry.read_children_path = None;
         }
@@ -72,14 +78,8 @@ pub fn walk_directory(path: &str) -> usize {
   for entry in walk_dir {
       let entry = entry.unwrap();
       let path = entry.path();
-      info!("Indexing: {}", path.to_str().unwrap());
+      // info!("Indexing: {}", path.to_str().unwrap());
       
-      // if the path contains any of the forbidden directories, continue
-      // if all_forbidden_directories.iter().any(|dir| path.to_str().unwrap().contains(&*dir)) {
-        // info!("Indexing: {}", path.to_str().unwrap());
-      //   // println!("ignoring directory");
-      //   continue;
-      // }
       // if the path does not exist or is not a file, continue
       if !path.exists() || !path.is_file() {
         println!("Folder maybe?: {}", path.to_str().unwrap());

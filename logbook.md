@@ -1,6 +1,6 @@
 # Logbook
 
-- Indexing metadata takes about 5 minutes for all file types (~ 55,000 files).
+- Indexing metadata takes about 90 seconds for all file types (~ 40,000 files).
 - Added logging using the `log` and `simple_log` crates.
 - Adding document metadata to the document table works. Metadata and metadata_fts tables get automatically updated using triggers.
 - Created new database schema. Hopefully is more robust for future scale.
@@ -63,10 +63,12 @@
 ### Backend
 - Allow searching by `created_at`, `last_modified` or `last_opened`.
 - Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
-- Figure out how to add app menu and context menus.
+- [x] Figure out how to add app menu and context menus.
 - Set up cron job to index every hour.
-- Add graceful error handling instead of panic.
-- Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
+  - Add code for adding folders to the index.
+  - Add code for indexing file contents.
+- Add graceful error handling using logger instead of panic.
+- [x] Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
 - Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
 - Add a tray icon and menubar window.
 
@@ -77,3 +79,4 @@
 - Add icons for new file types.
 - Disable default right-click context menu.
 - Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
+- Display counter of number of files logged when indexing during onboarding.
