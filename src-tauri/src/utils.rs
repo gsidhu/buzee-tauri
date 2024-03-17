@@ -7,3 +7,7 @@ pub fn get_metadata(path: &Path) -> io::Result<fs::Metadata> {
   let metadata = fs::metadata(path)?;
   Ok(metadata)
 }
+
+pub fn norm(path: &str) -> String {
+  str::replace(path, "\\", "/")
+}

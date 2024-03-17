@@ -1,14 +1,14 @@
 // use crate::database::crud::add_files_to_database;
-use jwalk::WalkDir;
-use crate::database::models::MetadataItem;
+use jwalk::{WalkDir, WalkDirGeneric};
 use crate::{database::models::DocumentItem, text_extraction::Extractor};
-use crate::utils::get_metadata;
+use crate::utils::{self, get_metadata};
 use std::time::UNIX_EPOCH;
 use crate::housekeeping::get_home_directory;
 use diesel::connection::Connection;
 use crate::database::schema::document;
 use crate::database::establish_connection;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection}; // Import the RunQueryDsl trait
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
+use log::{info, trace, warn, error};
 
 const DOCUMENT_FILETYPES: [&str; 11] = ["csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls"];
 const IMAGE_FILETYPES: [&str; 5] = ["jpg", "jpeg", "png", "gif", "svg"];
@@ -39,21 +39,47 @@ fn get_all_forbidden_directories() -> Vec<String> {
   all_forbidden_directories
 }
 
+fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), ())> {
+  WalkDir::new(path).process_read_dir(move |_, _, _, children| {
+    children.iter_mut().for_each(|dir_entry_result| {
+      if let Ok(dir_entry) = dir_entry_result {
+        let curr_path = utils::norm(dir_entry.path().to_str().unwrap_or(""));
+
+        // let guard = USER_SETTING.read().unwrap();
+        // let exclude_path = guard.exclude_index_path();
+
+        // if exclude_path.iter().any(|x| curr_path.starts_with(x))
+        if skip_path.iter().any(|x| curr_path.starts_with(x)) {
+          info!("skip path {}", curr_path);
+          dir_entry.read_children_path = None;
+        }
+      }
+    });
+  })
+}
+
 pub fn walk_directory(path: &str) -> usize {
+  info!("Logger initialized!");
   let mut connection = establish_connection();
   let mut files_array: Vec<DocumentItem> = vec![];
   let all_forbidden_directories = get_all_forbidden_directories();
   let mut files_added = 0;
   let allowed_filetypes = all_allowed_filetypes();
-  for entry in WalkDir::new(path) {
+
+  let walk_dir = build_walk_dir(&path.to_string(), all_forbidden_directories);
+
+  // for entry in WalkDir::new(path) {
+  for entry in walk_dir {
       let entry = entry.unwrap();
       let path = entry.path();
+      info!("Indexing: {}", path.to_str().unwrap());
       
       // if the path contains any of the forbidden directories, continue
-      if all_forbidden_directories.iter().any(|dir| path.to_str().unwrap().contains(&*dir)) {
-        // println!("ignoring directory");
-        continue;
-      }
+      // if all_forbidden_directories.iter().any(|dir| path.to_str().unwrap().contains(&*dir)) {
+        // info!("Indexing: {}", path.to_str().unwrap());
+      //   // println!("ignoring directory");
+      //   continue;
+      // }
       // if the path does not exist or is not a file, continue
       if !path.exists() || !path.is_file() {
         println!("Folder maybe?: {}", path.to_str().unwrap());

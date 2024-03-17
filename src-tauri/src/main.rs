@@ -4,8 +4,8 @@
 extern crate chrono;
 extern crate dotext;
 extern crate diesel;
+extern crate log;
 extern crate lopdf;
-extern crate muda;
 extern crate serde_json;
 
 mod utils;

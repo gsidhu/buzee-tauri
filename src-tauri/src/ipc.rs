@@ -59,8 +59,8 @@ async fn run_file_indexing() -> Result<String, Error> {
     let (sender, mut receiver) = mpsc::channel::<usize>(1);
 
     tokio::spawn(async move {
-        // let files_added = walk_directory(&home_directory);
-        let files_added = walk_directory("/Users/thatgurjot/Desktop/");
+        let files_added = walk_directory(&home_directory);
+        // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
         sender
             .send(files_added)
             .await
@@ -177,7 +177,6 @@ pub fn initialize() {
         ])
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
-            #[cfg(desktop)]
             {
                 app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::with_handler(|_app, shortcut| {

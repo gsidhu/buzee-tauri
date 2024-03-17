@@ -1,5 +1,7 @@
 # Logbook
 
+- Indexing metadata takes about 5 minutes for all file types (~ 55,000 files).
+- Added logging using the `log` and `simple_log` crates.
 - Adding document metadata to the document table works. Metadata and metadata_fts tables get automatically updated using triggers.
 - Created new database schema. Hopefully is more robust for future scale.
 - Results row context menu options now work. It gets ping ponged between backend and frontend but have to use it till I figure out how to send data to the menuevent::receiver.
