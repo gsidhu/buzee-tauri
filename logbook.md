@@ -1,5 +1,6 @@
 # Logbook
 
+- Adding document metadata to the document table works. Metadata and metadata_fts tables get automatically updated using triggers.
 - Created new database schema. Hopefully is more robust for future scale.
 - Results row context menu options now work. It gets ping ponged between backend and frontend but have to use it till I figure out how to send data to the menuevent::receiver.
 - Added command, types and function for DB Stats. The results are logged but don't render. The function is sloppy because of Rust's type system (couldn't use `group by` with `count`, instead calling a count statement for each file_type).
@@ -54,12 +55,8 @@
 > Stage I is a powerful desktop search tool. It will help people find documents and files more quickly on their computer. (Think of it as a replacement for Spotlight on Mac or Everything on Windows.)
 
 ### Database
-- Restructure database:
-  - Add `last_parsed` column to document table.
-  - Add `folders` to the document table by splitting paths. Set extension as `"folder"` and `file_content` as None.
-  - Create a new table for storing file_content in **chunks**. Connect it to the `document` table using a foreign key.
-  - Keep **one FTS table** connected to the `text` table. No need for FTS table for `document`.
-  - Rewrite the search query to use the new tables.
+- Restructure database.
+- Add logging to check why indexing halts at certain files.
 
 ### Backend
 - Allow searching by `created_at`, `last_modified` or `last_opened`.

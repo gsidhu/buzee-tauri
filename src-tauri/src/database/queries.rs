@@ -18,7 +18,7 @@
 
 /*
   DOCUMENT TABLE
-  domain = "local", "google_drive", "onedrive", "dropbox" etc.
+  source_domain = "local", "google_drive", "onedrive", "dropbox" etc.
   created_at = timestamp when the item was created on the source
   name, path, size, file_type, last_modified, last_opened : metadata of the document
   last_synced = timestamp when the item was last synced with the local database
@@ -26,27 +26,27 @@
   frecency_rank = float to indicate the frecency of the document
   frecency_last_accessed = timestamp when the document was last accessed using the app
   comment = user comment added in the app
-  metadata_id = id from the metadata table
+  
+  Note: cannot add metadata_id here because data is added to the `document` table first and then
+  the metadata table gets automatically populated using triggers
 */
 pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE TABLE IF NOT EXISTS "document" 
   (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    "domain" TEXT NOT NULL,
+    "source_domain" TEXT NOT NULL,
     "created_at" BIGINT NOT NULL,
     "name" TEXT NOT NULL,
     "path" TEXT NOT NULL,
     "size" INTEGER,
     "file_type" varchar NOT NULL,
     "last_modified" BIGINT NOT NULL,
-    "last_opened" BIGINT,
-    "last_synced" BIGINT,
+    "last_opened" BIGINT NOT NULL DEFAULT 0,
+    "last_synced" BIGINT NOT NULL DEFAULT 0,
     "is_pinned" BOOLEAN NOT NULL DEFAULT 0,
     "frecency_rank" REAL NOT NULL DEFAULT 0,
     "frecency_last_accessed" BIGINT,
-    "comment" TEXT,
-    "metadata_id" INTEGER NOT NULL,
-    FOREIGN KEY (metadata_id) REFERENCES metadata(id)
+    "comment" TEXT
   );
 "#;
 
@@ -54,14 +54,14 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
   BODY TABLE (for all sources)
   metadata_id = id from the metadata table
   source_id = id from the source table (document, email, article, website etc.)
-  body = body of the document, email, article, website etc.
+  text = body content of the document, email, article, website etc.
 */
 pub const BODY_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE TABLE IF NOT EXISTS "body" 
   (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
-    body TEXT NOT NULL,
+    text TEXT NOT NULL,
     FOREIGN KEY (metadata_id) REFERENCES metadata(id)
   );
 "#;
@@ -85,8 +85,8 @@ pub const METADATA_TABLE_CREATE_STATEMENT : &str = r#"
     source_table TEXT NOT NULL,
     source_domain TEXT NOT NULL,
     source_id INTEGER NOT NULL,
-    title TEXT,
-    url TEXT,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
     created_at BIGINT NOT NULL,
     last_modified BIGINT NOT NULL,
     frecency_rank REAL NOT NULL DEFAULT 0,
@@ -103,7 +103,6 @@ pub const METADATA_TABLE_CREATE_STATEMENT : &str = r#"
 pub const METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE VIRTUAL TABLE IF NOT EXISTS metadata_fts 
   USING fts5(
-    metadata_id UNINDEXED,
     source_table UNINDEXED,
     source_domain,
     source_id UNINDEXED,
@@ -130,7 +129,7 @@ pub const BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE VIRTUAL TABLE IF NOT EXISTS body_fts 
   USING fts5(
     metadata_id UNINDEXED,
-    body,
+    text,
     content=body,
     tokenize="porter unicode61"
   );
@@ -145,7 +144,9 @@ pub const TRIGGER_INSERT_DOCUMENT_METADATA : &str = r#"
   AFTER INSERT ON document
   BEGIN
       INSERT INTO metadata (source_table, source_domain, source_id, title, url, created_at, last_modified, frecency_rank, frecency_last_accessed, comment)
-      VALUES ('document', NEW.domain, NEW.id, NEW.name, NEW.path, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment);
+      VALUES ('document', NEW.source_domain, NEW.id, NEW.name, NEW.path, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment);
+      INSERT INTO metadata_fts (source_table, source_domain, source_id, title, url, created_at, last_modified, frecency_rank, frecency_last_accessed, comment)
+      VALUES ('document', NEW.source_domain, NEW.id, NEW.name, NEW.path, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment);
   END;
 "#;
 pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
@@ -153,9 +154,20 @@ pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
   AFTER UPDATE ON document
   BEGIN
       UPDATE metadata
-      SET source_domain = NEW.domain,
+      SET source_domain = NEW.source_domain,
           source_id = NEW.id,
           title = NEW.name,
+          url = NEW.path,
+          created_at = NEW.created_at,
+          last_modified = NEW.last_modified,
+          frecency_rank = NEW.frecency_rank,
+          frecency_last_accessed = NEW.frecency_last_accessed,
+          comment = NEW.comment
+      WHERE source_table = 'document' AND source_id = OLD.id;
+      UPDATE metadata_fts
+      SET source_domain = NEW.source_domain,
+          source_id = NEW.id,
+          title = NEW.title,
           url = NEW.path,
           created_at = NEW.created_at,
           last_modified = NEW.last_modified,
@@ -170,6 +182,7 @@ pub const TRIGGER_DELETE_DOCUMENT_METADATA : &str = r#"
   AFTER DELETE ON document
   BEGIN
       DELETE FROM metadata WHERE source_table = 'document' AND source_id = OLD.id;
+      DELETE FROM metadata_fts WHERE source_table = 'document' AND source_id = OLD.id;
   END;
 "#;
 
@@ -185,7 +198,6 @@ pub const TRIGGER_INSERT_METADATA_FTS : &str = r#"
       VALUES (NEW.id, NEW.source_table, NEW.source_domain, NEW.source_id, NEW.title, NEW.url, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment);
   END;
 "#;
-
 pub const TRIGGER_UPDATE_METADATA_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS metadata_fts_update_trigger
   AFTER UPDATE ON metadata
@@ -203,13 +215,11 @@ pub const TRIGGER_UPDATE_METADATA_FTS : &str = r#"
       WHERE metadata_id = NEW.id;
   END;
 "#;
-
 pub const TRIGGER_DELETE_METADATA_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS metadata_fts_delete_trigger
   AFTER DELETE ON metadata
   BEGIN
-      DELETE FROM metadata_fts
-      WHERE metadata_id = old.id;
+      DELETE FROM metadata_fts WHERE metadata_id = old.id;
   END;
 "#;
 
@@ -222,8 +232,8 @@ pub const TRIGGER_INSERT_BODY_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS body_fts_insert_trigger
   AFTER INSERT ON body
   BEGIN
-      INSERT INTO body_fts (metadata_id, body)
-      VALUES (NEW.metadata_id, NEW.body);
+      INSERT INTO body_fts (metadata_id, text)
+      VALUES (NEW.metadata_id, NEW.text);
   END;
 "#;
 
@@ -232,7 +242,7 @@ pub const TRIGGER_UPDATE_BODY_FTS : &str = r#"
   AFTER UPDATE ON body
   BEGIN
       UPDATE body_fts
-      SET body = NEW.body
+      SET text = NEW.text
       WHERE metadata_id = NEW.metadata_id;
   END;
 "#;
@@ -285,8 +295,6 @@ pub const EMAIL_TABLE_CREATE_STATEMENT : &str = r#"
     "label" text,
     "attachment_count" integer,
     "comment" text
-    "metadata_id" INTEGER NOT NULL,
-    FOREIGN KEY (metadata_id) REFERENCES metadata(id)
   );
 "#;
 
@@ -321,8 +329,6 @@ pub const BOOKMARK_TABLE_CREATE_STATEMENT : &str = r#"
     "frecency_rank" REAL NOT NULL DEFAULT 0,
     "frecency_last_accessed" BIGINT,
     "comment" text
-    "metadata_id" INTEGER NOT NULL,
-    FOREIGN KEY (metadata_id) REFERENCES metadata(id)
   );
 "#;
 
@@ -345,7 +351,5 @@ pub const WEBSITE_TABLE_CREATE_STATEMENT : &str = r#"
     "frecency_rank" REAL NOT NULL DEFAULT 0,
     "frecency_last_accessed" BIGINT,
     "comment" text
-    "metadata_id" INTEGER NOT NULL,
-    FOREIGN KEY (metadata_id) REFERENCES metadata(id)
   );
 "#;

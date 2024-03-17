@@ -1,9 +1,14 @@
 // use crate::database::crud::add_files_to_database;
 use jwalk::WalkDir;
+use crate::database::models::MetadataItem;
 use crate::{database::models::DocumentItem, text_extraction::Extractor};
 use crate::utils::get_metadata;
 use std::time::UNIX_EPOCH;
 use crate::housekeeping::get_home_directory;
+use diesel::connection::Connection;
+use crate::database::schema::document;
+use crate::database::establish_connection;
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection}; // Import the RunQueryDsl trait
 
 const DOCUMENT_FILETYPES: [&str; 11] = ["csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls"];
 const IMAGE_FILETYPES: [&str; 5] = ["jpg", "jpeg", "png", "gif", "svg"];
@@ -82,8 +87,7 @@ pub fn walk_directory(path: &str) -> usize {
       }
       let filesize = metadata.len();
       
-      // get UNIX timestamp for last_modified, last_opened and created_at
-      // and store it as text string
+      // get UNIX timestamp for last_modified, last_opened and created_at and store it as text string
       let last_modified_secs = metadata.modified().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs();
       let created_at = metadata.created().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs();
       let last_opened = metadata.accessed().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs();
@@ -93,7 +97,7 @@ pub fn walk_directory(path: &str) -> usize {
         continue;
       }
       // If ALLOWED_FILETYPES does not contain `extension`, continue
-      let mut file_content: Option<String> = None;
+      // let mut file_content: Option<String> = None;
       // if extension.unwrap() == "txt" || extension.unwrap() == "md" || extension.unwrap() == "docx" || extension.unwrap() == "pptx" {
       //   if !filename.contains("~$") || !filename.contains(".tmp") || !filename.contains(".temp")  {
       //     file_content = Some(extract_text_from_file(path.to_str().unwrap().to_string()));
@@ -101,29 +105,33 @@ pub fn walk_directory(path: &str) -> usize {
       // }
 
       let file_item = DocumentItem {
+        source_domain: "local".to_string(),
         created_at: created_at as i64,
         name: filename.to_string(),
         path: path.to_str().unwrap().to_string(),
         size: Some(filesize as f64),
         file_type: extension.unwrap().to_string(),
-        file_content: file_content,
         last_modified: last_modified_secs as i64,
-        last_opened: last_opened as i64
+        last_opened: last_opened as i64,
+        last_synced: 0,
+        is_pinned: false,
+        frecency_rank: 0.0,
+        frecency_last_accessed: 0,
+        comment: None,
       };
 
       files_array.push(file_item);
 
-      // if there are 100 items in files_array, add them to the database and clear the array
-      if files_array.len() == 100 {
-        let cloned_files_array = files_array.clone();
-        add_files_to_database(cloned_files_array, &mut connection);
+      // if there are 500 items in metadata_array, add them to the database and clear the array
+      if files_array.len() == 500 {
+        add_metadata_to_database(&files_array, &mut connection);
         files_added += files_array.len();
         files_array.clear();
       }
     // process the leftover files after the loop ends
     if files_array.len() > 0 {
-      let cloned_files_array = files_array.clone();
-      add_files_to_database(cloned_files_array, &mut connection);
+      // let cloned_files_array = files_array.clone();
+      add_metadata_to_database(&files_array, &mut connection);
       files_added += files_array.len();
       files_array.clear();
     }
@@ -159,15 +167,10 @@ pub fn walk_directory(path: &str) -> usize {
 //         .unwrap();
 //     }
 //   }
-
 //   // pass the files to handle_existing_files for updating the database
 // }
 
-use crate::database::schema::document;
-use crate::database::establish_connection;
-use diesel::{connection, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection}; // Import the RunQueryDsl trait
-
-pub fn add_files_to_database(files_array: Vec<DocumentItem>, connection: &mut SqliteConnection) {
+pub fn add_metadata_to_database(files_array: &Vec<DocumentItem>, connection: &mut SqliteConnection) {
   let files_array_clone = files_array.clone();
   // collect all file paths from files_array
   let file_paths: Vec<_> = files_array.iter().map(|file| &file.path).collect();
@@ -192,34 +195,49 @@ pub fn add_files_to_database(files_array: Vec<DocumentItem>, connection: &mut Sq
     .collect();
 
   // add the files to the database
+  // using batch insert
+  // if files_to_add.len() > 0 {
+  //   let _ = diesel::insert_into(document::table)
+  //     .values(files_to_add)
+  //     .execute(connection)
+  //     .unwrap();
+  // }
+  // using transaction
   if files_to_add.len() > 0 {
-    let _ = diesel::insert_into(document::table)
-      .values(&files_to_add)
-      .execute(connection)
-      .unwrap();
+    connection.transaction::<_, diesel::result::Error, _>(|connection| {
+        diesel::insert_into(document::table)
+            .values(files_to_add)
+            .execute(connection)
+    }).unwrap();
   }
 
   // handle files to update
   if files_to_update.len() > 0 {
-    handle_existing_files(files_to_update, connection);
+    println!("Handling existing file: {}", files_to_update[0].name);
+    // for each file in existing_files only update the last_modified, last_opened and size fields
+    for file in files_to_update {
+      let _ = diesel::update(document::table.filter(document::path.eq(&file.path)))
+        .set((
+          document::last_modified.eq(&file.last_modified),
+        ))
+        .execute(connection)
+        .unwrap();
+    }
   }
 
 }
 
-pub fn handle_existing_files(existing_files: Vec<DocumentItem>, connection: &mut SqliteConnection) {
-  println!("Handling existing file: {}", existing_files[0].name);
-  // for each file in existing_files only update the last_modified, last_opened and size fields
-  for file in existing_files {
-    let _ = diesel::update(document::table.filter(document::path.eq(&file.path)))
-      .set((
-        document::file_content.eq(&file.file_content),
-        document::last_modified.eq(&file.last_modified),
-        document::last_opened.eq(&file.last_opened),
-        document::size.eq(&file.size),
-      ))
-      .execute(connection)
-      .unwrap();
-  }
-}
-
-// 1709728265
+// pub fn handle_existing_files(existing_files: Vec<DocumentItem>, connection: &mut SqliteConnection) {
+//   println!("Handling existing file: {}", existing_files[0].name);
+//   // for each file in existing_files only update the last_modified, last_opened and size fields
+//   for file in existing_files {
+//     let _ = diesel::update(document::table.filter(document::path.eq(&file.path)))
+//       .set((
+//         document::last_modified.eq(&file.last_modified),
+//         document::last_opened.eq(&file.last_opened),
+//         document::size.eq(&file.size),
+//       ))
+//       .execute(connection)
+//       .unwrap();
+//   }
+// }

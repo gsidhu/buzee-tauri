@@ -70,7 +70,10 @@
 
 	async function toggleBackgroundTextProcessing() {
 		sendEvent('click:toggleBackgroundTextProcessing', { ...defaultData });
-		syncStatus = await window.electronAPI?.toggleBackgroundTextProcessing();
+		// syncStatus = await window.electronAPI?.toggleBackgroundTextProcessing();
+		invoke("run_file_indexing").then((res) => {
+			console.log(res);
+		});
 	}
 
 	function goToSearch() {
