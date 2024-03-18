@@ -44,17 +44,17 @@ pub struct MetadataItem {
 #[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
 #[diesel(table_name = metadata)]
 pub struct SearchResult {
-    pub id: i32,
-    pub source_table: String,
-    pub source_domain: String,
-    pub source_id: i32,
+    // pub id: i32,
+    // pub source_table: String,
+    // pub source_domain: String,
+    // pub source_id: i32,
     pub title: String,
     pub url: String,
     pub created_at: i64,
     pub last_modified: i64,
-    pub frecency_rank: f32,
-    pub frecency_last_accessed: i64,
-    pub comment: Option<String>,
+    // pub frecency_rank: f32,
+    // pub frecency_last_accessed: i64,
+    // pub comment: Option<String>,
 }
 
 // impl DocumentItem {

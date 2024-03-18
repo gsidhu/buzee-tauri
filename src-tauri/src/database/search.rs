@@ -47,20 +47,20 @@ pub fn search_fts_index(
 
     let inner_query = format!(
         r#"
-        SELECT d.name, d.path, d.size, d.file_type, d.last_modified, d.last_opened, d.created_at
-        FROM document d
+        SELECT d.source_id, d.title, d.url, d.last_modified, d.created_at
+        FROM metadata d
         JOIN (
-            SELECT DISTINCT path
-            FROM document_fts
+            SELECT DISTINCT url
+            FROM metadata_fts
             WHERE {match_clause}{where_file_type}
-            ORDER BY bm25(document_fts, 10)
+            ORDER BY bm25(metadata_fts, 10)
             LIMIT {limit} OFFSET {offset}
         ) t ON d.path = t.path
         {where_date_limit}
         ORDER BY last_modified DESC
         "#,
         match_clause = if !query.is_empty() {
-            format!("document_fts MATCH '{}'", query)
+            format!("metadata_fts MATCH '{}'", query)
         } else {
             "".to_string()
         },
@@ -110,10 +110,10 @@ pub fn get_recently_opened_docs(
 
     let inner_query = format!(
         r#"
-    SELECT name, path, size, file_type, last_modified, last_opened, created_at
-    FROM document {where_file_type}
-    ORDER BY last_opened DESC
-    LIMIT {limit} OFFSET {offset}
+        SELECT title, url, last_modified, created_at
+        FROM metadata {where_file_type}
+        ORDER BY last_modified DESC
+        LIMIT {limit} OFFSET {offset}
     "#,
         where_file_type = if !where_file_type.is_empty() {
             where_file_type

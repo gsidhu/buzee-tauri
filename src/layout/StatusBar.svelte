@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { pinMode, compactViewMode } from '$lib/stores';
 	import {
@@ -16,6 +16,7 @@
 	import { sendEvent } from '../utils/firebase';
 	import { page } from '$app/stores';
 	import { invoke } from '@tauri-apps/api/core';
+	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 
 	export let onboardingDone = false;
 	let darkMode = false;
@@ -81,9 +82,31 @@
 		goto('/search?highlight-search-bar=true&q=last%20month');
 	}
 
+	function update_files_added_count(filesAddedPayload: Payload) {
+		if (filesAddedSpan) {
+			if (filesAddedPayload.message == "files_added_complete") {
+				$dbCreationInProgress = false;
+				dbReady = true;
+			}
+			filesAddedSpan.innerHTML = filesAddedPayload.data.toString();
+		}
+	}
+
+	// FOR ONBOARDING PROCESS
+	let unlisten:UnlistenFn;
+	let filesAddedSpan: HTMLElement | null;
+
+	$: if ($dbCreationInProgress) {
+		filesAddedSpan = document.getElementById('files-added');
+	}
+
 	onMount(async () => {
 		// isMac = await window.constants?.isMac();
 		isMac = true;
+		unlisten = await listen<Payload>('files-added', (event: any) => {
+			update_files_added_count(event.payload);
+		});
+
 		// window.electronAPI?.setNumDocs(async (numDocs: number) => {
 		// 	numFiles = numDocs;
 		// 	showingResults = numFiles > 20;
@@ -101,20 +124,19 @@
 		// 	}
 		// 	$searchInProgress = false;
 		// });
+
 		// window.electronAPI?.setBackgroundTextProcessRunningStatus(async (status: boolean) => {
 		// 	syncStatus = status;
 		// });
+
 		// Get the sync status on each mount
 		// syncStatus = await window.dbAPI?.getBackgroundTextProcessRunningStatus();
 		// Set the app mode
+		
 		//// on renderer launch
 		// appMode = await window.electronAPI?.getAppMode();
 		appMode = "window";
-		//// on function call (defunct cuz renderer is reloaded on mode change)
-		// window.electronAPI?.setAppMode(async (mode: string) => {
-		// 	console.log('setAppMode', mode);
-		// 	appMode = mode;
-		// });
+
 		// Refresh documentsShown when a doc is deleted
 		// window.electronAPI?.docDeleted(async (filepath: string) => {
 		// 	console.log('docDeleted', filepath);
@@ -123,18 +145,10 @@
 		// 		1
 		// 	);
 		// });
-		// window.dbAPI?.getDBStats(async (result: DBStat[]) => {
-		// 	// set these variables only during onboarding
-		// 	page.subscribe((value) => {
-		// 	const route = value.url.pathname;
-		// 		if (route) {
-		// 			if (route === '/onboarding') {
-		// 				dbReady = true;
-		// 				$dbCreationInProgress = false;
-		// 			}
-		// 		}
-		// 	});
-		// });
+	});
+
+	onDestroy(() => {
+		unlisten();
 	});
 </script>
 
@@ -149,10 +163,14 @@
 	<div class="col px-0 d-flex flex-row justify-content-start" id="status-bar-left">
 		{#if onboardingDone}
 			Showing {numFiles} docs
-		{:else if dbReady}
-			<div>Scan complete</div>
-		{:else if $dbCreationInProgress}
-			<div>Scanning...</div>
+		{:else if dbReady || $dbCreationInProgress}
+			<div>
+				{#if $dbCreationInProgress}
+					Scanning...
+				{:else if dbReady}
+					Scan complete!
+				{/if}
+			</div>
 		{:else}
 			<div>Hello!</div>
 		{/if}
@@ -187,11 +205,6 @@
 			>
 				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />{` Sync${syncStatus ? 'ing' : ''}`}
 			</button>
-			<!-- Added here for debugging -->
-			<!-- <a href="/onboarding" class="link-light">Go to onboarding</a> -->
-		{:else}
-			<!-- Added here for debugging -->
-			<!-- <a href="/search" class="link-light">Go to search</a> -->
 		{/if}
 	</div>
 
@@ -264,14 +277,9 @@
 				</button>
 			{/if}
 		{/if}
-		<button
-			type="button"
-			class="px-1 mx-1 status-item"
-			title={`Open the app in ${appMode === 'menubar' ? 'window' : 'menubar'} mode (${isMac ? '⌘' : 'Ctrl'} + Shift + F)`}
-			on:click={() => toggleAppMode()}
-		>
-			<i class={`bi ${appMode === 'menubar' ? 'bi-fullscreen' : 'bi-fullscreen-exit'}`} />
-		</button>
+		<div class={dbReady || $dbCreationInProgress ? "" : "d-none"}>
+			<span id="files-added">0</span> files added
+		</div>
 	</div>
 </div>
 

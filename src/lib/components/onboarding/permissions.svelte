@@ -7,9 +7,8 @@
 	import Waiting from './waiting.svelte';
 
   let showWaiting = false;
-  async function startFileScan() {
+  function startFileScan() {
     $dbCreationInProgress = true;
-    // window.dbAPI?.startFileScan();
     invoke("run_file_indexing")
     showWaiting = true;
 	}

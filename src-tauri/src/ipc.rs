@@ -1,22 +1,32 @@
 // Inter-Process Communication between Rust and SvelteKit
 
-use crate::custom_types::{DateLimit, DBStat, Error, Payload}; // Import the Error type
+use crate::custom_types::{DBStat, DateLimit, Error, Payload}; // Import the Error type
 use crate::database::establish_connection;
 use crate::database::models::SearchResult;
-use crate::database::search::{get_recently_opened_docs, search_fts_index, get_counts_for_all_filetypes};
-use crate::indexing::{all_allowed_filetypes, walk_directory};
+use crate::database::search::{
+    get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index,
+};
 use crate::housekeeping;
-use diesel::SqliteConnection;
-use tauri_plugin_shell; // Import the tauri_plugin_shell crate
-use tokio::sync::mpsc;
+use crate::indexing::{all_allowed_filetypes, walk_directory};
 use crate::window::hide_or_show_window;
+use diesel::SqliteConnection;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
+use tauri_plugin_shell; // Import the tauri_plugin_shell crate
+use tokio::sync::mpsc;
 // App Menu
 use tauri::menu::Menu;
 // Import context menu commands
 #[cfg(desktop)]
-use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu};
+use crate::context_menu::{
+    contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,
+};
+
+
+pub fn send_message_to_frontend(window: &tauri::Window, event: String, message: String, data: String) {
+  window.emit(&event, Payload { message, data }).unwrap();
+}  
+
 
 // Get allowed filetypes
 #[tauri::command]
@@ -51,7 +61,7 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
 
 // Run the file watcher script
 #[tauri::command]
-async fn run_file_indexing() -> Result<String, Error> {
+async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
     println!("File watcher started");
     let home_directory = housekeeping::get_home_directory().unwrap();
     println!("Home directory: {}", home_directory);
@@ -59,7 +69,7 @@ async fn run_file_indexing() -> Result<String, Error> {
     let (sender, mut receiver) = mpsc::channel::<usize>(1);
 
     tokio::spawn(async move {
-        let files_added = walk_directory(&home_directory);
+        let files_added = walk_directory(window, &home_directory);
         // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
         sender
             .send(files_added)
@@ -69,7 +79,7 @@ async fn run_file_indexing() -> Result<String, Error> {
 
     // Receive the result from the channel asynchronously
     if let Some(files_added) = receiver.recv().await {
-        println!("Files added: {}", files_added);
+      println!("Files added: {}", files_added);
     }
     Ok("File indexing complete".to_string())
 }
@@ -107,9 +117,9 @@ fn get_recent_docs(
 // Get DB Stats
 #[tauri::command]
 fn get_db_stats() -> Result<Vec<DBStat>, Error> {
-  let conn: SqliteConnection = establish_connection();
-  let db_stats = get_counts_for_all_filetypes(conn).unwrap();
-  Ok(db_stats)
+    let conn: SqliteConnection = establish_connection();
+    let db_stats = get_counts_for_all_filetypes(conn).unwrap();
+    Ok(db_stats)
 }
 
 // Open QuickLook (MacOS) or Peek (Windows)
@@ -139,18 +149,6 @@ fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
     Shortcut::new(Some(modifier), key)
 }
 
-// Send message to frontend
-#[tauri::command]
-async fn test_app_handle(app: tauri::AppHandle) {
-    app.emit(
-        "event-name",
-        Payload {
-            message: "Tauri is awesome!".into(),
-        },
-    )
-    .unwrap();
-}
-
 // Context Menu
 #[tauri::command]
 fn open_context_menu(window: tauri::Window, option: String) {
@@ -159,6 +157,19 @@ fn open_context_menu(window: tauri::Window, option: String) {
         "statusbar" => statusbar_context_menu(&window),
         _ => println!("Invalid context menu option"),
     }
+}
+
+// Send message to frontend
+#[tauri::command]
+async fn test_app_handle(app: tauri::AppHandle) {
+    app.emit(
+        "event-name",
+        Payload {
+            message: "Tauri is awesome!".into(),
+            data: "Some data".into(),
+        },
+    )
+    .unwrap();
 }
 
 pub fn initialize() {
@@ -192,11 +203,11 @@ pub fn initialize() {
                 )?;
             }
             {
-              app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
-                println!("menu event: {:?}", event);
-                // let main_window = app_handle.get_webview_window("main").unwrap();
-                contextmenu_receiver(app_handle, event);
-              });
+                app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
+                    println!("menu event: {:?}", event);
+                    // let main_window = app_handle.get_webview_window("main").unwrap();
+                    contextmenu_receiver(app_handle, event);
+                });
             }
             Ok(())
         })

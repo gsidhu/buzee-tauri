@@ -1,5 +1,8 @@
 # Logbook
 
+- Onboarding works. Time to fix search now.
+- Indexing metadata takes UNDER FIVE SECONDS because I removed my dumbass mistake from the for-loop.
+- Figure out how to send files added incremental updates to front-end. SOLVED: just pass the Window variable from the command to the function.
 - Indexing metadata takes about 90 seconds for all file types (~ 40,000 files).
 - Added logging using the `log` and `simple_log` crates.
 - Adding document metadata to the document table works. Metadata and metadata_fts tables get automatically updated using triggers.
@@ -71,6 +74,7 @@
 - [x] Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
 - Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
 - Add a tray icon and menubar window.
+- Figure out how to pass types to tauri commands.
 
 ### Front-end
 - Connect loading spinners to the backend.

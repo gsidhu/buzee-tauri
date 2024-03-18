@@ -167,7 +167,7 @@ pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
       UPDATE metadata_fts
       SET source_domain = NEW.source_domain,
           source_id = NEW.id,
-          title = NEW.title,
+          title = NEW.name,
           url = NEW.path,
           created_at = NEW.created_at,
           last_modified = NEW.last_modified,

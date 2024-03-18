@@ -34,8 +34,6 @@ pub fn statusbar_context_menu(window: &Window) {
 
 // Use the MenuEvent::receiver to listen to click events on the menu items
 pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
-  app.emit("menu-ready", Payload { message: "Yo whaddup?".into() }).unwrap();
-
   // Define a trait to convert the MenuId to a string
   impl MenuIdString for MenuId {
     fn to_string(&self) -> String {
@@ -50,23 +48,23 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
 
   match event_id_string {
     "open" => {
-      app.emit("open", Payload { message: "Open File".into() }).unwrap();
+      app.emit("open", Payload { message: "Open File".into(), data: "".into() }).unwrap();
     }
     "open_folder" => {
-      app.emit("open-folder", Payload { message: "Open Folder".into() }).unwrap();
+      app.emit("open-folder", Payload { message: "Open Folder".into(), data: "".into() }).unwrap();
     }
     "document_stats" => {
-      app.emit("document-stats", Payload { message: "Document Stats".into() }).unwrap();
+      app.emit("document-stats", Payload { message: "Document Stats".into(), data: "".into() }).unwrap();
     }
     "deep_breathing" => {
-      app.emit("deep-breathing", Payload { message: "Deep Breathing".into() }).unwrap();
+      app.emit("deep-breathing", Payload { message: "Deep Breathing".into(), data: "".into() }).unwrap();
     }
     "tips_and_shortcuts" => {
-      app.emit("tips-and-shortcuts", Payload { message: "Tips & Shortcuts".into() }).unwrap();
+      app.emit("tips-and-shortcuts", Payload { message: "Tips & Shortcuts".into(), data: "".into() }).unwrap();
     }
     #[cfg(target_os = "macos")]
     "preview" => {
-      app.emit("show-preview", Payload { message: "Show Preview".into() }).unwrap();
+      app.emit("show-preview", Payload { message: "Show Preview".into(), data: "".into() }).unwrap();
     }
     _ => println!("Invalid context menu option"),
   }

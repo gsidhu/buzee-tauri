@@ -67,7 +67,8 @@ declare global {
   }
 
   type Payload = {
-    message: string;
+    message: string,
+    data: string
   };
 }
 

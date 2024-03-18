@@ -29,6 +29,7 @@ pub struct DateLimit {
 #[derive(Clone, Serialize)]
 pub struct Payload {
   pub message: String,
+  pub data: String
 }
 
 // Define a struct equivalent to this Typescript interface:

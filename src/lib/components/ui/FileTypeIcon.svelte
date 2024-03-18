@@ -24,11 +24,11 @@
 {:else if filetype === 'key'}
 	<i class={`bi bi-file-earmark-slides-fill ${color ? 'keynote-icon' : ''}`} title="Apple Keynote (.key)"></i>
 {:else if ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(filetype)}
-	<i class={`bi bi-file-earmark-image ${color ? 'keynote-icon' : ''}`} title="Image"></i>
+	<i class={`bi bi-file-earmark-image ${color ? 'image-icon' : ''}`} title="Image"></i>
 {:else if ['mp3', 'wav', 'flac', 'm4a', 'aac', 'ogg', 'wma', 'aiff'].includes(filetype)}
-	<i class={`bi bi-file-earmark-music-fill ${color ? 'pages-icon' : ''}`} title="Audio"></i>
+	<i class={`bi bi-file-earmark-music-fill ${color ? 'audio-icon' : ''}`} title="Audio"></i>
 {:else if ['mp4', 'mkv', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mpg', 'mpeg', '3gp', '3g2'].includes(filetype)}
-	<i class={`bi bi-film ${color ? 'pdf-icon' : ''}`} title="Video"></i>
+	<i class={`bi bi-film ${color ? 'video-icon' : ''}`} title="Video"></i>
 {/if}
 
 <style>
@@ -52,12 +52,21 @@
 		color: #0d6efd;
 	}
 	.numbers-icon {
-		color: #63ee56;
+		color: #37db28;
 	}
 	.pages-icon {
 		color: #fd9920;
 	}
 	.keynote-icon {
 		color: #1e88f5;
+	}
+	.image-icon {
+		color: #83C5BE;
+	}
+	.audio-icon {
+		color: #E07BE0;
+	}
+	.video-icon {
+		color: #E1BC29;
 	}
 </style>

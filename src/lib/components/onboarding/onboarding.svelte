@@ -1,18 +1,24 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { listen } from '@tauri-apps/api/event';
+  import type { UnlistenFn } from '@tauri-apps/api/event';
   import { fly, fade } from 'svelte/transition';
 	import ConfettiButton from "../ui/confettiButton.svelte";
 	import Permissions from "./permissions.svelte";
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
   let processingDone = false;
   let showPermissions = false;
 
-  onMount(() => {
-    // window.dbAPI?.getDBStats(async (result: DBStat[]) => {
-    //   await window.electronAPI?.setOnboardingDone();
-    //   processingDone = true;
-    // });
+  let unlisten:UnlistenFn;
+  onMount(async () => {
+    unlisten = await listen<Payload>('files-added', (event: any) => {
+      if (event.payload.message === "files_added_complete") {
+			  processingDone = true;
+      }
+		});
+  })
+  onDestroy(() => {
+    unlisten();
   })
 </script>
 

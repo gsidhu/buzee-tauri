@@ -40,11 +40,12 @@
 	onMount(async () => {
 		// Load the first page of documents whenever the app loads
 		// TODO: Replace this with pinned documents later
-		$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, 'any');
+		// $documentsShown = await getDocumentsFromDB(0, $resultsPerPage, 'any');
+		$documentsShown = [];
 
 		getUserPreferences().then((res) => {
 			// reroute(res.onboardingDone);
-			reroute(true);
+			reroute(false);
 		});
 
 	});
