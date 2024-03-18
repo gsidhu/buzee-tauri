@@ -2,16 +2,22 @@
   import {fade} from "svelte/transition";
   import TopBar from "../../layout/TopBar.svelte";
   import { onMount } from "svelte";
+  import { invoke } from "@tauri-apps/api/core";
   let isMac: boolean = true;
-  let isWin: boolean;
 
   function openFolder(path: string) {
     window.electronAPI?.openFileFolder(path);
   }
 
   onMount(() => {
-    isMac = window.constants.isMac();
-    isWin = window.constants.isWin();
+    invoke("get_os").then((res) => {
+			// @ts-ignore
+			if (res == "macos") {
+				isMac = true;
+			} else {
+				isMac = false;
+			}
+		});
   });
 </script>
 
@@ -35,7 +41,7 @@
       {#if isMac}
         <!-- svelte-ignore a11y-invalid-attribute -->
         Quit the app and delete it from the <a href="#" tabindex=0 role="button" on:click={() => openFolder('uninstall')}>Applications folder</a>.
-      {:else if isWin}
+      {:else}
         <!-- svelte-ignore a11y-invalid-attribute -->
         Quit the App and run the <a href="#" tabindex=0 role="button" on:click={() => openFolder('uninstall')}>Uninstaller</a>.
       {/if}

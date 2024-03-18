@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { sendEvent } from '../../utils/firebase';
+	import { invoke } from '@tauri-apps/api/core';
 
 	let showInDock: boolean;
 	let launchAtStartup: boolean;
@@ -58,9 +59,15 @@
 	}
 
 	onMount(() => {
-		// isMac = window.constants.isMac();
+		invoke("get_os").then((res) => {
+			// @ts-ignore
+			if (res == "macos") {
+				isMac = true;
+			} else {
+				isMac = false;
+			}
+		});
 		// isWin = window.constants.isWin();
-		isMac = true;
 		// getUserPreferences().then((res) => {
 		// 	userPreferences = res;
 		// 	console.log(userPreferences);

@@ -22,11 +22,10 @@
     <Waiting />
   {:else}
     <h3>Allow us to Scan Your Computer</h3>
-    <p>We will need your permission to scan your Documents, Downloads and Desktop folders.</p>
-    <p>You can always add more folders from the Settings in the app.</p>
+    <p>We will need your permission to scan your computer.</p>
 
     <h6 class="mt-4">Why Do We Need To Scan?</h6>
-    <p class="small">Scanning helps us tailor Buzee to your unique use-case. The scanned results remain on your computer. We do not transmit any of your data to our servers.</p>
+    <p class="small">Scanning helps us tailor Buzee to your unique use-case. The scanned results are stored in an encrypted database in your Documents folder. Your data never leaves your computer. Promise.</p>
 
     <div class="text-center my-5">
       <ConfettiButton label="Start Scan" handleClick={startFileScan}/>

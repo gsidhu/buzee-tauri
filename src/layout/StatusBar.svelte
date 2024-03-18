@@ -101,29 +101,17 @@
 	}
 
 	onMount(async () => {
-		// isMac = await window.constants?.isMac();
-		isMac = true;
+		invoke("get_os").then((res) => {
+			// @ts-ignore
+			if (res == "macos") {
+				isMac = true;
+			} else {
+				isMac = false;
+			}
+		});
 		unlisten = await listen<Payload>('files-added', (event: any) => {
 			update_files_added_count(event.payload);
 		});
-
-		// window.electronAPI?.setNumDocs(async (numDocs: number) => {
-		// 	numFiles = numDocs;
-		// 	showingResults = numFiles > 20;
-		// 	$resultsPerPage = numDocs;
-		// 	$searchInProgress = true;
-		// 	if ($searchQuery === '') {
-		// 		$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, $filetypeShown.slice(1));
-		// 	} else {
-		// 		$documentsShown = await searchDocuments(
-		// 			$searchQuery,
-		// 			$resultsPageShown,
-		// 			$resultsPerPage,
-		// 			$filetypeShown.slice(1)
-		// 		);
-		// 	}
-		// 	$searchInProgress = false;
-		// });
 
 		// window.electronAPI?.setBackgroundTextProcessRunningStatus(async (status: boolean) => {
 		// 	syncStatus = status;
@@ -133,8 +121,7 @@
 		// syncStatus = await window.dbAPI?.getBackgroundTextProcessRunningStatus();
 		// Set the app mode
 		
-		//// on renderer launch
-		// appMode = await window.electronAPI?.getAppMode();
+		// on renderer launch
 		appMode = "window";
 
 		// Refresh documentsShown when a doc is deleted
@@ -210,44 +197,6 @@
 
 	<!-- Right end -->
 	<div class="col px-0 d-flex flex-row justify-content-end" id="status-bar-right">
-		<!-- {#if $pinMode}
-      <button
-        type="button"
-        class="px-1 mx-1 status-item"
-        title="View or Set pinned files"
-        on:click={() => ($pinMode = !$pinMode)}
-        on:contextmenu={() => showStatusBarMenu('pin')}
-      >
-        <i class="bi bi-pin-fill" />
-      </button>
-    {:else}
-      <button
-        type="button"
-        class="px-1 mx-1 status-item"
-        title="View or Set pinned files"
-        on:click={() => ($pinMode = !$pinMode)}
-        on:contextmenu={() => showStatusBarMenu('pin')}
-      >
-        <i class="bi bi-pin" />
-      </button>
-    {/if}
-    <button
-      type="button"
-      class="px-1 mx-1 status-item"
-      title="View the folder containing the database file"
-      on:click={() => window.electronAPI.openFileFolder("dbPath")}
-    >
-      <i class="bi bi-database" />
-    </button>
-    {#if darkMode}
-      <button type="button" class="px-1 mx-1 status-item" on:click={() => (darkMode = !darkMode)}>
-        <i class="bi bi-brightness-high" />
-      </button>
-    {:else}
-      <button type="button" class="px-1 mx-1 status-item" on:click={() => (darkMode = !darkMode)}>
-        <i class="bi bi-moon-stars" />
-      </button>
-    {/if} -->
 		{#if onboardingDone}
 			<button
 				type="button"

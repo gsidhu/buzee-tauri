@@ -1,5 +1,6 @@
 # Logbook
 
+- Added command for detecting OS and sending it to the frontend.
 - Onboarding works. Time to fix search now.
 - Indexing metadata takes UNDER FIVE SECONDS because I removed my dumbass mistake from the for-loop.
 - Figure out how to send files added incremental updates to front-end. SOLVED: just pass the Window variable from the command to the function.

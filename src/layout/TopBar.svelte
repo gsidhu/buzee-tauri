@@ -3,15 +3,22 @@
 	import SettingsButton from "./SettingsButton.svelte";
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
+  import { invoke } from "@tauri-apps/api/core";
 
   var onSearchPage: boolean = false;
   var appMode: string = "menubar";
   var isMac: boolean = false;
 
   onMount(async () => {
-    // isMac = await window.constants?.isMac();
+    invoke("get_os").then((res) => {
+			// @ts-ignore
+			if (res == "macos") {
+				isMac = true;
+			} else {
+				isMac = false;
+			}
+		});
     // appMode = await window.electronAPI?.getAppMode();
-    isMac = true;
     appMode = "window";
 		// add an event listener to every time the page changes
 		page.subscribe((value) => {

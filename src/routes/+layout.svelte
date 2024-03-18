@@ -30,9 +30,15 @@
 
 	onMount(async () => {
     startSerialEventListener();
-		// isMac = await window.constants?.isMac();
+		invoke("get_os").then((res) => {
+			// @ts-ignore
+			if (res == "macos") {
+				isMac = true;
+			} else {
+				isMac = false;
+			}
+		});
     // appMode = await window.electronAPI?.getAppMode();
-    isMac = true;
     appMode = "window";
 		// // Grayscale contents when window blurs
     // window.electronAPI?.windowBlurred(async () => {

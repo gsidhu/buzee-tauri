@@ -1,14 +1,19 @@
 <script lang="ts">
+  import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import TopBar from "../../layout/TopBar.svelte";
   let isMac = false;
-  let isWin = false;
 
   onMount(() => {
-    isMac = true;
-    // isMac = window.constants?.isMac();
-    // isWin = window.constants?.isWin();
+    invoke("get_os").then((res) => {
+			// @ts-ignore
+			if (res == "macos") {
+				isMac = true;
+			} else {
+				isMac = false;
+			}
+		});
   })
 
 </script>
@@ -40,8 +45,7 @@
     </ul>
     {#if isMac}
       <p>To easily access search with Buzee, you can either click the Menubar icon at the top of your screen, or right-click the app’s icon in the Dock and choose <code>Options > Keep in Dock</code>.</p>
-    {/if}
-    {#if isWin}
+    {:else}
       <p>To easily access search with Buzee, right-click the app’s icon in the Taskbar and then choose <code>Pin to Taskbar</code>. You can also make the <a href="https://support.microsoft.com/en-us/windows/how-to-use-the-taskbar-in-windows-0657a50f-0cc7-dbfd-ae6b-05020b195b07#ID0ERBBBBDDD-button" target="_blank">app icon show in the system tray</a> from Windows settings.</p>
       <p>You can show/hide the File menu on top of the screen by pressing the <code>Alt</code> button (only in window mode).</p>
     {/if}

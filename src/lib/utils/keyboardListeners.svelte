@@ -6,7 +6,15 @@
 	import { sendEvent } from '../../utils/firebase';
 	import { goto } from '$app/navigation';
 
-	const isMac = true;
+	let isMac = false;
+	invoke("get_os").then((res) => {
+		// @ts-ignore
+		if (res == "macos") {
+			isMac = true;
+		} else {
+			isMac = false;
+		}
+	});
 
 	const allowedKeys = [
 		'Space',

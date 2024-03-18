@@ -45,7 +45,7 @@
 
 		getUserPreferences().then((res) => {
 			// reroute(res.onboardingDone);
-			reroute(false);
+			reroute(true);
 		});
 
 	});

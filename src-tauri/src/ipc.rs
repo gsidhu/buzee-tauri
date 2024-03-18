@@ -27,6 +27,12 @@ pub fn send_message_to_frontend(window: &tauri::Window, event: String, message: 
   window.emit(&event, Payload { message, data }).unwrap();
 }  
 
+// Get OS boolean
+#[tauri::command]
+fn get_os() -> Result<String, Error> {
+  let os = std::env::consts::OS;
+  Ok(os.to_string())
+}
 
 // Get allowed filetypes
 #[tauri::command]
@@ -132,7 +138,8 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
         .arg("-p")
         .arg(file_path)
         .output();
-    #[cfg(windows)]
+    
+    #[cfg(target_os = "windows")]
     let _ = std::process::Command::new("cmd")
         .arg("/C")
         .arg("start")
@@ -159,23 +166,11 @@ fn open_context_menu(window: tauri::Window, option: String) {
     }
 }
 
-// Send message to frontend
-#[tauri::command]
-async fn test_app_handle(app: tauri::AppHandle) {
-    app.emit(
-        "event-name",
-        Payload {
-            message: "Tauri is awesome!".into(),
-            data: "Some data".into(),
-        },
-    )
-    .unwrap();
-}
-
 pub fn initialize() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_allowed_filetypes,
+            get_os,
             open_file_or_folder,
             open_folder_containing_file,
             run_file_indexing,
@@ -183,8 +178,7 @@ pub fn initialize() {
             get_recent_docs,
             get_db_stats,
             open_quicklook,
-            open_context_menu,
-            test_app_handle
+            open_context_menu
         ])
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
