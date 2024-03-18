@@ -15,11 +15,14 @@
 	import PopoverIcon from '../ui/popoverIcon.svelte';
 	import { sendEvent } from '../../../utils/firebase';
 
-	function openFile(path: string) {
+	function openFile(url: string) {
 		sendEvent('click:open_file');
-		invoke('open_file_or_folder', { filePath: path });
+		invoke('open_file_or_folder', { filePath: url });
 	}
 	function formatUpdatedTime(unixTime: number): string {
+		if (unixTime === 0) {
+			return 'Never';
+		}
 		let unixToJs = new Date(unixTime*1000);
 		const updatedMoment = moment(unixToJs);
 		const today = moment();
@@ -37,22 +40,22 @@
 		}
 	}
 
-	function formatPath(path: string): string {
-		const parts = path.split('/'); // Split the path into components
+	function formatPath(url: string): string {
+		const parts = url.split('/'); // Split the url into components
 		const length = parts.length;
 
 		if (length > 3) {
 			// Take the two directories just before the file name and prepend '...'
 			return '.../' + parts.slice(length - 3, length - 1).join('/') + '/';
 		} else {
-			// If the path is already short, return it as is
-			return path;
+			// If the url is already short, return it as is
+			return url;
 		}
 	}
 
 	function showContextMenu(
 		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
-		result: SearchResult
+		result: DocumentSearchResult
 	) {
 		sendEvent('right_click:result_context_menu');
 		clickRow(e, $shiftKeyPressed);
@@ -94,17 +97,6 @@
 			}
 		}),
 		table.column({
-			header: 'Size',
-			accessor: 'size',
-			plugins: {
-				resize: {
-					initialWidth: 100,
-					minWidth: 100,
-					maxWidth: 150
-				}
-			}
-		}),
-		table.column({
 			header: 'Last Modifed',
 			accessor: 'last_modified',
 			id: 'lastModified',
@@ -119,7 +111,7 @@
 		}),
 		table.column({
 			header: 'Last Opened',
-			accessor: 'last_opened',
+			accessor: 'frecency_last_accessed',
 			id: 'lastOpened',
 			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
 			plugins: {
@@ -158,10 +150,12 @@
 		.map(([id]) => id);
 
 	// HACK: hide size column by default
-	hideForId['size'] = true;
+	// hideForId['size'] = true;
 	// hideForId['lastOpened'] = true;
 
 	onMount(() => {
+		console.log($documentsShown);
+		
 		resetColumnSize();
 
 		window.electronAPI?.resetTableColWidths(() => {
@@ -252,7 +246,7 @@
 											<FileTypeIcon filetype={String(cell.render())} />
 										{:else if cell.id === 'size'}
 											<span>{readableFileSize(Number(cell.render()))}</span>
-										{:else if cell.id === 'path'}
+										{:else if cell.id === 'url'}
 											<PopoverIcon
 												label={formatPath(String(cell.render()))}
 												title={String(cell.render())}

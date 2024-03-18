@@ -1,5 +1,6 @@
 use crate::custom_types::{DateLimit, DBStat};
-use crate::database::models::SearchResult;
+use crate::database::models::{DocumentSearchResult, DocumentResponseModel, MetadataItem, MetadataSearchResult};
+// use crate::database::response_models::DocumentResponseModel;
 use crate::indexing::all_allowed_filetypes;
 use diesel::ExpressionMethods;
 use diesel::QueryDsl;
@@ -15,7 +16,7 @@ pub fn search_fts_index(
     file_type: Option<String>,
     date_limit: Option<DateLimit>,
     mut conn: SqliteConnection,
-) -> Result<Vec<SearchResult>, diesel::result::Error> {
+) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
     println!(
         "search_fts_index: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
         query, page, limit, file_type, date_limit
@@ -23,10 +24,10 @@ pub fn search_fts_index(
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
         if !file_type.contains(",") {
-            format!(r#" AND file_type IN ('{}')"#, file_type)
+            format!(r#"file_type IN ('{}')"#, file_type)
         } else {
             format!(
-                r#" AND file_type IN ('{}')"#,
+                r#"file_type IN ('{}')"#,
                 file_type.replace(",", "','").replace("' ", "'")
             )
         }
@@ -36,7 +37,8 @@ pub fn search_fts_index(
     // Add date limit(s)
     let where_date_limit: String = if let Some(date_limit) = date_limit {
         format!(
-            r#" WHERE last_modified >= '{}' AND last_modified <= '{}'"#,
+            r#"{} last_modified >= '{}' AND last_modified <= '{}'"#,
+            if !where_file_type.is_empty() { "AND" } else { "" },
             date_limit.start, date_limit.end
         )
     } else {
@@ -45,20 +47,25 @@ pub fn search_fts_index(
 
     println!("where_file_type: {}", where_file_type);
 
+    // Give 5x weight to the title column (4th) in metadata_fts
     let inner_query = format!(
         r#"
-        SELECT d.source_id, d.title, d.url, d.last_modified, d.created_at
-        FROM metadata d
-        JOIN (
-            SELECT DISTINCT url
-            FROM metadata_fts
-            WHERE {match_clause}{where_file_type}
-            ORDER BY bm25(metadata_fts, 10)
-            LIMIT {limit} OFFSET {offset}
-        ) t ON d.path = t.path
-        {where_date_limit}
-        ORDER BY last_modified DESC
+          SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified
+          FROM metadata_fts m
+          JOIN (
+              SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_modified
+              FROM document
+              {inner_where} {where_file_type} {where_date_limit}
+          ) d ON m.source_id = d.id
+          WHERE {match_clause}
+          ORDER BY bm25(metadata_fts, 1,1,1,5)
+          LIMIT {limit} OFFSET {offset}
         "#,
+        inner_where = if !where_file_type.is_empty() || !where_date_limit.is_empty() {
+          "WHERE".to_string()
+        } else {
+          "".to_string()
+        },
         match_clause = if !query.is_empty() {
             format!("metadata_fts MATCH '{}'", query)
         } else {
@@ -72,7 +79,7 @@ pub fn search_fts_index(
         limit = limit,
         offset = page * limit,
         where_date_limit = if !where_date_limit.is_empty() {
-            where_date_limit
+          where_date_limit
         } else {
             "".to_string()
         }
@@ -80,10 +87,13 @@ pub fn search_fts_index(
 
     println!("inner_query: {}", inner_query);
 
-    let search_results: Vec<SearchResult> =
-        diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
+    let search_results: Vec<DocumentSearchResult> =
+        diesel::sql_query(inner_query).load::<DocumentSearchResult>(&mut conn)?;
 
-    // println!("search_results: {:?}", search_results);
+    if search_results.len() > 0 {
+      println!("search_results: {:?}", search_results[0]);
+    }
+
     Ok(search_results)
 }
 
@@ -93,7 +103,7 @@ pub fn get_recently_opened_docs(
     limit: i32,
     file_type: Option<String>,
     mut conn: SqliteConnection,
-) -> Result<Vec<SearchResult>, diesel::result::Error> {
+) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
         if !file_type.contains(",") {
@@ -110,8 +120,13 @@ pub fn get_recently_opened_docs(
 
     let inner_query = format!(
         r#"
-        SELECT title, url, last_modified, created_at
-        FROM metadata {where_file_type}
+        SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.last_modified, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced
+        FROM metadata m
+        JOIN (
+            SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced
+            FROM document
+            {where_file_type}
+        ) d ON m.source_id = d.id
         ORDER BY last_modified DESC
         LIMIT {limit} OFFSET {offset}
     "#,
@@ -124,9 +139,12 @@ pub fn get_recently_opened_docs(
         offset = page * limit
     );
     println!("inner_query: {}", inner_query);
-    let search_results: Vec<SearchResult> =
-        diesel::sql_query(inner_query).load::<SearchResult>(&mut conn)?;
+    let search_results =
+        diesel::sql_query(inner_query).load::<DocumentSearchResult>(&mut conn)?;
 
+    if search_results.len() > 0 {
+      println!("search_results: {:?}", search_results[0]);
+    }
     Ok(search_results)
 }
 

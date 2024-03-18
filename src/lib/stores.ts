@@ -25,7 +25,7 @@ let storedSearchOptions: DropdownItemsArray = [
     },
   },
 ];
-let storedDocumentsShown: SearchResult[] = [];
+let storedDocumentsShown: DocumentSearchResult[] = [];
 // let storedSearchTrigger = false;
 // let storedSearchResults = [];
 // let storedSearchHistory = [];
@@ -34,7 +34,7 @@ let storedDocumentsShown: SearchResult[] = [];
 // let storedDBStats = {};
 // let storedCurrentCollection = 'Everything';
 // let currentUser = null;
-let storedSelectedResult: SearchResult = {name: '', path: ''};
+let storedSelectedResult: DocumentSearchResult = {name: '', path: ''};
 
 // 2. Set the stored value or a sane default.
 export const pinMode = writable(false)

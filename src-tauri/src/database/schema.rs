@@ -42,3 +42,12 @@ table! {
       text -> Text
   }
 }
+
+joinable!(body -> metadata (metadata_id));
+joinable!(document -> metadata (id));
+
+allow_tables_to_appear_in_same_query!(
+  document,
+  metadata,
+  body
+);

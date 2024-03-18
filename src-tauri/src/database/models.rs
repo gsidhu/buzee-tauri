@@ -1,13 +1,13 @@
 // Defines the DocumentItem type
-// SearchResult type is derived from DocumentItem
+// DocumentSearchResult type is derived from DocumentItem
 
 use diesel::prelude::*;
 use diesel::Insertable;
 use super::schema::{document, metadata};
-// use chrono::NaiveDateTime;
 use serde::Deserialize;
 use serde::Serialize;
 
+// This struct is for INSERTING into the document table
 #[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
 #[diesel(table_name = document)]
 pub struct DocumentItem {
@@ -26,6 +26,8 @@ pub struct DocumentItem {
     pub comment: Option<String>,
 }
 
+// This struct is for INSERTING into the metadata table which is something you should NEVER DO
+// because metadata table is maintained using triggers in SQLite
 #[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
 #[diesel(table_name = metadata)]
 pub struct MetadataItem {
@@ -41,20 +43,56 @@ pub struct MetadataItem {
     pub comment: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+// This struct is for SELECTING from the metadata table without any JOINs
+#[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]
 #[diesel(table_name = metadata)]
-pub struct SearchResult {
-    // pub id: i32,
-    // pub source_table: String,
-    // pub source_domain: String,
-    // pub source_id: i32,
+pub struct MetadataSearchResult {
+    pub id: i32,
+    pub source_table: String,
+    pub source_domain: String,
+    pub source_id: i32,
     pub title: String,
     pub url: String,
     pub created_at: i64,
     pub last_modified: i64,
-    // pub frecency_rank: f32,
-    // pub frecency_last_accessed: i64,
+    pub frecency_rank: f32,
+    pub frecency_last_accessed: i64,
     // pub comment: Option<String>,
+}
+
+// This struct is for SELECTING from the document table without any JOINs
+#[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = document)]
+pub struct DocumentSearchResult {
+    pub id: i32,
+    pub source_domain: String,
+    pub created_at: i64,
+    pub name: String,
+    pub path: String,
+    pub size: Option<f64>,
+    pub file_type: String,
+    pub last_modified: i64,
+    pub last_opened: i64,
+    pub last_synced: i64,
+    pub is_pinned: bool,
+    pub frecency_rank: f32,
+    pub frecency_last_accessed: i64,
+    pub comment: Option<String>,
+}
+
+// This struct is for SELECTING from the metadata table with a JOIN to the document table
+#[derive(Serialize, Queryable, Debug)]
+pub struct DocumentResponseModel {
+    pub source_table: String,
+    pub source_domain: String,
+    pub source_id: i32,
+    pub title: String,
+    pub url: String,
+    pub created_at: i64,
+    pub last_modified: i64,
+    pub frecency_rank: f32,
+    pub frecency_last_accessed: i64,
+    pub file_type: String,
 }
 
 // impl DocumentItem {

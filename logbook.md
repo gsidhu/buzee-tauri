@@ -1,5 +1,9 @@
 # Logbook
 
+- File search also works. Amaze.
+- Quicklook is opened in a new thread so that it doesn't block the main process.
+- Recent documents load on the front-end perfectly.
+- Figured out how to get results from the DB JOINing metadata with document table. Defined a new struct (`DocumentResponseModel`) for the results.
 - Added command for detecting OS and sending it to the frontend.
 - Onboarding works. Time to fix search now.
 - Indexing metadata takes UNDER FIVE SECONDS because I removed my dumbass mistake from the for-loop.
@@ -73,15 +77,15 @@
   - Add code for indexing file contents.
 - Add graceful error handling using logger instead of panic.
 - [x] Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
-- Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
+- [x] Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
 - Add a tray icon and menubar window.
 - Figure out how to pass types to tauri commands.
 
 ### Front-end
-- Connect loading spinners to the backend.
+- Connect loading spinners during onboarding, sync and search to the backend.
 - Show feedback to the user about what dates are being parsed. Maybe as a popover button?
 - Allow searching by created_at, last_modified or last_opened.
 - Add icons for new file types.
 - Disable default right-click context menu.
 - Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
-- Display counter of number of files logged when indexing during onboarding.
+- [x] Display counter of number of files logged when indexing during onboarding.

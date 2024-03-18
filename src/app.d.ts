@@ -38,14 +38,21 @@ declare global {
 
   type DropdownItemsArray = DropdownOrButtonItem[];
 
-  interface SearchResult {
-    // id: number,
+  interface DocumentSearchResult {
+    id: number,
+    source_domain: string,
+    created_at: number,
     name: string,
     path: string,
-    // size: number,
-    // file_type: string,
-    // last_modified: Date,
-    // pinned: boolean,
+    size: number,
+    file_type: string,
+    last_modified: number,
+    last_opened: number,
+    last_synced: number,
+    is_pinned: boolean,
+    freceny_rank: number,
+    frecency_last_accessed: number,
+    comment: string | null,
   }
 
   // type ElectronStore = import('electron-store');

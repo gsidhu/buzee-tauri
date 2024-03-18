@@ -20,6 +20,7 @@ pub mod schema;
 pub mod models;
 pub mod search;
 mod queries;
+// mod response_models;
 
 pub fn establish_connection() -> SqliteConnection {
   let app_dir = get_documents_directory().unwrap();

@@ -2,7 +2,7 @@
 
 use crate::custom_types::{DBStat, DateLimit, Error, Payload}; // Import the Error type
 use crate::database::establish_connection;
-use crate::database::models::SearchResult;
+use crate::database::models::DocumentSearchResult;
 use crate::database::search::{
     get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index,
 };
@@ -98,7 +98,7 @@ fn run_search(
     limit: i32,
     file_type: Option<String>,
     date_limit: Option<DateLimit>,
-) -> Result<Vec<SearchResult>, Error> {
+) -> Result<Vec<DocumentSearchResult>, Error> {
     println!(
         "run_search: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
         query, page, limit, file_type, date_limit
@@ -114,7 +114,7 @@ fn get_recent_docs(
     page: i32,
     limit: i32,
     file_type: Option<String>,
-) -> Result<Vec<SearchResult>, Error> {
+) -> Result<Vec<DocumentSearchResult>, Error> {
     let conn: SqliteConnection = establish_connection();
     let search_results = get_recently_opened_docs(page, limit, file_type, conn).unwrap();
     Ok(search_results)
@@ -134,19 +134,24 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
     println!("Opening QuickLook for {}", file_path);
 
     #[cfg(target_os = "macos")]
-    let _ = std::process::Command::new("qlmanage")
+    // spawn a new thread to open QuickLook using `std` crate
+    std::thread::spawn(move || {
+      let _ = std::process::Command::new("qlmanage")
         .arg("-p")
         .arg(file_path)
         .output();
+    });
     
     #[cfg(target_os = "windows")]
-    let _ = std::process::Command::new("cmd")
+    std::thread::spawn(move || {
+      let _ = std::process::Command::new("cmd")
         .arg("/C")
         .arg("start")
         .arg("powershell")
         .arg("peek")
         .arg(file_path)
         .output();
+    });
     Ok("Opened QuickLook!".into())
 }
 

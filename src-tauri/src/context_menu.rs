@@ -1,4 +1,4 @@
-use crate::{custom_types::Payload, database::models::SearchResult};
+use crate::{custom_types::Payload, database::models::DocumentSearchResult};
 // Import the Error type
 use tauri::{
   menu::{Menu, MenuEvent, MenuId, MenuItem}, Manager, Window
