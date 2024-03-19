@@ -6,6 +6,7 @@ extern crate dotext;
 extern crate diesel;
 extern crate log;
 extern crate lopdf;
+extern crate regex;
 extern crate serde_json;
 
 mod utils;

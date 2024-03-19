@@ -96,6 +96,7 @@
 				class="d-flex"
 				placeholder="Search Documents"
 				aria-label="Search Documents"
+				spellcheck="false"
 				bind:this={searchInputRef}
 				bind:value={$searchQuery}
 				on:focus={() => {

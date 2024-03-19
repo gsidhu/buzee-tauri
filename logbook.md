@@ -1,5 +1,7 @@
 # Logbook
 
+- Disabled OS spell check in the search bar because it kept making quotation marks weird. Will handle it through suggested search keywords later.
+- Search is a lot more robust now. Negative-only queries are allowed. The placement of <query> <negative_query> <time> doesn't matter.
 - Sync operation works. Updates status on the frontend as well.
 - File content parsing works. Is a bit slow for Excel and PDF files though so keeping that off for now.
 - File search also works. Amaze.

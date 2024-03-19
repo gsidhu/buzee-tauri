@@ -18,9 +18,13 @@ export async function searchDocuments(query:string, page:number, limit:number, t
   console.log(dateLimit);
   
   if (type === "any") type = undefined;
-  const results: DocumentSearchResult[] = query.length === 0 
-    ? await getDocumentsFromDB(page, limit, type)
-    : await invoke("run_search", { query: query, page: page, limit: limit, fileType: type, dateLimit: dateLimit});
+
+  let results: DocumentSearchResult[];
+  if (query.length === 0 && !dateLimit) {
+    results = await getDocumentsFromDB(page, limit, type);
+  } else {
+    results = await invoke("run_search", { query: query, page: page, limit: limit, fileType: type, dateLimit: dateLimit});
+  }
   console.log("search results:", results);
   // const results: DocumentSearchResult[] = [];
   return results;

@@ -87,13 +87,19 @@ function getDefaultDateFormat() {
 export function cleanSearchQuery(value: string): string {
   // remove punctuation from the search query
   value = value.replace(/[[\]{}()*+?.,\\^$|#\s]/g, " ");
+  console.log("value:", value);
+  
   // TODO: put double quotes on punctuation marks to make them work with the MATCH query
   
   // Split the input string into segments by space, but keep quoted strings together
-  const segments = value.match(/"[^"]+"|\S+/g) || [];
+  const segments = value.match(/-?"[^"]+"|\S+/g) || [];
+  console.log("Segments:", segments);
+  
 
   // Process each segment
-  const processedSegments = segments.map(segment => {
+  let processedSegments = segments.map(segment => {
+    console.log("Seg:", segment);
+    
     // If the segment is a quoted string, remove the quotes and don't add '*'
     if (segment.startsWith('"') && segment.endsWith('"')) {
       return segment.substring(1, segment.length - 1);
@@ -115,6 +121,14 @@ export function cleanSearchQuery(value: string): string {
     // Otherwise, return the segment as is
     return segment;
   });
+
+  console.log("Processed Segments:", processedSegments);
+  
+  // move all the `NOT ` segments to the end
+  // find all notSegments using regex. Both `NOT key` and `NOT "key words"` should match
+  let notSegments = processedSegments.filter(segment => segment.startsWith('NOT '));
+  let normalSegments = processedSegments.filter(segment => !segment.startsWith('NOT '));
+  processedSegments = normalSegments.concat(notSegments);
 
   // Join the processed segments back together with spaces
   return processedSegments.join(' ');

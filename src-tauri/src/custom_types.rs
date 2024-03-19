@@ -18,7 +18,7 @@ impl serde::Serialize for Error {
 }
 
 // DateLimit struct
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DateLimit {
   pub start: String,
   pub end: String,

@@ -207,6 +207,7 @@ dependencies = [
  "lopdf",
  "notify",
  "open",
+ "regex",
  "serde",
  "serde_json",
  "simple-logging",
