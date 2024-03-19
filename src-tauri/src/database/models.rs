@@ -3,7 +3,7 @@
 
 use diesel::prelude::*;
 use diesel::Insertable;
-use super::schema::{document, metadata};
+use super::schema::{document, metadata, body};
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -41,6 +41,15 @@ pub struct MetadataItem {
     pub frecency_rank: f32,
     pub frecency_last_accessed: i64,
     pub comment: Option<String>,
+}
+
+// This struct is for INSERTING into the body table
+#[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = body)]
+pub struct BodyItem {
+    pub metadata_id: i32,
+    pub text: String,
+    pub last_parsed: i64,
 }
 
 // This struct is for SELECTING from the metadata table without any JOINs

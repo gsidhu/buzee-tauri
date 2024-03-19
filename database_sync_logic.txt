@@ -1,0 +1,11 @@
+On first creation,
+	Add metadata of all files
+
+On all followup rounds / sync,
+	Parse metadata of all files but only update the ones whose time metadata or size has changed
+	Then run through all the files and remove the ones that no longer exist
+	Then start parsing the content of all files and add it to the body table
+		If file doesn't exist in body table, add the content
+		If file exists, check if the last_synced time is older than the file's last modified time
+			If it is, update the content
+		Then update the last_synced time to the current time

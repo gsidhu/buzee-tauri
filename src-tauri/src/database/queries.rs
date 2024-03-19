@@ -6,8 +6,8 @@
   3. `body`: A table that stores content/body/text from all data sources in chunks. So text for each row in an individual table may be divided into multiple rows in this table.
   4. A FTS virtual table mapped to the `metadata` table.
   5. A FTS virtual table mapped to the `body` table.
-  6. Triggers to keep the metadata table updated when the source tables are updated.
-  7. Triggers to keep the FTS virtual tables updated when the source tables are updated.
+  6. Triggers to keep the metadata and metadata_fts table updated when the source tables are updated.
+  7. Triggers to keep the Body FTS virtual table updated when the body table is updated.
 
   Note: The search will run over the FTS tables.
 
@@ -62,6 +62,7 @@ pub const BODY_TABLE_CREATE_STATEMENT : &str = r#"
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     text TEXT NOT NULL,
+    last_parsed BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (metadata_id) REFERENCES metadata(id)
   );
 "#;
@@ -186,42 +187,6 @@ pub const TRIGGER_DELETE_DOCUMENT_METADATA : &str = r#"
   END;
 "#;
 
-/*
-  METADATA FTS TRIGGERS
-  Triggers to keep the Metadata FTS virtual table updated when the metadata table is updated
-*/
-pub const TRIGGER_INSERT_METADATA_FTS : &str = r#"
-  CREATE TRIGGER IF NOT EXISTS metadata_fts_insert_trigger
-  AFTER INSERT ON metadata
-  BEGIN
-      INSERT INTO metadata_fts (metadata_id, source_table, source_domain, source_id, title, url, created_at, last_modified, frecency_rank, frecency_last_accessed, comment)
-      VALUES (NEW.id, NEW.source_table, NEW.source_domain, NEW.source_id, NEW.title, NEW.url, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment);
-  END;
-"#;
-pub const TRIGGER_UPDATE_METADATA_FTS : &str = r#"
-  CREATE TRIGGER IF NOT EXISTS metadata_fts_update_trigger
-  AFTER UPDATE ON metadata
-  BEGIN
-      UPDATE metadata_fts
-      SET source_domain = NEW.source_domain,
-          source_id = NEW.source_id,
-          title = NEW.title,
-          url = NEW.url,
-          created_at = NEW.created_at,
-          last_modified = NEW.last_modified,
-          frecency_rank = NEW.frecency_rank,
-          frecency_last_accessed = NEW.frecency_last_accessed,
-          comment = NEW.comment
-      WHERE metadata_id = NEW.id;
-  END;
-"#;
-pub const TRIGGER_DELETE_METADATA_FTS : &str = r#"
-  CREATE TRIGGER IF NOT EXISTS metadata_fts_delete_trigger
-  AFTER DELETE ON metadata
-  BEGIN
-      DELETE FROM metadata_fts WHERE metadata_id = old.id;
-  END;
-"#;
 
 /*
   BODY FTS TRIGGERS

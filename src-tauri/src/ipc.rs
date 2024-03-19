@@ -7,7 +7,8 @@ use crate::database::search::{
     get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index,
 };
 use crate::housekeeping;
-use crate::indexing::{all_allowed_filetypes, walk_directory};
+use crate::indexing::{all_allowed_filetypes, walk_directory, parse_content_from_files};
+use crate::db_sync::run_sync_operation;
 use crate::window::hide_or_show_window;
 use diesel::SqliteConnection;
 use tauri::Manager;
@@ -65,7 +66,7 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
     Ok("Opened the folder!".into())
 }
 
-// Run the file watcher script
+// Run file indexing ONLY
 #[tauri::command]
 async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
     println!("File watcher started");
@@ -75,8 +76,9 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
     let (sender, mut receiver) = mpsc::channel::<usize>(1);
 
     tokio::spawn(async move {
-        let files_added = walk_directory(window, &home_directory);
+        let files_added = walk_directory(&window, &home_directory);
         // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
+        // let files_added = parse_content_from_files();
         sender
             .send(files_added)
             .await
@@ -86,6 +88,34 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
     // Receive the result from the channel asynchronously
     if let Some(files_added) = receiver.recv().await {
       println!("Files added: {}", files_added);
+    }
+    Ok("File indexing complete".to_string())
+}
+
+// Run file sync
+#[tauri::command]
+async fn run_file_sync(window: tauri::Window) -> Result<String, Error> {
+    println!("File watcher started");
+    let home_directory = housekeeping::get_home_directory().unwrap();
+    println!("Home directory: {}", home_directory);
+
+    let (sender, mut receiver) = mpsc::channel::<(usize, usize)>(1);
+
+    tokio::spawn(async move {
+        // let files_added = walk_directory(window, &home_directory);
+        // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
+        // let files_added = parse_content_from_files();
+        let (files_added, files_parsed) = run_sync_operation(window);
+        sender
+            .send((files_added, files_parsed))
+            .await
+            .expect("Failed to send data through channel");
+    });
+
+    // Receive the result from the channel asynchronously
+    if let Some(files_count) = receiver.recv().await {
+      println!("Files added: {}", files_count.0);
+      println!("Files parsed: {}", files_count.1);
     }
     Ok("File indexing complete".to_string())
 }
@@ -179,6 +209,7 @@ pub fn initialize() {
             open_file_or_folder,
             open_folder_containing_file,
             run_file_indexing,
+            run_file_sync,
             run_search,
             get_recent_docs,
             get_db_stats,

@@ -71,8 +71,7 @@
 
 	async function toggleBackgroundTextProcessing() {
 		sendEvent('click:toggleBackgroundTextProcessing', { ...defaultData });
-		// syncStatus = await window.electronAPI?.toggleBackgroundTextProcessing();
-		invoke("run_file_indexing").then((res) => {
+		invoke("run_file_sync").then((res) => {
 			console.log(res);
 		});
 	}
@@ -93,12 +92,15 @@
 	}
 
 	// FOR ONBOARDING PROCESS
-	let unlisten:UnlistenFn;
+	let unlisten_files_added:UnlistenFn;
 	let filesAddedSpan: HTMLElement | null;
 
 	$: if ($dbCreationInProgress) {
 		filesAddedSpan = document.getElementById('files-added');
 	}
+
+	// FOR SYNC STATUS
+	let unlisten_sync_status:UnlistenFn;
 
 	onMount(async () => {
 		invoke("get_os").then((res) => {
@@ -109,33 +111,21 @@
 				isMac = false;
 			}
 		});
-		unlisten = await listen<Payload>('files-added', (event: any) => {
+		unlisten_files_added = await listen<Payload>('files-added', (event: any) => {
 			update_files_added_count(event.payload);
 		});
 
-		// window.electronAPI?.setBackgroundTextProcessRunningStatus(async (status: boolean) => {
-		// 	syncStatus = status;
-		// });
-
-		// Get the sync status on each mount
-		// syncStatus = await window.dbAPI?.getBackgroundTextProcessRunningStatus();
-		// Set the app mode
+		unlisten_sync_status = await listen<Payload>('sync-status', (event: any) => {
+			syncStatus = event.payload.data === 'true';
+		});
 		
 		// on renderer launch
 		appMode = "window";
-
-		// Refresh documentsShown when a doc is deleted
-		// window.electronAPI?.docDeleted(async (filepath: string) => {
-		// 	console.log('docDeleted', filepath);
-		// 	$documentsShown.splice(
-		// 		$documentsShown.findIndex((doc) => doc.path === filepath),
-		// 		1
-		// 	);
-		// });
 	});
 
 	onDestroy(() => {
-		unlisten();
+		unlisten_files_added();
+		unlisten_sync_status();
 	});
 </script>
 

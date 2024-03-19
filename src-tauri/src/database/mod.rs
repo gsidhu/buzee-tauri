@@ -9,7 +9,6 @@ use queries::{
   METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT,
   BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT,
   TRIGGER_INSERT_DOCUMENT_METADATA, TRIGGER_UPDATE_DOCUMENT_METADATA, TRIGGER_DELETE_DOCUMENT_METADATA,
-  TRIGGER_INSERT_METADATA_FTS, TRIGGER_UPDATE_METADATA_FTS, TRIGGER_DELETE_METADATA_FTS,
   TRIGGER_INSERT_BODY_FTS, TRIGGER_UPDATE_BODY_FTS, TRIGGER_DELETE_BODY_FTS
 };
 
@@ -48,9 +47,6 @@ pub fn create_tables_if_not_exists(mut con: diesel::SqliteConnection) -> Result<
   diesel::sql_query(TRIGGER_INSERT_DOCUMENT_METADATA.to_string()).execute(&mut con)?;
   diesel::sql_query(TRIGGER_UPDATE_DOCUMENT_METADATA.to_string()).execute(&mut con)?;
   diesel::sql_query(TRIGGER_DELETE_DOCUMENT_METADATA.to_string()).execute(&mut con)?;
-  // diesel::sql_query(TRIGGER_INSERT_METADATA_FTS.to_string()).execute(&mut con)?;
-  // diesel::sql_query(TRIGGER_UPDATE_METADATA_FTS.to_string()).execute(&mut con)?;
-  // diesel::sql_query(TRIGGER_DELETE_METADATA_FTS.to_string()).execute(&mut con)?;
   diesel::sql_query(TRIGGER_INSERT_BODY_FTS.to_string()).execute(&mut con)?;
   diesel::sql_query(TRIGGER_UPDATE_BODY_FTS.to_string()).execute(&mut con)?;
   diesel::sql_query(TRIGGER_DELETE_BODY_FTS.to_string()).execute(&mut con)?;

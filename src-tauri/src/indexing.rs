@@ -1,10 +1,10 @@
 // use crate::database::crud::add_files_to_database;
 use crate::database::establish_connection;
-use crate::database::schema::document;
+use crate::database::schema::{document, metadata, body};
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::utils::{self, get_metadata};
-use crate::{database::models::DocumentItem, text_extraction::Extractor};
+use crate::{database::models::DocumentItem, database::models::BodyItem, text_extraction::Extractor};
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
@@ -78,7 +78,7 @@ fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), 
     })
 }
 
-pub fn walk_directory(window: tauri::Window, path: &str) -> usize {
+pub fn walk_directory(window: &tauri::Window, path: &str) -> usize {
     info!("Logger initialized!");
     let mut connection = establish_connection();
     let mut files_array: Vec<DocumentItem> = vec![];
@@ -151,13 +151,6 @@ pub fn walk_directory(window: tauri::Window, path: &str) -> usize {
         if extension.is_none() || is_folder {
             continue;
         }
-        // If ALLOWED_FILETYPES does not contain `extension`, continue
-        // let mut file_content: Option<String> = None;
-        // if extension.unwrap() == "txt" || extension.unwrap() == "md" || extension.unwrap() == "docx" || extension.unwrap() == "pptx" {
-        //   if !filename.contains("~$") || !filename.contains(".tmp") || !filename.contains(".temp")  {
-        //     file_content = Some(extract_text_from_file(path.to_str().unwrap().to_string()));
-        //   }
-        // }
 
         let file_item = DocumentItem {
             source_domain: "local".to_string(),
@@ -210,36 +203,6 @@ pub fn walk_directory(window: tauri::Window, path: &str) -> usize {
     files_added
 }
 
-// pub fn parse_content_from_file(path: &str) -> usize {
-//   // get file paths, extensions, file_content, last_modified, last_opened from all rows in the database
-//   let files_data = document::table
-//     .select((document::path, document::file_type, document::file_content, document::last_modified, document::last_opened))
-//     .load::<(String, String, Option<String>, i64, i64)>(connection)
-//     .unwrap();
-//   let extractor: Extractor = Extractor::new();
-//   for (path, file_type, file_content, last_modified, last_opened) in files_data {
-//     // for each file, if the extension is in DOCUMENT_FILETYPES
-//     // extract the text from path and update file_content
-//     if DOCUMENT_FILETYPES.contains(&file_type.as_str()) {
-//       let extracted_text = extractor.extract_text_from_file(path);
-//       let extracted_text = match extracted_text {
-//         Ok(text) => text,
-//         Err(e) => {
-//           eprintln!("Error extracting text: {}", e);
-//           // Update the Db to not parse this file again.
-//           continue;
-//         }
-//       };
-//       // update the file_content in the database
-//       let _ = diesel::update(document::table.filter(document::path.eq(&path)))
-//         .set(document::file_content.eq(extracted_text))
-//         .execute(connection)
-//         .unwrap();
-//     }
-//   }
-//   // pass the files to handle_existing_files for updating the database
-// }
-
 pub fn add_file_metadata_to_database(
     files_array: &Vec<DocumentItem>,
     connection: &mut SqliteConnection,
@@ -287,14 +250,6 @@ pub fn add_file_metadata_to_database(
         .collect();
 
     // add the new files to the database
-    // using batch insert
-    // if files_to_add.len() > 0 {
-    //   let _ = diesel::insert_into(document::table)
-    //     .values(files_to_add)
-    //     .execute(connection)
-    //     .unwrap();
-    // }
-    // using transaction
     if files_to_add.len() > 0 {
         // println!(">>> Adding {} new files", files_to_add.len());
         connection
@@ -321,4 +276,127 @@ pub fn add_file_metadata_to_database(
                 .unwrap();
         }
     }
+}
+
+pub fn parse_content_from_files() -> usize {
+  // Get all files from document table
+  let mut files_parsed = 0;
+  let mut connection = establish_connection();
+  let files_data = document::table
+    .select((document::id, document::path, document::file_type, document::last_modified))
+    .load::<(i32, String, String, i64)>(&mut connection)
+    .unwrap();
+
+  // Keep only those files whose extension is in DOCUMENT_FILETYPES
+  let file_items_to_parse: Vec<(i32, String, String, i64)> = files_data
+    .into_iter()
+    .filter(|(_, _, file_type, _)| DOCUMENT_FILETYPES.contains(&file_type.as_str()))
+    .collect();
+
+  // Then parse and chunk the content and store it in the body table
+  for file_item in file_items_to_parse {
+    // Get the metadata::id for this document::file
+    let (metadata_id) = metadata::table
+      .select(metadata::id)
+      .filter(metadata::source_id.eq(&file_item.0))
+      .first::<i32>(&mut connection)
+      .unwrap();
+    // Get the MAX(last_parsed) from the body table for this metadata_id
+    let last_parsed = body::table
+      .select(diesel::dsl::max(body::last_parsed))
+      .filter(body::metadata_id.eq(metadata_id))
+      .first::<Option<i64>>(&mut connection)
+      .unwrap();
+    
+    // If last_parsed is None or file_item.last_modified < last_parsed, continue
+    if last_parsed.is_some() && file_item.3 < last_parsed.unwrap() {
+      continue;
+    }
+
+    // Extract text from the file
+    let text = extract_text_from_path(file_item.1.clone(), file_item.2.clone());
+
+    // If there is no text, skip this file
+    if text.is_empty() {
+      continue;
+    }
+    // Chunk the text into 2000 character chunks
+    let chunks = chunk_text(text);
+    let body_items: Vec<BodyItem> = chunks
+      .iter()
+      .map(|chunk| {
+        BodyItem {
+          metadata_id: metadata_id,
+          text: chunk.to_string(),
+          last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        }
+      })
+      .collect();
+    add_body_to_database(&body_items, &mut connection);
+    files_parsed += 1;
+  }
+  files_parsed
+}
+
+pub fn extract_text_from_path(path: String, file_type: String) -> String {
+  let extractor: Extractor = Extractor::new();
+  let extracted_text = extractor.extract_text_from_file(path, file_type);
+  match extracted_text {
+    Ok(text) => text,
+    Err(e) => {
+      eprintln!("Error extracting text: {}", e);
+      String::new()
+    }
+  }
+}
+
+fn chunk_text(text: String) -> Vec<String> {
+  // chunk the text into 2000 character chunks
+  let mut chunks: Vec<String> = vec![];
+  let mut chunk = String::new();
+  for word in text.split_whitespace() {
+    if chunk.len() + word.len() < 2000 {
+      chunk.push_str(word);
+      chunk.push_str(" ");
+    } else {
+      chunks.push(chunk);
+      chunk = String::new();
+    }
+  }
+  chunks.push(chunk);
+  chunks
+}
+
+fn add_body_to_database(body_items: &Vec<BodyItem>, connection: &mut SqliteConnection) {
+  // using transaction
+  if body_items.len() > 0 {
+    // println!("{}", body_items[0].metadata_id.to_string());
+    // println!("{}", body_items[0].text);
+    connection
+      .transaction::<_, diesel::result::Error, _>(|connection| {
+        diesel::insert_into(body::table)
+          .values(body_items)
+          .execute(connection)
+      })
+      .unwrap();
+  }
+}
+
+pub fn remove_nonexistent_files() {
+  let mut connection = establish_connection();
+  let all_files = document::table
+    .select(document::path)
+    .load::<String>(&mut connection)
+    .unwrap();
+  let mut nonexistent_files: Vec<String> = vec![];
+  for file in all_files {
+    if !std::path::Path::new(&file).exists() {
+      nonexistent_files.push(file);
+    }
+  }
+  if nonexistent_files.len() > 0 {
+    let _ = diesel::delete(document::table.filter(document::path.eq_any(nonexistent_files)))
+      .execute(&mut connection)
+      .unwrap();
+  }
 }

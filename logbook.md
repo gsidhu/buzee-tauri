@@ -1,5 +1,7 @@
 # Logbook
 
+- Sync operation works. Updates status on the frontend as well.
+- File content parsing works. Is a bit slow for Excel and PDF files though so keeping that off for now.
 - File search also works. Amaze.
 - Quicklook is opened in a new thread so that it doesn't block the main process.
 - Recent documents load on the front-end perfectly.
@@ -89,3 +91,4 @@
 - Disable default right-click context menu.
 - Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
 - [x] Display counter of number of files logged when indexing during onboarding.
+- Add a Preview sidebar that shows a thumbnail and complete metadata of the selected file.

@@ -39,7 +39,8 @@ table! {
   body (id) {
       id -> Integer,
       metadata_id -> Integer,
-      text -> Text
+      text -> Text,
+      last_parsed -> BigInt,
   }
 }
 
