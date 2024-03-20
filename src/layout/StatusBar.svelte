@@ -99,7 +99,7 @@
 		filesAddedSpan = document.getElementById('files-added');
 	}
 
-	// FOR SYNC STATUS
+	// FOR SYNC STATUS WHEN CLICKED
 	let unlisten_sync_status:UnlistenFn;
 
 	onMount(async () => {
@@ -114,10 +114,14 @@
 		unlisten_files_added = await listen<Payload>('files-added', (event: any) => {
 			update_files_added_count(event.payload);
 		});
-
 		unlisten_sync_status = await listen<Payload>('sync-status', (event: any) => {
 			syncStatus = event.payload.data === 'true';
 		});
+
+		// Ask for sync status on each mount to keep it updated in case of page changes
+		syncStatus = await invoke("get_sync_status") === 'true';
+		console.log("syncStatus", syncStatus);
+		
 		
 		// on renderer launch
 		appMode = "window";

@@ -1,15 +1,11 @@
 use crate::custom_types::{DBStat, DateLimit, QuerySegments};
-use crate::database::models::{
-    DocumentResponseModel, DocumentSearchResult, MetadataItem, MetadataSearchResult,
-};
-// use crate::database::response_models::DocumentResponseModel;
+use crate::database::models::DocumentSearchResult;
 use crate::indexing::all_allowed_filetypes;
 use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 use diesel::SqliteConnection;
-use serde::{Serializer, Serialize};
-use serde_json::{self, value::RawValue};
+use serde_json;
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
   let parsed_json = serde_json::from_str(json_string);
@@ -210,17 +206,17 @@ pub fn get_recently_opened_docs(
 pub fn get_counts_for_all_filetypes(
     mut conn: SqliteConnection,
 ) -> Result<Vec<DBStat>, diesel::result::Error> {
+    // couldn't get COUNT -- GROUP BY to work so doing it manually for each filetype
     use crate::database::schema::document::dsl::*;
-
-    let all_filetypes = all_allowed_filetypes();
+    let all_filetypes = all_allowed_filetypes(true);
     let mut counts: Vec<DBStat> = Vec::new();
     for doctype in all_filetypes {
         let count = document
-            .filter(file_type.eq(doctype.to_string()))
+            .filter(file_type.eq(&doctype.file_type))
             .count()
             .get_result(&mut conn)?;
         counts.push(DBStat {
-            file_type: doctype.to_string(),
+            file_type: doctype.file_type,
             count: count,
         });
     }

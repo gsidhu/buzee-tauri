@@ -18,8 +18,8 @@ mod db_sync;
 mod indexing;
 mod text_extraction;
 mod context_menu;
+mod user_prefs;
 mod window;
-// mod file_watch;
 
 fn main() {
   housekeeping::initialize();

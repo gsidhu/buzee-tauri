@@ -3,18 +3,18 @@
 use crate::custom_types::{DBStat, DateLimit, Error, Payload}; // Import the Error type
 use crate::database::establish_connection;
 use crate::database::models::DocumentSearchResult;
-use crate::database::search::{
-    get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index,
-};
+use crate::database::search::{get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory, parse_content_from_files};
-use crate::db_sync::run_sync_operation;
+use crate::db_sync::{sync_status, run_sync_operation};
+use crate::user_prefs::set_scan_running_status;
 use crate::window::hide_or_show_window;
 use diesel::SqliteConnection;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
 use tokio::sync::mpsc;
+use serde_json;
 // App Menu
 use tauri::menu::Menu;
 // Import context menu commands
@@ -37,10 +37,11 @@ fn get_os() -> Result<String, Error> {
 
 // Get allowed filetypes
 #[tauri::command]
-fn get_allowed_filetypes() -> Result<Vec<String>, Error> {
-    let allowed_filetypes = all_allowed_filetypes();
-    // Convert ALLOWED_FILETYPES to Vec<String>
-    Ok(allowed_filetypes.iter().map(|s| s.to_string()).collect())
+fn get_allowed_filetypes() -> Result<String, Error> {
+    let allowed_filetypes = all_allowed_filetypes(true);
+    // Convert allowed_filetypes to JSON using serde_json
+    let json_response = serde_json::to_string(&allowed_filetypes).unwrap();
+    Ok(json_response)
 }
 
 // Open a file (in default app) or a folder from the path
@@ -100,11 +101,11 @@ async fn run_file_sync(window: tauri::Window) -> Result<String, Error> {
     println!("Home directory: {}", home_directory);
 
     let (sender, mut receiver) = mpsc::channel::<(usize, usize)>(1);
-
     tokio::spawn(async move {
         // let files_added = walk_directory(window, &home_directory);
         // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
         // let files_added = parse_content_from_files();
+        set_scan_running_status(true, true);
         let (files_added, files_parsed) = run_sync_operation(window);
         sender
             .send((files_added, files_parsed))
@@ -117,7 +118,16 @@ async fn run_file_sync(window: tauri::Window) -> Result<String, Error> {
       println!("Files added: {}", files_count.0);
       println!("Files parsed: {}", files_count.1);
     }
+
+    set_scan_running_status(false, true);
     Ok("File indexing complete".to_string())
+}
+
+// Get sync status
+#[tauri::command]
+fn get_sync_status() -> Result<String, Error> {
+    let sync_running = sync_status();
+    Ok(sync_running)
 }
 
 // Run search
@@ -210,6 +220,7 @@ pub fn initialize() {
             open_folder_containing_file,
             run_file_indexing,
             run_file_sync,
+            get_sync_status,
             run_search,
             get_recent_docs,
             get_db_stats,

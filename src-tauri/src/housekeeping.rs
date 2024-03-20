@@ -1,8 +1,8 @@
 // use crate::custom_types::Error; // Import the Error type
 use dirs::document_dir;
-use crate::database::{enable_fts_and_foreign_keys, create_tables_if_not_exists};
+use crate::database::create_tables_if_not_exists;
 use crate::database::establish_connection;
-// use std::path::PathBuf;
+use crate::user_prefs::{set_default_app_data, set_default_user_prefs, set_default_file_types, set_scan_running_status};
 use log::LevelFilter;
 
 pub const APP_DIRECTORY: &str = r#"buzee-tauri"#;
@@ -49,6 +49,15 @@ pub fn initialize() -> () {
   println!("Initializing app directory");
   create_app_directory_if_not_exists().unwrap();
   println!("Initializing database");
-  enable_fts_and_foreign_keys(establish_connection()).unwrap();
   create_tables_if_not_exists(establish_connection()).unwrap();
+
+  // Set default app data
+  set_default_app_data();
+  // Set default user prefs
+  set_default_user_prefs();
+  // Set default file types
+  set_default_file_types();
+
+  // On each launch, set the sync_running flag to false
+  set_scan_running_status(false, false);
 }

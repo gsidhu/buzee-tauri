@@ -3,9 +3,47 @@
 
 use diesel::prelude::*;
 use diesel::Insertable;
-use super::schema::{document, metadata, body};
+use super::schema::{document, metadata, body, user_preferences, app_data, file_types};
 use serde::Deserialize;
 use serde::Serialize;
+
+// This struct is for CRUD on the user_prefs table
+#[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = user_preferences)]
+pub struct UserPrefs {
+    pub first_launch_done: bool,
+    pub onboarding_done: bool,
+    pub launch_at_startup: bool,
+    pub show_in_dock: bool,
+    pub global_shortcut_enabled: bool,
+    pub global_shortcut: String,
+    pub automatic_background_sync: bool,
+    pub detailed_scan: bool,
+    pub disallowed_paths: String,
+}
+
+// This struct is for CRUD on the app_data table
+#[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = app_data)]
+pub struct AppData {
+    pub app_name: String,
+    pub app_version: String,
+    pub app_mode: String,
+    pub app_theme: String,
+    pub app_language: String,
+    pub last_scan_time: i64,
+    pub scan_running: bool
+}
+
+// This struct is for CRUD on the file_types table
+#[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = file_types)]
+pub struct FileTypes {
+    pub file_type: String,
+    pub file_type_category: String,
+    pub file_type_allowed: bool,
+    pub added_by_user: bool,
+}
 
 // This struct is for INSERTING into the document table
 #[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]

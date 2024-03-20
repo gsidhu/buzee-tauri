@@ -1,32 +1,31 @@
 // use crate::database::crud::add_files_to_database;
 use crate::database::establish_connection;
-use crate::database::schema::{document, metadata, body};
+use crate::database::schema::{document, metadata, body, file_types};
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::utils::{self, get_metadata};
-use crate::{database::models::DocumentItem, database::models::BodyItem, text_extraction::Extractor};
+use crate::database::models::{DocumentItem, BodyItem, FileTypes};
+use crate::text_extraction::Extractor;
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
 use log::{error, info, trace, warn};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-const DOCUMENT_FILETYPES: [&str; 11] = [
-    "csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls",
-];
-const IMAGE_FILETYPES: [&str; 4] = ["jpg", "jpeg", "png", "gif"];
-const BOOK_FILETYPES: [&str; 3] = ["epub", "mobi", "azw3"];
-const AUDIO_FILETYPES: [&str; 5] = ["mp3", "wav", "aac", "flac", "ogg"];
-const VIDEO_FILETYPES: [&str; 5] = ["mp4", "mkv", "avi", "mov", "wmv"];
+pub fn all_allowed_filetypes(only_allowed: bool) -> Vec<FileTypes> {
+  let mut connection = establish_connection();
+  let filetypes = file_types::table
+    .select((file_types::file_type, file_types::file_type_category, file_types::file_type_allowed, file_types::added_by_user))
+    .load::<FileTypes>(&mut connection)
+    .unwrap();
 
-pub fn all_allowed_filetypes() -> Vec<String> {
-    let mut allowed_filetypes: Vec<String> = vec![];
-    allowed_filetypes.extend(DOCUMENT_FILETYPES.iter().map(|&s| s.to_string()));
-    allowed_filetypes.extend(IMAGE_FILETYPES.iter().map(|&s| s.to_string()));
-    allowed_filetypes.extend(BOOK_FILETYPES.iter().map(|&s| s.to_string()));
-    allowed_filetypes.extend(AUDIO_FILETYPES.iter().map(|&s| s.to_string()));
-    allowed_filetypes.extend(VIDEO_FILETYPES.iter().map(|&s| s.to_string()));
-    allowed_filetypes
+  if only_allowed {
+    filetypes.into_iter()
+      .filter(|filetype| filetype.file_type_allowed == true)
+      .collect()
+  } else {
+    filetypes
+  }
 }
 
 fn get_all_forbidden_directories() -> Vec<String> {
@@ -84,7 +83,11 @@ pub fn walk_directory(window: &tauri::Window, path: &str) -> usize {
     let mut files_array: Vec<DocumentItem> = vec![];
     let all_forbidden_directories = get_all_forbidden_directories();
     let mut files_added = 0;
-    let allowed_filetypes = all_allowed_filetypes();
+    let allowed_filetypes = all_allowed_filetypes(true);
+    let allowed_extensions: Vec<String> = allowed_filetypes
+        .iter()
+        .map(|filetype| filetype.file_type.to_string())
+        .collect();
 
     let walk_dir = build_walk_dir(&path.to_string(), all_forbidden_directories);
 
@@ -104,7 +107,7 @@ pub fn walk_directory(window: &tauri::Window, path: &str) -> usize {
         let mut extension = path.extension().and_then(|s| s.to_str());
 
         // if extension is not in allowed filetypes, continue
-        if extension.is_none() || !allowed_filetypes.contains(&extension.unwrap().to_string()) {
+        if extension.is_none() || !allowed_extensions.contains(&extension.unwrap().to_string()) {
             // println!("ignoring file");
             continue;
         }
@@ -287,10 +290,17 @@ pub fn parse_content_from_files() -> usize {
     .load::<(i32, String, String, i64)>(&mut connection)
     .unwrap();
 
-  // Keep only those files whose extension is in DOCUMENT_FILETYPES
+  let allowed_filetypes = all_allowed_filetypes(true);
+  let document_filetypes: Vec<String> = allowed_filetypes
+    .iter()
+    .filter(|filetype| filetype.file_type_category == "document")
+    .map(|filetype| filetype.file_type.to_string())
+    .collect();
+
+  // Keep only those files whose extension is in document_filetypes
   let file_items_to_parse: Vec<(i32, String, String, i64)> = files_data
     .into_iter()
-    .filter(|(_, _, file_type, _)| DOCUMENT_FILETYPES.contains(&file_type.as_str()))
+    .filter(|(_, _, file_type, _)| document_filetypes.contains(file_type))
     .collect();
 
   // Then parse and chunk the content and store it in the body table

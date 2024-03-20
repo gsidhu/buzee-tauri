@@ -52,3 +52,41 @@ allow_tables_to_appear_in_same_query!(
   metadata,
   body
 );
+
+table! {
+  user_preferences (id) {
+    id -> Integer,
+    first_launch_done -> Bool,
+    onboarding_done -> Bool,
+    launch_at_startup -> Bool,
+    show_in_dock -> Bool,
+    global_shortcut_enabled -> Bool,
+    global_shortcut -> Text,
+    automatic_background_sync -> Bool,
+    detailed_scan -> Bool,
+    disallowed_paths -> Text,
+  }
+}
+
+table! {
+  app_data (id) {
+    id -> Integer,
+    app_name -> Text,
+    app_version -> Text,
+    app_mode -> Text,
+    app_theme -> Text,
+    app_language -> Text,
+    last_scan_time -> BigInt,
+    scan_running -> Bool,
+  }
+}
+
+table! {
+  file_types (id) {
+    id -> Integer,
+    file_type -> Text,
+    file_type_category -> Text,
+    file_type_allowed -> Bool,
+    added_by_user -> Bool,
+  }
+}

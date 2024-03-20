@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { invoke } from '@tauri-apps/api/core';
-	// TOOD: Get allowedExtensions from the main process
 	import {
 		documentsShown,
 		searchQuery,
@@ -15,13 +14,21 @@
 
 	export let searchBar = true;
 
-	let allowedExtensions: string[] = [];
+	let allowedExtensions: FileTypesDropdown = {
+		categories: [],
+		items: []
+	};
+	
+	function categoriseExtensions(received_filetypes: FileTypes[]) {
+		received_filetypes.forEach((extension) => {
+			if (allowedExtensions.categories.indexOf(extension.file_type_category) === -1) {
+				allowedExtensions.categories.push(extension.file_type_category);
+			}
+		});
+		allowedExtensions.items = received_filetypes;
+	}
 
 	async function showDocsForFiletype() {
-		// TODO: The type argument can either be a '.any' (which becomes undefined)
-		// or a single extension (e.g. '.pdf', which becomes 'pdf')
-		// or a list of extensions (e.g. '.pdf,.docx', which should be double-quoted and comma separated like '"pdf","docx"')
-		// because the SQL IN query expects a list of double-quoted strings
 		$searchInProgress = true;
 		if ($searchQuery === '') {
 			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, $filetypeShown.slice(1));
@@ -45,9 +52,9 @@
 		// Get list of available extensions from main process
 		invoke('get_allowed_filetypes').then((res) => {
 			// @ts-ignore
-			allowedExtensions = res;
+			categoriseExtensions(JSON.parse(res));
+			console.log('allowedExtensions:', allowedExtensions);
 		});
-		console.log('allowedExtensions:', allowedExtensions);
 	});
 </script>
 
@@ -58,9 +65,9 @@
 		bind:value={$filetypeShown}
 		on:change={() => showDocsForFiletype()}
 	>
-		<option value=".any">.any</option>
-		{#each allowedExtensions as extension}
-			<option value=".{extension}">.{extension}</option>
+		<option value="any" selected>any</option>
+		{#each allowedExtensions.categories as category}
+			<option value="{category}">{category}</option>
 		{/each}
 	</select>
 {:else}
@@ -74,9 +81,9 @@
 			bind:value={$filetypeShown}
 			on:change={() => showDocsForFiletype()}
 		>
-			<option value=".any">.any</option>
-			{#each allowedExtensions as extension}
-				<option value=".{extension}">.{extension}</option>
+			<option value="any">any</option>
+			{#each allowedExtensions.categories as category}
+				<option value="{category}">{category}</option>
 			{/each}
 		</select>
 	</div>

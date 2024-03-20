@@ -34,14 +34,29 @@ let storedDocumentsShown: DocumentSearchResult[] = [];
 // let storedDBStats = {};
 // let storedCurrentCollection = 'Everything';
 // let currentUser = null;
-let storedSelectedResult: DocumentSearchResult = {name: '', path: ''};
+let storedSelectedResult: DocumentSearchResult = {
+  id: 0,
+  source_domain: '',
+  created_at: 0,
+  name: '',
+  path: '',
+  size: 0,
+  file_type: '',
+  last_modified: 0,
+  last_opened: 0,
+  last_synced: 0,
+  is_pinned: false,
+  freceny_rank: 0,
+  frecency_last_accessed: 0,
+  comment: null,
+};
 
 // 2. Set the stored value or a sane default.
 export const pinMode = writable(false)
 export const searchQuery = writable(storedSearchQuery || '')
 export const searchOptions = writable(storedSearchOptions || '')
 export const documentsShown = writable(storedDocumentsShown || [])
-export const filetypeShown = writable('.any')
+export const filetypeShown = writable('any')
 export const resultsPageShown = writable(0)
 export const resultsPerPage = writable(50)
 export const promptUser = writable("")

@@ -55,6 +55,18 @@ declare global {
     comment: string | null,
   }
 
+  interface FileTypes {
+    file_type: string,
+    file_type_category: string,
+    file_type_allowed: boolean,
+    added_by_user: boolean,
+  }
+
+  interface FileTypesDropdown {
+    categories: string[],
+    items: FileTypes[]
+  }
+
   // type ElectronStore = import('electron-store');
   // Not sure how to export the types from the ElectronStore schema without rewriting
   // So going with `any`

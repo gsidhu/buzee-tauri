@@ -1,5 +1,8 @@
 # Logbook
 
+- Sync status is updated in the database each time it runs or app loads. Frontend also asks for sync status on each mount.
+- Filetypes, user preferences and app data are now stored in the database. Declared new types/structs for filetypes. Next step: allow user to modify the filetypes and categories.
+- Calling all SQLite PRAGMAS on each `establish_connection` call. Switched to WAL mode instead of journal. Hopefully this does not cause any database lock errors.
 - Clearly segregating query into an object and generating the SQL query accordingly. Heavy robustness.
 - Disabled OS spell check in the search bar because it kept making quotation marks weird. Will handle it through suggested search keywords later.
 - Search is a lot more robust now. Negative-only queries are allowed. The placement of <query> <negative_query> <time> doesn't matter.
@@ -70,8 +73,8 @@
 > Stage I is a powerful desktop search tool. It will help people find documents and files more quickly on their computer. (Think of it as a replacement for Spotlight on Mac or Everything on Windows.)
 
 ### Database
-- Restructure database.
-- Add logging to check why indexing halts at certain files.
+- [x] Restructure database.
+- Add user prefs to database.
 
 ### Backend
 - Allow searching by `created_at`, `last_modified` or `last_opened`.
@@ -85,6 +88,7 @@
 - [x] Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
 - Add a tray icon and menubar window.
 - Figure out how to pass types to tauri commands.
+- Add search suggestions.
 
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.
@@ -95,3 +99,5 @@
 - Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
 - [x] Display counter of number of files logged when indexing during onboarding.
 - Add a Preview sidebar that shows a thumbnail and complete metadata of the selected file.
+- Allow user to add/remove file types and categories.
+- Update Document Stats to reflect categories and # files indexed.

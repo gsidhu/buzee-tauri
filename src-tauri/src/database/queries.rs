@@ -223,6 +223,56 @@ pub const TRIGGER_DELETE_BODY_FTS : &str = r#"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// USER PREFS & APP DATA //////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+// USER_PREFS stores user preferences
+pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
+  CREATE TABLE IF NOT EXISTS "user_preferences" 
+  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    first_launch_done BOOLEAN NOT NULL DEFAULT 0,
+    onboarding_done BOOLEAN NOT NULL DEFAULT 0,
+    launch_at_startup BOOLEAN NOT NULL DEFAULT 0,
+    show_in_dock BOOLEAN NOT NULL DEFAULT 1,
+    global_shortcut_enabled BOOLEAN NOT NULL DEFAULT 1,
+    global_shortcut TEXT NOT NULL DEFAULT "Alt+Space",
+    automatic_background_sync BOOLEAN NOT NULL DEFAULT 1,
+    detailed_scan BOOLEAN NOT NULL DEFAULT 1,
+    disallowed_paths TEXT NOT NULL DEFAULT ""
+  );
+"#;
+
+// APP_DATA stores basic app data and file type data
+pub const APP_DATA_TABLE_CREATE_STATEMENT : &str = r#"
+  CREATE TABLE IF NOT EXISTS "app_data" 
+  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    app_name TEXT NOT NULL DEFAULT "Buzee",
+    app_version TEXT NOT NULL DEFAULT "0.1.0",
+    app_mode TEXT NOT NULL DEFAULT "window",
+    app_theme TEXT NOT NULL DEFAULT "system",
+    app_language TEXT NOT NULL DEFAULT "en",
+    last_scan_time BIGINT NOT NULL DEFAULT 0,
+    scan_running BOOLEAN NOT NULL DEFAULT 0
+  );
+"#;
+
+// FILE_TYPES stores file types and their categories
+pub const FILE_TYPES_TABLE_CREATE_STATEMENT : &str = r#"
+  CREATE TABLE IF NOT EXISTS "file_types" 
+  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    added_by_user BOOLEAN NOT NULL DEFAULT 0,
+    file_type TEXT NOT NULL DEFAULT "",
+    file_type_category TEXT NOT NULL DEFAULT "",
+    file_type_allowed BOOLEAN NOT NULL DEFAULT 1
+  );
+"#;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// OTHER DOMAINS /////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
