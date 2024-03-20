@@ -111,7 +111,8 @@ export function cleanSearchQuery(value: string): {} {
 
     // If the segment has a - in front of it, remove the `-` and add it to the notSegments array
     if (segment.startsWith('-')) {
-      result.notSegments.push(segment.substring(1).trim());
+      // remove any quotes because they get added in the SQL query anyway
+      result.notSegments.push(segment.substring(1).trim().replace(/"/g, ''));
       return;
     }
 
