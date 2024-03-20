@@ -21,14 +21,14 @@
 		$searchInProgress = true;
 		sendEvent('search-triggered', {
 			searchQuery: $searchQuery,
-			filetypeShown: $filetypeShown.slice(1),
+			filetypeShown: $filetypeShown,
 			resultsPageShown: $resultsPageShown
 		});
 		let results = await searchDocuments(
 			$searchQuery,
 			$resultsPageShown,
 			$resultsPerPage,
-			$filetypeShown.slice(1)
+			$filetypeShown
 		);
 		sendEvent('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
 		$documentsShown = results;
@@ -48,7 +48,7 @@
 			$searchQuery,
 			$resultsPageShown,
 			$resultsPerPage,
-			$filetypeShown.slice(1)
+			$filetypeShown
 		);
 		return results;
 	}

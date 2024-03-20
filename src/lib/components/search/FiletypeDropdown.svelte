@@ -31,18 +31,18 @@
 	async function showDocsForFiletype() {
 		$searchInProgress = true;
 		if ($searchQuery === '') {
-			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, $filetypeShown.slice(1));
+			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, $filetypeShown);
 		} else {
 			$documentsShown = await searchDocuments(
 				$searchQuery,
 				$resultsPageShown,
 				$resultsPerPage,
-				$filetypeShown.slice(1)
+				$filetypeShown
 			);
 		}
 		sendEvent('click:showDocsForFileType', {
 			searchQuery: $searchQuery,
-      filetypeShown: $filetypeShown.slice(1),
+      filetypeShown: $filetypeShown,
 			resultsPageShown: $resultsPageShown,
 		});
 		$searchInProgress = false;
