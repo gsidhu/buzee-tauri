@@ -1,4 +1,4 @@
-use crate::custom_types::{DBStat, DateLimit};
+use crate::custom_types::{DBStat, DateLimit, QuerySegments};
 use crate::database::models::{
     DocumentResponseModel, DocumentSearchResult, MetadataItem, MetadataSearchResult,
 };
@@ -8,6 +8,23 @@ use diesel::ExpressionMethods;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 use diesel::SqliteConnection;
+use serde::{Serializer, Serialize};
+use serde_json::{self, value::RawValue};
+
+fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
+  let parsed_json = serde_json::from_str(json_string);
+  // convert to QuerySegments
+  let query_segments: QuerySegments = match parsed_json {
+    Ok(value) => value,
+    Err(_) => QuerySegments {
+      quoted_segments: Vec::new(),
+      normal_segments: Vec::new(),
+      greedy_segments: Vec::new(),
+      not_segments: Vec::new(),
+    },
+  };
+  query_segments
+}
 
 // Return documents from the document_fts Index that match the given search query (name and type)
 // bm25(document_fts, 10) is the ranking function which gives 10x weight to the file name (first column)
@@ -23,6 +40,9 @@ pub fn search_fts_index(
         "search_fts_index: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
         query, page, limit, file_type, date_limit
     );
+
+    let query_segments:QuerySegments = parse_stringified_query_segments(&query);
+    println!("query_segments: {:?}", query_segments);
 
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
@@ -55,12 +75,37 @@ pub fn search_fts_index(
 
     println!("where_file_type: {}", where_file_type);
 
-    // if query starts with NOT, pass it to `handle_special_case` function
-    if query.starts_with("NOT ") {
-        println!("original query: {}", query);
+    // if there is only a NOT query, pass it to `handle_special_case` function
+    if query_segments.normal_segments.is_empty() && query_segments.quoted_segments.is_empty()
+      && query_segments.greedy_segments.is_empty() && !query_segments.not_segments.is_empty() {
         let search_results = handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
         return search_results;
     }
+
+    let mut match_string: String = String::new();
+
+    // If there are quoted segments, join them with double quotes
+    if query_segments.quoted_segments.len() > 0 {
+      match_string = format!("\"{}\"", query_segments.quoted_segments.join("\" \""));
+    }
+    // If there are normal segments, join them with a space
+    if query_segments.normal_segments.len() > 0 {
+      match_string = format!("{} {}", match_string, query_segments.normal_segments.join(" "));
+    }
+    // If there are greedy segments, join them with an asterisk space
+    if query_segments.greedy_segments.len() > 0 {
+      match_string = format!("{} {}*", match_string, query_segments.greedy_segments.join("* "));
+    }
+    // If there are NOT segments, join them with `NOT` and OR
+    if query_segments.not_segments.len() > 0 {
+      // putting double quotes around each segment so that punctuated words are also covered
+      // otherwise would have to run same regex as frontend which is unnecessary
+      match_string = format!("{} NOT (\"{}\")", match_string, query_segments.not_segments.join("\" OR \""));
+    }
+
+    match_string = match_string.trim().to_string();
+
+    println!("match_string: {}", match_string);
 
     // Give 5x weight to the title column (4th) in metadata_fts
     let inner_query = format!(
@@ -80,8 +125,8 @@ pub fn search_fts_index(
         } else {
             "".to_string()
         },
-        match_clause = if !query.is_empty() {
-            format!("WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)", query)
+        match_clause = if !match_string.is_empty() {
+            format!("WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)", match_string)
         } else {
             "".to_string()
         },
@@ -191,28 +236,19 @@ fn handle_special_case(
     where_file_type: String,
     mut conn: SqliteConnection,
 ) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
-    // remove NOT from query and keep just the keyword(s) in a tuple
-    // for e.g. "NOT pdf" becomes ("pdf") and "NOT pdf NOT doc" becomes ("pdf", "doc")
-    let query = query.replace("NOT ", "");
-    let keywords: Vec<&str>;
-    // if query contains quoted strings, use regex to extract them
-    // else split the query by whitespace
-    if query.contains("\"") {
-        let re = regex::Regex::new(r#""([^"]*)""#).unwrap();
-        keywords = re
-            .captures_iter(&query)
-            .map(|c| c.get(1).unwrap().as_str())
-            .collect();
-    } else {
-        keywords = query.split_whitespace().collect();
-    }
-    println!("keywords: {:?}", keywords);
+    let query_segments:QuerySegments = parse_stringified_query_segments(&query);
+    println!("query_segments: {:?}", query_segments);
 
     let where_date_limit_clone = where_date_limit.clone();
     let where_file_type_clone = where_file_type.clone();
 
+    let mut match_string = format!("(\"{}\")", query_segments.not_segments.join("\" OR \""));
+    match_string = match_string.trim().to_string();
+    println!("match_string: {}", match_string);
+
     // Run a modified query to get all documents that MATCH the query
     // Not running OFFSET here because only the top matches are needed
+    // getting 5x limit results to catch OR cases that might be missed in first set
     let inner_query = format!(
         r#"
           SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified
@@ -230,8 +266,8 @@ fn handle_special_case(
         } else {
           "".to_string()
         },
-        match_clause = if !keywords.is_empty() {
-            format!("WHERE metadata_fts MATCH '{}*' ORDER BY bm25(metadata_fts, 1,1,1,5)", keywords.join("* "))
+        match_clause = if !match_string.is_empty() {
+            format!("WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)", match_string)
         } else {
             "".to_string()
         },
@@ -245,7 +281,7 @@ fn handle_special_case(
         } else {
             "".to_string()
         },
-        limit = limit
+        limit = limit*5
     );
 
     println!("inner_query: {}", inner_query);

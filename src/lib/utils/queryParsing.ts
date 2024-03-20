@@ -84,52 +84,58 @@ function getDefaultDateFormat() {
 // Examples – `hello world` will search for `hello* world*`
 // `hello "world"` will search for `hello* "world"`
 // `dear "star wars" fan` will search for `dear* "star wars" fan*`
-export function cleanSearchQuery(value: string): string {
-  // remove punctuation from the search query
-  value = value.replace(/[[\]{}()*+?.,\\^$|#\s]/g, " ");
+export function cleanSearchQuery(value: string): {} {
   console.log("value:", value);
-  
-  // TODO: put double quotes on punctuation marks to make them work with the MATCH query
+
+  // create a result object to store three types of segments: quoted, greedy and not
+  let result: { quotedSegments: string[], normalSegments: string[], greedySegments: string[], notSegments: string[] } = {
+    quotedSegments: [],
+    normalSegments: [],
+    greedySegments: [],
+    notSegments: []
+  };
   
   // Split the input string into segments by space, but keep quoted strings together
   const segments = value.match(/-?"[^"]+"|\S+/g) || [];
   console.log("Segments:", segments);
-  
 
   // Process each segment
-  let processedSegments = segments.map(segment => {
+  segments.map(segment => {
     console.log("Seg:", segment);
     
-    // If the segment is a quoted string, remove the quotes and don't add '*'
+    // If the segment is a quoted string, remove the quotes and add it to the normalSegments array
     if (segment.startsWith('"') && segment.endsWith('"')) {
-      return segment.substring(1, segment.length - 1);
+      result.normalSegments.push(segment.substring(1, segment.length - 1).trim());
+      return;
     }
 
-    // If the segment has a - in front of it, replace the - with NOT and don't add '*'
+    // If the segment has a - in front of it, remove the `-` and add it to the notSegments array
     if (segment.startsWith('-')) {
-      return `NOT ${segment.substring(1)}`;
+      result.notSegments.push(segment.substring(1).trim());
+      return;
     }
 
-    // If the segment is a word, add '*'
+    // If the segment is a word, push it to the greedySegments array
     if (segment.match(/^[a-zA-Z0-9]+$/)) {
-      return `${segment}*`;
+      result.greedySegments.push(segment.trim());
+      return;
     }
 
+    // If the segment matches <WORD/DIGIT><PUNCTUATION><WORD/DIGIT>, push it to the quotedSegments array
+    if (segment.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
+      result.quotedSegments.push(segment.trim());
+      return;
+    }
+
+    // Otherwise, just push it to the greedySegments array
     // BUGFIX: Sometimes doublequote becomes “ or ”
     segment = segment.replace('“', '"').replace('”', '"')
-
-    // Otherwise, return the segment as is
-    return segment;
+    result.greedySegments.push(segment.trim());
+    return;
   });
 
-  console.log("Processed Segments:", processedSegments);
-  
-  // move all the `NOT ` segments to the end
-  // find all notSegments using regex. Both `NOT key` and `NOT "key words"` should match
-  let notSegments = processedSegments.filter(segment => segment.startsWith('NOT '));
-  let normalSegments = processedSegments.filter(segment => !segment.startsWith('NOT '));
-  processedSegments = normalSegments.concat(notSegments);
+  console.log("Processed Segments:", result);
 
   // Join the processed segments back together with spaces
-  return processedSegments.join(' ');
+  return result;
 }

@@ -13,17 +13,17 @@ export async function searchDocuments(query:string, page:number, limit:number, t
   if (dateLimit) {
     query = dateLimit.text;
   }
-  query = cleanSearchQuery(query);
-  console.log(query);
+  let querySegments = cleanSearchQuery(query);
+  console.log(querySegments);
   console.log(dateLimit);
   
   if (type === "any") type = undefined;
 
-  let results: DocumentSearchResult[];
+  let results: DocumentSearchResult[] = [];
   if (query.length === 0 && !dateLimit) {
     results = await getDocumentsFromDB(page, limit, type);
   } else {
-    results = await invoke("run_search", { query: query, page: page, limit: limit, fileType: type, dateLimit: dateLimit});
+    results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type, dateLimit: dateLimit});
   }
   console.log("search results:", results);
   // const results: DocumentSearchResult[] = [];

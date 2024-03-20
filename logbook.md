@@ -1,5 +1,6 @@
 # Logbook
 
+- Clearly segregating query into an object and generating the SQL query accordingly. Heavy robustness.
 - Disabled OS spell check in the search bar because it kept making quotation marks weird. Will handle it through suggested search keywords later.
 - Search is a lot more robust now. Negative-only queries are allowed. The placement of <query> <negative_query> <time> doesn't matter.
 - Sync operation works. Updates status on the frontend as well.
