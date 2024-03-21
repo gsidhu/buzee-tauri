@@ -15,17 +15,14 @@ use diesel::SqliteConnection;
 use lazy_static::lazy_static;
 use log::{error, info, trace, warn};
 use serde_json;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 use tokio_graceful_shutdown::{SubsystemBuilder, SubsystemHandle, Toplevel};
 
-lazy_static::lazy_static! {
-    static ref THREAD_MANAGER: Arc<Mutex<ThreadManager>> = Arc::new(Mutex::new(ThreadManager::new()));
-}
 
 // App Menu
 use tauri::menu::Menu;
@@ -109,44 +106,34 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
     Ok("File indexing complete".to_string())
 }
 
+lazy_static::lazy_static! {
+    static ref THREAD_MANAGER: Arc<Mutex<ThreadManager>> = Arc::new(Mutex::new(ThreadManager::new()));
+}
+
 // Run file sync
 #[tauri::command]
 async fn run_file_sync(window: tauri::Window) -> Result<String, Error> {
     println!("File sync started");
 
     // Acquire the lock on the thread manager
-    let mut thread_manager = THREAD_MANAGER.lock().await;
+    let mut thread_manager = THREAD_MANAGER.lock().unwrap();
 
     // Check if the task is already running
-    if let Some(handle) = thread_manager.handle.take() {
-      println!("File sync already running; Stopping now");
-      // If it's running, stop the task
-      handle.abort();
-      // Await the completion of the previous task
-      if let Err(_) = handle.await {
-          println!("File sync task aborted");
-      }
+    if let Some(handle) = &thread_manager.handle {
+        println!("File sync already running; Stopping now");
+        println!("{:?}", handle);
+        // If it's running, stop the task
+        handle.abort();
     } else {
       // Spawn the new task
-      let (sender, mut receiver) = mpsc::channel::<(usize, usize)>(1);
       let handle: JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>> =
           tokio::spawn(async move {
-              let (files_added, files_parsed) = run_sync_operation(window);
-              sender
-                  .send((files_added, files_parsed))
-                  .await
-                  .expect("Failed to send data through channel");
+              run_sync_operation(window);
               Ok(())
           });
 
       // Store the handle in the thread manager
       thread_manager.handle = Some(handle);
-    
-      // Receive the result from the channel asynchronously
-      if let Some((files_added, files_indexed)) = receiver.recv().await {
-        println!("Files added: {}", files_added);
-        println!("Files indexed: {}", files_indexed);
-      }
     }
     // Release the lock
     drop(thread_manager);
