@@ -23,12 +23,13 @@ diesel = { version = "2.1.4", features = ["sqlite", "chrono", "time"] }
 chrono = "0.4.26"
 notify = "4.0.17"
 jwalk = "0.8.1"
-tokio = { version = "1.36.0", features = ["full"] }
 docx = "1.1.2"
 dotext = "0.1.1"
+lopdf = { version = "0.32.0", features = ["pom", "pom_parser"] }
 log = "0.4.21"
 simple-logging = "2.0.2"
 regex = "1.10.3"
-[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+lazy_static = "1.4.0"
 tauri-plugin-global-shortcut = "2.0.0-beta.2"
-lopdf = { version = "0.32.0", features = ["pom", "pom_parser"] }
+tokio = { version = "1.36.0", features = ["full"] }
+tokio-graceful-shutdown = "0.14.3"

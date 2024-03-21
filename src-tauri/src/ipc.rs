@@ -1,20 +1,32 @@
 // Inter-Process Communication between Rust and SvelteKit
 
-use crate::custom_types::{DBStat, DateLimit, Error, Payload}; // Import the Error type
+use crate::custom_types::{DBStat, DateLimit, Error, Payload, ThreadManager};
 use crate::database::establish_connection;
 use crate::database::models::DocumentSearchResult;
-use crate::database::search::{get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index};
+use crate::database::search::{
+    get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index,
+};
+use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
-use crate::indexing::{all_allowed_filetypes, walk_directory, parse_content_from_files};
-use crate::db_sync::{sync_status, run_sync_operation};
+use crate::indexing::{all_allowed_filetypes, walk_directory};
 use crate::user_prefs::set_scan_running_status;
 use crate::window::hide_or_show_window;
 use diesel::SqliteConnection;
+use lazy_static::lazy_static;
+use log::{error, info, trace, warn};
+use serde_json;
+use std::sync::Arc;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
-use tokio::sync::mpsc;
-use serde_json;
+use tokio::sync::{mpsc, Mutex};
+use tokio::task::JoinHandle;
+use tokio_graceful_shutdown::{SubsystemBuilder, SubsystemHandle, Toplevel};
+
+lazy_static::lazy_static! {
+    static ref THREAD_MANAGER: Arc<Mutex<ThreadManager>> = Arc::new(Mutex::new(ThreadManager::new()));
+}
+
 // App Menu
 use tauri::menu::Menu;
 // Import context menu commands
@@ -23,16 +35,20 @@ use crate::context_menu::{
     contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,
 };
 
-
-pub fn send_message_to_frontend(window: &tauri::Window, event: String, message: String, data: String) {
-  window.emit(&event, Payload { message, data }).unwrap();
-}  
+pub fn send_message_to_frontend(
+    window: &tauri::Window,
+    event: String,
+    message: String,
+    data: String,
+) {
+    window.emit(&event, Payload { message, data }).unwrap();
+}
 
 // Get OS boolean
 #[tauri::command]
 fn get_os() -> Result<String, Error> {
-  let os = std::env::consts::OS;
-  Ok(os.to_string())
+    let os = std::env::consts::OS;
+    Ok(os.to_string())
 }
 
 // Get allowed filetypes
@@ -88,7 +104,7 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
 
     // Receive the result from the channel asynchronously
     if let Some(files_added) = receiver.recv().await {
-      println!("Files added: {}", files_added);
+        println!("Files added: {}", files_added);
     }
     Ok("File indexing complete".to_string())
 }
@@ -96,28 +112,44 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
 // Run file sync
 #[tauri::command]
 async fn run_file_sync(window: tauri::Window) -> Result<String, Error> {
-    println!("File watcher started");
-    let home_directory = housekeeping::get_home_directory().unwrap();
-    println!("Home directory: {}", home_directory);
+    println!("File sync started");
 
-    let (sender, mut receiver) = mpsc::channel::<(usize, usize)>(1);
-    tokio::spawn(async move {
-        // let files_added = walk_directory(window, &home_directory);
-        // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
-        // let files_added = parse_content_from_files();
-        set_scan_running_status(true, true);
-        let (files_added, files_parsed) = run_sync_operation(window);
-        sender
-            .send((files_added, files_parsed))
-            .await
-            .expect("Failed to send data through channel");
-    });
+    // Acquire the lock on the thread manager
+    let mut thread_manager = THREAD_MANAGER.lock().await;
 
-    // Receive the result from the channel asynchronously
-    if let Some(files_count) = receiver.recv().await {
-      println!("Files added: {}", files_count.0);
-      println!("Files parsed: {}", files_count.1);
+    // Check if the task is already running
+    if let Some(handle) = thread_manager.handle.take() {
+      println!("File sync already running; Stopping now");
+      // If it's running, stop the task
+      handle.abort();
+      // Await the completion of the previous task
+      if let Err(_) = handle.await {
+          println!("File sync task aborted");
+      }
+    } else {
+      // Spawn the new task
+      let (sender, mut receiver) = mpsc::channel::<(usize, usize)>(1);
+      let handle: JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>> =
+          tokio::spawn(async move {
+              let (files_added, files_parsed) = run_sync_operation(window);
+              sender
+                  .send((files_added, files_parsed))
+                  .await
+                  .expect("Failed to send data through channel");
+              Ok(())
+          });
+
+      // Store the handle in the thread manager
+      thread_manager.handle = Some(handle);
+    
+      // Receive the result from the channel asynchronously
+      if let Some((files_added, files_indexed)) = receiver.recv().await {
+        println!("Files added: {}", files_added);
+        println!("Files indexed: {}", files_indexed);
+      }
     }
+    // Release the lock
+    drop(thread_manager);
 
     set_scan_running_status(false, true);
     Ok("File indexing complete".to_string())
@@ -176,21 +208,21 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
     #[cfg(target_os = "macos")]
     // spawn a new thread to open QuickLook using `std` crate
     std::thread::spawn(move || {
-      let _ = std::process::Command::new("qlmanage")
-        .arg("-p")
-        .arg(file_path)
-        .output();
+        let _ = std::process::Command::new("qlmanage")
+            .arg("-p")
+            .arg(file_path)
+            .output();
     });
-    
+
     #[cfg(target_os = "windows")]
     std::thread::spawn(move || {
-      let _ = std::process::Command::new("cmd")
-        .arg("/C")
-        .arg("start")
-        .arg("powershell")
-        .arg("peek")
-        .arg(file_path)
-        .output();
+        let _ = std::process::Command::new("cmd")
+            .arg("/C")
+            .arg("start")
+            .arg("powershell")
+            .arg("peek")
+            .arg(file_path)
+            .output();
     });
     Ok("Opened QuickLook!".into())
 }

@@ -1,5 +1,7 @@
 # Logbook
 
+### Figure out how to stop the ThreadManager `handle` when clicked.
+
 - Sync status is updated in the database each time it runs or app loads. Frontend also asks for sync status on each mount.
 - Filetypes, user preferences and app data are now stored in the database. Declared new types/structs for filetypes. Next step: allow user to modify the filetypes and categories.
 - Calling all SQLite PRAGMAS on each `establish_connection` call. Switched to WAL mode instead of journal. Hopefully this does not cause any database lock errors.
@@ -89,6 +91,7 @@
 - Add a tray icon and menubar window.
 - Figure out how to pass types to tauri commands.
 - Add search suggestions.
+- Let front end know when app is not in focus so that it can change CSS.
 
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.

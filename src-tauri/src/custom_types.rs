@@ -55,3 +55,24 @@ pub struct DBStat {
   pub file_type: String,
   pub count: i64
 }
+
+// Thread Manager for Tokio sync threads
+use tokio::task::JoinHandle;
+
+pub struct ThreadManager {
+    pub handle: Option<JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>>>,
+}
+
+impl ThreadManager {
+    pub fn new() -> Self {
+        ThreadManager { handle: None }
+    }
+
+    pub fn stop_task(&mut self) {
+        if let Some(handle) = self.handle.take() {
+          println!("Stopping task");
+          // Stop the task
+          let _ = handle.abort();
+        }
+    }
+}
