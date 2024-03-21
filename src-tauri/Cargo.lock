@@ -222,6 +222,7 @@ dependencies = [
  "docx",
  "dotenvy",
  "dotext",
+ "epub",
  "jwalk",
  "lazy_static",
  "log",
@@ -972,6 +973,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7268b386296a025e474d5140678f75d6de9493ae55a5d709eeb9dd08149945e1"
 dependencies = [
  "cfg-if 1.0.0",
+]
+
+[[package]]
+name = "epub"
+version = "2.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7538474d3e8793ff36a1fa28e7de7b0aa4bf7498d04f0cb43ad58b6722c0c490"
+dependencies = [
+ "percent-encoding",
+ "regex",
+ "thiserror",
+ "xml-rs",
+ "zip 0.6.6",
 ]
 
 [[package]]
@@ -5185,6 +5199,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e63e71c4b8bd9ffec2c963173a4dc4cbde9ee96961d4fcb4429db9929b606c34"
 
 [[package]]
+name = "xml-rs"
+version = "0.8.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fcb9cbac069e033553e8bb871be2fbdffcab578eb25bd0f7c508cedc6dcd75a"
+
+[[package]]
 name = "xmlparser"
 version = "0.13.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5214,4 +5234,16 @@ dependencies = [
  "flate2",
  "thiserror",
  "time 0.1.45",
+]
+
+[[package]]
+name = "zip"
+version = "0.6.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "760394e246e4c28189f19d488c058bf16f564016aefac5d32bb1f3b51d5e9261"
+dependencies = [
+ "byteorder",
+ "crc32fast",
+ "crossbeam-utils",
+ "flate2",
 ]

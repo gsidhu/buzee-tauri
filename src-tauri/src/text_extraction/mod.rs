@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 use std::error::Error;
 
-pub mod pdf;
+pub mod csv;
 pub mod docx;
+pub mod epub;
+pub mod pdf;
 pub mod pptx;
-pub mod xlsx;
 pub mod txt;
+pub mod xlsx;
 
 pub struct Extractor {
     map: HashMap<String, fn(&String) -> Result<String, Box<dyn Error>>>,
@@ -14,7 +16,9 @@ pub struct Extractor {
 impl Extractor {
     pub fn new() -> Self {
         let mut map: HashMap<String, fn(&String) -> Result<String, Box<dyn Error>>> = HashMap::new();
+        // map.insert("csv".to_string(), csv::extract);
         map.insert("docx".to_string(), docx::extract);
+        map.insert("epub".to_string(), epub::extract);
         map.insert("md".to_string(), txt::extract);
         // map.insert("pdf".to_string(), pdf::extract);
         map.insert("pptx".to_string(), pptx::extract);
@@ -28,7 +32,7 @@ impl Extractor {
         if let Some(extract) = self.map.get(&file_type) {
             extract(&file_path)
         } else {
-            Err("Unsupported file type".into())
+            Err("File type not supported".into())
         }
     }
 }

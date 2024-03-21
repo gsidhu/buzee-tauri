@@ -291,23 +291,26 @@ pub fn parse_content_from_files() -> usize {
     .load::<(i32, String, String, i64)>(&mut connection)
     .unwrap();
 
-  let allowed_filetypes = all_allowed_filetypes(true);
-  let document_filetypes: Vec<String> = allowed_filetypes
-    .iter()
-    .filter(|filetype| filetype.file_type_category == "document")
-    .map(|filetype| filetype.file_type.to_string())
-    .collect();
+  // let allowed_filetypes = all_allowed_filetypes(true);
+  // let document_filetypes: Vec<String> = allowed_filetypes
+  //   .iter()
+  //   .filter(|filetype| filetype.file_type_category == "document")
+  //   .map(|filetype| filetype.file_type.to_string())
+  //   .collect();
+
+  let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
 
   // Keep only those files whose extension is in document_filetypes
   let file_items_to_parse: Vec<(i32, String, String, i64)> = files_data
     .into_iter()
-    .filter(|(_, _, file_type, _)| document_filetypes.contains(file_type))
+    .filter(|(_, _, file_type, _)| document_filetypes.contains(&file_type.as_str()))
     .collect();
 
+    let sync_running = sync_status();
   // Then parse and chunk the content and store it in the body table
   for file_item in file_items_to_parse {
     // Get the metadata::id for this document::file
-    let (metadata_id) = metadata::table
+    let metadata_id = metadata::table
       .select(metadata::id)
       .filter(metadata::source_id.eq(&file_item.0))
       .first::<i32>(&mut connection)
@@ -344,8 +347,6 @@ pub fn parse_content_from_files() -> usize {
       files_parsed += 1;
     }
 
-    let sync_running = sync_status();
-    println!("Sync running: {}", sync_running);
     if sync_running == "false" {
       break;
     }
