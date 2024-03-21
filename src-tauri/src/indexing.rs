@@ -1,6 +1,7 @@
 // use crate::database::crud::add_files_to_database;
 use crate::database::establish_connection;
 use crate::database::schema::{document, metadata, body, file_types};
+use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::utils::{self, get_metadata};
@@ -311,6 +312,7 @@ pub fn parse_content_from_files() -> usize {
       .filter(metadata::source_id.eq(&file_item.0))
       .first::<i32>(&mut connection)
       .unwrap();
+
     // Get the MAX(last_parsed) from the body table for this metadata_id
     let last_parsed = body::table
       .select(diesel::dsl::max(body::last_parsed))
@@ -319,31 +321,34 @@ pub fn parse_content_from_files() -> usize {
       .unwrap();
     
     // If last_parsed is None or file_item.last_modified < last_parsed, continue
-    if last_parsed.is_some() && file_item.3 < last_parsed.unwrap() {
-      continue;
+    if last_parsed.is_none() || file_item.3 > last_parsed.unwrap() {
+      // Extract text from the file
+      let text = extract_text_from_path(file_item.1.clone(), file_item.2.clone());
+
+      // If there is no text, skip this file
+      if text.is_empty() {
+        continue;
+      }
+      // Chunk the text into 2000 character chunks
+      let chunks = chunk_text(text);
+      let body_items: Vec<BodyItem> = chunks
+        .iter()
+        .map(|chunk| {
+          BodyItem {
+            metadata_id: metadata_id, text: chunk.to_string(),
+            last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+          }
+        }).collect();
+
+      add_body_to_database(&body_items, &mut connection);
+      files_parsed += 1;
     }
 
-    // Extract text from the file
-    let text = extract_text_from_path(file_item.1.clone(), file_item.2.clone());
-
-    // If there is no text, skip this file
-    if text.is_empty() {
-      continue;
+    let sync_running = sync_status();
+    println!("Sync running: {}", sync_running);
+    if sync_running == "false" {
+      break;
     }
-    // Chunk the text into 2000 character chunks
-    let chunks = chunk_text(text);
-    let body_items: Vec<BodyItem> = chunks
-      .iter()
-      .map(|chunk| {
-        BodyItem {
-          metadata_id: metadata_id,
-          text: chunk.to_string(),
-          last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-        }
-      })
-      .collect();
-    add_body_to_database(&body_items, &mut connection);
-    files_parsed += 1;
   }
   files_parsed
 }

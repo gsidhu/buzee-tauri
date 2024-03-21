@@ -12,17 +12,14 @@ use crate::indexing::{all_allowed_filetypes, walk_directory};
 use crate::user_prefs::set_scan_running_status;
 use crate::window::hide_or_show_window;
 use diesel::SqliteConnection;
-use lazy_static::lazy_static;
 use log::{error, info, trace, warn};
 use serde_json;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 use tauri_plugin_shell; // Import the tauri_plugin_shell crate
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, Mutex};
 use tokio::task::JoinHandle;
-use tokio_graceful_shutdown::{SubsystemBuilder, SubsystemHandle, Toplevel};
-
 
 // App Menu
 use tauri::menu::Menu;
@@ -107,39 +104,42 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
 }
 
 lazy_static::lazy_static! {
-    static ref THREAD_MANAGER: Arc<Mutex<ThreadManager>> = Arc::new(Mutex::new(ThreadManager::new()));
+  static ref THREAD_MANAGER: Arc<Mutex<ThreadManager>> = Arc::new(Mutex::new(ThreadManager::new()));
 }
 
 // Run file sync
 #[tauri::command]
 async fn run_file_sync(window: tauri::Window) -> Result<String, Error> {
-    println!("File sync started");
+  println!("File sync started");
 
-    // Acquire the lock on the thread manager
-    let mut thread_manager = THREAD_MANAGER.lock().unwrap();
+  // Acquire the lock on the thread manager
+  let mut thread_manager = THREAD_MANAGER.lock().await;
+  println!("Thread manager: {:?}", thread_manager);
 
-    // Check if the task is already running
-    if let Some(handle) = &thread_manager.handle {
-        println!("File sync already running; Stopping now");
-        println!("{:?}", handle);
-        // If it's running, stop the task
-        handle.abort();
-    } else {
-      // Spawn the new task
-      let handle: JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>> =
-          tokio::spawn(async move {
-              run_sync_operation(window);
-              Ok(())
-          });
-
-      // Store the handle in the thread manager
-      thread_manager.handle = Some(handle);
-    }
-    // Release the lock
-    drop(thread_manager);
-
+  // Check if the task is already running
+  if let Some(handle) = &thread_manager.handle {
+    println!("File sync already running; Stopping now");
+    // Set sync status to false
+    thread_manager.handle = None;
     set_scan_running_status(false, true);
-    Ok("File indexing complete".to_string())
+    println!("File sync stopped");
+  } else {
+    // Set sync status to true
+    set_scan_running_status(true, true);
+    // Spawn the new task
+    let handle: JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>> =
+      tokio::spawn(async move {
+        run_sync_operation(window);
+        set_scan_running_status(false, true);
+        Ok(())
+      });
+
+    // Store the handle in the thread manager
+    thread_manager.handle = Some(handle);
+    drop(thread_manager);
+  }
+
+  Ok("File indexing complete".to_string())
 }
 
 // Get sync status

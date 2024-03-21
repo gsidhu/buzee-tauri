@@ -1,7 +1,9 @@
 # Logbook
 
-### Figure out how to stop the ThreadManager `handle` when clicked.
-
+- ThreadManager stores the `handle` when sync operation starts. The `app_data` table in the DB sets the sync_running flag to true. The parse_file function checks this flag at the end of the loop. If it is true, it waits for 5 seconds and then checks again. If it is false, it continues. The sync operation sets the flag to false when user clicks a second time or when the operation is completed. Not the most glorious way but this is what worked.
+  - Can't use a global variable using Arc and Mutex because the tauri command and the file parse function get separate handles on the thread manager; so updating the kill_flag in one doesn't affect the other.
+  - Have to pass a receiever to the file parse function but that just doesn't seem to work.
+  - For now, updating the DB flag it is, until I find a better working solution.
 - Sync status is updated in the database each time it runs or app loads. Frontend also asks for sync status on each mount.
 - Filetypes, user preferences and app data are now stored in the database. Declared new types/structs for filetypes. Next step: allow user to modify the filetypes and categories.
 - Calling all SQLite PRAGMAS on each `establish_connection` call. Switched to WAL mode instead of journal. Hopefully this does not cause any database lock errors.

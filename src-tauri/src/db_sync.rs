@@ -1,7 +1,6 @@
-use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{QueryDsl, RunQueryDsl};
 use crate::database::establish_connection;
-use crate::database::models::{AppData, UserPrefs, FileTypes};
-use crate::database::schema::{app_data, user_preferences, file_types};
+use crate::database::schema::app_data;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::indexing::{walk_directory, parse_content_from_files, remove_nonexistent_files};
