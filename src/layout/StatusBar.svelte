@@ -72,6 +72,17 @@
 	async function toggleBackgroundTextProcessing() {
 		sendEvent('click:toggleBackgroundTextProcessing', { ...defaultData });
 		invoke("run_file_sync");
+		// disable `bg-sync-btn` for 30 seconds
+		// this allows any pending processes to complete when stopping the sync
+		const btn = document.getElementById('bg-sync-btn') as HTMLButtonElement | null;
+		if (btn) {
+			if (btn) {
+				btn.disabled = true;
+			}
+			setTimeout(() => {
+				btn.disabled = false;
+			}, 30000);
+		}
 	}
 
 	function goToSearch() {

@@ -55,21 +55,3 @@ pub struct DBStat {
   pub file_type: String,
   pub count: i64
 }
-
-// Thread Manager for Tokio sync threads
-use tokio::task::JoinHandle;
-
-#[derive(Debug)]
-pub struct ThreadManager {
-  pub handle: Option<JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>>>,
-  pub kill_thread: bool
-}
-
-impl ThreadManager {
-  pub fn new() -> Self {
-    ThreadManager { 
-      handle: None,
-      kill_thread: false 
-    }
-  }
-}

@@ -1,6 +1,7 @@
 # Logbook
 
 - Optimised file content parsing. Runs _a lot_ faster now.
+- Removed ThreadManager because it didn't work as intended.
 - Reduced new database connection requests.
 - Added MOBI file parsing but not sure if it works yet. Created issue on GitHub repo.
 - Added EPUB file parsing.
@@ -98,9 +99,11 @@
 - Figure out how to pass types to tauri commands.
 - Add search suggestions.
 - Let front end know when app is not in focus so that it can change CSS.
-- Optimise file indexing. 
+- [x] Optimise file indexing. 
   - [x] Check why it seems to be stuck sometimes. ANS: multiple select calls to db were the bottleneck.
   - [x] Also check why the kill switch doesn't work sometimes. (It seems the database flag is not being updated when the sync operation completes.) ANS: sync_status wasn't being updated inside the for-loop.
+- Make XLSX, CSV and PDF indexing better.
+  - Detect if PDF is text-based and use existing library. Otherwise, skip.
 
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.

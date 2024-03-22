@@ -1,6 +1,7 @@
 // Inter-Process Communication between Rust and SvelteKit
 
-use crate::custom_types::{DBStat, DateLimit, Error, Payload, ThreadManager};
+use std::time::{SystemTime, UNIX_EPOCH};
+use crate::custom_types::{DBStat, DateLimit, Error, Payload};
 use crate::database::establish_connection;
 use crate::database::models::DocumentSearchResult;
 use crate::database::search::{
@@ -11,23 +12,14 @@ use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
 use crate::user_prefs::set_scan_running_status;
 use crate::window::hide_or_show_window;
-use diesel::SqliteConnection;
-use log::{error, info, trace, warn};
 use serde_json;
-use std::sync::Arc;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
-use tauri_plugin_shell; // Import the tauri_plugin_shell crate
-use tokio::sync::{mpsc, Mutex};
-use tokio::task::JoinHandle;
-
-// App Menu
+use tauri_plugin_shell;
+use tokio::sync::mpsc;
 use tauri::menu::Menu;
-// Import context menu commands
-#[cfg(desktop)]
-use crate::context_menu::{
-    contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,
-};
+use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,};
+use log::{error, info, trace, warn};
 
 pub fn send_message_to_frontend(
     window: &tauri::Window,
@@ -105,42 +97,33 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
   Ok("File indexing complete".to_string())
 }
 
-lazy_static::lazy_static! {
-  static ref THREAD_MANAGER: Arc<Mutex<ThreadManager>> = Arc::new(Mutex::new(ThreadManager::new()));
-}
-
 // Run file sync
 #[tauri::command]
 async fn run_file_sync(window: tauri::Window) {
+  info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
   println!("File sync started");
-  // Check the DB flag to see if the sync is already running
-  // let sync_running = sync_status();
-  // Acquire the lock on the thread manager
-  let mut thread_manager = THREAD_MANAGER.lock().await;
-  println!("Thread manager: {:?}", thread_manager);
-
   let mut conn = establish_connection();
+
+  // Since thread_manager cannot be passed to the tokio thread,
+  // the handle is not removed when the process completes
+  // So on each click, check against the DB
+  let sync_running = sync_status(&mut conn);
   // Check if the task is already running
-  // if sync_running == "true" {
-  if let Some(handle) = &thread_manager.handle {
+  if sync_running == "true" {
+  // if let Some(handle) = &thread_manager.handle {
     println!("File sync already running; Stopping now");
     // Set sync status to false
-    thread_manager.handle = None;
     set_scan_running_status(&mut conn, false, true);
     println!("File sync stopped");
   } else {
     // Set sync status to true
     set_scan_running_status(&mut conn, true, true);
     // Spawn the new task
-    let handle: JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>> =
-      tokio::spawn(async move {
-        run_sync_operation(window);
-        set_scan_running_status(&mut conn, false, true);
-        Ok(())
-      });
-    // Store the handle in the thread manager
-    thread_manager.handle = Some(handle);
-    drop(thread_manager);
+    tokio::spawn(async move {
+      run_sync_operation(window);
+      set_scan_running_status(&mut conn, false, true);
+      info!("FILE SYNC FINISHED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
+    });
   }
 }
 

@@ -310,11 +310,9 @@ pub fn parse_content_from_files(conn: &mut SqliteConnection) -> usize {
     .collect();
   
   let mut sync_running = sync_status(conn);
-  println!("Num Files:{}", files_data.len());
 
   // Then parse and chunk the content and store it in the body table
   for file_item in files_data {
-    println!("Processing file...");
     let metadata_id = file_item.0;
     let path = file_item.1;
     let file_type = file_item.2;
@@ -332,7 +330,6 @@ pub fn parse_content_from_files(conn: &mut SqliteConnection) -> usize {
     }  
     // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
     if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
-      println!("Processing file:{}", path);
       // Extract text from the file
       let text = extract_text_from_path(path.clone(), file_type.clone());
       // If there is no text, still add this file so that next time its last_parsed is compared
