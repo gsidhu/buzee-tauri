@@ -71,9 +71,7 @@
 
 	async function toggleBackgroundTextProcessing() {
 		sendEvent('click:toggleBackgroundTextProcessing', { ...defaultData });
-		invoke("run_file_sync").then((res) => {
-			console.log(res);
-		});
+		invoke("run_file_sync");
 	}
 
 	function goToSearch() {

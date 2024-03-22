@@ -1,5 +1,8 @@
 # Logbook
 
+- Optimised file content parsing. Runs _a lot_ faster now.
+- Reduced new database connection requests.
+- Added MOBI file parsing but not sure if it works yet. Created issue on GitHub repo.
 - Added EPUB file parsing.
 - ThreadManager stores the `handle` when sync operation starts. The `app_data` table in the DB sets the sync_running flag to true. The parse_file function checks this flag at the end of the loop. If it is true, it waits for 5 seconds and then checks again. If it is false, it continues. The sync operation sets the flag to false when user clicks a second time or when the operation is completed. Not the most glorious way but this is what worked.
   - Can't use a global variable using Arc and Mutex because the tauri command and the file parse function get separate handles on the thread manager; so updating the kill_flag in one doesn't affect the other.
@@ -95,7 +98,9 @@
 - Figure out how to pass types to tauri commands.
 - Add search suggestions.
 - Let front end know when app is not in focus so that it can change CSS.
-- Optimise file indexing. Check why it seems to be stuck sometimes. Also check why the kill switch doesn't work sometimes.
+- Optimise file indexing. 
+  - [x] Check why it seems to be stuck sometimes. ANS: multiple select calls to db were the bottleneck.
+  - [x] Also check why the kill switch doesn't work sometimes. (It seems the database flag is not being updated when the sync operation completes.) ANS: sync_status wasn't being updated inside the for-loop.
 
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.

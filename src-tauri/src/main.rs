@@ -7,6 +7,7 @@ extern crate diesel;
 extern crate lazy_static;
 extern crate log;
 extern crate lopdf;
+extern crate mobi;
 extern crate epub;
 extern crate regex;
 extern crate serde_json;

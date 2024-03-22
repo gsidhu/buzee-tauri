@@ -141,39 +141,3 @@ pub struct DocumentResponseModel {
     pub frecency_last_accessed: i64,
     pub file_type: String,
 }
-
-// impl DocumentItem {
-//     pub fn new(
-//         source_domain: &str,
-//         file_created_at: i64,
-//         filename: &str,
-//         filepath: &str,
-//         filesize: Option<f64>,
-//         file_type: &str,
-//         file_last_modified: i64,
-//         file_last_opened: i64,
-//         file_last_synced: i64,
-//         is_pinned: bool,
-//         frecency_rank: f32,
-//         frecency_last_accessed: i64,
-//         comment: Option<String>,
-//         metadata_id: i32,
-//     ) -> Self {
-//         DocumentItem {
-//             source_domain: source_domain.to_string(),
-//             created_at: file_created_at,
-//             name: filename.to_string(),
-//             path: filepath.to_string(),
-//             size: filesize,
-//             file_type: file_type.to_string(),
-//             last_modified: file_last_modified,
-//             last_opened: file_last_opened,
-//             last_synced: file_last_synced,
-//             is_pinned,
-//             frecency_rank,
-//             frecency_last_accessed,
-//             comment,
-//             metadata_id,
-//         }
-//     }
-// }

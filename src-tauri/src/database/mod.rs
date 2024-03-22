@@ -41,25 +41,25 @@ pub fn establish_connection() -> SqliteConnection {
 }
 
 // Create all tables and triggers in the db if they don't exist
-pub fn create_tables_if_not_exists(mut con: diesel::SqliteConnection) -> Result<usize, diesel::result::Error> {
+pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
   // User Prefs and App Data Tables
-  diesel::sql_query(USER_PREFS_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
-  diesel::sql_query(APP_DATA_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
-  diesel::sql_query(FILE_TYPES_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
+  diesel::sql_query(USER_PREFS_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(APP_DATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(FILE_TYPES_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   
   // Data Tables
-  diesel::sql_query(DOCUMENT_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
-  diesel::sql_query(BODY_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
-  diesel::sql_query(METADATA_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
-  diesel::sql_query(METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
-  diesel::sql_query(BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(&mut con)?;
+  diesel::sql_query(DOCUMENT_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(BODY_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(METADATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
 
   // Triggers
-  diesel::sql_query(TRIGGER_INSERT_DOCUMENT_METADATA.to_string()).execute(&mut con)?;
-  diesel::sql_query(TRIGGER_UPDATE_DOCUMENT_METADATA.to_string()).execute(&mut con)?;
-  diesel::sql_query(TRIGGER_DELETE_DOCUMENT_METADATA.to_string()).execute(&mut con)?;
-  diesel::sql_query(TRIGGER_INSERT_BODY_FTS.to_string()).execute(&mut con)?;
-  diesel::sql_query(TRIGGER_UPDATE_BODY_FTS.to_string()).execute(&mut con)?;
-  diesel::sql_query(TRIGGER_DELETE_BODY_FTS.to_string()).execute(&mut con)?;
+  diesel::sql_query(TRIGGER_INSERT_DOCUMENT_METADATA.to_string()).execute(conn)?;
+  diesel::sql_query(TRIGGER_UPDATE_DOCUMENT_METADATA.to_string()).execute(conn)?;
+  diesel::sql_query(TRIGGER_DELETE_DOCUMENT_METADATA.to_string()).execute(conn)?;
+  diesel::sql_query(TRIGGER_INSERT_BODY_FTS.to_string()).execute(conn)?;
+  diesel::sql_query(TRIGGER_UPDATE_BODY_FTS.to_string()).execute(conn)?;
+  diesel::sql_query(TRIGGER_DELETE_BODY_FTS.to_string()).execute(conn)?;
   Ok(1)
 }

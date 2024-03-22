@@ -1,23 +1,22 @@
 // use crate::database::crud::add_files_to_database;
-use crate::database::establish_connection;
 use crate::database::schema::{document, metadata, body, file_types};
+use crate::database::models::{DocumentItem, BodyItem, FileTypes, DocumentResponseModel};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::utils::{self, get_metadata};
-use crate::database::models::{DocumentItem, BodyItem, FileTypes};
 use crate::text_extraction::Extractor;
 use diesel::connection::Connection;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
+use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
 use log::{error, info, trace, warn};
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::collections::HashMap;
 
-pub fn all_allowed_filetypes(only_allowed: bool) -> Vec<FileTypes> {
-  let mut connection = establish_connection();
+pub fn all_allowed_filetypes(connection: &mut SqliteConnection, only_allowed: bool) -> Vec<FileTypes> {
   let filetypes = file_types::table
     .select((file_types::file_type, file_types::file_type_category, file_types::file_type_allowed, file_types::added_by_user))
-    .load::<FileTypes>(&mut connection)
+    .load::<FileTypes>(connection)
     .unwrap();
 
   if only_allowed {
@@ -78,13 +77,12 @@ fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), 
     })
 }
 
-pub fn walk_directory(window: &tauri::Window, path: &str) -> usize {
+pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::Window, path: &str) -> usize {
     info!("Logger initialized!");
-    let mut connection = establish_connection();
     let mut files_array: Vec<DocumentItem> = vec![];
     let all_forbidden_directories = get_all_forbidden_directories();
     let mut files_added = 0;
-    let allowed_filetypes = all_allowed_filetypes(true);
+    let allowed_filetypes = all_allowed_filetypes(conn, true);
     let allowed_extensions: Vec<String> = allowed_filetypes
         .iter()
         .map(|filetype| filetype.file_type.to_string())
@@ -179,7 +177,7 @@ pub fn walk_directory(window: &tauri::Window, path: &str) -> usize {
 
         // if there are 500 items in files_array, add them to the database and clear the array
         if files_array.len() == 500 {
-            add_file_metadata_to_database(&files_array, &mut connection);
+            add_file_metadata_to_database(&files_array, conn);
             files_added += files_array.len();
             send_message_to_frontend(
                 &window,
@@ -193,7 +191,7 @@ pub fn walk_directory(window: &tauri::Window, path: &str) -> usize {
     // process the leftover files from the last iteration (because count may be < 500)
     if files_array.len() > 0 {
       // let cloned_files_array = files_array.clone();
-      add_file_metadata_to_database(&files_array, &mut connection);
+      add_file_metadata_to_database(&files_array, conn);
       files_added += files_array.len();
       send_message_to_frontend(
           &window,
@@ -282,74 +280,84 @@ pub fn add_file_metadata_to_database(
     }
 }
 
-pub fn parse_content_from_files() -> usize {
-  // Get all files from document table
+pub fn parse_content_from_files(conn: &mut SqliteConnection) -> usize {
   let mut files_parsed = 0;
-  let mut connection = establish_connection();
-  let files_data = document::table
-    .select((document::id, document::path, document::file_type, document::last_modified))
-    .load::<(i32, String, String, i64)>(&mut connection)
-    .unwrap();
-
-  // let allowed_filetypes = all_allowed_filetypes(true);
+  let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
+  // let allowed_filetypes = all_allowed_filetypes(conn, true);
   // let document_filetypes: Vec<String> = allowed_filetypes
   //   .iter()
   //   .filter(|filetype| filetype.file_type_category == "document")
   //   .map(|filetype| filetype.file_type.to_string())
   //   .collect();
 
-  let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
+  // Get metadata_id, source_id, path, file_type and last_modified
+  // For all files that have the filetype in the array above
+  let files_data = document::table
+    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
+    .filter(document::file_type.eq_any(document_filetypes))
+    .select((metadata::id, document::path, document::file_type, document::last_modified))
+    .load::<(i32, String, String, i64)>(conn)
+    .unwrap();
 
-  // Keep only those files whose extension is in document_filetypes
-  let file_items_to_parse: Vec<(i32, String, String, i64)> = files_data
+  let metadata_ids_to_select: Vec<i32> = files_data.iter().map(|item| item.0).collect();
+
+  let last_parsed_values: HashMap<i32, i64> = body::table
+    .filter(body::metadata_id.eq_any(metadata_ids_to_select))
+    .select((body::metadata_id, body::last_parsed))
+    .load::<(i32, i64)>(conn)
+    .unwrap()
     .into_iter()
-    .filter(|(_, _, file_type, _)| document_filetypes.contains(&file_type.as_str()))
     .collect();
+  
+  let mut sync_running = sync_status(conn);
+  println!("Num Files:{}", files_data.len());
 
-    let sync_running = sync_status();
   // Then parse and chunk the content and store it in the body table
-  for file_item in file_items_to_parse {
-    // Get the metadata::id for this document::file
-    let metadata_id = metadata::table
-      .select(metadata::id)
-      .filter(metadata::source_id.eq(&file_item.0))
-      .first::<i32>(&mut connection)
-      .unwrap();
-
-    // Get the MAX(last_parsed) from the body table for this metadata_id
-    let last_parsed = body::table
-      .select(diesel::dsl::max(body::last_parsed))
-      .filter(body::metadata_id.eq(metadata_id))
-      .first::<Option<i64>>(&mut connection)
-      .unwrap();
-    
-    // If last_parsed is None or file_item.last_modified < last_parsed, continue
-    if last_parsed.is_none() || file_item.3 > last_parsed.unwrap() {
-      // Extract text from the file
-      let text = extract_text_from_path(file_item.1.clone(), file_item.2.clone());
-
-      // If there is no text, skip this file
-      if text.is_empty() {
-        continue;
+  for file_item in files_data {
+    println!("Processing file...");
+    let metadata_id = file_item.0;
+    let path = file_item.1;
+    let file_type = file_item.2;
+    let last_modified = file_item.3;
+    let last_parsed: Option<&i64>;
+    match last_parsed_values.get(&metadata_id) {
+      Some(value) => {
+        // Handle the case where metadata_id exists in the HashMap
+        last_parsed = Some(value);
       }
+      None => {
+        // Handle the case where metadata_id does not exist in the HashMap
+        last_parsed = None;
+      }
+    }  
+    // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
+    if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
+      println!("Processing file:{}", path);
+      // Extract text from the file
+      let text = extract_text_from_path(path.clone(), file_type.clone());
+      // If there is no text, still add this file so that next time its last_parsed is compared
       // Chunk the text into 2000 character chunks
       let chunks = chunk_text(text);
       let body_items: Vec<BodyItem> = chunks
         .iter()
         .map(|chunk| {
           BodyItem {
-            metadata_id: metadata_id, text: chunk.to_string(),
+            metadata_id: metadata_id, 
+            text: chunk.to_string(),
             last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
           }
         }).collect();
 
-      add_body_to_database(&body_items, &mut connection);
+      add_body_to_database(&body_items, conn);
       files_parsed += 1;
     }
 
+    // Check if sync_running is false, if so break the loop
     if sync_running == "false" {
       break;
     }
+    // Update sync_running status
+    sync_running = sync_status(conn);
   }
   files_parsed
 }
@@ -398,11 +406,10 @@ fn add_body_to_database(body_items: &Vec<BodyItem>, connection: &mut SqliteConne
   }
 }
 
-pub fn remove_nonexistent_files() {
-  let mut connection = establish_connection();
+pub fn remove_nonexistent_files(conn: &mut SqliteConnection) {
   let all_files = document::table
     .select(document::path)
-    .load::<String>(&mut connection)
+    .load::<String>(conn)
     .unwrap();
   let mut nonexistent_files: Vec<String> = vec![];
   for file in all_files {
@@ -411,8 +418,9 @@ pub fn remove_nonexistent_files() {
     }
   }
   if nonexistent_files.len() > 0 {
-    let _ = diesel::delete(document::table.filter(document::path.eq_any(nonexistent_files)))
-      .execute(&mut connection)
+    let _ = diesel::delete(document::table
+      .filter(document::path.eq_any(nonexistent_files)))
+      .execute(conn)
       .unwrap();
   }
 }

@@ -1,25 +1,22 @@
 use crate::custom_types::{DBStat, DateLimit, QuerySegments};
 use crate::database::models::DocumentSearchResult;
 use crate::indexing::all_allowed_filetypes;
-use diesel::ExpressionMethods;
-use diesel::QueryDsl;
-use diesel::RunQueryDsl;
-use diesel::SqliteConnection;
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl,SqliteConnection};
 use serde_json;
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
-  let parsed_json = serde_json::from_str(json_string);
-  // convert to QuerySegments
-  let query_segments: QuerySegments = match parsed_json {
-    Ok(value) => value,
-    Err(_) => QuerySegments {
-      quoted_segments: Vec::new(),
-      normal_segments: Vec::new(),
-      greedy_segments: Vec::new(),
-      not_segments: Vec::new(),
-    },
-  };
-  query_segments
+    let parsed_json = serde_json::from_str(json_string);
+    // convert to QuerySegments
+    let query_segments: QuerySegments = match parsed_json {
+        Ok(value) => value,
+        Err(_) => QuerySegments {
+            quoted_segments: Vec::new(),
+            normal_segments: Vec::new(),
+            greedy_segments: Vec::new(),
+            not_segments: Vec::new(),
+        },
+    };
+    query_segments
 }
 
 // Return documents from the document_fts Index that match the given search query (name and type)
@@ -37,7 +34,7 @@ pub fn search_fts_index(
         query, page, limit, file_type, date_limit
     );
 
-    let query_segments:QuerySegments = parse_stringified_query_segments(&query);
+    let query_segments: QuerySegments = parse_stringified_query_segments(&query);
     println!("query_segments: {:?}", query_segments);
 
     // Add file type(s)
@@ -72,9 +69,13 @@ pub fn search_fts_index(
     println!("where_file_type: {}", where_file_type);
 
     // if there is only a NOT query, pass it to `handle_special_case` function
-    if query_segments.normal_segments.is_empty() && query_segments.quoted_segments.is_empty()
-      && query_segments.greedy_segments.is_empty() && !query_segments.not_segments.is_empty() {
-        let search_results = handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
+    if query_segments.normal_segments.is_empty()
+        && query_segments.quoted_segments.is_empty()
+        && query_segments.greedy_segments.is_empty()
+        && !query_segments.not_segments.is_empty()
+    {
+        let search_results =
+            handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
         return search_results;
     }
 
@@ -82,21 +83,33 @@ pub fn search_fts_index(
 
     // If there are quoted segments, join them with double quotes
     if query_segments.quoted_segments.len() > 0 {
-      match_string = format!("\"{}\"", query_segments.quoted_segments.join("\" \""));
+        match_string = format!("\"{}\"", query_segments.quoted_segments.join("\" \""));
     }
     // If there are normal segments, join them with a space
     if query_segments.normal_segments.len() > 0 {
-      match_string = format!("{} {}", match_string, query_segments.normal_segments.join(" "));
+        match_string = format!(
+            "{} {}",
+            match_string,
+            query_segments.normal_segments.join(" ")
+        );
     }
     // If there are greedy segments, join them with an asterisk space
     if query_segments.greedy_segments.len() > 0 {
-      match_string = format!("{} {}*", match_string, query_segments.greedy_segments.join("* "));
+        match_string = format!(
+            "{} {}*",
+            match_string,
+            query_segments.greedy_segments.join("* ")
+        );
     }
     // If there are NOT segments, join them with `NOT` and OR
     if query_segments.not_segments.len() > 0 {
-      // putting double quotes around each segment so that punctuated words are also covered
-      // otherwise would have to run same regex as frontend which is unnecessary
-      match_string = format!("{} NOT (\"{}\")", match_string, query_segments.not_segments.join("\" OR \""));
+        // putting double quotes around each segment so that punctuated words are also covered
+        // otherwise would have to run same regex as frontend which is unnecessary
+        match_string = format!(
+            "{} NOT (\"{}\")",
+            match_string,
+            query_segments.not_segments.join("\" OR \"")
+        );
     }
 
     match_string = match_string.trim().to_string();
@@ -122,7 +135,10 @@ pub fn search_fts_index(
             "".to_string()
         },
         match_clause = if !match_string.is_empty() {
-            format!("WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)", match_string)
+            format!(
+                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)",
+                match_string
+            )
         } else {
             "".to_string()
         },
@@ -208,7 +224,7 @@ pub fn get_counts_for_all_filetypes(
 ) -> Result<Vec<DBStat>, diesel::result::Error> {
     // couldn't get COUNT -- GROUP BY to work so doing it manually for each filetype
     use crate::database::schema::document::dsl::*;
-    let all_filetypes = all_allowed_filetypes(true);
+    let all_filetypes = all_allowed_filetypes(&mut conn, true);
     let mut counts: Vec<DBStat> = Vec::new();
     for doctype in all_filetypes {
         let count = document
@@ -232,7 +248,7 @@ fn handle_special_case(
     where_file_type: String,
     mut conn: SqliteConnection,
 ) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
-    let query_segments:QuerySegments = parse_stringified_query_segments(&query);
+    let query_segments: QuerySegments = parse_stringified_query_segments(&query);
     println!("query_segments: {:?}", query_segments);
 
     let where_date_limit_clone = where_date_limit.clone();
@@ -258,12 +274,15 @@ fn handle_special_case(
           LIMIT {limit}
         "#,
         inner_where = if !where_file_type.is_empty() || !where_date_limit.is_empty() {
-          "WHERE".to_string()
+            "WHERE".to_string()
         } else {
-          "".to_string()
+            "".to_string()
         },
         match_clause = if !match_string.is_empty() {
-            format!("WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)", match_string)
+            format!(
+                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)",
+                match_string
+            )
         } else {
             "".to_string()
         },
@@ -277,7 +296,7 @@ fn handle_special_case(
         } else {
             "".to_string()
         },
-        limit = limit*5
+        limit = limit * 5
     );
 
     println!("inner_query: {}", inner_query);
@@ -298,9 +317,9 @@ fn handle_special_case(
           LIMIT {limit} OFFSET {offset}
         "#,
         inner_where = if !where_date_limit_clone.is_empty() || !where_file_type_clone.is_empty() {
-          "WHERE".to_string()
+            "WHERE".to_string()
         } else {
-          "".to_string()
+            "".to_string()
         },
         where_date_limit_clone = if !where_date_limit_clone.is_empty() {
             where_date_limit_clone

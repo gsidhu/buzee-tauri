@@ -46,18 +46,20 @@ pub fn setup_logging_file_path() {
 pub fn initialize() -> () {
   // Set up logging
   setup_logging_file_path();
+
+  let mut conn = establish_connection();
   println!("Initializing app directory");
   create_app_directory_if_not_exists().unwrap();
   println!("Initializing database");
-  create_tables_if_not_exists(establish_connection()).unwrap();
+  create_tables_if_not_exists(&mut conn).unwrap();
 
   // Set default app data
-  set_default_app_data();
+  set_default_app_data(&mut conn);
   // Set default user prefs
-  set_default_user_prefs();
+  set_default_user_prefs(&mut conn);
   // Set default file types
-  set_default_file_types();
+  set_default_file_types(&mut conn);
 
   // On each launch, set the sync_running flag to false
-  set_scan_running_status(false, false);
+  set_scan_running_status(&mut conn, false, false);
 }

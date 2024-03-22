@@ -1,18 +1,15 @@
 // Handles for User Preferences and App Data
 
 use std::time::{SystemTime, UNIX_EPOCH};
-use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl};
-use crate::database::establish_connection;
+use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use crate::database::models::{AppData, UserPrefs, FileTypes};
 use crate::database::schema::{app_data, user_preferences, file_types};
 
-pub fn set_default_user_prefs() {
-  let mut conn = establish_connection();
-
+pub fn set_default_user_prefs(conn: &mut SqliteConnection) {
   // get the first row from user_prefs table
   let existing_prefs = user_preferences::table
     .select(user_preferences::id)
-    .load::<i32>(&mut conn)
+    .load::<i32>(conn)
     .expect("Error loading user_prefs");
 
   if existing_prefs.len() == 0 {
@@ -32,18 +29,16 @@ pub fn set_default_user_prefs() {
     // insert new_user_prefs into the user_prefs table
     diesel::insert_into(user_preferences::table)
       .values(&new_user_prefs)
-      .execute(&mut conn)
+      .execute(conn)
       .expect("Error inserting new user_prefs");
   }
 }
 
-pub fn set_default_app_data() {
-  let mut conn = establish_connection();
-
+pub fn set_default_app_data(conn: &mut SqliteConnection) {
   // get the first row from app_data table
   let existing_app_data = app_data::table
     .select(app_data::id)
-    .load::<i32>(&mut conn)
+    .load::<i32>(conn)
     .expect("Error loading app_data");
 
   if existing_app_data.len() == 0 {
@@ -61,14 +56,12 @@ pub fn set_default_app_data() {
     // insert new_app_data into the app_data table
     diesel::insert_into(app_data::table)
       .values(&new_app_data)
-      .execute(&mut conn)
+      .execute(conn)
       .expect("Error inserting new app_data");
   }
 }
 
-pub fn set_default_file_types() {
-  let mut conn = establish_connection();
-
+pub fn set_default_file_types(conn: &mut SqliteConnection) {
   const DOCUMENT_FILETYPES: [&str; 11] = ["csv", "docx", "key", "md", "numbers", "pages", "pdf", "pptx", "txt", "xlsx", "xls"];
   const IMAGE_FILETYPES: [&str; 4] = ["jpg", "jpeg", "png", "gif"];
   const BOOK_FILETYPES: [&str; 4] = ["epub", "mobi", "azw3", "pdf"];
@@ -78,7 +71,7 @@ pub fn set_default_file_types() {
   // get the first row from file_types table
   let existing_file_types = file_types::table
     .select(file_types::id)
-    .load::<i32>(&mut conn)
+    .load::<i32>(conn)
     .expect("Error loading file_types");
 
   if existing_file_types.len() == 0 {
@@ -141,21 +134,19 @@ pub fn set_default_file_types() {
   }
 }
 
-pub fn set_scan_running_status(status: bool, set_time: bool) {
-  let mut conn = establish_connection();
-
+pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_time: bool) {
   if set_time {
     let _ = diesel::update(app_data::table)
       .set((
           app_data::scan_running.eq(&status),
           app_data::last_scan_time.eq(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64)
       ))
-      .execute(&mut conn)
+      .execute(conn)
       .unwrap();
   } else {
     let _ = diesel::update(app_data::table)
       .set(app_data::scan_running.eq(&status))
-      .execute(&mut conn)
+      .execute(conn)
       .unwrap();
   }
 }

@@ -48,10 +48,11 @@ fn get_os() -> Result<String, Error> {
 // Get allowed filetypes
 #[tauri::command]
 fn get_allowed_filetypes() -> Result<String, Error> {
-    let allowed_filetypes = all_allowed_filetypes(true);
-    // Convert allowed_filetypes to JSON using serde_json
-    let json_response = serde_json::to_string(&allowed_filetypes).unwrap();
-    Ok(json_response)
+  let mut connection = establish_connection();
+  let allowed_filetypes = all_allowed_filetypes(&mut connection, true);
+  // Convert allowed_filetypes to JSON using serde_json
+  let json_response = serde_json::to_string(&allowed_filetypes).unwrap();
+  Ok(json_response)
 }
 
 // Open a file (in default app) or a folder from the path
@@ -80,27 +81,28 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
 // Run file indexing ONLY
 #[tauri::command]
 async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
-    println!("File watcher started");
-    let home_directory = housekeeping::get_home_directory().unwrap();
-    println!("Home directory: {}", home_directory);
+  let mut connection = establish_connection();
+  println!("File watcher started");
+  let home_directory = housekeeping::get_home_directory().unwrap();
+  println!("Home directory: {}", home_directory);
 
-    let (sender, mut receiver) = mpsc::channel::<usize>(1);
+  let (sender, mut receiver) = mpsc::channel::<usize>(1);
 
-    tokio::spawn(async move {
-        let files_added = walk_directory(&window, &home_directory);
-        // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
-        // let files_added = parse_content_from_files();
-        sender
-            .send(files_added)
-            .await
-            .expect("Failed to send data through channel");
-    });
+  tokio::spawn(async move {
+      let files_added = walk_directory(&mut connection, &window, &home_directory);
+      // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
+      // let files_added = parse_content_from_files();
+      sender
+          .send(files_added)
+          .await
+          .expect("Failed to send data through channel");
+  });
 
-    // Receive the result from the channel asynchronously
-    if let Some(files_added) = receiver.recv().await {
-        println!("Files added: {}", files_added);
-    }
-    Ok("File indexing complete".to_string())
+  // Receive the result from the channel asynchronously
+  if let Some(files_added) = receiver.recv().await {
+      println!("Files added: {}", files_added);
+  }
+  Ok("File indexing complete".to_string())
 }
 
 lazy_static::lazy_static! {
@@ -109,44 +111,45 @@ lazy_static::lazy_static! {
 
 // Run file sync
 #[tauri::command]
-async fn run_file_sync(window: tauri::Window) -> Result<String, Error> {
+async fn run_file_sync(window: tauri::Window) {
   println!("File sync started");
-
+  // Check the DB flag to see if the sync is already running
+  // let sync_running = sync_status();
   // Acquire the lock on the thread manager
   let mut thread_manager = THREAD_MANAGER.lock().await;
   println!("Thread manager: {:?}", thread_manager);
 
+  let mut conn = establish_connection();
   // Check if the task is already running
+  // if sync_running == "true" {
   if let Some(handle) = &thread_manager.handle {
     println!("File sync already running; Stopping now");
     // Set sync status to false
     thread_manager.handle = None;
-    set_scan_running_status(false, true);
+    set_scan_running_status(&mut conn, false, true);
     println!("File sync stopped");
   } else {
     // Set sync status to true
-    set_scan_running_status(true, true);
+    set_scan_running_status(&mut conn, true, true);
     // Spawn the new task
     let handle: JoinHandle<Result<(), Box<dyn std::error::Error + Send + Sync>>> =
       tokio::spawn(async move {
         run_sync_operation(window);
-        set_scan_running_status(false, true);
+        set_scan_running_status(&mut conn, false, true);
         Ok(())
       });
-
     // Store the handle in the thread manager
     thread_manager.handle = Some(handle);
     drop(thread_manager);
   }
-
-  Ok("File indexing complete".to_string())
 }
 
 // Get sync status
 #[tauri::command]
 fn get_sync_status() -> Result<String, Error> {
-    let sync_running = sync_status();
-    Ok(sync_running)
+  let mut conn = establish_connection();
+  let sync_running = sync_status(&mut conn);
+  Ok(sync_running)
 }
 
 // Run search
@@ -162,7 +165,7 @@ fn run_search(
         "run_search: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
         query, page, limit, file_type, date_limit
     );
-    let conn: SqliteConnection = establish_connection();
+    let conn = establish_connection();
     let search_results = search_fts_index(query, page, limit, file_type, date_limit, conn).unwrap();
     Ok(search_results)
 }
@@ -174,7 +177,7 @@ fn get_recent_docs(
     limit: i32,
     file_type: Option<String>,
 ) -> Result<Vec<DocumentSearchResult>, Error> {
-    let conn: SqliteConnection = establish_connection();
+    let conn = establish_connection();
     let search_results = get_recently_opened_docs(page, limit, file_type, conn).unwrap();
     Ok(search_results)
 }
@@ -182,7 +185,7 @@ fn get_recent_docs(
 // Get DB Stats
 #[tauri::command]
 fn get_db_stats() -> Result<Vec<DBStat>, Error> {
-    let conn: SqliteConnection = establish_connection();
+    let conn = establish_connection();
     let db_stats = get_counts_for_all_filetypes(conn).unwrap();
     Ok(db_stats)
 }
