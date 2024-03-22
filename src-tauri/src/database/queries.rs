@@ -62,6 +62,8 @@ pub const BODY_TABLE_CREATE_STATEMENT : &str = r#"
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     text TEXT NOT NULL,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
     last_parsed BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (metadata_id) REFERENCES metadata(id)
   );
@@ -92,7 +94,8 @@ pub const METADATA_TABLE_CREATE_STATEMENT : &str = r#"
     last_modified BIGINT NOT NULL,
     frecency_rank REAL NOT NULL DEFAULT 0,
     frecency_last_accessed BIGINT,
-    comment TEXT
+    comment TEXT,
+    FOREIGN KEY (source_id) REFERENCES document(id)
   );
 "#;
 
@@ -104,6 +107,7 @@ pub const METADATA_TABLE_CREATE_STATEMENT : &str = r#"
 pub const METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE VIRTUAL TABLE IF NOT EXISTS metadata_fts 
   USING fts5(
+    id UNINDEXED,
     source_table UNINDEXED,
     source_domain,
     source_id UNINDEXED,
@@ -131,6 +135,9 @@ pub const BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
   USING fts5(
     metadata_id UNINDEXED,
     text,
+    title,
+    url,
+    last_parsed UNINDEXED,
     content=body,
     tokenize="porter unicode61"
   );
@@ -197,8 +204,8 @@ pub const TRIGGER_INSERT_BODY_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS body_fts_insert_trigger
   AFTER INSERT ON body
   BEGIN
-      INSERT INTO body_fts (metadata_id, text)
-      VALUES (NEW.metadata_id, NEW.text);
+      INSERT INTO body_fts (metadata_id, text, title, url, last_parsed)
+      VALUES (NEW.metadata_id, NEW.text, NEW.title, NEW.url, NEW.last_parsed);
   END;
 "#;
 

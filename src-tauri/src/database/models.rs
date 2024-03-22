@@ -87,6 +87,8 @@ pub struct MetadataItem {
 pub struct BodyItem {
     pub metadata_id: i32,
     pub text: String,
+    pub title: String,
+    pub url: String,
     pub last_parsed: i64,
 }
 
@@ -127,17 +129,19 @@ pub struct DocumentSearchResult {
     pub comment: Option<String>,
 }
 
-// This struct is for SELECTING from the metadata table with a JOIN to the document table
+// This struct is for SELECTING from the document table via the metadata table when searching the body_fts table
 #[derive(Serialize, Queryable, Debug)]
 pub struct DocumentResponseModel {
+    pub metadata_id: i32,
     pub source_table: String,
     pub source_domain: String,
     pub source_id: i32,
-    pub title: String,
-    pub url: String,
+    pub name: String,
+    pub path: String,
+    pub file_type: String,
     pub created_at: i64,
     pub last_modified: i64,
     pub frecency_rank: f32,
     pub frecency_last_accessed: i64,
-    pub file_type: String,
+    pub comment: Option<String>,
 }

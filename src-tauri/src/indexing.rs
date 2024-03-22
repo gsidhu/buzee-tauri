@@ -1,6 +1,6 @@
 // use crate::database::crud::add_files_to_database;
 use crate::database::schema::{document, metadata, body, file_types};
-use crate::database::models::{DocumentItem, BodyItem, FileTypes, DocumentResponseModel};
+use crate::database::models::{DocumentItem, BodyItem, FileTypes};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
@@ -295,8 +295,8 @@ pub fn parse_content_from_files(conn: &mut SqliteConnection) -> usize {
   let files_data = document::table
     .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
     .filter(document::file_type.eq_any(document_filetypes))
-    .select((metadata::id, document::path, document::file_type, document::last_modified))
-    .load::<(i32, String, String, i64)>(conn)
+    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
+    .load::<(i32, String, String, String, i64)>(conn)
     .unwrap();
 
   let metadata_ids_to_select: Vec<i32> = files_data.iter().map(|item| item.0).collect();
@@ -315,8 +315,9 @@ pub fn parse_content_from_files(conn: &mut SqliteConnection) -> usize {
   for file_item in files_data {
     let metadata_id = file_item.0;
     let path = file_item.1;
-    let file_type = file_item.2;
-    let last_modified = file_item.3;
+    let name = file_item.2;
+    let file_type = file_item.3;
+    let last_modified = file_item.4;
     let last_parsed: Option<&i64>;
     match last_parsed_values.get(&metadata_id) {
       Some(value) => {
@@ -341,6 +342,8 @@ pub fn parse_content_from_files(conn: &mut SqliteConnection) -> usize {
           BodyItem {
             metadata_id: metadata_id, 
             text: chunk.to_string(),
+            title: name.clone(),
+            url: path.clone(),
             last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
           }
         }).collect();

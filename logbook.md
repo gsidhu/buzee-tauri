@@ -1,5 +1,10 @@
 # Logbook
 
+## IMMEDIATE TODO:
+### Fix handle_not_case function in lightof body_fts search query.
+### Combine results from body_fts and metadata_fts in case the number of results is not enough.
+
+- Added body_fts search query. Broke down the fts_search function into smaller components.
 - Optimised file content parsing. Runs _a lot_ faster now.
 - Removed ThreadManager because it didn't work as intended.
 - Reduced new database connection requests.

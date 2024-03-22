@@ -246,7 +246,7 @@
 											<FileTypeIcon filetype={String(cell.render())} />
 										{:else if cell.id === 'size'}
 											<span>{readableFileSize(Number(cell.render()))}</span>
-										{:else if cell.id === 'url'}
+										{:else if cell.id === 'path'}
 											<PopoverIcon
 												label={formatPath(String(cell.render()))}
 												title={String(cell.render())}

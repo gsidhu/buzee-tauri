@@ -19,7 +19,45 @@ fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
     query_segments
 }
 
-// Return documents from the document_fts Index that match the given search query (name and type)
+fn create_match_statement(query_segments: QuerySegments) -> String {
+    let mut match_string: String = String::new();
+
+    // If there are quoted segments, join them with double quotes
+    if query_segments.quoted_segments.len() > 0 {
+        match_string = format!("\"{}\"", query_segments.quoted_segments.join("\" \""));
+    }
+    // If there are normal segments, join them with a space
+    if query_segments.normal_segments.len() > 0 {
+        match_string = format!(
+            "{} {}",
+            match_string,
+            query_segments.normal_segments.join(" ")
+        );
+    }
+    // If there are greedy segments, join them with an asterisk space
+    if query_segments.greedy_segments.len() > 0 {
+        match_string = format!(
+            "{} {}*",
+            match_string,
+            query_segments.greedy_segments.join("* ")
+        );
+    }
+    // If there are NOT segments, join them with `NOT` and OR
+    if query_segments.not_segments.len() > 0 {
+        // putting double quotes around each segment so that punctuated words are also covered
+        // otherwise would have to run same regex as frontend which is unnecessary
+        match_string = format!(
+            "{} NOT (\"{}\")",
+            match_string,
+            query_segments.not_segments.join("\" OR \"")
+        );
+    }
+    match_string = match_string.trim().to_string();
+    match_string
+}
+
+
+// Return documents from the metadata_fts index that match the given search query (name and type)
 // bm25(document_fts, 10) is the ranking function which gives 10x weight to the file name (first column)
 pub fn search_fts_index(
     query: String,
@@ -66,56 +104,90 @@ pub fn search_fts_index(
         "".to_string()
     };
 
-    println!("where_file_type: {}", where_file_type);
-
     // if there is only a NOT query, pass it to `handle_special_case` function
-    if query_segments.normal_segments.is_empty()
-        && query_segments.quoted_segments.is_empty()
-        && query_segments.greedy_segments.is_empty()
-        && !query_segments.not_segments.is_empty()
-    {
-        let search_results =
-            handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
-        return search_results;
-    }
+    // if query_segments.normal_segments.is_empty()
+    //     && query_segments.quoted_segments.is_empty()
+    //     && query_segments.greedy_segments.is_empty()
+    //     && !query_segments.not_segments.is_empty()
+    // {
+    //     let search_results =
+    //         handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
+    //     return search_results;
+    // }
 
-    let mut match_string: String = String::new();
-
-    // If there are quoted segments, join them with double quotes
-    if query_segments.quoted_segments.len() > 0 {
-        match_string = format!("\"{}\"", query_segments.quoted_segments.join("\" \""));
-    }
-    // If there are normal segments, join them with a space
-    if query_segments.normal_segments.len() > 0 {
-        match_string = format!(
-            "{} {}",
-            match_string,
-            query_segments.normal_segments.join(" ")
-        );
-    }
-    // If there are greedy segments, join them with an asterisk space
-    if query_segments.greedy_segments.len() > 0 {
-        match_string = format!(
-            "{} {}*",
-            match_string,
-            query_segments.greedy_segments.join("* ")
-        );
-    }
-    // If there are NOT segments, join them with `NOT` and OR
-    if query_segments.not_segments.len() > 0 {
-        // putting double quotes around each segment so that punctuated words are also covered
-        // otherwise would have to run same regex as frontend which is unnecessary
-        match_string = format!(
-            "{} NOT (\"{}\")",
-            match_string,
-            query_segments.not_segments.join("\" OR \"")
-        );
-    }
-
-    match_string = match_string.trim().to_string();
-
+    let match_string = create_match_statement(query_segments);
     println!("match_string: {}", match_string);
 
+    // let _metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
+    let body_fts_query = create_body_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
+
+    let search_results: Vec<DocumentSearchResult> =
+        diesel::sql_query(body_fts_query).load::<DocumentSearchResult>(&mut conn)?;
+
+    Ok(search_results)
+}
+
+fn create_body_fts_query(
+    where_file_type: &String,
+    where_date_limit: &String,
+    match_string: &String,
+    limit: i32,
+    page: i32,
+) -> String {
+    // Give 5x weight to the title column (4th) in metadata_fts
+    let inner_query = format!(
+        r#" 
+            SELECT d.id, d.source_domain, d.created_at,
+                d.name, d.path, d.size, d.file_type,
+                d.last_modified, d.last_opened, d.last_synced, d.is_pinned,
+                d.frecency_rank, d.frecency_last_accessed, d.comment
+            FROM (
+                SELECT DISTINCT metadata_id FROM body_fts
+                {match_clause}
+                LIMIT {limit} OFFSET {offset}
+            ) b
+            JOIN metadata m ON b.metadata_id = m.id
+            JOIN document d ON m.source_id = d.id
+            {inner_where} {where_file_type} {where_date_limit}
+        "#,
+        inner_where = if !where_file_type.is_empty() || !where_date_limit.is_empty() {
+            "WHERE".to_string()
+        } else {
+            "".to_string()
+        },
+        match_clause = if !match_string.is_empty() {
+            format!(
+                "WHERE body_fts MATCH '{}' ORDER BY bm25(body_fts, 1,1,5,5)",
+                match_string
+            )
+        } else {
+            "".to_string()
+        },
+        where_file_type = if !where_file_type.is_empty() {
+            where_file_type.clone()
+        } else {
+            "".to_string()
+        },
+        limit = limit,
+        offset = page * limit,
+        where_date_limit = if !where_date_limit.is_empty() {
+            where_date_limit.clone()
+        } else {
+            "".to_string()
+        }
+    );
+
+    println!("inner_query: {}", inner_query);
+    inner_query
+}
+
+fn create_metadata_fts_query(
+    where_file_type: &String,
+    where_date_limit: &String,
+    match_string: &String,
+    limit: i32,
+    page: i32,
+) -> String {
     // Give 5x weight to the title column (4th) in metadata_fts
     let inner_query = format!(
         r#"
@@ -143,30 +215,24 @@ pub fn search_fts_index(
             "".to_string()
         },
         where_file_type = if !where_file_type.is_empty() {
-            where_file_type
+            where_file_type.clone()
         } else {
             "".to_string()
         },
         limit = limit,
         offset = page * limit,
         where_date_limit = if !where_date_limit.is_empty() {
-            where_date_limit
+            where_date_limit.clone()
         } else {
             "".to_string()
         }
     );
 
     println!("inner_query: {}", inner_query);
-
-    let search_results: Vec<DocumentSearchResult> =
-        diesel::sql_query(inner_query).load::<DocumentSearchResult>(&mut conn)?;
-
-    if search_results.len() > 0 {
-        println!("search_results: {:?}", search_results[0]);
-    }
-
-    Ok(search_results)
+    inner_query
 }
+
+
 
 // Get recently opened documents
 pub fn get_recently_opened_docs(

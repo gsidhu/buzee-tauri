@@ -40,6 +40,8 @@ table! {
       id -> Integer,
       metadata_id -> Integer,
       text -> Text,
+      title -> Text,
+      url -> Text,
       last_parsed -> BigInt,
   }
 }
