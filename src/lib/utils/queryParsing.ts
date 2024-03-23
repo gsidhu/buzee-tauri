@@ -112,7 +112,12 @@ export function cleanSearchQuery(value: string): {} {
     // If the segment has a - in front of it, remove the `-` and add it to the notSegments array
     if (segment.startsWith('-')) {
       // remove any quotes because they get added in the SQL query anyway
-      result.notSegments.push(segment.substring(1).trim().replace(/"/g, ''));
+      let tempSeg = segment.substring(1).trim().replace(/"/g, '');
+      // if the segment has a punctuation in it, prepend a ^^ so backend can double-quote it
+      if (tempSeg.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;\-<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
+        tempSeg = '^^' + tempSeg;
+      } 
+      result.notSegments.push(tempSeg);
       return;
     }
 

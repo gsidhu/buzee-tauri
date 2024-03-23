@@ -34,12 +34,6 @@
 		$documentsShown = results;
 		$searchInProgress = false;
 		// searchInputRef.blur();
-
-		setTimeout(() => {}, 1000);
-		results = await getMoreResults();
-		if (results.length > 0) {
-			$documentsShown = [...$documentsShown, ...results];
-		}
 	}
 
 	async function getMoreResults() {
@@ -70,18 +64,6 @@
 		if (highlightSearchBar) {
 			searchInputRef.focus();
 		}
-
-		window.onscroll = () => {
-        let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
-        if (bottomOfWindow) {
-					console.log('bottom of window');
-          getMoreResults().then((results) => {
-						if (results.length > 0) {
-							$documentsShown = [...$documentsShown, ...results];
-						}
-					});
-        }
-      }
 	});
 </script>
 

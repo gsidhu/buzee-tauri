@@ -1,9 +1,10 @@
 # Logbook
 
-## IMMEDIATE TODO:
-### Fix handle_not_case function in lightof body_fts search query.
-### Combine results from body_fts and metadata_fts in case the number of results is not enough.
+## Make search bar file_type dropdown work
 
+- Getting up to 100 results on each search since results from both FTS tables are combined. This is good because then we don't need to run double searches from the front end.
+- NOT query case handled as before. Not using body_fts for that because it is going to be quite impossible for a user to spot a document that has the search query _inside_ it but not in its title. Marginal utility is low.
+- Combining results from body_fts and metadata_fts and sorting them by last_modified. Eventually will sort them by frecency_rank. This also solves the problem of showing folders and non-document files in search results (since they are not included in body_fts, they come from metadata_fts).
 - Added body_fts search query. Broke down the fts_search function into smaller components.
 - Optimised file content parsing. Runs _a lot_ faster now.
 - Removed ThreadManager because it didn't work as intended.
@@ -91,29 +92,30 @@
 - Add user prefs to database.
 
 ### Backend
-- Allow searching by `created_at`, `last_modified` or `last_opened`.
-- Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
-- [x] Figure out how to add app menu and context menus.
 - Set up cron job to index every hour.
-  - Add code for adding folders to the index.
-  - Add code for indexing file contents.
+- Add code for adding folders to the index.
+- Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
+- Add search suggestions.
+- Make XLSX, CSV and PDF indexing better.
+  - Detect if PDF is text-based and use existing library. Otherwise, skip.
+- Detect paths/files in OneDrive, Google Drive, Dropbox, etc. and ignore them.
 - Add graceful error handling using logger instead of panic.
+- Figure out how to pass types to tauri commands.
+- Let front end know when app is not in focus so that it can change CSS.
+- Add logging to a file + sentry/firebase events.
+- Add a tray icon and menubar window.
+- Allow searching by `created_at`, `last_modified` or `last_opened`.
+- [x] Figure out how to add app menu and context menus.
+- [x] Add code for indexing file contents.
 - [x] Send data from backend to frontend ([see this](https://github.com/tauri-apps/tauri/discussions/7558))
 - [x] Check why QuickLook (`qlmanage`) blocks the main process. What if it was launched in a child process?
-- Add a tray icon and menubar window.
-- Figure out how to pass types to tauri commands.
-- Add search suggestions.
-- Let front end know when app is not in focus so that it can change CSS.
 - [x] Optimise file indexing. 
   - [x] Check why it seems to be stuck sometimes. ANS: multiple select calls to db were the bottleneck.
   - [x] Also check why the kill switch doesn't work sometimes. (It seems the database flag is not being updated when the sync operation completes.) ANS: sync_status wasn't being updated inside the for-loop.
-- Make XLSX, CSV and PDF indexing better.
-  - Detect if PDF is text-based and use existing library. Otherwise, skip.
 
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.
 - Show feedback to the user about what dates are being parsed. Maybe as a popover button?
-- Allow searching by created_at, last_modified or last_opened.
 - Add icons for new file types.
 - Disable default right-click context menu.
 - Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
@@ -121,3 +123,4 @@
 - Add a Preview sidebar that shows a thumbnail and complete metadata of the selected file.
 - Allow user to add/remove file types and categories.
 - Update Document Stats to reflect categories and # files indexed.
+- Add infinite scroll to search results. (Need Punnu's help for this.)

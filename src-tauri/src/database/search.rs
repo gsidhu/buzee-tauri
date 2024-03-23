@@ -44,18 +44,37 @@ fn create_match_statement(query_segments: QuerySegments) -> String {
     }
     // If there are NOT segments, join them with `NOT` and OR
     if query_segments.not_segments.len() > 0 {
-        // putting double quotes around each segment so that punctuated words are also covered
-        // otherwise would have to run same regex as frontend which is unnecessary
         match_string = format!(
-            "{} NOT (\"{}\")",
+            "{} NOT ({})",
             match_string,
-            query_segments.not_segments.join("\" OR \"")
+            if query_segments.not_segments.len() == 1 {
+                format!("{}*", query_segments.not_segments[0])
+            } else {
+                // join with `* OR` and remove the trailing `OR`
+                let not_segments = query_segments.not_segments;
+                let not_string = not_segments
+                    .iter()
+                    .map(|segment| {
+                        // if segment starts with ^^, it contains a punctuation mark (using code from frontend because regex caused problems in rust)
+                        if segment.starts_with("^^") {
+                            // Remove ^^ from the segment and
+                            // Add double quotes around the segment
+                            format!("\"{}\"", segment.replace("^^", ""))
+                        } else {
+                            // Add * to the end of the segment
+                            format!("{}*", segment)
+                        }
+                    })
+                    .collect::<Vec<String>>()
+                    .join(" OR ");
+                not_string
+            }
         );
     }
+    // remove the trailing `OR )`
     match_string = match_string.trim().to_string();
     match_string
 }
-
 
 // Return documents from the metadata_fts index that match the given search query (name and type)
 // bm25(document_fts, 10) is the ranking function which gives 10x weight to the file name (first column)
@@ -105,24 +124,35 @@ pub fn search_fts_index(
     };
 
     // if there is only a NOT query, pass it to `handle_special_case` function
-    // if query_segments.normal_segments.is_empty()
-    //     && query_segments.quoted_segments.is_empty()
-    //     && query_segments.greedy_segments.is_empty()
-    //     && !query_segments.not_segments.is_empty()
-    // {
-    //     let search_results =
-    //         handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
-    //     return search_results;
-    // }
+    if query_segments.normal_segments.is_empty()
+        && query_segments.quoted_segments.is_empty()
+        && query_segments.greedy_segments.is_empty()
+        && !query_segments.not_segments.is_empty()
+    {
+        let search_results =
+            handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
+        return search_results;
+    }
 
     let match_string = create_match_statement(query_segments);
     println!("match_string: {}", match_string);
 
-    // let _metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
     let body_fts_query = create_body_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
-
-    let search_results: Vec<DocumentSearchResult> =
+    let body_search_results: Vec<DocumentSearchResult> =
         diesel::sql_query(body_fts_query).load::<DocumentSearchResult>(&mut conn)?;
+    let metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
+    let metadata_search_results: Vec<DocumentSearchResult> =
+        diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn)?;
+
+    let mut search_results: Vec<DocumentSearchResult> = Vec::new();
+    // combine the results from body_fts and metadata_fts
+    for result in body_search_results.iter().chain(metadata_search_results.iter()) {
+        search_results.push(result.clone());
+    }
+    // and order them by last_modified
+    search_results.sort_by(|a, b| b.last_modified.cmp(&a.last_modified));
+    // remove duplicates by checking if the id is the same
+    search_results.dedup_by(|a, b| a.id == b.id);
 
     Ok(search_results)
 }
@@ -134,7 +164,7 @@ fn create_body_fts_query(
     limit: i32,
     page: i32,
 ) -> String {
-    // Give 5x weight to the title column (4th) in metadata_fts
+    // Give 100x weight to the title/name column (4th) in metadata_fts and 2x weight to the url/path column (5th)
     let inner_query = format!(
         r#" 
             SELECT d.id, d.source_domain, d.created_at,
@@ -144,22 +174,22 @@ fn create_body_fts_query(
             FROM (
                 SELECT DISTINCT metadata_id FROM body_fts
                 {match_clause}
-                LIMIT {limit} OFFSET {offset}
             ) b
             JOIN metadata m ON b.metadata_id = m.id
             JOIN document d ON m.source_id = d.id
             {inner_where} {where_file_type} {where_date_limit}
+            LIMIT {limit} OFFSET {offset}
         "#,
-        inner_where = if !where_file_type.is_empty() || !where_date_limit.is_empty() {
-            "WHERE".to_string()
+        match_clause = if !match_string.is_empty() {
+            format!(
+                "WHERE body_fts MATCH '{}' ORDER BY bm25(body_fts, 1,1,100,2)",
+                match_string
+            )
         } else {
             "".to_string()
         },
-        match_clause = if !match_string.is_empty() {
-            format!(
-                "WHERE body_fts MATCH '{}' ORDER BY bm25(body_fts, 1,1,5,5)",
-                match_string
-            )
+        inner_where = if !where_file_type.is_empty() || !where_date_limit.is_empty() {
+            "WHERE".to_string()
         } else {
             "".to_string()
         },
@@ -168,13 +198,14 @@ fn create_body_fts_query(
         } else {
             "".to_string()
         },
-        limit = limit,
-        offset = page * limit,
         where_date_limit = if !where_date_limit.is_empty() {
-            where_date_limit.clone()
+            // replace `last_modified` with `document.last_modified` in where_date_limit
+            where_date_limit.clone().replace("last_modified", "d.last_modified")
         } else {
             "".to_string()
-        }
+        },
+        limit = limit,
+        offset = page * limit
     );
 
     println!("inner_query: {}", inner_query);
@@ -208,7 +239,7 @@ fn create_metadata_fts_query(
         },
         match_clause = if !match_string.is_empty() {
             format!(
-                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)",
+                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,1,50)",
                 match_string
             )
         } else {
@@ -219,20 +250,18 @@ fn create_metadata_fts_query(
         } else {
             "".to_string()
         },
-        limit = limit,
-        offset = page * limit,
         where_date_limit = if !where_date_limit.is_empty() {
             where_date_limit.clone()
         } else {
             "".to_string()
-        }
+        },
+        limit = limit,
+        offset = page * limit
     );
 
     println!("inner_query: {}", inner_query);
     inner_query
 }
-
-
 
 // Get recently opened documents
 pub fn get_recently_opened_docs(
@@ -306,6 +335,7 @@ pub fn get_counts_for_all_filetypes(
 }
 
 // Handle special case with NEGATIVE query only
+// We don't bother looking into body_fts here because it's not needed for eliminating results
 fn handle_special_case(
     query: String,
     page: i32,
@@ -346,7 +376,7 @@ fn handle_special_case(
         },
         match_clause = if !match_string.is_empty() {
             format!(
-                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,5)",
+                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,1,50)",
                 match_string
             )
         } else {
@@ -392,13 +422,13 @@ fn handle_special_case(
         } else {
             "".to_string()
         },
-        limit = limit,
-        offset = page * limit,
         where_file_type_clone = if !where_file_type_clone.is_empty() {
             where_file_type_clone
         } else {
             "".to_string()
-        }
+        },
+        limit = limit,
+        offset = page * limit,
     );
 
     println!("outer_query: {}", outer_query);
