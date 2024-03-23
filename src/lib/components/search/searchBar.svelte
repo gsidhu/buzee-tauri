@@ -7,9 +7,10 @@
 		resultsPageShown,
 		resultsPerPage,
 		searchInProgress,
-		compactViewMode
+		compactViewMode,
+		allowedExtensions
 	} from '$lib/stores';
-	import { searchDocuments } from '$lib/utils/dbUtils';
+	import { searchDocuments, setExtensionCategory } from '$lib/utils/dbUtils';
 	let isInputFocused = false;
 	let searchInputRef: HTMLInputElement; // a reference to the input element that allows updating the DOM without running a querySelector.
 
@@ -24,11 +25,16 @@
 			filetypeShown: $filetypeShown,
 			resultsPageShown: $resultsPageShown
 		});
+		let filetypeToGet = $filetypeShown;
+		if (filetypeToGet !== 'any') {
+			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
+			console.log('filetypeToGet:', filetypeToGet);
+		}
 		let results = await searchDocuments(
 			$searchQuery,
 			$resultsPageShown,
 			$resultsPerPage,
-			$filetypeShown
+			filetypeToGet
 		);
 		sendEvent('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
 		$documentsShown = results;

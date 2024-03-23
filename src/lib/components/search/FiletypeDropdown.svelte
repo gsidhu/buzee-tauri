@@ -7,37 +7,29 @@
 		filetypeShown,
 		resultsPageShown,
 		resultsPerPage,
-		searchInProgress
+		searchInProgress,
+		allowedExtensions
 	} from '$lib/stores';
-	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
+	import { getDocumentsFromDB, searchDocuments, categoriseExtensions, setExtensionCategory } from '$lib/utils/dbUtils';
 	import { sendEvent } from '../../../utils/firebase';
 
 	export let searchBar = true;
 
-	let allowedExtensions: FileTypesDropdown = {
-		categories: [],
-		items: []
-	};
-	
-	function categoriseExtensions(received_filetypes: FileTypes[]) {
-		received_filetypes.forEach((extension) => {
-			if (allowedExtensions.categories.indexOf(extension.file_type_category) === -1) {
-				allowedExtensions.categories.push(extension.file_type_category);
-			}
-		});
-		allowedExtensions.items = received_filetypes;
-	}
-
 	async function showDocsForFiletype() {
 		$searchInProgress = true;
+		let filetypeToGet = $filetypeShown;
+		if (filetypeToGet !== 'any') {
+			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
+			console.log('filetypeToGet:', filetypeToGet);
+		}
 		if ($searchQuery === '') {
-			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, $filetypeShown);
+			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, filetypeToGet);
 		} else {
 			$documentsShown = await searchDocuments(
 				$searchQuery,
 				$resultsPageShown,
 				$resultsPerPage,
-				$filetypeShown
+				filetypeToGet
 			);
 		}
 		sendEvent('click:showDocsForFileType', {
@@ -52,8 +44,8 @@
 		// Get list of available extensions from main process
 		invoke('get_allowed_filetypes').then((res) => {
 			// @ts-ignore
-			categoriseExtensions(JSON.parse(res));
-			console.log('allowedExtensions:', allowedExtensions);
+			$allowedExtensions = categoriseExtensions(JSON.parse(res));
+			console.log('allowedExtensions:', $allowedExtensions);
 		});
 	});
 </script>
@@ -66,7 +58,7 @@
 		on:change={() => showDocsForFiletype()}
 	>
 		<option value="any" selected>any</option>
-		{#each allowedExtensions.categories as category}
+		{#each $allowedExtensions.categories as category}
 			<option value="{category}">{category}</option>
 		{/each}
 	</select>
@@ -82,7 +74,7 @@
 			on:change={() => showDocsForFiletype()}
 		>
 			<option value="any">any</option>
-			{#each allowedExtensions.categories as category}
+			{#each $allowedExtensions.categories as category}
 				<option value="{category}">{category}</option>
 			{/each}
 		</select>
@@ -123,7 +115,7 @@
 	.filetype-select,
 	.filetype-select:focus-visible {
 		color: var(--purple);
-		font-weight: 600;
+		font-weight: 400;
 	}
 	.filetype-select::-ms-expand {
 		display: none;

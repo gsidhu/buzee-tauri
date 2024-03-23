@@ -51,12 +51,18 @@ let storedSelectedResult: DocumentSearchResult = {
   comment: null,
 };
 
+let storedAllowedExtensions: FileTypesDropdown = {
+  categories: [],
+  items: []
+};
+
 // 2. Set the stored value or a sane default.
 export const pinMode = writable(false)
 export const searchQuery = writable(storedSearchQuery || '')
 export const searchOptions = writable(storedSearchOptions || '')
 export const documentsShown = writable(storedDocumentsShown || [])
 export const filetypeShown = writable('any')
+export const allowedExtensions = writable(storedAllowedExtensions);
 export const resultsPageShown = writable(0)
 export const resultsPerPage = writable(50)
 export const promptUser = writable("")
