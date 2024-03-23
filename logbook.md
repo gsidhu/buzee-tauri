@@ -1,5 +1,8 @@
 # Logbook
 
+## - Set up cron job to index every hour.
+## - Add code for adding folders to the index.
+
 - Made search bar file_type dropdown work. Storing allowedExtensions in the store now.
 - Getting up to 100 results on each search since results from both FTS tables are combined. This is good because then we don't need to run double searches from the front end.
 - NOT query case handled as before. Not using body_fts for that because it is going to be quite impossible for a user to spot a document that has the search query _inside_ it but not in its title. Marginal utility is low.
@@ -91,8 +94,6 @@
 - Add user prefs to database.
 
 ### Backend
-- Set up cron job to index every hour.
-- Add code for adding folders to the index.
 - Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
 - Add search suggestions.
 - Make XLSX, CSV and PDF indexing better.
@@ -123,3 +124,4 @@
 - Allow user to add/remove file types and categories.
 - Update Document Stats to reflect categories and # files indexed.
 - Add infinite scroll to search results. (Need Punnu's help for this.)
+- Fix window overflow issue.

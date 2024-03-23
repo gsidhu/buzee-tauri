@@ -1,6 +1,6 @@
 // Inter-Process Communication between Rust and SvelteKit
+// The idea is to eventually keep only callers here and move the actual logic to other files. This way, for creating a web app, we just have to convert this file into an API and call the same functions from the frontend.
 
-use std::time::{SystemTime, UNIX_EPOCH};
 use crate::custom_types::{DBStat, DateLimit, Error, Payload};
 use crate::database::establish_connection;
 use crate::database::models::DocumentSearchResult;
@@ -10,7 +10,6 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::user_prefs::set_scan_running_status;
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
@@ -100,31 +99,7 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
 // Run file sync
 #[tauri::command]
 async fn run_file_sync(window: tauri::Window) {
-  info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
-  println!("File sync started");
-  let mut conn = establish_connection();
-
-  // Since thread_manager cannot be passed to the tokio thread,
-  // the handle is not removed when the process completes
-  // So on each click, check against the DB
-  let sync_running = sync_status(&mut conn);
-  // Check if the task is already running
-  if sync_running == "true" {
-  // if let Some(handle) = &thread_manager.handle {
-    println!("File sync already running; Stopping now");
-    // Set sync status to false
-    set_scan_running_status(&mut conn, false, true);
-    println!("File sync stopped");
-  } else {
-    // Set sync status to true
-    set_scan_running_status(&mut conn, true, true);
-    // Spawn the new task
-    tokio::spawn(async move {
-      run_sync_operation(window);
-      set_scan_running_status(&mut conn, false, true);
-      info!("FILE SYNC FINISHED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
-    });
-  }
+    run_sync_operation(window);
 }
 
 // Get sync status
