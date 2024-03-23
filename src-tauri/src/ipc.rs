@@ -13,12 +13,14 @@ use crate::indexing::{all_allowed_filetypes, walk_directory};
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
-use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
 use tauri_plugin_shell;
 use tokio::sync::mpsc;
 use tauri::menu::Menu;
 use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,};
 use log::{error, info, trace, warn};
+use schedule::{Agenda, Job};
+use std::sync::{Arc, Mutex};
 
 pub fn send_message_to_frontend(
     window: &tauri::Window,
@@ -27,6 +29,23 @@ pub fn send_message_to_frontend(
     data: String,
 ) {
     window.emit(&event, Payload { message, data }).unwrap();
+}
+
+async fn setup_cron_job(window: tauri::Window) {
+    let mut sched = Agenda::new();
+    let window_clone = Arc::new(Mutex::new(window));
+    sched.add(Job::new(move || {
+        info!("Running background sync cron job");
+        // convert Arc<std::sync::Mutex<tauri::Window>> to tauri::Window
+        let window_clone = window_clone.lock().unwrap().clone();
+        run_sync_operation(window_clone);
+    }, "0 * * * *".parse().unwrap()));
+
+    // Check and run pending jobs in agenda every 60 seconds
+    loop {
+        sched.run_pending();
+        std::thread::sleep(std::time::Duration::from_millis(60000));
+    }
 }
 
 // Get OS boolean
@@ -209,19 +228,21 @@ pub fn initialize() {
         ])
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
+            #[cfg(desktop)]
             {
                 app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::with_handler(|_app, shortcut| {
                         let global_shortcut = get_global_shortcut(Modifiers::ALT, Code::Space);
                         println!("{:?}", shortcut);
                         if shortcut == &global_shortcut {
-                            println!("Alt+Space Detected!");
-                            let main_window = _app.get_webview_window("main").unwrap();
-                            hide_or_show_window(main_window);
+                          println!("Alt+Space Detected!");
+                          let main_window = _app.get_webview_window("main").unwrap();
+                          hide_or_show_window(main_window);
                         }
                     })
                     .build(),
                 )?;
+                app.global_shortcut().register(get_global_shortcut(Modifiers::ALT, Code::Space))?;
             }
             {
                 app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
@@ -229,6 +250,11 @@ pub fn initialize() {
                     // let main_window = app_handle.get_webview_window("main").unwrap();
                     contextmenu_receiver(app_handle, event);
                 });
+            }
+            {
+                // let main_window = app.get_webview_window("main").unwrap();
+                // convert tauri::WebviewWindow to tauri::Window
+                // setup_cron_job(main_window);
             }
             Ok(())
         })

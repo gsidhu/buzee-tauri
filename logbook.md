@@ -1,8 +1,9 @@
 # Logbook
 
-## - Set up cron job to index every hour.
+## - Set up cron job to index every hour. Modify sync function to use WebviewWindow instead of Window.
 ## - Add code for adding folders to the index.
 
+- Fixed global shortcut.
 - Made search bar file_type dropdown work. Storing allowedExtensions in the store now.
 - Getting up to 100 results on each search since results from both FTS tables are combined. This is good because then we don't need to run double searches from the front end.
 - NOT query case handled as before. Not using body_fts for that because it is going to be quite impossible for a user to spot a document that has the search query _inside_ it but not in its title. Marginal utility is low.
