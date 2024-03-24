@@ -1,4 +1,6 @@
-use crate::{custom_types::Payload, database::models::DocumentSearchResult};
+use crate::custom_types::Payload;
+use crate::housekeeping::{get_documents_directory, APP_DIRECTORY};
+
 // Import the Error type
 use tauri::{
   menu::{Menu, MenuEvent, MenuId, MenuItem}, Manager, Window
@@ -24,7 +26,8 @@ pub fn statusbar_context_menu(window: &Window) {
         &[
           &MenuItem::with_id(manager, "document_stats", "Document Stats", true, None::<&str>).unwrap(),
           &MenuItem::with_id(manager, "deep_breathing", "Deep Breathing", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(manager, "tips_and_shortcuts", "Tips && Shortcuts", true, None::<&str>).unwrap()
+          &MenuItem::with_id(manager, "tips_and_shortcuts", "Tips && Shortcuts", true, None::<&str>).unwrap(),
+          &MenuItem::with_id(manager, "app_folder", "Show App Folder", true, None::<&str>).unwrap()
         ],
     )
     .unwrap();
@@ -52,6 +55,10 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
     }
     "open_folder" => {
       app.emit("open-folder", Payload { message: "Open Folder".into(), data: "".into() }).unwrap();
+    }
+    "app_folder" => {
+      let app_dir_path = format!("{}/{}", get_documents_directory().unwrap(), APP_DIRECTORY);
+      let _ = open::that_in_background(app_dir_path);
     }
     "document_stats" => {
       app.emit("document-stats", Payload { message: "Document Stats".into(), data: "".into() }).unwrap();

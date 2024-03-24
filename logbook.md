@@ -1,8 +1,10 @@
 # Logbook
 
-## - Set up cron job to index every hour. Modify sync function to use WebviewWindow instead of Window.
+## - Set up cron job to index every hour. 
 ## - Add code for adding folders to the index.
 
+- Modified sync function to use WebviewWindow instead of Window. So that it can be called from the tauri builder function.
+- Now highlighting the file when opening the folder. Fallback to just opening the folder.
 - Fixed global shortcut.
 - Made search bar file_type dropdown work. Storing allowedExtensions in the store now.
 - Getting up to 100 results on each search since results from both FTS tables are combined. This is good because then we don't need to run double searches from the front end.

@@ -21,9 +21,10 @@ use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statu
 use log::{error, info, trace, warn};
 use schedule::{Agenda, Job};
 use std::sync::{Arc, Mutex};
+use std::process::Command;
 
 pub fn send_message_to_frontend(
-    window: &tauri::Window,
+    window: &tauri::WebviewWindow,
     event: String,
     message: String,
     data: String,
@@ -31,21 +32,21 @@ pub fn send_message_to_frontend(
     window.emit(&event, Payload { message, data }).unwrap();
 }
 
-async fn setup_cron_job(window: tauri::Window) {
-    let mut sched = Agenda::new();
-    let window_clone = Arc::new(Mutex::new(window));
-    sched.add(Job::new(move || {
-        info!("Running background sync cron job");
-        // convert Arc<std::sync::Mutex<tauri::Window>> to tauri::Window
-        let window_clone = window_clone.lock().unwrap().clone();
-        run_sync_operation(window_clone);
-    }, "0 * * * *".parse().unwrap()));
+fn setup_cron_job(window: tauri::WebviewWindow) {
+  let mut sched = Agenda::new();
+  let window_clone = Arc::new(Mutex::new(window));
+  sched.add(Job::new(move || {
+    info!("Running background sync cron job");
+    // convert Arc<std::sync::Mutex<tauri::Window>> to tauri::Window
+    let window_clone = window_clone.lock().unwrap().clone();
+    run_sync_operation(window_clone);
+  }, "0 * * * * *".parse().unwrap()));
 
-    // Check and run pending jobs in agenda every 60 seconds
-    loop {
-        sched.run_pending();
-        std::thread::sleep(std::time::Duration::from_millis(60000));
-    }
+  // Check and run pending jobs in agenda every 60 seconds
+  loop {
+    sched.run_pending();
+    std::thread::sleep(std::time::Duration::from_millis(10000));
+  }
 }
 
 // Get OS boolean
@@ -81,16 +82,43 @@ fn open_file_or_folder(file_path: String, window: tauri::Window) -> Result<Strin
 // Open the folder containing the file from the filepath
 #[tauri::command]
 fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
-    println!("Opening file folder for {}", file_path);
-    let path = std::path::PathBuf::from(file_path);
-    let dir = path.parent().unwrap();
-    let _ = open::that(dir);
+    println!("Opening folder for {}", file_path);
+    let do_steps = || -> Result<(), Error> {
+        #[cfg(target_os = "windows")]
+        {
+            Command::new("explorer")
+            .args(["/select,", &path]) // The comma after select is not a typo
+            .spawn()
+            .map_err(|e| e)?;
+        }
+        #[cfg(target_os = "macos")]
+        {
+            let path_buf = std::path::PathBuf::from(&file_path);
+            if path_buf.is_dir() {
+            Command::new("open")
+                .args([&file_path])
+                .spawn()
+                .map_err(|e| e)?;
+            } else {
+            Command::new("open")
+                .args(["-R", &file_path])
+                .spawn()
+                .map_err(|e| e)?;
+            }
+        }
+        Ok(())
+    };
+    if let Err(_err) = do_steps() {
+        let path = std::path::PathBuf::from(file_path);
+        let dir = path.parent().unwrap();
+        let _ = open::that_in_background(dir);
+    }
     Ok("Opened the folder!".into())
 }
 
 // Run file indexing ONLY
 #[tauri::command]
-async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
+async fn run_file_indexing(window: tauri::WebviewWindow) -> Result<String, Error> {
   let mut connection = establish_connection();
   println!("File watcher started");
   let home_directory = housekeeping::get_home_directory().unwrap();
@@ -117,7 +145,7 @@ async fn run_file_indexing(window: tauri::Window) -> Result<String, Error> {
 
 // Run file sync
 #[tauri::command]
-async fn run_file_sync(window: tauri::Window) {
+async fn run_file_sync(window: tauri::WebviewWindow) {
     run_sync_operation(window);
 }
 
@@ -197,6 +225,7 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
 // Add global shortcut to hide or show the window
 fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
     // TODO: Modify this so it pulls values from user settings instead of args
+    // Add support for multiple modifiers: Some(Modifiers::CONTROL | Modifiers::SHIFT)
     Shortcut::new(Some(modifier), key)
 }
 
@@ -211,54 +240,53 @@ fn open_context_menu(window: tauri::Window, option: String) {
 }
 
 pub fn initialize() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            get_allowed_filetypes,
-            get_os,
-            open_file_or_folder,
-            open_folder_containing_file,
-            run_file_indexing,
-            run_file_sync,
-            get_sync_status,
-            run_search,
-            get_recent_docs,
-            get_db_stats,
-            open_quicklook,
-            open_context_menu
-        ])
-        .plugin(tauri_plugin_shell::init())
-        .setup(|app| {
-            #[cfg(desktop)]
-            {
-                app.handle().plugin(
-                    tauri_plugin_global_shortcut::Builder::with_handler(|_app, shortcut| {
-                        let global_shortcut = get_global_shortcut(Modifiers::ALT, Code::Space);
-                        println!("{:?}", shortcut);
-                        if shortcut == &global_shortcut {
-                          println!("Alt+Space Detected!");
-                          let main_window = _app.get_webview_window("main").unwrap();
-                          hide_or_show_window(main_window);
-                        }
-                    })
-                    .build(),
-                )?;
-                app.global_shortcut().register(get_global_shortcut(Modifiers::ALT, Code::Space))?;
-            }
-            {
-                app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
-                    println!("menu event: {:?}", event);
-                    // let main_window = app_handle.get_webview_window("main").unwrap();
-                    contextmenu_receiver(app_handle, event);
-                });
-            }
-            {
-                // let main_window = app.get_webview_window("main").unwrap();
-                // convert tauri::WebviewWindow to tauri::Window
-                // setup_cron_job(main_window);
-            }
-            Ok(())
-        })
-        .menu(|app_handle| Menu::default(app_handle))
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+  tauri::Builder::default()
+    .invoke_handler(tauri::generate_handler![
+      get_allowed_filetypes,
+      get_os,
+      open_file_or_folder,
+      open_folder_containing_file,
+      run_file_indexing,
+      run_file_sync,
+      get_sync_status,
+      run_search,
+      get_recent_docs,
+      get_db_stats,
+      open_quicklook,
+      open_context_menu
+    ])
+    .plugin(tauri_plugin_shell::init())
+    .setup(|app| {
+        #[cfg(desktop)]
+      {
+          app.handle().plugin(
+            tauri_plugin_global_shortcut::Builder::with_handler(|_app, shortcut| {
+              let global_shortcut = get_global_shortcut(Modifiers::ALT, Code::Space);
+              println!("{:?}", shortcut);
+              if shortcut == &global_shortcut {
+                println!("Alt+Space Detected!");
+                let main_window = _app.get_webview_window("main").unwrap();
+                hide_or_show_window(main_window);
+              }
+            })
+            .build(),
+          )?;
+          app.global_shortcut().register(get_global_shortcut(Modifiers::ALT, Code::Space))?;
+        }
+        {
+          app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
+            println!("menu event: {:?}", event);
+            // let main_window = app_handle.get_webview_window("main").unwrap();
+            contextmenu_receiver(app_handle, event);
+          });
+        }
+        {
+          // let main_window = app.get_webview_window("main").unwrap();
+          // setup_cron_job(main_window);
+        }
+        Ok(())
+    })
+    .menu(|app_handle| Menu::default(app_handle))
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
 }

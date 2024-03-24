@@ -3,12 +3,12 @@ use crate::database::establish_connection;
 use crate::database::schema::app_data;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
-use crate::indexing::{walk_directory, parse_content_from_files, remove_nonexistent_files};
+use crate::indexing::{walk_directory, parse_content_from_files};
 use crate::user_prefs::set_scan_running_status;
 use log::{error, info, trace, warn};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub fn run_sync_operation(window: tauri::Window) {
+pub fn run_sync_operation(window: tauri::WebviewWindow) {
   info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
   println!("File sync started");
   let mut conn = establish_connection();
@@ -30,8 +30,6 @@ pub fn run_sync_operation(window: tauri::Window) {
       let home_directory = get_home_directory().unwrap();
       // Parse metadata of all files but only update the ones whose time metadata or size has changed
       let _files_added = walk_directory(&mut conn, &window, &home_directory);
-      // Then run through all the files and remove the ones that no longer exist
-      remove_nonexistent_files(&mut conn);
       // Then start parsing the content of all files and add it to the body table
       let _files_parsed = parse_content_from_files(&mut conn);
       // let files_parsed = 0;

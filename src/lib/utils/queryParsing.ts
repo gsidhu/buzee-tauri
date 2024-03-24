@@ -105,7 +105,12 @@ export function cleanSearchQuery(value: string): {} {
     
     // If the segment is a quoted string, remove the quotes and add it to the normalSegments array
     if (segment.startsWith('"') && segment.endsWith('"')) {
-      result.normalSegments.push(segment.substring(1, segment.length - 1).trim());
+      let tempSeg = segment.replace(/"/g, '').trim();
+      // if the segment has a punctuation in it, prepend a ^^ so backend can double-quote it
+      if (tempSeg.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;\-<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
+        tempSeg = '^^' + tempSeg;
+      }
+      result.normalSegments.push(tempSeg);
       return;
     }
 
@@ -116,8 +121,8 @@ export function cleanSearchQuery(value: string): {} {
       // if the segment has a punctuation in it, prepend a ^^ so backend can double-quote it
       if (tempSeg.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;\-<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
         tempSeg = '^^' + tempSeg;
-      } 
-      result.notSegments.push(tempSeg);
+      }
+      if (tempSeg.length > 0) result.notSegments.push(tempSeg);
       return;
     }
 

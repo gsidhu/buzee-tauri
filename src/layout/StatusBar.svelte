@@ -152,7 +152,7 @@
 	<!-- Left end -->
 	<div class="col px-0 d-flex flex-row justify-content-start" id="status-bar-left">
 		{#if onboardingDone}
-			Showing {numFiles} docs
+			Showing {numFiles} {numFiles === 1 ? "file" : "files"}
 		{:else if dbReady || $dbCreationInProgress}
 			<div>
 				{#if $dbCreationInProgress}

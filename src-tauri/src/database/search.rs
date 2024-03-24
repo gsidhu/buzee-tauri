@@ -31,7 +31,27 @@ fn create_match_statement(query_segments: QuerySegments) -> String {
         match_string = format!(
             "{} {}",
             match_string,
-            query_segments.normal_segments.join(" ")
+            // query_segments.normal_segments.join(" ")
+            if query_segments.normal_segments.len() > 0 {
+                let normal_string = query_segments.normal_segments
+                        .iter()
+                        .map(|segment| {
+                            // if segment starts with ^^, it contains a punctuation mark (using code from frontend because regex caused problems in rust)
+                            if segment.starts_with("^^") {
+                                // Remove ^^ from the segment and
+                                // Add double quotes around the segment
+                                format!("\"{}\"", segment.replace("^^", ""))
+                            } else {
+                                // Leave it as it is
+                                format!("{}", segment)
+                            }
+                        })
+                        .collect::<Vec<String>>()
+                        .join(" ");
+                normal_string
+            } else {
+                "".to_string()
+            }
         );
     }
     // If there are greedy segments, join them with an asterisk space
@@ -51,8 +71,7 @@ fn create_match_statement(query_segments: QuerySegments) -> String {
                 format!("{}*", query_segments.not_segments[0])
             } else {
                 // join with `* OR` and remove the trailing `OR`
-                let not_segments = query_segments.not_segments;
-                let not_string = not_segments
+                let not_string = query_segments.not_segments
                     .iter()
                     .map(|segment| {
                         // if segment starts with ^^, it contains a punctuation mark (using code from frontend because regex caused problems in rust)

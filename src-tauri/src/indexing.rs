@@ -77,7 +77,7 @@ fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), 
     })
 }
 
-pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::Window, path: &str) -> usize {
+pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow, path: &str) -> usize {
     info!("Logger initialized!");
     let mut files_array: Vec<DocumentItem> = vec![];
     let all_forbidden_directories = get_all_forbidden_directories();
@@ -201,6 +201,11 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::Window, path:
       );
       files_array.clear();
     }
+
+    // add folders to the database
+    add_folders_to_db(conn);
+    // remove files from the database that do not exist in the filesystem
+    remove_nonexistent_files(conn);
     // return number of files_added
     files_added
 }
@@ -423,4 +428,8 @@ pub fn remove_nonexistent_files(conn: &mut SqliteConnection) {
       .execute(conn)
       .unwrap();
   }
+}
+
+pub fn add_folders_to_db(conn: &mut SqliteConnection) {
+
 }
