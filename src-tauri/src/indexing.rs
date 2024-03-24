@@ -202,10 +202,10 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
       files_array.clear();
     }
 
-    // add folders to the database
-    add_folders_to_db(conn);
     // remove files from the database that do not exist in the filesystem
     remove_nonexistent_files(conn);
+    // add folders to the database
+    add_folders_to_db(conn);
     // return number of files_added
     files_added
 }
@@ -431,5 +431,51 @@ pub fn remove_nonexistent_files(conn: &mut SqliteConnection) {
 }
 
 pub fn add_folders_to_db(conn: &mut SqliteConnection) {
+  // Get all file paths from the document table
+  let all_files = document::table
+    .select(document::path)
+    .load::<String>(conn)
+    .unwrap();
 
+  // Get parent folders for all the files
+  let all_folders: Vec<String> = all_files
+    .iter()
+    .map(|file| std::path::Path::new(file).parent().unwrap().to_str().unwrap().to_string())
+    .collect();
+  
+  println!("All folders: {}", all_folders.len());
+  // Iterate over all_folders and add only unique folders to unique_folders
+  let mut unique_folders: Vec<String> = vec![];
+  all_folders.iter().for_each(|folder| {
+    if !unique_folders.contains(&folder) {
+      unique_folders.push(folder.to_string());
+    }
+  });
+  println!("Unique folders: {}", unique_folders.len());
+  // Get metadata for each folder and add it to the document table
+  let folder_items: Vec<DocumentItem> = unique_folders
+    .iter()
+    .map(|folder| {
+      let folder_metadata = get_metadata(&std::path::Path::new(folder)).unwrap();
+      DocumentItem {
+        source_domain: "local".to_string(),
+        created_at: folder_metadata.created().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        name: std::path::Path::new(folder).file_name().unwrap().to_str().unwrap().to_string(),
+        path: folder.to_string(),
+        size: None,
+        file_type: "folder".to_string(),
+        last_modified: folder_metadata.modified().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        last_opened: folder_metadata.accessed().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        last_synced: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        is_pinned: false,
+        frecency_rank: 0.0,
+        frecency_last_accessed: 0,
+        comment: None,
+      }
+    })
+    .collect();
+  let _ = diesel::insert_into(document::table)
+    .values(folder_items)
+    .execute(conn)
+    .unwrap();
 }

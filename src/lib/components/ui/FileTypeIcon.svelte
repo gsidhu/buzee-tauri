@@ -31,6 +31,8 @@
 	<i class={`bi bi-film ${color ? 'video-icon' : ''}`} title="Video"></i>
 {:else if ['epub', 'mobi', 'azw3'].includes(filetype)}
 	<i class={`bi bi-book-half ${color ? 'video-icon' : ''}`} title="Book"></i>
+{:else if ['folder'].includes(filetype)}
+	<i class={`bi bi-folder-fill ${color ? 'pages-icon' : ''}`} title="Book"></i>
 {:else}
 	<i class={`bi bi-file-earmark ${color ? 'txt-icon' : ''}`} title="File"></i>
 {/if}

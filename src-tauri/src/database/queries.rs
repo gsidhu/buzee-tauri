@@ -39,7 +39,7 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
     "name" TEXT NOT NULL,
     "path" TEXT NOT NULL,
     "size" INTEGER,
-    "file_type" varchar NOT NULL,
+    "file_type" TEXT NOT NULL,
     "last_modified" BIGINT NOT NULL,
     "last_opened" BIGINT NOT NULL DEFAULT 0,
     "last_synced" BIGINT NOT NULL DEFAULT 0,
@@ -81,6 +81,7 @@ pub const BODY_TABLE_CREATE_STATEMENT : &str = r#"
   frecency_rank = float to indicate the frecency of the item
   frecency_last_accessed = timestamp when the item was last accessed using the app
   comment = user comment added in the app
+  extra_tag = additional tag relevant to the source_table (e.g. file_type for document)
 */
 pub const METADATA_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE TABLE IF NOT EXISTS metadata (
@@ -95,6 +96,7 @@ pub const METADATA_TABLE_CREATE_STATEMENT : &str = r#"
     frecency_rank REAL NOT NULL DEFAULT 0,
     frecency_last_accessed BIGINT,
     comment TEXT,
+    extra_tag TEXT NOT NULL,
     FOREIGN KEY (source_id) REFERENCES document(id)
   );
 "#;
@@ -118,6 +120,7 @@ pub const METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
     frecency_rank UNINDEXED,
     frecency_last_accessed UNINDEXED,
     comment,
+    extra_tag,
     content=metadata,
     tokenize="porter unicode61"
   );
@@ -151,10 +154,10 @@ pub const TRIGGER_INSERT_DOCUMENT_METADATA : &str = r#"
   CREATE TRIGGER IF NOT EXISTS insert_document_metadata
   AFTER INSERT ON document
   BEGIN
-      INSERT INTO metadata (source_table, source_domain, source_id, title, url, created_at, last_modified, frecency_rank, frecency_last_accessed, comment)
-      VALUES ('document', NEW.source_domain, NEW.id, NEW.name, NEW.path, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment);
-      INSERT INTO metadata_fts (source_table, source_domain, source_id, title, url, created_at, last_modified, frecency_rank, frecency_last_accessed, comment)
-      VALUES ('document', NEW.source_domain, NEW.id, NEW.name, NEW.path, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment);
+      INSERT INTO metadata (source_table, source_domain, source_id, title, url, created_at, last_modified, frecency_rank, frecency_last_accessed, comment, extra_tag)
+      VALUES ('document', NEW.source_domain, NEW.id, NEW.name, NEW.path, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment, NEW.file_type);
+      INSERT INTO metadata_fts (source_table, source_domain, source_id, title, url, created_at, last_modified, frecency_rank, frecency_last_accessed, comment, extra_tag)
+      VALUES ('document', NEW.source_domain, NEW.id, NEW.name, NEW.path, NEW.created_at, NEW.last_modified, NEW.frecency_rank, NEW.frecency_last_accessed, NEW.comment, NEW.file_type);
   END;
 "#;
 pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
@@ -170,7 +173,8 @@ pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
           last_modified = NEW.last_modified,
           frecency_rank = NEW.frecency_rank,
           frecency_last_accessed = NEW.frecency_last_accessed,
-          comment = NEW.comment
+          comment = NEW.comment,
+          extra_tag = NEW.file_type
       WHERE source_table = 'document' AND source_id = OLD.id;
       UPDATE metadata_fts
       SET source_domain = NEW.source_domain,
@@ -181,7 +185,8 @@ pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
           last_modified = NEW.last_modified,
           frecency_rank = NEW.frecency_rank,
           frecency_last_accessed = NEW.frecency_last_accessed,
-          comment = NEW.comment
+          comment = NEW.comment,
+          extra_tag = NEW.file_type
       WHERE source_table = 'document' AND source_id = OLD.id;
   END;
 "#;

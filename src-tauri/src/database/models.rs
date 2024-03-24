@@ -79,6 +79,7 @@ pub struct MetadataItem {
     pub frecency_rank: f32,
     pub frecency_last_accessed: i64,
     pub comment: Option<String>,
+    pub extra_tag: String,
 }
 
 // This struct is for INSERTING into the body table

@@ -1,8 +1,8 @@
 # Logbook
 
 ## - Set up cron job to index every hour. 
-## - Add code for adding folders to the index.
 
+- Folder search enabled. Added folders to the metadata and _fts tables as `extra_tag`. There will always be some column specific to a source (like file_type for documents or subject for emails) that needs to be indexed. This is a simple way to do it.
 - Modified sync function to use WebviewWindow instead of Window. So that it can be called from the tauri builder function.
 - Now highlighting the file when opening the folder. Fallback to just opening the folder.
 - Fixed global shortcut.

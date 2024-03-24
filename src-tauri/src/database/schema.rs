@@ -31,7 +31,8 @@ table! {
       last_modified -> BigInt,
       frecency_rank -> Float,
       frecency_last_accessed -> BigInt,
-      comment -> Nullable<Text>
+      comment -> Nullable<Text>,
+      extra_tag -> Text
   }
 }
 
