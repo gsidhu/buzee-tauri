@@ -116,6 +116,7 @@
 	.filetype-select:focus-visible {
 		color: var(--purple);
 		font-weight: 400;
+		text-align-last: right;
 	}
 	.filetype-select::-ms-expand {
 		display: none;

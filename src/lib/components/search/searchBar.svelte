@@ -11,11 +11,16 @@
 		allowedExtensions
 	} from '$lib/stores';
 	import { searchDocuments, setExtensionCategory } from '$lib/utils/dbUtils';
-	let isInputFocused = false;
-	let searchInputRef: HTMLInputElement; // a reference to the input element that allows updating the DOM without running a querySelector.
-
 	import FiletypeDropdown from './FiletypeDropdown.svelte';
+	import SearchSuggestions from './searchSuggestions.svelte';
 	import { sendEvent } from '../../../utils/firebase';
+
+	let isInputFocused = false;
+	let searchInputRef: HTMLInputElement; // a reference to the input element that allows updating the DOM without running a querySelector
+
+	// Limiting searchSuggestions to five items so don't have to implement a scroll
+  var searchSuggestions: string[] = ["buzo", "hi", "good boy","buzo", "hi"];
+  var selectedSuggestionItem = -1;
 
 	async function triggerSearch() {
 		$resultsPageShown = 0; // reset the page number on each new search
@@ -39,7 +44,7 @@
 		sendEvent('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
 		$documentsShown = results;
 		$searchInProgress = false;
-		// searchInputRef.blur();
+		searchInputRef.blur();
 	}
 
 	async function getMoreResults() {
@@ -70,49 +75,73 @@
 		if (highlightSearchBar) {
 			searchInputRef.focus();
 		}
+		// add event listener to #search-input to handle arrowdown and arrowup
+		searchInputRef.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowDown') {
+				if (selectedSuggestionItem < searchSuggestions.length - 1) {
+					selectedSuggestionItem += 1;
+					$searchQuery = searchSuggestions[selectedSuggestionItem];
+				}
+			} else if (e.key === 'ArrowUp') {
+				if (selectedSuggestionItem > 0) {
+					selectedSuggestionItem -= 1;
+					$searchQuery = searchSuggestions[selectedSuggestionItem];
+				}
+			} else {
+				selectedSuggestionItem = -1; // on any other key press, reset the suggestion selection
+			}
+		});
 	});
 </script>
 
-<div id="search-bar-wrapper" class={`rounded-3 no-drag ${$compactViewMode ? 'compact-view' : ''}`}>
-	<i class="bi bi-search px-1" aria-label="Search" aria-hidden="true" />
-	<!-- actual search box -->
-	<div id="actual-search-box" class="d-flex flex-grow-1">
-		<form class="d-flex flex-fill" role="search" on:submit|preventDefault={() => triggerSearch()}>
-			<input
-				id="search-input"
-				type="search"
-				class="d-flex"
-				placeholder="Search Documents"
-				aria-label="Search Documents"
-				spellcheck="false"
-				bind:this={searchInputRef}
-				bind:value={$searchQuery}
-				on:focus={() => {
-					isInputFocused = true;
-				}}
-				on:blur={() => {
-					isInputFocused = false;
-				}}
-			/>
-			<FiletypeDropdown searchBar={true} />
-		</form>
-		<div class="d-flex align-items-center justify-content-center">
-			{#if $searchQuery !== ''}
-				<button class="btn clear-search" on:click={() => clearSearchQuery()}>
-					<i class="bi bi-x-circle-fill px-1" aria-label="Clear Search" />
-				</button>
-			{:else}
-				<button class="btn" tabindex="-1" aria-hidden="true" disabled>
-					<i
-						id="placeholder-clear-btn"
-						class="bi bi-x-circle-fill px-1"
-						aria-label="Invisible Placeholder"
-						aria-hidden="true"
-					/>
-				</button>
-			{/if}
+<div id="search-bar-outer-wrapper">
+	<div id="search-bar-wrapper" class={`rounded-3 no-drag ${$compactViewMode ? 'compact-view' : ''}`}>
+		<i class="bi bi-search px-1" aria-label="Search" aria-hidden="true" />
+		<!-- actual search box -->
+		<div id="actual-search-box" class="d-flex flex-grow-1">
+			<form class="d-flex flex-fill" role="search" on:submit|preventDefault={() => triggerSearch()}>
+				<input
+					id="search-input"
+					type="search"
+					class="d-flex"
+					placeholder="Search"
+					aria-label="Search"
+					spellcheck="false"
+					bind:this={searchInputRef}
+					bind:value={$searchQuery}
+					on:focus={() => {
+						isInputFocused = true;
+					}}
+					on:blur={() => {
+						isInputFocused = false;
+					}}
+				/>
+				<FiletypeDropdown searchBar={true} />
+			</form>
+			<div class="d-flex align-items-center justify-content-center clear-search-div">
+				{#if $searchQuery !== ''}
+					<button class="btn clear-search" on:click={() => clearSearchQuery()}>
+						<i class="bi bi-x-circle-fill px-1" aria-label="Clear Search" />
+					</button>
+				{:else}
+					<button class="btn" tabindex="-1" aria-hidden="true" disabled>
+						<i
+							id="placeholder-clear-btn"
+							class="bi bi-x-circle-fill px-1"
+							aria-label="Invisible Placeholder"
+							aria-hidden="true"
+						/>
+					</button>
+				{/if}
+			</div>
 		</div>
 	</div>
+	<SearchSuggestions
+      isSearchSuggestionsVisible={isInputFocused}
+      {searchSuggestions}
+      {selectedSuggestionItem}
+      {triggerSearch}
+	  />
 </div>
 
 <style lang="scss">
@@ -155,19 +184,24 @@
 
 	#search-bar-wrapper {
 		display: flex;
-		border: 0;
 		width: 100%;
 		font-size: 1rem;
 		background-color: var(--search-bg);
 		background-clip: padding-box;
 		appearance: none;
 		border: 2px solid #dee2e6;
+		border-radius: 8px;
 		transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 
 		&:focus-within {
-			border: 2px solid var(--light-purple);
+			border-color: var(--light-purple);
 			color: var(--purple);
 		}
+	}
+
+	#search-bar-outer-wrapper {
+		width: 100%;
+		position: relative;
 	}
 
 	.btn {
@@ -180,6 +214,10 @@
 
 	.clear-search:focus {
 		color: var(--hot-pink);
+	}
+
+	.clear-search-div {
+		width: 24px;
 	}
 
 	#placeholder-clear-btn {

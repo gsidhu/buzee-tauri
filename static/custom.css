@@ -35,6 +35,7 @@ body {
 
 .no-drag {
   -webkit-app-region: no-drag;
+  -webkit-user-drag: none;
 }
 
 .grayscale {

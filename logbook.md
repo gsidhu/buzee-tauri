@@ -1,7 +1,9 @@
 # Logbook
 
 ## - Set up cron job to index every hour. 
+## - Populate search suggestions from the database.
 
+- Added UI and interactions for search suggestions.
 - Disabling sync button in status bar for 10 seconds on each click. Showing appropriate UI feedback. This is to allow the sync operation to start properly or complete ongoing tasks before the user can click again.
 - Folder search enabled. Added folders to the metadata and _fts tables as `extra_tag`. There will always be some column specific to a source (like file_type for documents or subject for emails) that needs to be indexed. This is a simple way to do it.
 - Modified sync function to use WebviewWindow instead of Window. So that it can be called from the tauri builder function.
