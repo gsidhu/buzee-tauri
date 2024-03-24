@@ -431,9 +431,10 @@ pub fn remove_nonexistent_files(conn: &mut SqliteConnection) {
 }
 
 pub fn add_folders_to_db(conn: &mut SqliteConnection) {
-  // Get all file paths from the document table
+  // Get all file paths from the document table (excluding folders)
   let all_files = document::table
     .select(document::path)
+    .filter(document::file_type.ne("folder"))
     .load::<String>(conn)
     .unwrap();
 
@@ -444,14 +445,25 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
     .collect();
   
   println!("All folders: {}", all_folders.len());
-  // Iterate over all_folders and add only unique folders to unique_folders
+  // Get all existing folders from the database
+  let existing_folders = document::table
+    .select(document::path)
+    .filter(document::file_type.eq("folder"))
+    .load::<String>(conn)
+    .unwrap();
+
+  // Iterate over all_folders and add only unique folders
   let mut unique_folders: Vec<String> = vec![];
   all_folders.iter().for_each(|folder| {
-    if !unique_folders.contains(&folder) {
+    if !unique_folders.contains(&folder) && !existing_folders.contains(&folder){
       unique_folders.push(folder.to_string());
     }
   });
   println!("Unique folders: {}", unique_folders.len());
+
+  if unique_folders.len() == 0 {
+    return;
+  }
   // Get metadata for each folder and add it to the document table
   let folder_items: Vec<DocumentItem> = unique_folders
     .iter()

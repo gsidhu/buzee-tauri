@@ -22,6 +22,7 @@
 	let darkMode = false;
 	let isMac = false;
 	let syncStatus = false;
+	let syncCoolingPeriod = false;
 	let appMode = 'menubar';
 	let numFiles: number = 0;
 	let showingResults: boolean = false;
@@ -72,16 +73,14 @@
 	async function toggleBackgroundTextProcessing() {
 		sendEvent('click:toggleBackgroundTextProcessing', { ...defaultData });
 		invoke("run_file_sync");
-		// disable `bg-sync-btn` for 30 seconds
+		// disable `bg-sync-btn` for 10 seconds
 		// this allows any pending processes to complete when stopping the sync
 		const btn = document.getElementById('bg-sync-btn') as HTMLButtonElement | null;
 		if (btn) {
-			if (btn) {
-				btn.disabled = true;
-			}
+			syncCoolingPeriod = true;
 			setTimeout(() => {
-				btn.disabled = false;
-			}, 30000);
+				syncCoolingPeriod = false;
+			}, 10000);
 		}
 	}
 
@@ -187,11 +186,10 @@
 			<button
 				id="bg-sync-btn"
 				type="button"
-				class={`px-1 mx-1 status-item ${syncStatus ? 'bg-code-pink' : ''}`}
-				title={`Background sync is ${syncStatus ? 'running' : 'stopped'}. Click to ${
-					syncStatus ? 'stop' : 'start'
-				}.`}
+				class={`px-1 mx-1 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
+				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background sync is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
 				on:click={() => toggleBackgroundTextProcessing()}
+				disabled={syncCoolingPeriod}
 			>
 				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />{` Sync${syncStatus ? 'ing' : ''}`}
 			</button>
@@ -235,9 +233,15 @@
 	</div>
 </div>
 
-<style>
+<style lang="scss">
 	.bg-code-pink {
 		background: var(--bs-code-color) !important;
+	}
+	.disabled-gray {
+		background: var(--bs-gray) !important;
+		&:hover {
+			cursor: not-allowed !important;
+		}
 	}
 	#status-bar-footer.compact-view {
 		height: 1.75em;

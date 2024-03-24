@@ -2,6 +2,7 @@
 
 ## - Set up cron job to index every hour. 
 
+- Disabling sync button in status bar for 10 seconds on each click. Showing appropriate UI feedback. This is to allow the sync operation to start properly or complete ongoing tasks before the user can click again.
 - Folder search enabled. Added folders to the metadata and _fts tables as `extra_tag`. There will always be some column specific to a source (like file_type for documents or subject for emails) that needs to be indexed. This is a simple way to do it.
 - Modified sync function to use WebviewWindow instead of Window. So that it can be called from the tauri builder function.
 - Now highlighting the file when opening the folder. Fallback to just opening the folder.
@@ -119,9 +120,9 @@
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.
 - Show feedback to the user about what dates are being parsed. Maybe as a popover button?
-- Add icons for new file types.
+- [x] Add icons for new file types.
 - Disable default right-click context menu.
-- Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
+- [x] Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
 - [x] Display counter of number of files logged when indexing during onboarding.
 - Add a Preview sidebar that shows a thumbnail and complete metadata of the selected file.
 - Allow user to add/remove file types and categories.
