@@ -32,9 +32,7 @@
 	function showStatusBarMenu(option: string) {
 		sendEvent('click:showStatusBarMenu', { option, ...defaultData });
 		// window.menuAPI?.showStatusBarMenu(option);
-		invoke("open_context_menu", {option:"statusbar"}).then((res) => {
-      console.log("context:", res);
-    });
+		invoke("open_context_menu", {option:"statusbar"}).then((res) => {});
 	}
 
 	function reCalculateOnDocsShownChange() {
@@ -128,8 +126,6 @@
 
 		// Ask for sync status on each mount to keep it updated in case of page changes
 		syncStatus = await invoke("get_sync_status") === 'true';
-		console.log("syncStatus", syncStatus);
-		
 		
 		// on renderer launch
 		appMode = "window";

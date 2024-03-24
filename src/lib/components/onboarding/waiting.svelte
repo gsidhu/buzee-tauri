@@ -11,8 +11,6 @@
   function changeOpacity(element: HTMLElement, mode: 'increase' | 'reduce') {
     //get the style value with getComputedStyle, which is an accurate representation of 
     //all element styling on load.
-    console.log("string: ", getComputedStyle(element).getPropertyValue("opacity"));
-    console.log("number: ", Number(getComputedStyle(element).getPropertyValue("opacity")));
     var currentOp = Number(getComputedStyle(element).getPropertyValue("opacity"));
     if (mode === 'reduce') {
       currentOp -= 0.1;
@@ -21,7 +19,6 @@
       currentOp += 0.1;
       if(currentOp >= 1) clearInterval(increaseTimer);
     }
-    console.log(currentOp);
     element.style.opacity = String(currentOp);
   }
 

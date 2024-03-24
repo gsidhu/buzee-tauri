@@ -19,24 +19,6 @@
 		}
 	}
 
-	function openFileFolder() {
-		invoke("open_file_folder", { filePath: "/Users/thatgurjot/Documents/" }).then((res) => {
-			console.log(res);
-		});
-	}
-
-	function runFileIndexing() {
-		invoke("run_file_indexing").then((res) => {
-			console.log(res);
-		});
-	}
-
-	function runSearch() {
-		invoke("run_search", { query: "gurjot", page: 0, limit: 10, fileType: "xlsx, pdf" }).then((res) => {
-			console.log(res);
-		});
-	}
-
 	onMount(async () => {
 		// Load the first page of documents whenever the app loads
 		// TODO: Replace this with pinned documents later

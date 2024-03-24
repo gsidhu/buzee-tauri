@@ -21,13 +21,7 @@
 			console.log("Event triggered from rust!\nPayload: " + event.payload.message);
 		});
 	}
-
-  function buttonClick() {
-    invoke("test_app_handle").then((res) => {
-      console.log("hi:", res);
-    });
-  }
-
+	
 	onMount(async () => {
     startSerialEventListener();
 		invoke("get_os").then((res) => {

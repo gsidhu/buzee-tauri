@@ -2,7 +2,6 @@ import { writable } from 'svelte/store'
 
 // 1. Get the value out of storage on load.
 // let storedSearchQuery = localStorage.searchQuery;
-// let storedSearchOptions = localStorage.searchOptions;
 // let storedSearchTrigger = localStorage.searchTrigger;
 // let storedSearchResults = localStorage.searchResults;
 // let storedSearchHistory = localStorage.searchHistory;
@@ -17,14 +16,6 @@ if (typeof window !== "undefined") {
 
 // 1.5 Not storing values in localStorage yet because then the last search shows up on each new load.
 let storedSearchQuery = '';
-let storedSearchOptions: DropdownItemsArray = [
-  {
-    label: "Exact Search",
-    handleClick: () => {
-      console.log("Exact search");
-    },
-  },
-];
 let storedDocumentsShown: DocumentSearchResult[] = [];
 // let storedSearchTrigger = false;
 // let storedSearchResults = [];
@@ -59,12 +50,11 @@ let storedAllowedExtensions: FileTypesDropdown = {
 // 2. Set the stored value or a sane default.
 export const pinMode = writable(false)
 export const searchQuery = writable(storedSearchQuery || '')
-export const searchOptions = writable(storedSearchOptions || '')
 export const documentsShown = writable(storedDocumentsShown || [])
 export const filetypeShown = writable('any')
 export const allowedExtensions = writable(storedAllowedExtensions);
 export const resultsPageShown = writable(0)
-export const resultsPerPage = writable(50)
+export const resultsPerPage = writable(25)
 export const promptUser = writable("")
 export const compactViewMode = writable(storedCompactViewMode || false)
 export const selectedResult = writable(storedSelectedResult || {})
@@ -87,7 +77,6 @@ export const dbCreationInProgress = writable(false);
 if(typeof window !== "undefined") {
   pinMode.subscribe(value => { localStorage.pinMode = value })
   searchQuery.subscribe(value => { localStorage.searchQuery = value })
-  searchOptions.subscribe(value => { localStorage.searchOptions = value })
   documentsShown.subscribe(value => { localStorage.documentsShown = value })
   filetypeShown.subscribe(value => { localStorage.filetypeShown = value })
   resultsPageShown.subscribe(value => { localStorage.resultsPageShown = value })

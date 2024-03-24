@@ -33,7 +33,6 @@
 		let filetypeToGet = $filetypeShown;
 		if (filetypeToGet !== 'any') {
 			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
-			console.log('filetypeToGet:', filetypeToGet);
 		}
 		let results = await searchDocuments(
 			$searchQuery,
@@ -86,6 +85,10 @@
 				if (selectedSuggestionItem > 0) {
 					selectedSuggestionItem -= 1;
 					$searchQuery = searchSuggestions[selectedSuggestionItem];
+					setTimeout(function() {
+						// set the cursor to the end of the input because browsers set it to the beginning when you press ArrowUp
+						searchInputRef.setSelectionRange($searchQuery.length, $searchQuery.length);
+					}, 1);
 				}
 			} else {
 				selectedSuggestionItem = -1; // on any other key press, reset the suggestion selection

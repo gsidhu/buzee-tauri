@@ -20,7 +20,6 @@
 		let filetypeToGet = $filetypeShown;
 		if (filetypeToGet !== 'any') {
 			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
-			console.log('filetypeToGet:', filetypeToGet);
 		}
 		if ($searchQuery === '') {
 			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, filetypeToGet);
@@ -45,7 +44,6 @@
 		invoke('get_allowed_filetypes').then((res) => {
 			// @ts-ignore
 			$allowedExtensions = categoriseExtensions(JSON.parse(res));
-			console.log('allowedExtensions:', $allowedExtensions);
 		});
 	});
 </script>

@@ -61,9 +61,7 @@
 		clickRow(e, $shiftKeyPressed);
 		// window.menuAPI?.showResultsContextMenu(result);
 		$selectedResult = result;
-		invoke("open_context_menu", {option:"searchresult"}).then((res) => {
-      console.log("context:", res);
-    });
+		invoke("open_context_menu", {option:"searchresult"}).then((res) => {});
 	}
 
 	const table = createTable(readable($documentsShown), {
@@ -154,28 +152,33 @@
 	// hideForId['lastOpened'] = true;
 
 	onMount(() => {
-		console.log($documentsShown);
-		
+		console.log("docs shown:", $documentsShown);
+		// select the first result when loading new search results
+		$selectedResult = $documentsShown[0];
+		let firstResult = document.querySelector('.result-0') as HTMLElement | null;
+		if (firstResult) {
+			firstResult.focus();
+		}
+
 		resetColumnSize();
+		// window.electronAPI?.resetTableColWidths(() => {
+		// 	resetColumnSize();
+		// });
+		// window.electronAPI?.showHideColumn((id: string, hide: boolean) => {
+		// 	let falseCount = Object.values(hideForId).filter((value) => value === false).length;
+		// 	if (falseCount <= 2 && hide) {
+		// 		return;
+		// 	}
+		// 	console.log(id, hide);
 
-		window.electronAPI?.resetTableColWidths(() => {
-			resetColumnSize();
-		});
-		window.electronAPI?.showHideColumn((id: string, hide: boolean) => {
-			let falseCount = Object.values(hideForId).filter((value) => value === false).length;
-			if (falseCount <= 2 && hide) {
-				return;
-			}
-			console.log(id, hide);
-
-			hideForId[id] = hide;
-			// HACK: if no columns are hidden after this, reset the column size
-			falseCount = Object.values(hideForId).filter((value) => value === false).length;
-			if (falseCount === ids.length) {
-				// window.location.reload();
-				resetColumnSize();
-			}
-		});
+		// 	hideForId[id] = hide;
+		// 	// HACK: if no columns are hidden after this, reset the column size
+		// 	falseCount = Object.values(hideForId).filter((value) => value === false).length;
+		// 	if (falseCount === ids.length) {
+		// 		// window.location.reload();
+		// 		resetColumnSize();
+		// 	}
+		// });
 	});
 </script>
 

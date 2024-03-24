@@ -14,8 +14,6 @@
 
   async function updateDBStats() {
     let dbStats: DBStat[] = await invoke('get_db_stats');
-    console.log('dbStats:', dbStats);
-    
     
     totalDocs = dbStats.reduce((acc, curr) => acc + curr.count, 0);
     // dbStats.map((stat) => {
@@ -46,12 +44,9 @@
       count: totalDocs - allDocCount
     });
 
-    console.log("stats:", statPercentage);
-    console.log("counts:", dbStats);
   }
 
   // function saveUniqueDocumentProfile() {
-  //   console.log('saveUniqueDocumentProfile');
   //   html2canvas(document.getElementById("unique-profile") as HTMLElement).then(canvas => {
   //     saveAs(canvas.toDataURL(), 'unique-document-profile.png');
   //   });

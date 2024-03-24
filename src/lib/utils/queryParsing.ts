@@ -37,7 +37,6 @@ export function extractDate(value: string) {
       // save as string
       dateLimitTrimmed.start = dateLimitTrimmed.start.toString();
       dateLimitTrimmed.end = dateLimitTrimmed.end.toString();
-      console.log(dateLimitTrimmed);
       return dateLimitTrimmed;
     }
   }
@@ -74,8 +73,6 @@ function checkDateMonth(dateLimit: DateLimit, value: string) {
 // But I am keeping it here for now until further testing
 function getDefaultDateFormat() {
   const dateString = new Intl.DateTimeFormat().format(new Date(2000, 1, 10)); // Parse 10th Feb 2000
-  console.log(new Date().toLocaleString());
-  console.log(dateString);
   const isMonthFirst = dateString.startsWith('2') || dateString.startsWith('02'); // check if if 10/2 or 2/10
   return isMonthFirst ? 'MM/DD' : 'DD/MM';
 }
@@ -85,8 +82,6 @@ function getDefaultDateFormat() {
 // `hello "world"` will search for `hello* "world"`
 // `dear "star wars" fan` will search for `dear* "star wars" fan*`
 export function cleanSearchQuery(value: string): {} {
-  console.log("value:", value);
-
   // create a result object to store three types of segments: quoted, greedy and not
   let result: { quotedSegments: string[], normalSegments: string[], greedySegments: string[], notSegments: string[] } = {
     quotedSegments: [],
@@ -97,11 +92,9 @@ export function cleanSearchQuery(value: string): {} {
   
   // Split the input string into segments by space, but keep quoted strings together
   const segments = value.match(/-?"[^"]+"|\S+/g) || [];
-  console.log("Segments:", segments);
 
   // Process each segment
   segments.map(segment => {
-    console.log("Seg:", segment);
     
     // If the segment is a quoted string, remove the quotes and add it to the normalSegments array
     if (segment.startsWith('"') && segment.endsWith('"')) {

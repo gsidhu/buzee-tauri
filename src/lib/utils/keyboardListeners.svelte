@@ -91,8 +91,8 @@
 				?.split('-')[1];
 			let result = $documentsShown[Number(thisResultIndex)];
 
-			console.log(thisResultIndex);
-			console.log($metaKeyPressed);
+			console.log("thisResultIndex:", thisResultIndex);
+			console.log("meta key pressed:", $metaKeyPressed);
 
 			if (e.code === 'Space') {
 				e.preventDefault();

@@ -14,8 +14,6 @@ export async function searchDocuments(query:string, page:number, limit:number, t
     query = dateLimit.text;
   }
   let querySegments = cleanSearchQuery(query);
-  console.log(querySegments);
-  console.log(dateLimit);
   
   if (type === "any") type = undefined;
 
@@ -25,8 +23,6 @@ export async function searchDocuments(query:string, page:number, limit:number, t
   } else {
     results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type, dateLimit: dateLimit});
   }
-  console.log("search results:", results);
-  // const results: DocumentSearchResult[] = [];
   return results;
 }
 

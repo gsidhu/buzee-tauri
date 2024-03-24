@@ -2,7 +2,11 @@
 
 ## - Set up cron job to index every hour. 
 ## - Populate search suggestions from the database.
+```
+select distinct(title) from metadata_fts where title  MATCH 'delhi mod*' ORDER BY last_modified LIMIT 5;
+```
 
+- Cleaned up unnecessary console logs.
 - Added UI and interactions for search suggestions.
 - Disabling sync button in status bar for 10 seconds on each click. Showing appropriate UI feedback. This is to allow the sync operation to start properly or complete ongoing tasks before the user can click again.
 - Folder search enabled. Added folders to the metadata and _fts tables as `extra_tag`. There will always be some column specific to a source (like file_type for documents or subject for emails) that needs to be indexed. This is a simple way to do it.

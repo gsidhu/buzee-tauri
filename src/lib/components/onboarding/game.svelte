@@ -24,13 +24,11 @@
 
 	// @ts-ignore
 	function handleUpdate(event) {
-		console.log('handleUpdate', event.detail);
 		questions[currentQuestionIndex].answer = event.detail;
 		nextQuestion();
 	}
 
 	function nextQuestion() {
-		console.log('nextQuestion', currentQuestionIndex);
 		if (currentQuestionIndex < questions.length - 1) {
 			currentQuestionIndex += 1;
 		} else {
