@@ -47,9 +47,12 @@ let storedAllowedExtensions: FileTypesDropdown = {
   items: []
 };
 
+let storedSearchSuggestions: string[] = [];
+
 // 2. Set the stored value or a sane default.
 export const pinMode = writable(false)
 export const searchQuery = writable(storedSearchQuery || '')
+export const searchSuggestions = writable(storedSearchSuggestions || [])
 export const documentsShown = writable(storedDocumentsShown || [])
 export const filetypeShown = writable('any')
 export const allowedExtensions = writable(storedAllowedExtensions);

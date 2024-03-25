@@ -1,8 +1,11 @@
 use crate::custom_types::{DBStat, DateLimit, QuerySegments};
-use crate::database::models::DocumentSearchResult;
+use crate::database::models::{DocumentSearchResult, MetadataFTSSearchResult};
+use crate::database::schema::metadata;
 use crate::indexing::all_allowed_filetypes;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl,SqliteConnection};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection, TextExpressionMethods};
 use serde_json;
+
+use super::models::BodyFTSSearchResult;
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
     let parsed_json = serde_json::from_str(json_string);
@@ -11,7 +14,6 @@ fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
         Ok(value) => value,
         Err(_) => QuerySegments {
             quoted_segments: Vec::new(),
-            normal_segments: Vec::new(),
             greedy_segments: Vec::new(),
             not_segments: Vec::new(),
         },
@@ -24,34 +26,23 @@ fn create_match_statement(query_segments: QuerySegments) -> String {
 
     // If there are quoted segments, join them with double quotes
     if query_segments.quoted_segments.len() > 0 {
-        match_string = format!("\"{}\"", query_segments.quoted_segments.join("\" \""));
-    }
-    // If there are normal segments, join them with a space
-    if query_segments.normal_segments.len() > 0 {
-        match_string = format!(
-            "{} {}",
-            match_string,
-            // query_segments.normal_segments.join(" ")
-            if query_segments.normal_segments.len() > 0 {
-                let normal_string = query_segments.normal_segments
-                        .iter()
-                        .map(|segment| {
-                            // if segment starts with ^^, it contains a punctuation mark (using code from frontend because regex caused problems in rust)
-                            if segment.starts_with("^^") {
-                                // Remove ^^ from the segment and
-                                // Add double quotes around the segment
-                                format!("\"{}\"", segment.replace("^^", ""))
-                            } else {
-                                // Leave it as it is
-                                format!("{}", segment)
-                            }
-                        })
-                        .collect::<Vec<String>>()
-                        .join(" ");
-                normal_string
-            } else {
-                "".to_string()
-            }
+        match_string = format!("{}",
+        // query_segments.quoted_segments.join("\" \"")
+        query_segments.quoted_segments
+            .iter()
+            .map(|segment| {
+                // if segment contains ^^, it contains a punctuation mark (using code from frontend because regex caused problems in rust)
+                if segment.contains("^^") {
+                    // Remove ^^ from the segment and
+                    // Add double quotes around the segment
+                    format!("\"{}\"", segment.replace("^^", ""))
+                } else {
+                    // Add double quotes around the segment
+                    format!("\"{}\"", segment)
+                }
+            })
+            .collect::<Vec<String>>()
+            .join(" ")
         );
     }
     // If there are greedy segments, join them with an asterisk space
@@ -143,8 +134,7 @@ pub fn search_fts_index(
     };
 
     // if there is only a NOT query, pass it to `handle_special_case` function
-    if query_segments.normal_segments.is_empty()
-        && query_segments.quoted_segments.is_empty()
+    if query_segments.quoted_segments.is_empty()
         && query_segments.greedy_segments.is_empty()
         && !query_segments.not_segments.is_empty()
     {
@@ -470,4 +460,51 @@ fn handle_special_case(
     }
 
     Ok(search_results)
+}
+
+// Get search suggestions
+pub fn get_metadata_title_matches(
+    query: String,
+    conn: &mut SqliteConnection,
+) -> Result<Vec<String>, diesel::result::Error> {
+    let inner_query = format!(
+        r#"
+        SELECT snippet(metadata_fts, 4, '', '', '', 2) as title from metadata_fts
+        WHERE metadata_fts MATCH '{}*'
+        ORDER BY rank LIMIT 5;
+    "#,
+        query
+    );
+    let keyword_suggestions: Vec<MetadataFTSSearchResult> = diesel::sql_query(inner_query).load::<MetadataFTSSearchResult>(conn)?;
+    let mut suggestions: Vec<String> = keyword_suggestions.iter().map(|suggestion| suggestion.title.clone()).collect();
+
+    let inner_query = format!(
+        r#"
+        SELECT snippet(body_fts, 1, '', '', '', 2) as text from body_fts
+        WHERE body_fts MATCH '{}*'
+        ORDER BY rank LIMIT 5;
+    "#,
+        query
+    );
+    let keyword_suggestions: Vec<BodyFTSSearchResult> = diesel::sql_query(inner_query).load::<BodyFTSSearchResult>(conn)?;
+    for suggestion in keyword_suggestions {
+        suggestions.push(suggestion.text);
+    }
+    // convert to lowercase and remove duplicates
+    suggestions = suggestions.iter().map(|s| s.to_lowercase()).collect();
+    suggestions.sort();
+    suggestions.dedup();
+
+    let file_suggestions = metadata::table
+        .select(metadata::title)
+        .filter(metadata::title.like(format!("{}%", query)))
+        .order(metadata::last_modified.desc())
+        .limit(5)
+        .load::<String>(conn)?;
+
+    for suggestion in &file_suggestions {
+        suggestions.push(suggestion.clone());
+    }
+
+    Ok(suggestions)
 }

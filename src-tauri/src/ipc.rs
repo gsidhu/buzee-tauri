@@ -5,7 +5,7 @@ use crate::custom_types::{DBStat, DateLimit, Error, Payload};
 use crate::database::establish_connection;
 use crate::database::models::DocumentSearchResult;
 use crate::database::search::{
-    get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index,
+    get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index, get_metadata_title_matches,
 };
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
@@ -146,7 +146,7 @@ async fn run_file_indexing(window: tauri::WebviewWindow) -> Result<String, Error
 // Run file sync
 #[tauri::command]
 async fn run_file_sync(window: tauri::WebviewWindow) {
-    run_sync_operation(window);
+  run_sync_operation(window);
 }
 
 // Get sync status
@@ -155,6 +155,14 @@ fn get_sync_status() -> Result<String, Error> {
   let mut conn = establish_connection();
   let sync_running = sync_status(&mut conn);
   Ok(sync_running)
+}
+
+// Get search suggestions
+#[tauri::command]
+fn get_search_suggestions(query: String) -> Result<Vec<String>, Error> {
+  let mut conn = establish_connection();
+  let suggestions = get_metadata_title_matches(query, &mut conn).unwrap();
+  Ok(suggestions)
 }
 
 // Run search
@@ -249,6 +257,7 @@ pub fn initialize() {
       run_file_indexing,
       run_file_sync,
       get_sync_status,
+      get_search_suggestions,
       run_search,
       get_recent_docs,
       get_db_stats,

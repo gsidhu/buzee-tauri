@@ -37,8 +37,35 @@ table! {
 }
 
 table! {
+  metadata_fts (id) {
+      id -> Integer,
+      source_table -> Text,
+      source_domain -> Text,
+      source_id -> Integer,
+      title -> Text,
+      url -> Text,
+      created_at -> BigInt,
+      last_modified -> BigInt,
+      frecency_rank -> Float,
+      frecency_last_accessed -> BigInt,
+      comment -> Nullable<Text>,
+      extra_tag -> Text
+  }
+}
+
+table! {
   body (id) {
       id -> Integer,
+      metadata_id -> Integer,
+      text -> Text,
+      title -> Text,
+      url -> Text,
+      last_parsed -> BigInt,
+  }
+}
+
+table! {
+  body_fts (metadata_id) {
       metadata_id -> Integer,
       text -> Text,
       title -> Text,

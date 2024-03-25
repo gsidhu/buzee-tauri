@@ -83,51 +83,45 @@ function getDefaultDateFormat() {
 // `dear "star wars" fan` will search for `dear* "star wars" fan*`
 export function cleanSearchQuery(value: string): {} {
   // create a result object to store three types of segments: quoted, greedy and not
-  let result: { quotedSegments: string[], normalSegments: string[], greedySegments: string[], notSegments: string[] } = {
+  let result: { quotedSegments: string[], greedySegments: string[], notSegments: string[] } = {
     quotedSegments: [],
-    normalSegments: [],
     greedySegments: [],
     notSegments: []
   };
   
-  // Split the input string into segments by space, but keep quoted strings together
+  // if there is a single quote, double it up
+  value = value.replace(/'/g, "''");
+
+  // Split the input string into segments by space, but keep quoted strings and - together
   const segments = value.match(/-?"[^"]+"|\S+/g) || [];
 
   // Process each segment
   segments.map(segment => {
-    
-    // If the segment is a quoted string, remove the quotes and add it to the normalSegments array
+    // If the segment starts with quotes and ends with quotes, remove the quotes and push it to the quotedSegments array
     if (segment.startsWith('"') && segment.endsWith('"')) {
-      let tempSeg = segment.replace(/"/g, '').trim();
-      // if the segment has a punctuation in it, prepend a ^^ so backend can double-quote it
-      if (tempSeg.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;\-<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
-        tempSeg = '^^' + tempSeg;
-      }
-      result.normalSegments.push(tempSeg);
+      let tempSeg = handle_punctuation(segment);
+      result.quotedSegments.push(tempSeg);
       return;
     }
 
-    // If the segment has a - in front of it, remove the `-` and add it to the notSegments array
+    // If the segment has a - in front of it, remove the - and add it to the notSegments array
     if (segment.startsWith('-')) {
-      // remove any quotes because they get added in the SQL query anyway
-      let tempSeg = segment.substring(1).trim().replace(/"/g, '');
-      // if the segment has a punctuation in it, prepend a ^^ so backend can double-quote it
-      if (tempSeg.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;\-<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
-        tempSeg = '^^' + tempSeg;
-      }
+      // remove the - and any quotes because they get added in the SQL query anyway
+      let tempSeg = handle_punctuation(segment.substring(1).trim().replace(/"/g, ''));
       if (tempSeg.length > 0) result.notSegments.push(tempSeg);
+      return;
+    }
+
+    // If the segment matches <WORD/DIGIT><PUNCTUATION><WORD/DIGIT>, push it to the quotedSegments array
+    if (segment.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;\-<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
+      let tempSeg = handle_punctuation(segment);
+      result.quotedSegments.push(tempSeg);
       return;
     }
 
     // If the segment is a word, push it to the greedySegments array
     if (segment.match(/^[a-zA-Z0-9]+$/)) {
       result.greedySegments.push(segment.trim());
-      return;
-    }
-
-    // If the segment matches <WORD/DIGIT><PUNCTUATION><WORD/DIGIT>, push it to the quotedSegments array
-    if (segment.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
-      result.quotedSegments.push(segment.trim());
       return;
     }
 
@@ -142,4 +136,13 @@ export function cleanSearchQuery(value: string): {} {
 
   // Join the processed segments back together with spaces
   return result;
+}
+
+function handle_punctuation(segment: string) {
+  let tempSeg = segment.replace(/"/g, '').trim();
+  // if the segment has a punctuation in it, prepend a ^^ so backend can double-quote it
+  if (tempSeg.match(/[\b\s]*[\w\d]*[!#$₹%&'()*+,./\\:;\-<=>?@[\]^_`{|}~][\w\d]*[\b\s]*/g)) {
+    tempSeg = '^^' + tempSeg;
+  }
+  return tempSeg.trim();
 }

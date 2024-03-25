@@ -1,40 +1,41 @@
 <script lang="ts">
 
 	export let isSearchSuggestionsVisible = false;
-	export let searchSuggestions: string[] = [];
 	export let selectedSuggestionItem = 0;
   export let triggerSearch = () => {};
-  import {searchQuery} from '$lib/stores';
+  import {searchQuery, searchSuggestions} from '$lib/stores';
 
   function searchTrigger(searchItem: string) {
-    $searchQuery = searchItem;
+    // if user clicks on a suggestion, double quote the query
+    $searchQuery = '"' + searchItem + '"';
     triggerSearch();
   }
 </script>
 
 <div id="search-suggestions" class:d-none={!isSearchSuggestionsVisible}>
-	<div class="d-flex list-group">
-		{#each searchSuggestions as searchItem, index}
-			<button
-        type="button"
+	<ul class="d-flex list-group">
+		{#each $searchSuggestions as searchItem, index}
+			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<li
 				class={`btn list-group-item border-0 d-flex py-0 ${
 					index === selectedSuggestionItem
 						? 'selected-history-item'
 						: 'unselected-history-item'
 				}`}
 				id={'search-suggestions-item-' + index}
-				on:keydown={(e) => (e.key === 'Enter' ? searchTrigger(searchItem) : null)}
+        on:click={() => (searchTrigger(searchItem))}
 			>
 					{searchItem}
-			</button>
+			</li>
 		{/each}
-  </div>
+  </ul>
 </div>
 
 <style lang="scss">
   #search-suggestions {
     position: absolute;
-    z-index: 1000;
+    z-index: 1050;
     width: 100%;
     top: 24px; // hack: overlap the search bar a bit to cover the bottom border
   }
@@ -46,6 +47,7 @@
 	}
   .list-group-item {
     border-radius: 0px;
+    cursor: default;
   }
   .list-group {
     overflow: auto;

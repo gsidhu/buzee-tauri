@@ -3,7 +3,7 @@
 
 use diesel::prelude::*;
 use diesel::Insertable;
-use super::schema::{document, metadata, body, user_preferences, app_data, file_types};
+use super::schema::{document, metadata, metadata_fts, body, body_fts, user_preferences, app_data, file_types};
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -110,6 +110,20 @@ pub struct MetadataSearchResult {
     // pub comment: Option<String>,
 }
 
+// This struct is for SELECTING from the metadata table without any JOINs
+#[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = metadata_fts)]
+pub struct MetadataFTSSearchResult {
+    pub title: String,
+}
+
+// This struct is for SELECTING from the metadata table without any JOINs
+#[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = body_fts)]
+pub struct BodyFTSSearchResult {
+    pub text: String,
+}
+
 // This struct is for SELECTING from the document table without any JOINs
 #[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]
 #[diesel(table_name = document)]
@@ -145,4 +159,10 @@ pub struct DocumentResponseModel {
     pub frecency_rank: f32,
     pub frecency_last_accessed: i64,
     pub comment: Option<String>,
+}
+
+// This struct is for SELECTING titles from the metadata_fts table
+#[derive(Serialize, Queryable, Debug)]
+pub struct SearchSuggestionsModel {
+    pub title: String
 }

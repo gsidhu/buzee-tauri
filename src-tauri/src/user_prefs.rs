@@ -123,6 +123,15 @@ pub fn set_default_file_types(conn: &mut SqliteConnection) {
       new_file_types.push(new_file_type);
     }
 
+    // Add folder filetype
+    let new_file_type = FileTypes {
+      file_type: "folder".to_string(),
+      file_type_category: "folder".to_string(),
+      file_type_allowed: true,
+      added_by_user: false,
+    };
+    new_file_types.push(new_file_type);
+
     // insert all new file_types into the file_types table using a transaction
     conn
       .transaction::<_, diesel::result::Error, _>(|conn| {

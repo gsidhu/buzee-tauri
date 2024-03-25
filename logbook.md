@@ -1,11 +1,10 @@
 # Logbook
 
-## - Set up cron job to index every hour. 
-## - Populate search suggestions from the database.
-```
-select distinct(title) from metadata_fts where title  MATCH 'delhi mod*' ORDER BY last_modified LIMIT 5;
-```
+## - Set up cron job to index every hour.
 
+- Added `folder` as a filetype dropdown.
+- Suggested search works.
+- Populating search suggestions from the database combining items from file contents, file names and the complete filename itself.
 - Cleaned up unnecessary console logs.
 - Added UI and interactions for search suggestions.
 - Disabling sync button in status bar for 10 seconds on each click. Showing appropriate UI feedback. This is to allow the sync operation to start properly or complete ongoing tasks before the user can click again.

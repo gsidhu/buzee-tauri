@@ -30,8 +30,6 @@ pub struct DateLimit {
 pub struct QuerySegments {
   #[serde(rename = "quotedSegments")]
   pub quoted_segments: Vec<String>,
-  #[serde(rename = "normalSegments")]
-  pub normal_segments: Vec<String>,
   #[serde(rename = "greedySegments")]
   pub greedy_segments: Vec<String>,
   #[serde(rename = "notSegments")]

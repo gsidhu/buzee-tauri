@@ -10,7 +10,8 @@
 		searchInProgress,
 		allowedExtensions
 	} from '$lib/stores';
-	import { getDocumentsFromDB, searchDocuments, categoriseExtensions, setExtensionCategory } from '$lib/utils/dbUtils';
+	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
+	import { categoriseExtensions, setExtensionCategory } from '$lib/utils/miscUtils';
 	import { sendEvent } from '../../../utils/firebase';
 
 	export let searchBar = true;

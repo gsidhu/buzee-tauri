@@ -8,19 +8,33 @@
 		resultsPerPage,
 		searchInProgress,
 		compactViewMode,
-		allowedExtensions
+		allowedExtensions,
+		searchSuggestions
 	} from '$lib/stores';
-	import { searchDocuments, setExtensionCategory } from '$lib/utils/dbUtils';
+	import { searchDocuments } from '$lib/utils/dbUtils';
+	import { setExtensionCategory } from '$lib/utils/miscUtils';
 	import FiletypeDropdown from './FiletypeDropdown.svelte';
 	import SearchSuggestions from './searchSuggestions.svelte';
 	import { sendEvent } from '../../../utils/firebase';
+	import { invoke } from '@tauri-apps/api/core';
 
 	let isInputFocused = false;
 	let searchInputRef: HTMLInputElement; // a reference to the input element that allows updating the DOM without running a querySelector
 
 	// Limiting searchSuggestions to five items so don't have to implement a scroll
-  var searchSuggestions: string[] = ["buzo", "hi", "good boy","buzo", "hi"];
-  var selectedSuggestionItem = -1;
+  let selectedSuggestionItem = -1;
+	let getSuggestions = true;
+
+	$: if ($searchQuery.length >= 3 && getSuggestions) {
+		getSearchSuggestions();
+	} else if ($searchQuery.length < 3) {
+		$searchSuggestions = [];
+	}
+
+	async function getSearchSuggestions() {
+		let removeSpecialChars = $searchQuery.replace(/[^a-zA-Z0-9 ]/g, '');
+		$searchSuggestions = await invoke('get_search_suggestions', { query: removeSpecialChars });
+	}
 
 	async function triggerSearch() {
 		$resultsPageShown = 0; // reset the page number on each new search
@@ -46,19 +60,9 @@
 		searchInputRef.blur();
 	}
 
-	async function getMoreResults() {
-		$resultsPageShown += 1;
-		const results = await searchDocuments(
-			$searchQuery,
-			$resultsPageShown,
-			$resultsPerPage,
-			$filetypeShown
-		);
-		return results;
-	}
-
 	function clearSearchQuery() {
 		$searchQuery = '';
+		$searchSuggestions = [];
 		sendEvent('click:clearSearchQuery');
 	}
 
@@ -77,14 +81,16 @@
 		// add event listener to #search-input to handle arrowdown and arrowup
 		searchInputRef.addEventListener('keydown', (e) => {
 			if (e.key === 'ArrowDown') {
-				if (selectedSuggestionItem < searchSuggestions.length - 1) {
+				if (selectedSuggestionItem < $searchSuggestions.length - 1) {
 					selectedSuggestionItem += 1;
-					$searchQuery = searchSuggestions[selectedSuggestionItem];
+					getSuggestions = false;
+					$searchQuery = $searchSuggestions[selectedSuggestionItem];
 				}
 			} else if (e.key === 'ArrowUp') {
 				if (selectedSuggestionItem > 0) {
 					selectedSuggestionItem -= 1;
-					$searchQuery = searchSuggestions[selectedSuggestionItem];
+					getSuggestions = false;
+					$searchQuery = $searchSuggestions[selectedSuggestionItem];
 					setTimeout(function() {
 						// set the cursor to the end of the input because browsers set it to the beginning when you press ArrowUp
 						searchInputRef.setSelectionRange($searchQuery.length, $searchQuery.length);
@@ -92,6 +98,7 @@
 				}
 			} else {
 				selectedSuggestionItem = -1; // on any other key press, reset the suggestion selection
+				getSuggestions = true;
 			}
 		});
 	});
@@ -116,7 +123,10 @@
 						isInputFocused = true;
 					}}
 					on:blur={() => {
-						isInputFocused = false;
+						// blur after timeout so that clicks on suggested items get registered
+						setTimeout(() => {
+							isInputFocused = false;
+						}, 200);
 					}}
 				/>
 				<FiletypeDropdown searchBar={true} />
@@ -140,8 +150,7 @@
 		</div>
 	</div>
 	<SearchSuggestions
-      isSearchSuggestionsVisible={isInputFocused}
-      {searchSuggestions}
+      isSearchSuggestionsVisible={isInputFocused && $searchSuggestions.length > 0}
       {selectedSuggestionItem}
       {triggerSearch}
 	  />
