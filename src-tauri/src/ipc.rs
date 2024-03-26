@@ -1,7 +1,7 @@
 // Inter-Process Communication between Rust and SvelteKit
 // The idea is to eventually keep only callers here and move the actual logic to other files. This way, for creating a web app, we just have to convert this file into an API and call the same functions from the frontend.
 
-use crate::custom_types::{DBStat, DateLimit, Error, Payload};
+use crate::custom_types::{DBStat, DateLimit, Error, Payload, GlobalShortcutState};
 use crate::database::establish_connection;
 use crate::database::models::DocumentSearchResult;
 use crate::database::search::{
@@ -10,10 +10,10 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
+use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut};
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
 use tauri_plugin_shell;
 use tokio::sync::mpsc;
 use tauri::menu::Menu;
@@ -230,13 +230,6 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
     Ok("Opened QuickLook!".into())
 }
 
-// Add global shortcut to hide or show the window
-fn get_global_shortcut(modifier: Modifiers, key: Code) -> Shortcut {
-    // TODO: Modify this so it pulls values from user settings instead of args
-    // Add support for multiple modifiers: Some(Modifiers::CONTROL | Modifiers::SHIFT)
-    Shortcut::new(Some(modifier), key)
-}
-
 // Context Menu
 #[tauri::command]
 fn open_context_menu(window: tauri::Window, option: String) {
@@ -245,21 +238,6 @@ fn open_context_menu(window: tauri::Window, option: String) {
         "statusbar" => statusbar_context_menu(&window),
         _ => println!("Invalid context menu option"),
     }
-}
-
-// Init a background process to detect window focus/blur, and emit periodic events
-#[tauri::command]
-fn track_window_focus(window: tauri::WebviewWindow) {
-  // Seems to consume too much juice
-  // std::thread::spawn(move || {
-  //   loop {
-  //     if window.is_focused().unwrap() {
-  //       send_message_to_frontend(&window, "window-focussed".to_string(), "".to_string(), "".to_string());
-  //     } else {
-  //       send_message_to_frontend(&window, "window-blurred".to_string(), "".to_string(), "".to_string());
-  //     }
-  //   }
-  // });
 }
 
 pub fn initialize() {
@@ -277,26 +255,25 @@ pub fn initialize() {
       get_recent_docs,
       get_db_stats,
       open_quicklook,
-      open_context_menu,
-      track_window_focus
+      open_context_menu
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {
         #[cfg(desktop)]
-      {
+        {
           app.handle().plugin(
-            tauri_plugin_global_shortcut::Builder::with_handler(|_app, shortcut| {
-              let global_shortcut = get_global_shortcut(Modifiers::ALT, Code::Space);
-              println!("{:?}", shortcut);
-              if shortcut == &global_shortcut {
-                println!("Alt+Space Detected!");
-                let main_window = _app.get_webview_window("main").unwrap();
-                hide_or_show_window(main_window);
-              }
-            })
-            .build(),
+            tauri_plugin_global_shortcut::Builder::new()
+              .with_shortcut(get_global_shortcut())?
+              .with_handler(|app, shortcut| {
+                  let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut();
+                  if shortcut.matches(global_shortcut_modifiers, global_shortcut_code) {
+                    println!("Alt+Shift+Space Detected!");
+                    let main_window = app.get_webview_window("main").unwrap();
+                    hide_or_show_window(main_window);
+                  }
+              })
+              .build(),
           )?;
-          app.global_shortcut().register(get_global_shortcut(Modifiers::ALT, Code::Space))?;
         }
         {
           app.on_menu_event(|app_handle: &tauri::AppHandle, event| {

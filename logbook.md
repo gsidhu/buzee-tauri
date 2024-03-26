@@ -1,8 +1,10 @@
 # Logbook
 
 ## - Set up cron job to index every hour.
+## - Set up a mutable state to store the global shortcut string instead of making DB calls each time.
 
-- Added code to detect when window loses focus to grayscale the window contents. But plugged out for now because the loop seems to be a bottleneck.
+- Global launch shortcut is set from the string stored in the `user-preferences` table in the DB.
+- Added event listener to detect when window loses focus to grayscale the window contents.
 - Disabled body scroll on results page, enabled elsewhere.
 - Replace popover with title attribute on result path. Added it to name column as well.
 - Fixed delete triggers in database.

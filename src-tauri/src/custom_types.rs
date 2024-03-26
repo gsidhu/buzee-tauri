@@ -53,3 +53,8 @@ pub struct DBStat {
   pub file_type: String,
   pub count: i64
 }
+
+// create a struct to read and write a string
+pub struct GlobalShortcutState(
+  pub String
+);

@@ -5,7 +5,7 @@
   import EventListeners from '$lib/utils/eventListeners.svelte';
   import { sendEvent } from '../utils/firebase';
   import { invoke } from "@tauri-apps/api/core";
-	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+	import { listen } from '@tauri-apps/api/event';
 	import { windowBlurred } from '$lib/stores';
 
 	var appMode: string = "menubar";
@@ -22,19 +22,7 @@
 		});
 	}
 	
-	let unlistenBlurred: UnlistenFn;
-	let unlistenFocussed: UnlistenFn;
 	onMount(async () => {
-		// Initiate the bg process that tracks window focus
-		await invoke("track_window_focus");
-		// Grayscale contents when window blurs
-		unlistenBlurred = await listen<Payload>('window-blurred', (event: any) => {
-			$windowBlurred = true;
-		});
-		// Remove grayscale when window is in focus
-		unlistenFocussed = await listen<Payload>('window-focussed', (event: any) => {
-			$windowBlurred = false;
-		});
     // startSerialEventListener();
 		invoke("get_os").then((res) => {
 			// @ts-ignore
@@ -45,11 +33,21 @@
 			}
 		});
     appMode = "window";
+
+		// Grayscale contents when window blurs
+		if (window) {
+			window.addEventListener("focus", () => {
+				$windowBlurred = false;
+			});
+			window.addEventListener("blur", () => {
+				$windowBlurred = true;
+			});
+		}
   });
 
 	onDestroy(() => {
-		unlistenBlurred();
-		unlistenFocussed();
+		// unlistenBlurred();
+		// unlistenFocussed();
 	});
 </script>
 
