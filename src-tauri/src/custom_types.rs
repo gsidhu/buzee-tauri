@@ -43,11 +43,7 @@ pub struct Payload {
   pub data: String
 }
 
-// Define a struct equivalent to this Typescript interface:
-// interface DBStat {
-//   type: string,
-//   count: number
-// }
+// Define a struct for passing DB Stats
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DBStat {
   pub file_type: String,
@@ -55,6 +51,15 @@ pub struct DBStat {
 }
 
 // create a struct to read and write a string
-pub struct GlobalShortcutState(
-  pub String
-);
+#[derive(Serialize, Clone)]
+pub(crate) struct GlobalShortcutState {
+  pub shortcut_string: String,
+}
+
+impl Default for GlobalShortcutState {
+    fn default() -> Self {
+        Self {
+          shortcut_string: "Alt+Space".to_string()
+        }
+    }
+}

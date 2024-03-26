@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut};
+use crate::user_prefs::{set_new_global_shortcut_in_db, set_global_shortcut_from_db, get_global_shortcut, get_modifiers_and_code_from_global_shortcut};
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
@@ -29,7 +29,7 @@ pub fn send_message_to_frontend(
     message: String,
     data: String,
 ) {
-    window.emit(&event, Payload { message, data }).unwrap();
+  window.emit(&event, Payload { message, data }).unwrap();
 }
 
 fn setup_cron_job(window: tauri::WebviewWindow) {
@@ -240,6 +240,16 @@ fn open_context_menu(window: tauri::Window, option: String) {
     }
 }
 
+// Set new global shortcut in DB and update the global shortcut
+#[tauri::command]
+async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_string: String) {
+  println!("Setting new global shortcut: {}", new_shortcut_string);
+  set_new_global_shortcut_in_db(new_shortcut_string);
+  set_global_shortcut_from_db(&app_handle);
+  // restart the app to set the new shortcut
+  app_handle.restart();
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -255,20 +265,27 @@ pub fn initialize() {
       get_recent_docs,
       get_db_stats,
       open_quicklook,
-      open_context_menu
+      open_context_menu,
+      set_new_global_shortcut
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {
         #[cfg(desktop)]
         {
+          // manage state(s)
+          let handle = app.handle();
+          handle.manage(Mutex::new(GlobalShortcutState::default()));
+        }
+        {
+          set_global_shortcut_from_db(app.handle());
           app.handle().plugin(
             tauri_plugin_global_shortcut::Builder::new()
-              .with_shortcut(get_global_shortcut())?
-              .with_handler(|app, shortcut| {
-                  let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut();
+              .with_shortcut(get_global_shortcut(app.handle()))?
+              .with_handler(|app_handle, shortcut| {
+                  let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut(app_handle);
                   if shortcut.matches(global_shortcut_modifiers, global_shortcut_code) {
-                    println!("Alt+Shift+Space Detected!");
-                    let main_window = app.get_webview_window("main").unwrap();
+                    println!("Global Shortcut Detected!");
+                    let main_window = app_handle.get_webview_window("main").unwrap();
                     hide_or_show_window(main_window);
                   }
               })

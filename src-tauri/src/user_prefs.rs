@@ -7,6 +7,8 @@ use crate::database::models::{AppData, UserPrefs, FileTypes};
 use crate::database::schema::{app_data, user_preferences, file_types};
 use crate::database::establish_connection;
 use crate::utils::string_to_modifiers;
+use std::sync::Mutex;
+use tauri::Manager;
 
 pub fn set_default_user_prefs(conn: &mut SqliteConnection) {
   // get the first row from user_prefs table
@@ -162,59 +164,46 @@ pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_ti
       .unwrap();
   }
 }
+
+
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 use std::str::FromStr;
 
-// pub fn set_global_shortcut() {
-//   GlobalShortcutState(global_shortcut_string.to_string().into());
-// }
+pub fn set_new_global_shortcut_in_db(new_shortcut_string: String) {
+  let mut conn = establish_connection();
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::global_shortcut.eq(new_shortcut_string))
+    .execute(&mut conn)
+    .unwrap();
+}
 
-pub fn get_global_shortcut() -> Shortcut {
+pub fn set_global_shortcut_from_db(app: &tauri::AppHandle) {
+  println!("Setting global shortcut to mutex state");
+  let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
+  let mut state = state_mutex.lock().unwrap();
+
   let mut conn = establish_connection();
   let global_shortcut_string = user_preferences::table
     .select(user_preferences::global_shortcut).load::<String>(&mut conn).unwrap();
   let global_shortcut_string = global_shortcut_string.first().unwrap();
-  let mut splits: Vec<&str> = global_shortcut_string.split("+").collect();
-  let key = Code::from_str(splits.last().unwrap()).unwrap();
-  
-  // remove the key from splits
-  let _ = splits.pop();
-  println!("splits: {:?}", splits);
-  
-  let mut combined_modifiers: Vec<Modifiers> = Vec::new();
+  state.shortcut_string = global_shortcut_string.to_string();
 
-  for modifier in &splits {
-    let uppercase = modifier.to_uppercase();
-    combined_modifiers.push(string_to_modifiers(&uppercase));
-  }
-  println!("combined_modifiers: {:?}", combined_modifiers);
+  println!("Set global shortcut mutex state to: {}", state.shortcut_string);
+}
 
+pub fn get_global_shortcut(app: &tauri::AppHandle) -> Shortcut {
+  let (combined_modifiers, key) = set_modifiers_and_code_from_state(app);
   let shortcut_modifiers = combined_modifiers.iter().fold(Some(combined_modifiers[0]), |acc, &modifier| {
     Some(match acc {
         Some(acc_value) => acc_value | modifier,
         None => modifier,
     })
   });
-
-  println!("shortcut_modifiers: {:?}", shortcut_modifiers);
-
-  // Reference usage: Shortcut::new(Some(Modifiers::ALT | Modifiers::SHIFT), Code::Space)
   Shortcut::new(shortcut_modifiers, key)
 }
 
-pub fn get_modifiers_and_code_from_global_shortcut() -> (Modifiers, Code) {
-  let mut conn = establish_connection();
-  let global_shortcut_string = user_preferences::table
-    .select(user_preferences::global_shortcut).load::<String>(&mut conn).unwrap();
-  let global_shortcut_string = global_shortcut_string.first().unwrap();
-  let mut splits: Vec<&str> = global_shortcut_string.split("+").collect();
-  let key = Code::from_str(splits.last().unwrap()).unwrap();
-  let _ = splits.pop();
-  let mut combined_modifiers: Vec<Modifiers> = Vec::new();
-  for modifier in &splits {
-    let uppercase = modifier.to_uppercase();
-    combined_modifiers.push(string_to_modifiers(&uppercase));
-  }
+pub fn get_modifiers_and_code_from_global_shortcut(app: &tauri::AppHandle) -> (Modifiers, Code) {
+  let (combined_modifiers, key) = set_modifiers_and_code_from_state(app);
   let shortcut_modifiers = combined_modifiers.iter().fold(Some(combined_modifiers[0]), |acc, &modifier| {
     Some(match acc {
         Some(acc_value) => acc_value | modifier,
@@ -223,4 +212,20 @@ pub fn get_modifiers_and_code_from_global_shortcut() -> (Modifiers, Code) {
   }).unwrap();
 
   (shortcut_modifiers, key)
+}
+
+fn set_modifiers_and_code_from_state(app: &tauri::AppHandle) -> (Vec<Modifiers>, Code) {
+  let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
+  let state = state_mutex.lock().unwrap();
+  let global_shortcut_string = &state.shortcut_string;
+  println!("global_shortcut_string2: {:?}", global_shortcut_string);
+  let mut splits: Vec<&str> = global_shortcut_string.split("+").collect();
+  let key = Code::from_str(splits.last().unwrap()).unwrap();
+  let _ = splits.pop();
+  let mut combined_modifiers: Vec<Modifiers> = Vec::new();
+  for modifier in &splits {
+    let uppercase = modifier.to_uppercase();
+    combined_modifiers.push(string_to_modifiers(&uppercase));
+  }
+  (combined_modifiers, key)
 }

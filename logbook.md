@@ -1,8 +1,10 @@
 # Logbook
 
 ## - Set up cron job to index every hour.
-## - Set up a mutable state to store the global shortcut string instead of making DB calls each time.
+## - Add UI for setting global shortcut.
 
+- Can set new global shortcut from the frontend. Requires app restart. Works perfectly. (on build, not dev)
+- Set up a mutable state to store the global shortcut string instead of making DB calls each time. Can use [this guide](https://tauri.by.simon.hyll.nu/concepts/tauri/state_management/) for storing auth tokens in future.
 - Global launch shortcut is set from the string stored in the `user-preferences` table in the DB.
 - Added event listener to detect when window loses focus to grayscale the window contents.
 - Disabled body scroll on results page, enabled elsewhere.

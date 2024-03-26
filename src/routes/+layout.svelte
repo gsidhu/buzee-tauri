@@ -21,6 +21,12 @@
 			console.log("Event triggered from rust!\nPayload: " + event.payload.message);
 		});
 	}
+
+	function testFn() {
+		invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
+			console.log(res);
+		});
+	}
 	
 	onMount(async () => {
     // startSerialEventListener();
@@ -54,6 +60,7 @@
 <KeyboardListeners />
 <EventListeners />
 <main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
+	<!-- <button on:click={() => testFn()}>Test</button> -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
   {#if !isMac && appMode==="window"}
     <div class="w-100 fixed-top drag" style="height: 30px;" on:dblclick={() => maximiseWindow()}></div>
