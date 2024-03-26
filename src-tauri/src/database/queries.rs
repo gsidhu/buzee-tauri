@@ -192,8 +192,9 @@ pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
 "#;
 pub const TRIGGER_DELETE_DOCUMENT_METADATA : &str = r#"
   CREATE TRIGGER IF NOT EXISTS delete_document_metadata
-  AFTER DELETE ON document
+  BEFORE DELETE ON document
   BEGIN
+      DELETE FROM body WHERE metadata_id = (SELECT id FROM metadata WHERE source_table = 'document' AND source_id = OLD.id);
       DELETE FROM metadata WHERE source_table = 'document' AND source_id = OLD.id;
       DELETE FROM metadata_fts WHERE source_table = 'document' AND source_id = OLD.id;
   END;
@@ -226,10 +227,9 @@ pub const TRIGGER_UPDATE_BODY_FTS : &str = r#"
 
 pub const TRIGGER_DELETE_BODY_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS body_fts_delete_trigger
-  AFTER DELETE ON body
+  BEFORE DELETE ON body
   BEGIN
-      DELETE FROM body_fts
-      WHERE metadata_id = old.metadata_id;
+      DELETE FROM body_fts WHERE metadata_id = old.metadata_id;
   END;
 "#;
 

@@ -75,6 +75,7 @@ export const metaKeyPressed = writable(false);
 export const mouseDown = writable(false);
 export const searchInProgress = writable(false);
 export const dbCreationInProgress = writable(false);
+export const windowBlurred = writable(false);
 
 // 3. Anytime the store changes, update the local storage value.
 if(typeof window !== "undefined") {

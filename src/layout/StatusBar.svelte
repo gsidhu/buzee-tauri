@@ -9,7 +9,8 @@
 		filetypeShown,
 		resultsPageShown,
 		searchInProgress,
-		dbCreationInProgress
+		dbCreationInProgress,
+		windowBlurred
 	} from '$lib/stores';
 	import { selectAllRows } from '$lib/utils/fileUtils';
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
@@ -142,6 +143,7 @@
 	class={`row row-cols-3 mx-0 d-flex flex-row justify-content-between px-2 
       ${showingResults ? 'sticky-bottom' : 'fixed-bottom'}
 			${$compactViewMode ? 'compact-view' : ''}
+			${$windowBlurred ? 'grayscale' : ''}
   `}
 >
 	<!-- Left end -->

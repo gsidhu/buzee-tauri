@@ -34,6 +34,7 @@
 	async function getSearchSuggestions() {
 		let removeSpecialChars = $searchQuery.replace(/[^a-zA-Z0-9 ]/g, '');
 		$searchSuggestions = await invoke('get_search_suggestions', { query: removeSpecialChars });
+		$searchSuggestions = [...new Set($searchSuggestions)]; // remove duplicates
 	}
 
 	async function triggerSearch() {

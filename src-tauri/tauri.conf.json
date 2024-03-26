@@ -1,5 +1,5 @@
 {
-  "productName": "buzee-tauri",
+  "productName": "buzee",
   "version": "0.0.0",
   "identifier": "inc.buzilla.buzee",
   "build": {
@@ -12,10 +12,11 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "buzee-tauri",
+        "title": "Buzee",
         "width": 800,
         "height": 600,
-        "titleBarStyle": "Transparent"
+        "titleBarStyle": "Transparent",
+        "visibleOnAllWorkspaces": false
       }
     ],
     "security": {

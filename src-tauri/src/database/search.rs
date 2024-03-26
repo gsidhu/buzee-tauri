@@ -467,22 +467,18 @@ pub fn get_metadata_title_matches(
     query: String,
     conn: &mut SqliteConnection,
 ) -> Result<Vec<String>, diesel::result::Error> {
+    println!("getting suggestions for: {}!", query);
     let inner_query = format!(
         r#"
-        SELECT snippet(metadata_fts, 4, '', '', '', 2) as title from metadata_fts
-        WHERE metadata_fts MATCH '{}*'
-        ORDER BY rank LIMIT 5;
+        SELECT snippet(metadata_fts, 4, '', '', '', 2) as title from metadata_fts WHERE metadata_fts MATCH '{}*' ORDER BY rank LIMIT 5;
     "#,
         query
     );
     let keyword_suggestions: Vec<MetadataFTSSearchResult> = diesel::sql_query(inner_query).load::<MetadataFTSSearchResult>(conn)?;
     let mut suggestions: Vec<String> = keyword_suggestions.iter().map(|suggestion| suggestion.title.clone()).collect();
-
     let inner_query = format!(
         r#"
-        SELECT snippet(body_fts, 1, '', '', '', 2) as text from body_fts
-        WHERE body_fts MATCH '{}*'
-        ORDER BY rank LIMIT 5;
+        SELECT snippet(body_fts, 1, '', '', '', 2) as text from body_fts WHERE body_fts MATCH '{}*' LIMIT 5;
     "#,
         query
     );
@@ -490,21 +486,25 @@ pub fn get_metadata_title_matches(
     for suggestion in keyword_suggestions {
         suggestions.push(suggestion.text);
     }
-    // convert to lowercase and remove duplicates
-    suggestions = suggestions.iter().map(|s| s.to_lowercase()).collect();
-    suggestions.sort();
-    suggestions.dedup();
+    
+    // convert keywords to lowercase
+    suggestions = suggestions.iter().map(|s| s.trim().to_lowercase()).collect();
+    // iterate over the suggestions and remove any item that does not contain the query
+    suggestions.retain(|suggestion| suggestion.contains(&query));
 
     let file_suggestions = metadata::table
         .select(metadata::title)
-        .filter(metadata::title.like(format!("{}%", query)))
+        .filter(metadata::title.like(format!("%{}%", query)))
         .order(metadata::last_modified.desc())
-        .limit(5)
+        .limit(7)
         .load::<String>(conn)?;
 
     for suggestion in &file_suggestions {
         suggestions.push(suggestion.clone());
     }
+
+    // remove duplicates
+    suggestions.dedup();
 
     Ok(suggestions)
 }

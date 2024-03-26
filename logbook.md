@@ -2,6 +2,11 @@
 
 ## - Set up cron job to index every hour.
 
+- Added code to detect when window loses focus to grayscale the window contents. But plugged out for now because the loop seems to be a bottleneck.
+- Disabled body scroll on results page, enabled elsewhere.
+- Replace popover with title attribute on result path. Added it to name column as well.
+- Fixed delete triggers in database.
+- Added icons using `npm run tauri icon`.
 - Added `folder` as a filetype dropdown.
 - Suggested search works.
 - Populating search suggestions from the database combining items from file contents, file names and the complete filename itself.
@@ -104,7 +109,7 @@
 
 ### Backend
 - Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
-- Add search suggestions.
+- [x] Add search suggestions.
 - Make XLSX, CSV and PDF indexing better.
   - Detect if PDF is text-based and use existing library. Otherwise, skip.
 - Detect paths/files in OneDrive, Google Drive, Dropbox, etc. and ignore them.
@@ -112,7 +117,7 @@
 - Figure out how to pass types to tauri commands.
 - Let front end know when app is not in focus so that it can change CSS.
 - Add logging to a file + sentry/firebase events.
-- Add a tray icon and menubar window.
+- ? Add a tray icon and menubar window.
 - Allow searching by `created_at`, `last_modified` or `last_opened`.
 - [x] Figure out how to add app menu and context menus.
 - [x] Add code for indexing file contents.

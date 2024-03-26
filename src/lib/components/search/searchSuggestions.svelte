@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	export let isSearchSuggestionsVisible = false;
 	export let selectedSuggestionItem = 0;
   export let triggerSearch = () => {};
@@ -26,7 +25,11 @@
 				id={'search-suggestions-item-' + index}
         on:click={() => (searchTrigger(searchItem))}
 			>
-					{searchItem}
+        {#if searchItem.length > 50}
+					{searchItem.slice(0, 30) + ' ... ' + searchItem.slice(-30)}
+        {:else}
+          {searchItem}
+        {/if}
 			</li>
 		{/each}
   </ul>

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
   import EventListeners from '$lib/utils/eventListeners.svelte';
   import { sendEvent } from '../utils/firebase';
   import { invoke } from "@tauri-apps/api/core";
-	import { listen } from '@tauri-apps/api/event';
+	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+	import { windowBlurred } from '$lib/stores';
 
 	var appMode: string = "menubar";
   var isMac: boolean = false;
-	let windowBlurred: boolean = false;
 
 	async function maximiseWindow() {
 		console.log('double click');
@@ -22,8 +22,20 @@
 		});
 	}
 	
+	let unlistenBlurred: UnlistenFn;
+	let unlistenFocussed: UnlistenFn;
 	onMount(async () => {
-    startSerialEventListener();
+		// Initiate the bg process that tracks window focus
+		await invoke("track_window_focus");
+		// Grayscale contents when window blurs
+		unlistenBlurred = await listen<Payload>('window-blurred', (event: any) => {
+			$windowBlurred = true;
+		});
+		// Remove grayscale when window is in focus
+		unlistenFocussed = await listen<Payload>('window-focussed', (event: any) => {
+			$windowBlurred = false;
+		});
+    // startSerialEventListener();
 		invoke("get_os").then((res) => {
 			// @ts-ignore
 			if (res == "macos") {
@@ -33,21 +45,17 @@
 			}
 		});
     appMode = "window";
-		// // Grayscale contents when window blurs
-    // window.electronAPI?.windowBlurred(async () => {
-    //   windowBlurred = true;
-    // })
-    // // Remove grayscale when window is in focus
-    // window.electronAPI?.windowFocussed(async () => {
-    //   windowBlurred = false;
-    // })
   });
+
+	onDestroy(() => {
+		unlistenBlurred();
+		unlistenFocussed();
+	});
 </script>
 
 <KeyboardListeners />
 <EventListeners />
-<main class={`min-vh-100 main-container ${windowBlurred ? "grayscale" : ""}`}>
-  <!-- <button on:click={buttonClick}>Test</button> -->
+<main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
   {#if !isMac && appMode==="window"}
     <div class="w-100 fixed-top drag" style="height: 30px;" on:dblclick={() => maximiseWindow()}></div>

@@ -201,6 +201,7 @@
 							>
 								{#if cell.id === 'file_type'}
 									<!-- <FiletypeDropdown searchBar={false} /> -->
+									<FileTypeIcon filetype="other" />
 								{:else}
 									<Render of={cell.render()} />
 								{/if}
@@ -244,12 +245,14 @@
 						>
 							{#each row.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs>
-									<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}>
+									<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
+										title={cell.id === 'name' || cell.id === 'path' ? String(cell.render()) : ''}
+									>
 										{#if cell.id === 'file_type'}
 											<FileTypeIcon filetype={String(cell.render())} />
 										{:else if cell.id === 'size'}
 											<span>{readableFileSize(Number(cell.render()))}</span>
-										{:else if cell.id === 'path'}
+										<!-- {:else if cell.id === 'path'}
 											<PopoverIcon
 												label={formatPath(String(cell.render()))}
 												title={String(cell.render())}
@@ -258,7 +261,7 @@
 												marginClass="m-0"
 												paddingClass="p-0"
 												isBtn={false}
-											/>
+											/> -->
 										{:else}
 											<span><Render of={cell.render()} /></span>
 										{/if}
@@ -343,6 +346,10 @@
 		.pinned,
 		.pin {
 			color: white;
+		}
+		&.grayscale {
+			filter: grayscale(.7);
+			background-color: transparent !important;
 		}
 	}
 	// pinned rows

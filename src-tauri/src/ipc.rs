@@ -247,6 +247,21 @@ fn open_context_menu(window: tauri::Window, option: String) {
     }
 }
 
+// Init a background process to detect window focus/blur, and emit periodic events
+#[tauri::command]
+fn track_window_focus(window: tauri::WebviewWindow) {
+  // Seems to consume too much juice
+  // std::thread::spawn(move || {
+  //   loop {
+  //     if window.is_focused().unwrap() {
+  //       send_message_to_frontend(&window, "window-focussed".to_string(), "".to_string(), "".to_string());
+  //     } else {
+  //       send_message_to_frontend(&window, "window-blurred".to_string(), "".to_string(), "".to_string());
+  //     }
+  //   }
+  // });
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -262,7 +277,8 @@ pub fn initialize() {
       get_recent_docs,
       get_db_stats,
       open_quicklook,
-      open_context_menu
+      open_context_menu,
+      track_window_focus
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {
