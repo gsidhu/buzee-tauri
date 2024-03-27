@@ -10,7 +10,15 @@ pub fn get_metadata(path: &Path) -> io::Result<fs::Metadata> {
 }
 
 pub fn norm(path: &str) -> String {
-  str::replace(path, "\\", "/")
+  #[cfg(target_os = "windows")]
+  {
+    str::replace(path, "/", "\\")
+  }
+  
+  #[cfg(target_os = "macos")]
+  {
+    str::replace(path, "\\", "/")
+  }
 }
 
 pub fn string_to_modifiers(modifier: &str) -> Modifiers {

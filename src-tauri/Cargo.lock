@@ -219,7 +219,6 @@ dependencies = [
  "chrono 0.4.35",
  "diesel",
  "dirs",
- "docx",
  "dotenvy",
  "dotext",
  "epub",
@@ -277,27 +276,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "514de17de45fdb8dc022b1a7975556c53c86f9f0aa5f534b98977b171857c2c9"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "bzip2"
-version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdb116a6ef3f6c3698828873ad02c3014b3c85cadb88496095628e3ef1e347f8"
-dependencies = [
- "bzip2-sys",
- "libc",
-]
-
-[[package]]
-name = "bzip2-sys"
-version = "0.1.11+1.0.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "736a955f3fa7875102d57c82b8cac37ec45224a07fd32d58f9f7a186b6cd4cdc"
-dependencies = [
- "cc",
- "libc",
- "pkg-config",
 ]
 
 [[package]]
@@ -841,18 +819,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.55",
-]
-
-[[package]]
-name = "docx"
-version = "1.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e626dd790e185281674a1af083f2f031bdfa4953c23b8a4397265413a34dc7a7"
-dependencies = [
- "derive_more",
- "log",
- "strong-xml",
- "zip 0.5.13",
 ]
 
 [[package]]
@@ -1942,12 +1908,6 @@ dependencies = [
  "libc",
  "system-deps",
 ]
-
-[[package]]
-name = "jetscii"
-version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f25cca2463cb19dbb1061eb3bd38a8b5e4ce1cc5a5a9fc0e02de486d92b9b05"
 
 [[package]]
 name = "jni"
@@ -3704,31 +3664,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "strong-xml"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98c54661f58cdd722d87bd1836581aa1f9db078eb83374b2297cf363397e0e7f"
-dependencies = [
- "jetscii",
- "lazy_static",
- "log",
- "memchr 2.7.1",
- "strong-xml-derive",
- "xmlparser",
-]
-
-[[package]]
-name = "strong-xml-derive"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7360ad7fc699b2753db380ab3d08ec6b952486e74c631be793a0b5542e55fa6f"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5336,12 +5271,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fcb9cbac069e033553e8bb871be2fbdffcab578eb25bd0f7c508cedc6dcd75a"
 
 [[package]]
-name = "xmlparser"
-version = "0.13.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66fee0b777b0f5ac1c69bb06d361268faafa61cd4682ae064a171c16c433e9e4"
-
-[[package]]
 name = "zip"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5350,20 +5279,6 @@ dependencies = [
  "flate2",
  "msdos_time",
  "podio",
- "time 0.1.45",
-]
-
-[[package]]
-name = "zip"
-version = "0.5.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93ab48844d61251bb3835145c521d88aa4031d7139e8485990f60ca911fa0815"
-dependencies = [
- "byteorder",
- "bzip2",
- "crc32fast",
- "flate2",
- "thiserror",
  "time 0.1.45",
 ]
 

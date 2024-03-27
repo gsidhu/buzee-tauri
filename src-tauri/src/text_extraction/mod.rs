@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 
 pub mod csv;
-pub mod docx;
+// pub mod docx;
 pub mod epub;
 pub mod mobi;
 pub mod pdf;
@@ -18,7 +18,7 @@ impl Extractor {
   pub fn new() -> Self {
     let mut map: HashMap<String, fn(&String) -> Result<String, Box<dyn Error>>> = HashMap::new();
     map.insert("csv".to_string(), csv::extract);
-    map.insert("docx".to_string(), docx::extract);
+    // map.insert("docx".to_string(), docx::extract);
     map.insert("epub".to_string(), epub::extract);
     map.insert("mobi".to_string(), mobi::extract);
     map.insert("md".to_string(), txt::extract);

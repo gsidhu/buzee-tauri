@@ -2,6 +2,7 @@
 use dirs::document_dir;
 use crate::database::create_tables_if_not_exists;
 use crate::database::establish_connection;
+use crate::utils::norm;
 use crate::user_prefs::{set_default_app_data, set_default_user_prefs, set_default_file_types, set_scan_running_status};
 use log::LevelFilter;
 
@@ -31,6 +32,8 @@ pub fn get_home_directory() -> Option<String> {
 pub fn create_app_directory_if_not_exists() -> Result<(), std::io::Error> {
   let documents_dir = get_documents_directory().unwrap();
   let app_dir_path = format!("{}/{}", documents_dir, APP_DIRECTORY);
+  let app_dir_path = norm(&app_dir_path);
+  println!("creating app dir at:{}", &app_dir_path);
   std::fs::create_dir_all(app_dir_path)
 }
 
@@ -38,18 +41,20 @@ pub fn setup_logging_file_path() {
   let documents_dir = get_documents_directory().unwrap();
   let app_dir_path = format!("{}/{}", documents_dir, APP_DIRECTORY);
   let logging_file_path = format!("{}/{}", app_dir_path, "buzee.log");
+  let logging_file_path = norm(&logging_file_path);
   println!("Logging to file: {}", &logging_file_path);
   let _ = simple_logging::log_to_file(logging_file_path, LevelFilter::Info);
 }
 
 // Initialisation function called on each app load
 pub fn initialize() -> () {
+  println!("Initializing app directory");
+  create_app_directory_if_not_exists().unwrap();
+  
   // Set up logging
   setup_logging_file_path();
 
   let mut conn = establish_connection();
-  println!("Initializing app directory");
-  create_app_directory_if_not_exists().unwrap();
   println!("Initializing database");
   create_tables_if_not_exists(&mut conn).unwrap();
 

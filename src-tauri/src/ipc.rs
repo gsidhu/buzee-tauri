@@ -87,7 +87,7 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
         #[cfg(target_os = "windows")]
         {
             Command::new("explorer")
-            .args(["/select,", &path]) // The comma after select is not a typo
+            .args(["/select,", &file_path]) // The comma after select is not a typo
             .spawn()
             .map_err(|e| e)?;
         }

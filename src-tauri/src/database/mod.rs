@@ -2,6 +2,7 @@
 use diesel::prelude::*;
 use diesel::SqliteConnection;
 use crate::housekeeping::{get_documents_directory, APP_DIRECTORY};
+use crate::utils::norm;
 use queries::{
   DOCUMENT_TABLE_CREATE_STATEMENT, 
   BODY_TABLE_CREATE_STATEMENT, 
@@ -28,7 +29,22 @@ pub fn establish_connection() -> SqliteConnection {
   let app_dir = get_documents_directory().unwrap();
   println!("app_dir: {}", app_dir);
 
-  let database_url = format!("sqlite://{}/{}/{}", app_dir, APP_DIRECTORY, DB_NAME);
+  let database_path = format!("{}/{}/{}", app_dir, APP_DIRECTORY, DB_NAME);
+  let database_path = norm(&database_path);
+
+  let database_url: String;
+
+  #[cfg(target_os = "windows")]
+  {
+    database_url = format!("sqlite:///{}", database_path);
+  }
+
+  #[cfg(target_os = "macos")]
+  {
+    database_url = format!("sqlite://{}", database_path);
+  }
+
+  println!("Connecting db at: {}", &database_url);
   let mut connection = SqliteConnection::establish(&database_url).unwrap();
 
   // run PRAGMA queries on each connection

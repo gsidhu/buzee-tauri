@@ -3,6 +3,7 @@
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
 
+- Added code blocks to make app build on Windows. Localhost IPC CORS issue remains to be resolved.
 - Can set new global shortcut from the frontend. Requires app restart. Works perfectly. (on build, not dev)
 - Set up a mutable state to store the global shortcut string instead of making DB calls each time. Can use [this guide](https://tauri.by.simon.hyll.nu/concepts/tauri/state_management/) for storing auth tokens in future.
 - Global launch shortcut is set from the string stored in the `user-preferences` table in the DB.

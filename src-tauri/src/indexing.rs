@@ -29,7 +29,6 @@ pub fn all_allowed_filetypes(connection: &mut SqliteConnection, only_allowed: bo
 }
 
 fn get_all_forbidden_directories() -> Vec<String> {
-    let home_dir: String = get_home_directory().unwrap();
     let mut all_forbidden_directories: Vec<String> = vec![];
     let forbidden_directories: [&str; 4] = ["node_modules", "venv", "bower_components", "pycache"];
     all_forbidden_directories.extend(forbidden_directories.iter().map(|&s| s.to_string()));
@@ -48,6 +47,7 @@ fn get_all_forbidden_directories() -> Vec<String> {
     }
     #[cfg(target_os = "macos")]
     {
+      let home_dir: String = get_home_directory().unwrap();
         let mac_forbidden_directories: [&str; 2] = [
             &format!("{}/Library", home_dir),
             &format!("{}/Applications", home_dir),
