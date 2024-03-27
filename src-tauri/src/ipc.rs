@@ -22,6 +22,7 @@ use log::{error, info, trace, warn};
 use schedule::{Agenda, Job};
 use std::sync::{Arc, Mutex};
 use std::process::Command;
+use dirs::home_dir;
 
 pub fn send_message_to_frontend(
     window: &tauri::WebviewWindow,
@@ -86,32 +87,36 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
     let do_steps = || -> Result<(), Error> {
         #[cfg(target_os = "windows")]
         {
-            Command::new("explorer")
-            .args(["/select,", &file_path]) // The comma after select is not a typo
-            .spawn()
-            .map_err(|e| e)?;
+          // This opens the folder in the background, which is not desirable
+          // Maybe remove it in future
+          Command::new("explorer")
+          .args(["/select,", &file_path]) // The comma after select is not a typo
+          .spawn()
+          .map_err(|e| e)?;
         }
+
         #[cfg(target_os = "macos")]
         {
-            let path_buf = std::path::PathBuf::from(&file_path);
-            if path_buf.is_dir() {
-            Command::new("open")
-                .args([&file_path])
-                .spawn()
-                .map_err(|e| e)?;
-            } else {
-            Command::new("open")
-                .args(["-R", &file_path])
-                .spawn()
-                .map_err(|e| e)?;
-            }
+          let path_buf = std::path::PathBuf::from(&file_path);
+          if path_buf.is_dir() {
+          Command::new("open")
+            .args([&file_path])
+            .spawn()
+            .map_err(|e| e)?;
+          } else {
+          Command::new("open")
+            .args(["-R", &file_path])
+            .spawn()
+            .map_err(|e| e)?;
+          }
         }
         Ok(())
     };
+
     if let Err(_err) = do_steps() {
         let path = std::path::PathBuf::from(file_path);
         let dir = path.parent().unwrap();
-        let _ = open::that_in_background(dir);
+        let _ = open::that_detached(dir);
     }
     Ok("Opened the folder!".into())
 }
@@ -209,7 +214,6 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
     println!("Opening QuickLook for {}", file_path);
 
     #[cfg(target_os = "macos")]
-    // spawn a new thread to open QuickLook using `std` crate
     std::thread::spawn(move || {
         let _ = std::process::Command::new("qlmanage")
             .arg("-p")
@@ -219,13 +223,11 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
 
     #[cfg(target_os = "windows")]
     std::thread::spawn(move || {
-        let _ = std::process::Command::new("cmd")
-            .arg("/C")
-            .arg("start")
-            .arg("powershell")
-            .arg("peek")
-            .arg(file_path)
-            .output();
+      let home_directory = home_dir().unwrap().to_string_lossy().to_string();
+      let quicklook_path = format!("{}\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe", &home_directory);
+      let _ = std::process::Command::new(quicklook_path)
+        .arg(file_path)
+        .output();
     });
     Ok("Opened QuickLook!".into())
 }

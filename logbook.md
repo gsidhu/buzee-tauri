@@ -3,6 +3,10 @@
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
 
+- Disabled Sentry and Firebase for now. Windows gave CORS issue and wouldn't load. On Mac, sentry is recording needlessly.
+- Removed code for border-less window.
+- Added support for opening file previews in QuickLook on Windows. TODO: Add explanation on how to install and setup QuickLook.
+- Disabled default right click context menu using JavaScript in `+layout.svelte`.
 - Added code blocks to make app build on Windows. Localhost IPC CORS issue remains to be resolved.
 - Can set new global shortcut from the frontend. Requires app restart. Works perfectly. (on build, not dev)
 - Set up a mutable state to store the global shortcut string instead of making DB calls each time. Can use [this guide](https://tauri.by.simon.hyll.nu/concepts/tauri/state_management/) for storing auth tokens in future.

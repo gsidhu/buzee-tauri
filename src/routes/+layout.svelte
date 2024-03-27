@@ -49,6 +49,10 @@
 				$windowBlurred = true;
 			});
 		}
+		// Disable right click context menu
+		if (document) {
+			document.oncontextmenu = function() { return false; }
+		}
   });
 
 	onDestroy(() => {
@@ -61,10 +65,6 @@
 <EventListeners />
 <main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
 	<!-- <button on:click={() => testFn()}>Test</button> -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-  {#if !isMac && appMode==="window"}
-    <div class="w-100 fixed-top drag" style="height: 30px;" on:dblclick={() => maximiseWindow()}></div>
-  {/if}
 	<slot />
 </main>
 
