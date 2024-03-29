@@ -4,7 +4,7 @@ use crate::database::models::{DocumentItem, BodyItem, FileTypes};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
-use crate::utils::{self, get_metadata};
+use crate::utils::{self, get_metadata, install_textra_from_github};
 use crate::text_extraction::Extractor;
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
@@ -287,7 +287,13 @@ pub fn add_file_metadata_to_database(
 
 pub fn parse_content_from_files(conn: &mut SqliteConnection) -> usize {
   let mut files_parsed = 0;
-  let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
+  #[cfg(target_os = "macos")]
+  {
+    let _ = install_textra_from_github();
+  }
+
+  let document_filetypes = ["docx", "md", "pptx", "txt", "epub", "pdf"];
+  // let document_filetypes = ["pdf"];
   // let allowed_filetypes = all_allowed_filetypes(conn, true);
   // let document_filetypes: Vec<String> = allowed_filetypes
   //   .iter()

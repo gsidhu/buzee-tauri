@@ -1,6 +1,5 @@
 use crate::custom_types::Payload;
-use crate::housekeeping::{get_documents_directory, APP_DIRECTORY};
-use crate::utils::norm;
+use crate::housekeeping::get_app_directory;
 
 // Import the Error type
 use tauri::{
@@ -58,8 +57,7 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
       app.emit("open-folder", Payload { message: "Open Folder".into(), data: "".into() }).unwrap();
     }
     "app_folder" => {
-      let app_dir_path = format!("{}/{}", get_documents_directory().unwrap(), APP_DIRECTORY);
-      let app_dir_path = norm(&app_dir_path);
+      let app_dir_path = get_app_directory();
       let _ = open::that_detached(app_dir_path);
     }
     "document_stats" => {

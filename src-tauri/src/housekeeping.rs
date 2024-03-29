@@ -37,6 +37,12 @@ pub fn create_app_directory_if_not_exists() -> Result<(), std::io::Error> {
   std::fs::create_dir_all(app_dir_path)
 }
 
+pub fn get_app_directory() -> String {
+  let app_dir_path = format!("{}/{}", get_documents_directory().unwrap(), APP_DIRECTORY);
+  let app_dir_path = norm(&app_dir_path);
+  app_dir_path
+}
+
 pub fn setup_logging_file_path() {
   let documents_dir = get_documents_directory().unwrap();
   let app_dir_path = format!("{}/{}", documents_dir, APP_DIRECTORY);

@@ -1,19 +1,32 @@
-use std::collections::BTreeMap;
 use std::error::Error;
-
-use lopdf::Document;
+use std::process::Command;
+use crate::housekeeping::get_app_directory;
+use crate::text_extraction::txt;
 
 pub fn extract(file: &String) -> Result<String, Box<dyn Error>> {
-  let document: Document = Document::load(file)?;
-  let pages: BTreeMap<u32, (u32, u16)> = document.get_pages();
-  let mut texts: Vec<String> = Vec::new();
+  // run textra on the file and save the output to a temporary file
+  let app_directory = get_app_directory();
 
-  for (i, _) in pages.iter().enumerate() {
-    let page_number: u32 = (i + 1) as u32;
-    let text: String = document.extract_text(&[page_number])?;
-    texts.push(text);
+  #[cfg(target_os = "macos")]
+  {
+    let bash_script = format!(
+      r#"
+      cd {}
+      ./textra -s "{}" -o temp_output.txt
+      "#,
+      app_directory, file
+    );
+    let textra_command = Command::new("bash")
+      .arg("-c")
+      .arg(bash_script)
+      .output()
+      .expect("Failed to execute command");
+    let _textra_stdout = String::from_utf8(textra_command.stdout).unwrap();
+    let _textra_stderr = String::from_utf8(textra_command.stderr).unwrap();
+    // read the temporary file
+    let temp_file_path = format!("{}/temp_output.txt", app_directory);
+    let text = txt::extract(&temp_file_path).unwrap();
+    // return the extracted text
+    return Ok(text)
   }
-
-  let text: String = texts.join("\n");
-  Ok(text)
 }

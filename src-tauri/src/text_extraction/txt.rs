@@ -7,3 +7,12 @@ pub fn extract(file: &String) -> Result<String, Box<dyn Error>> {
     let text = lines.join("\n");
     Ok(text)
 }
+
+pub fn extract_large_file(file: &String) -> Result<String, Box<dyn Error>> {
+    use std::fs::File;
+    use std::io::{self, prelude::*, BufReader};
+    let file = File::open(file)?;
+    let reader = BufReader::new(file);
+    let text = reader.lines().map(|line| line.unwrap()).collect::<Vec<String>>().join("\n");
+    Ok(text)
+}

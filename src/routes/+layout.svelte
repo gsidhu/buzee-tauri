@@ -23,9 +23,10 @@
 	}
 
 	function testFn() {
-		invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
-			console.log(res);
-		});
+		// invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
+		// 	console.log(res);
+		// });
+		invoke("install_textra").then();
 	}
 	
 	onMount(async () => {

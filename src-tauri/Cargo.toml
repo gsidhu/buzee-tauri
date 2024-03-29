@@ -23,9 +23,7 @@ diesel = { version = "2.1.4", features = ["sqlite", "chrono", "time"] }
 chrono = "0.4.26"
 notify = "4.0.17"
 jwalk = "0.8.1"
-# docx = "1.1.2"
 dotext = "0.1.1"
-lopdf = { version = "0.32.0", features = ["pom", "pom_parser"] }
 log = "0.4.21"
 simple-logging = "2.0.2"
 regex = "1.10.3"

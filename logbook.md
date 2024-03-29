@@ -3,6 +3,9 @@
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
 
+- Removed unnecessary `docx` dependency. Using `dotext` for extracting docx, pptx and xlsx anyway.
+- Added a spare function for reading large txt files.
+- Added PDF file parsing using [textra](https://github.com/freedmand/textra). Textra is automatically installed in the app_dir when sync runs for the first time. On each sync run, it is checked whether textra is installed and available.
 - Disabled Sentry and Firebase for now. Windows gave CORS issue and wouldn't load. On Mac, sentry is recording needlessly.
 - Removed code for border-less window.
 - Added support for opening file previews in QuickLook on Windows. TODO: Add explanation on how to install and setup QuickLook.
@@ -119,8 +122,11 @@
 ### Backend
 - Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
 - [x] Add search suggestions.
-- Make XLSX, CSV and PDF indexing better.
-  - Detect if PDF is text-based and use existing library. Otherwise, skip.
+- Handle large file parsing.
+  - Make XLSX, CSV and PDF indexing better.
+  - Add PDF parsing on Windows.
+  - Add image text parsing.
+  - Set up separate child processes for parsing (1) regular documents (2) pdfs and images (3) xlsx and csv.
 - Detect paths/files in OneDrive, Google Drive, Dropbox, etc. and ignore them.
 - Add graceful error handling using logger instead of panic.
 - Figure out how to pass types to tauri commands.

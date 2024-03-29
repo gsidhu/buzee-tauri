@@ -22,7 +22,6 @@ use log::{error, info, trace, warn};
 use schedule::{Agenda, Job};
 use std::sync::{Arc, Mutex};
 use std::process::Command;
-use dirs::home_dir;
 
 pub fn send_message_to_frontend(
     window: &tauri::WebviewWindow,

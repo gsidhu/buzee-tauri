@@ -225,6 +225,7 @@ pub const TRIGGER_UPDATE_BODY_FTS : &str = r#"
   END;
 "#;
 
+// Don't need this because deleting from body automatically removes from body_fts
 pub const TRIGGER_DELETE_BODY_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS body_fts_delete_trigger
   BEFORE DELETE ON body
