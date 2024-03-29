@@ -2,7 +2,9 @@
 
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
+## - Figure out why sync button doesn't stop the process when PDFs are being indexed.
 
+- Fixed textra installation script. Using `curl` instead of `wget`.
 - Removed unnecessary `docx` dependency. Using `dotext` for extracting docx, pptx and xlsx anyway.
 - Added a spare function for reading large txt files.
 - Added PDF file parsing using [textra](https://github.com/freedmand/textra). Textra is automatically installed in the app_dir when sync runs for the first time. On each sync run, it is checked whether textra is installed and available.
