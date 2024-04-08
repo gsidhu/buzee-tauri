@@ -11,6 +11,25 @@
     "resources:default",
     "menu:default",
     "tray:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "args": [
+            {
+              "validator": "\\S+"
+            },
+            "-o",
+            {
+              "validator": "\\S+"
+            }
+          ],
+          "cmd": "",
+          "name": "binaries/textra",
+          "sidecar": true
+        }
+      ]
+    },
     "shell:allow-open"
   ]
 }

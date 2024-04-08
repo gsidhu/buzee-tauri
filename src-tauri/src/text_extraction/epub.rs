@@ -2,7 +2,7 @@
 use std::error::Error;
 use epub::doc::EpubDoc;
 
-pub fn extract(file: &String) -> Result<String, Box<dyn Error>> {
+pub fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
   let doc = EpubDoc::new(file);
   let mut doc = doc.unwrap();
   let mut text = String::new();

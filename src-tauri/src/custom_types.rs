@@ -50,7 +50,21 @@ pub struct DBStat {
   pub count: i64
 }
 
-// create a struct to read and write a string
+// // Struct for AppHandle
+// pub(crate) struct AppHandleState {
+//   pub stored_app_handle: tauri::AppHandle
+// }
+
+// impl AppHandleState {
+//   // using new because Default doesn't let you pass arguments
+//   pub fn new(app_handle: tauri::AppHandle) -> Self {
+//     Self {
+//       stored_app_handle: app_handle
+//     }
+//   }
+// }
+
+// Struct for Global Shortcut String
 #[derive(Serialize, Clone)]
 pub(crate) struct GlobalShortcutState {
   pub shortcut_string: String,

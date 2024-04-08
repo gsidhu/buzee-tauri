@@ -1,5 +1,10 @@
 # Logbook
 
+## Sidecar (OCR) TODO
+- Add a page to let user OCR a PDF or image.
+  - Add dialog to select file.
+- Modify textra and winocr_cli to pass a "finished" message to stdout so the child process can be stopped and output text file read.
+
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
 ## - Figure out why sync button doesn't stop the process when PDFs are being indexed.
@@ -122,19 +127,19 @@
 - Add user prefs to database.
 
 ### Backend
-- Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
 - [x] Add search suggestions.
 - Handle large file parsing.
   - Make XLSX, CSV and PDF indexing better.
-  - Add PDF parsing on Windows.
+  - [x] Add PDF parsing on Windows.
   - Add image text parsing.
   - Set up separate child processes for parsing (1) regular documents (2) pdfs and images (3) xlsx and csv.
+  - Use state management for storing reference to child processes. Use single sync button on the front end.
 - Detect paths/files in OneDrive, Google Drive, Dropbox, etc. and ignore them.
 - Add graceful error handling using logger instead of panic.
 - Figure out how to pass types to tauri commands.
-- Let front end know when app is not in focus so that it can change CSS.
 - Add logging to a file + sentry/firebase events.
 - ? Add a tray icon and menubar window.
+- ? Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
 - Allow searching by `created_at`, `last_modified` or `last_opened`.
 - [x] Figure out how to add app menu and context menus.
 - [x] Add code for indexing file contents.
@@ -143,6 +148,7 @@
 - [x] Optimise file indexing. 
   - [x] Check why it seems to be stuck sometimes. ANS: multiple select calls to db were the bottleneck.
   - [x] Also check why the kill switch doesn't work sometimes. (It seems the database flag is not being updated when the sync operation completes.) ANS: sync_status wasn't being updated inside the for-loop.
+- [x] Let front end know when app is not in focus so that it can change CSS.
 
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.

@@ -2,7 +2,7 @@
 use std::error::Error;
 use mobi::Mobi;
 
-pub fn extract(file: &String) -> Result<String, Box<dyn Error>> {
+pub fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
   let mobi_file = Mobi::from_path(file)?;
   let text = mobi_file.content_as_string()?;
   Ok(text)

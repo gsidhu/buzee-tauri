@@ -6,6 +6,7 @@
   import { sendEvent } from '../utils/firebase';
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
+	import { Command } from '@tauri-apps/plugin-shell';
 	import { windowBlurred } from '$lib/stores';
 
 	var appMode: string = "menubar";
@@ -26,9 +27,19 @@
 		// invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
 		// 	console.log(res);
 		// });
-		invoke("install_textra").then();
+		invoke("enable_sidecar").then((res) => {
+			console.log("enabled sidecar");
+		});
+		const command = Command.sidecar('binaries/textra', [
+			'/Users/thatgurjot/Desktop/Gurjot_Arc.png',
+			'-o',
+			'/Users/thatgurjot/Desktop/output.txt',
+		])
+		command.execute().then((res) => {
+			console.log(res);
+		});
 	}
-	
+
 	onMount(async () => {
     // startSerialEventListener();
 		invoke("get_os").then((res) => {
@@ -52,7 +63,7 @@
 		}
 		// Disable right click context menu
 		if (document) {
-			document.oncontextmenu = function() { return false; }
+			// document.oncontextmenu = function() { return false; }
 		}
   });
 

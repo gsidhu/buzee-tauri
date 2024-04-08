@@ -22,6 +22,7 @@ use log::{error, info, trace, warn};
 use schedule::{Agenda, Job};
 use std::sync::{Arc, Mutex};
 use std::process::Command;
+use tauri_plugin_shell::ShellExt;
 
 pub fn send_message_to_frontend(
     window: &tauri::WebviewWindow,
@@ -39,7 +40,7 @@ fn setup_cron_job(window: tauri::WebviewWindow) {
     info!("Running background sync cron job");
     // convert Arc<std::sync::Mutex<tauri::Window>> to tauri::Window
     let window_clone = window_clone.lock().unwrap().clone();
-    run_sync_operation(window_clone);
+    // run_sync_operation(window_clone);
   }, "0 * * * * *".parse().unwrap()));
 
   // Check and run pending jobs in agenda every 60 seconds
@@ -132,8 +133,6 @@ async fn run_file_indexing(window: tauri::WebviewWindow) -> Result<String, Error
 
   tokio::spawn(async move {
       let files_added = walk_directory(&mut connection, &window, &home_directory);
-      // let files_added = walk_directory("/Users/thatgurjot/Desktop/");
-      // let files_added = parse_content_from_files();
       sender
           .send(files_added)
           .await
@@ -149,8 +148,8 @@ async fn run_file_indexing(window: tauri::WebviewWindow) -> Result<String, Error
 
 // Run file sync
 #[tauri::command]
-async fn run_file_sync(window: tauri::WebviewWindow) {
-  run_sync_operation(window);
+async fn run_file_sync(app: tauri::AppHandle, window: tauri::WebviewWindow) {
+  run_sync_operation(window, app);
 }
 
 // Get sync status
@@ -251,6 +250,15 @@ async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_stri
   app_handle.restart();
 }
 
+#[tauri::command]
+async fn enable_sidecar(app: tauri::AppHandle) {
+  #[cfg(target_os = "macos")] 
+  {
+    let sidecar_command = app.shell().sidecar("textra").unwrap().args(["/Users/thatgurjot/Desktop/Gurjot_Arc.png", "-o", "/Users/thatgurjot/Desktop/arc.txt"]);
+    let (mut _rx, mut _child) = sidecar_command.spawn().unwrap();
+  }
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -267,7 +275,8 @@ pub fn initialize() {
       get_db_stats,
       open_quicklook,
       open_context_menu,
-      set_new_global_shortcut
+      set_new_global_shortcut,
+      enable_sidecar
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {

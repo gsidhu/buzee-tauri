@@ -11,12 +11,12 @@ pub mod txt;
 pub mod xlsx;
 
 pub struct Extractor {
-  map: HashMap<String, fn(&String) -> Result<String, Box<dyn Error>>>,
+  map: HashMap<String, fn(&String, &tauri::AppHandle) -> Result<String, Box<dyn Error>>>,
 }
 
 impl Extractor {
   pub fn new() -> Self {
-    let mut map: HashMap<String, fn(&String) -> Result<String, Box<dyn Error>>> = HashMap::new();
+    let mut map: HashMap<String, fn(&String, &tauri::AppHandle) -> Result<String, Box<dyn Error>>> = HashMap::new();
     map.insert("csv".to_string(), csv::extract);
     map.insert("docx".to_string(), docx::extract);
     map.insert("epub".to_string(), epub::extract);
@@ -33,10 +33,11 @@ impl Extractor {
     &self,
     file_path: String,
     file_type: String,
+    app: &tauri::AppHandle
   ) -> Result<String, Box<dyn Error>> {
     println!("Extracting text from file: {}", file_path);
     if let Some(extract) = self.map.get(&file_type) {
-      extract(&file_path)
+      extract(&file_path, app)
     } else {
       Err("File type not supported".into())
     }

@@ -1,4 +1,5 @@
 use diesel::{QueryDsl, RunQueryDsl, SqliteConnection};
+use tauri::AppHandle;
 use crate::database::establish_connection;
 use crate::database::schema::app_data;
 use crate::housekeeping::get_home_directory;
@@ -8,7 +9,7 @@ use crate::user_prefs::set_scan_running_status;
 use log::{error, info, trace, warn};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub fn run_sync_operation(window: tauri::WebviewWindow) {
+pub fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
   info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
   println!("File sync started");
   let mut conn = establish_connection();
@@ -31,7 +32,8 @@ pub fn run_sync_operation(window: tauri::WebviewWindow) {
       // Parse metadata of all files but only update the ones whose time metadata or size has changed
       let _files_added = walk_directory(&mut conn, &window, &home_directory);
       // Then start parsing the content of all files and add it to the body table
-      let _files_parsed = parse_content_from_files(&mut conn);
+      println!("Parsing content from files");
+      let _files_parsed = parse_content_from_files(&mut conn, app.clone());
       // let files_parsed = 0;
       // Emit closing sync status to the frontend
       println!("Sending message to frontend: Sync operation completed");
