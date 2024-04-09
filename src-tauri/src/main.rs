@@ -17,6 +17,7 @@ mod ipc;
 mod housekeeping;
 mod database;
 mod db_sync;
+mod drag;
 mod indexing;
 mod text_extraction;
 mod context_menu;

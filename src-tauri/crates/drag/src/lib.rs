@@ -143,7 +143,7 @@ pub enum DragItem {
 
 #[derive(Default)]
 pub struct Options {
-    pub skip_animatation_on_cancel_or_failure: bool,
+    pub skip_animation_on_cancel_or_failure: bool,
 }
 
 /// An image definition.

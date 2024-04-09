@@ -1,22 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
   import TopBar from "../../layout/TopBar.svelte";
-  import { invoke, transformCallback } from "@tauri-apps/api/core";
-
-  function startDragging() {
-    startDrag({ item: ['/Users/thatgurjot/Desktop/Gurjot_Arc.png'], icon: '/Users/thatgurjot/Desktop/Gurjot_Arc.png' })
-  }
-
-  async function startDrag(
-    options: Options,
-    onEvent?: (result: CallbackPayload) => void
-  ): Promise<void> {
-    await invoke("start_drag", {
-      item: options.item,
-      image: options.icon,
-      onEventFn: onEvent ? transformCallback(onEvent) : null,
-    });
-  }
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
@@ -35,10 +19,6 @@
   </div>
 </div>
 
-<div draggable="true" id="drag" on:dragstart={startDragging}>
-  Drag me
-</div>
-
 <style>
   #breathing {
 		background-image: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%);
@@ -47,15 +27,4 @@
 		border-radius: 67% 33% 63% 37% / 46% 32% 68% 54%;
     animation: breathing-circle 10s linear infinite;
 	}
-
-  #drag {
-    border: 2px solid black;
-    border-radius: 3px;
-    width: 100%;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-user-select: none;
-  }
 </style>

@@ -205,6 +205,7 @@ checksum = "7ff69b9dd49fd426c69a0db9fc04dd934cdb6645ff000864d98f7e2af8830eaa"
 name = "buzee-tauri"
 version = "0.0.0"
 dependencies = [
+ "base64 0.21.7",
  "chrono 0.4.35",
  "diesel",
  "dirs",
@@ -222,6 +223,7 @@ dependencies = [
  "schedule",
  "serde",
  "serde_json",
+ "serialize-to-javascript",
  "simple-logging",
  "tauri",
  "tauri-build",

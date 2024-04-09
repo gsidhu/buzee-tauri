@@ -292,7 +292,7 @@ pub fn start_drag<W: HasRawWindowHandle, F: Fn(DragResult, CursorPosition) + Sen
             (*source).set_ivar("on_drop_ptr", callback_ptr as *mut _ as *mut c_void);
             (*source).set_ivar(
                 "animate_on_cancel_or_failure",
-                !options.skip_animatation_on_cancel_or_failure,
+                !options.skip_animation_on_cancel_or_failure,
             );
 
             let _: () = msg_send![ns_view, beginDraggingSessionWithItems: dragging_items event: drag_event source: source];

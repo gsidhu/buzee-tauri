@@ -267,7 +267,8 @@ pub fn initialize() {
       get_db_stats,
       open_quicklook,
       open_context_menu,
-      set_new_global_shortcut
+      set_new_global_shortcut,
+      crate::drag::start_drag
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {

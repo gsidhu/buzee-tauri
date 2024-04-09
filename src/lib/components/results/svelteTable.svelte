@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invoke } from '@tauri-apps/api/core';
+	import { invoke, transformCallback } from "@tauri-apps/api/core";
 	import moment from 'moment';
 	import { onMount } from 'svelte';
 	import { readable } from 'svelte/store';
@@ -12,8 +12,23 @@
 	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
-	import PopoverIcon from '../ui/popoverIcon.svelte';
 	import { sendEvent } from '../../../utils/firebase';
+  
+  function startDragging(filepath: string) {
+		const image64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADySURBVFiF7dcxSgNRFIXhT4Wx1NrCFCK4iEiCWxBcgjsQscteLMQlKCksLCLYWbkE3cEEJBaTgL5MzGReAhb3h9cc3tz7w0wxh3k6GKLEpOV5R7dmdiOGuEHR8vkBHvGBfpsBZcbymcBgunypxHZNVmCcITDjCee4x9kqAuvkeSpx95dEyiRz6SVuk6yPT5yml7cWCNTlTdnHK0Z4+5F3cYyTTQvAHi5wlOTXTWbnvoKVZm/6I1xKCIRACIRACIRACIRACPxLgbG8araIXVXt+8VOzcUeDvCCrzUtL3Cl+iVPS8scHVW7zann6SnxgMN02Ter0UNOfhP2XAAAAABJRU5ErkJggg==";
+    startDrag({ item: [filepath], icon: image64 })
+  }
+
+  async function startDrag(
+    options: Options,
+    onEvent?: (result: CallbackPayload) => void
+  ): Promise<void> {
+    await invoke("start_drag", {
+      item: options.item,
+      image: options.icon,
+      onEventFn: onEvent ? transformCallback(onEvent) : null,
+    });
+  }
 
 	function openFile(url: string) {
 		sendEvent('click:open_file');
@@ -242,6 +257,8 @@
 							on:click={(e) => clickRow(e, $shiftKeyPressed)}
 							on:contextmenu={(e) => showContextMenu(e, $documentsShown[Number(row.id)])}
 							on:dblclick={() => openFile($documentsShown[Number(row.id)].path)}
+							draggable="true"
+							on:dragstart={startDragging($documentsShown[Number(row.id)].path)}
 						>
 							{#each row.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs>
@@ -252,16 +269,6 @@
 											<FileTypeIcon filetype={String(cell.render())} />
 										{:else if cell.id === 'size'}
 											<span>{readableFileSize(Number(cell.render()))}</span>
-										<!-- {:else if cell.id === 'path'}
-											<PopoverIcon
-												label={formatPath(String(cell.render()))}
-												title={String(cell.render())}
-												showIcon={false}
-												showText={true}
-												marginClass="m-0"
-												paddingClass="p-0"
-												isBtn={false}
-											/> -->
 										{:else}
 											<span><Render of={cell.render()} /></span>
 										{/if}
