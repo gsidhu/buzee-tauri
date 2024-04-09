@@ -52,7 +52,7 @@
 		}
 		// Disable right click context menu
 		if (document) {
-			document.oncontextmenu = function() { return false; }
+			// document.oncontextmenu = function() { return false; }
 		}
   });
 

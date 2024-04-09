@@ -2,10 +2,19 @@
 name = "buzee-tauri"
 version = "0.0.0"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["Buzilla Inc."]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2021"
+authors = ["Buzilla Inc."]
+license = "Apache-2.0 OR MIT"
 
 [build-dependencies]
 tauri-build = { version = "2.0.0-beta", features = [] }
@@ -13,6 +22,7 @@ tauri-build = { version = "2.0.0-beta", features = [] }
 [dependencies]
 tauri = { version = "2.0.0-beta", features = [] }
 tauri-plugin-shell = "2.0.0-beta"
+drag = { path = "./crates/drag", version = "0.4.0", features = [ "serde" ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "1.0"

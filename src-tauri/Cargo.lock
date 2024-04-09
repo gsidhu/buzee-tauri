@@ -210,6 +210,7 @@ dependencies = [
  "dirs",
  "dotenvy",
  "dotext",
+ "drag",
  "epub",
  "jwalk",
  "lazy_static",
@@ -830,6 +831,21 @@ name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
+
+[[package]]
+name = "drag"
+version = "0.4.0"
+dependencies = [
+ "cocoa",
+ "core-graphics",
+ "dunce",
+ "objc",
+ "raw-window-handle 0.6.0",
+ "serde",
+ "tauri",
+ "thiserror",
+ "windows 0.52.0",
+]
 
 [[package]]
 name = "drm"
