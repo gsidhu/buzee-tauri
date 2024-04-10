@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-License-Identifier: MIT
 
+#[allow(deprecated)]
 use raw_window_handle::{HasRawWindowHandle, RawWindowHandle};
 
 use crate::{CursorPosition, DragItem, DragResult, Image, Options};
@@ -210,6 +211,7 @@ impl IDataObject_Impl for DataObject {
     }
 }
 
+#[allow(deprecated)]
 pub fn start_drag<W: HasRawWindowHandle, F: Fn(DragResult, CursorPosition) + Send + 'static>(
     handle: &W,
     item: DragItem,
@@ -217,7 +219,7 @@ pub fn start_drag<W: HasRawWindowHandle, F: Fn(DragResult, CursorPosition) + Sen
     on_drop_callback: F,
     _options: Options,
 ) -> crate::Result<()> {
-    if let RawWindowHandle::Win32(_w) = handle.raw_window_handle() {
+    if let Ok(RawWindowHandle::Win32(_w)) = handle.raw_window_handle() {
         match item {
             DragItem::Files(files) => {
                 init_ole();
