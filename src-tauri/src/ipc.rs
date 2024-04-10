@@ -149,7 +149,7 @@ async fn run_file_indexing(window: tauri::WebviewWindow) -> Result<String, Error
 // Run file sync
 #[tauri::command]
 async fn run_file_sync(app: tauri::AppHandle, window: tauri::WebviewWindow) {
-  run_sync_operation(window, app);
+  run_sync_operation(window, app).await;
 }
 
 // Get sync status

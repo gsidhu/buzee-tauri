@@ -3,12 +3,15 @@
 ## Sidecar (OCR) TODO
 - Add a page to let user OCR a PDF or image.
   - Add dialog to select file.
-- Modify textra and winocr_cli to pass a "finished" message to stdout so the child process can be stopped and output text file read.
+- [x] Read output_text file only when the extraction process completes.
+- Divide PDF and non-PDF extraction into two child tokio threads.
+  - Keep track of the threads using a mutable state.
 
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
 ## - Figure out why sync button doesn't stop the process when PDFs are being indexed.
 
+- Replaced extraction hashmap with async/await to make PDF extraction work.
 - Fixed textra installation script. Using `curl` instead of `wget`.
 - Removed unnecessary `docx` dependency. Using `dotext` for extracting docx, pptx and xlsx anyway.
 - Added a spare function for reading large txt files.

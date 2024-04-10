@@ -2,7 +2,7 @@ use crate::database::establish_connection;
 // use crate::database::crud::add_files_to_database;
 use crate::database::schema::{document, metadata, body, file_types};
 use crate::database::models::{DocumentItem, BodyItem, FileTypes};
-use crate::db_sync::sync_status;
+// use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::utils::{self, get_metadata, install_textra_from_github};
@@ -286,7 +286,7 @@ pub fn add_file_metadata_to_database(
     }
 }
 
-pub fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle) -> usize {
+pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle) -> usize {
   let mut files_parsed = 0;
 
   let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
@@ -339,64 +339,63 @@ pub fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHand
   println!("PDF files: {}", pdf_files_data.len());
   println!("Not PDF files: {}", not_pdf_files_data.len());
 
-  let app_clone = app.clone();
+  // let app_clone = app.clone();
   // Spawn child processes to extract text from PDF and non-PDF files
-  tokio::spawn(async move {
-    println!("Parsing PDF files");
-    parse_text_and_store_in_db(pdf_files_data, pdf_last_parsed_values, &app);
-  });
+  // tokio::spawn(async move {
+  //   println!("Parsing PDF files");
+  //   parse_text_and_store_in_db(pdf_files_data, pdf_last_parsed_values, &app).await;
+  // });
 
-  tokio::spawn(async move {
-    println!("Parsing non-PDF files");
-    parse_text_and_store_in_db(not_pdf_files_data, not_pdf_last_parsed_values, &app_clone);
-  });
+  // tokio::spawn(async move {
+  //   println!("Parsing non-PDF files");
+  //   parse_text_and_store_in_db(not_pdf_files_data, not_pdf_last_parsed_values, &app_clone).await;
+  // });
 
-  // for file_item in pdf_files_data {
-  //   let metadata_id = file_item.0;
-  //   let path = file_item.1;
-  //   let name = file_item.2;
-  //   let file_type = file_item.3;
-  //   let last_modified = file_item.4;
-  //   let last_parsed: Option<&i64>;
-  //   match pdf_last_parsed_values.get(&metadata_id) {
-  //     Some(value) => {
-  //       // Handle the case where metadata_id exists in the HashMap
-  //       last_parsed = Some(value);
-  //     }
-  //     None => {
-  //       // Handle the case where metadata_id does not exist in the HashMap
-  //       last_parsed = None;
-  //     }
-  //   }  
-  //   // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
-  //   if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
-  //     // Extract text from the file
-  //     let text = extract_text_from_path(path.clone(), file_type.clone(), &app);
-  //     // If there is no text, still add this file so that next time its last_parsed is compared
-  //     // Chunk the text into 2000 character chunks
-  //     let chunks = chunk_text(text);
-  //     let body_items: Vec<BodyItem> = chunks
-  //       .iter()
-  //       .map(|chunk| {
-  //         BodyItem {
-  //           metadata_id: metadata_id, 
-  //           text: chunk.to_string(),
-  //           title: name.clone(),
-  //           url: path.clone(),
-  //           last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-  //         }
-  //       }).collect();
+  for file_item in pdf_files_data {
+    let metadata_id = file_item.0;
+    let path = file_item.1;
+    let name = file_item.2;
+    let file_type = file_item.3;
+    let last_modified = file_item.4;
+    let last_parsed: Option<&i64>;
+    match pdf_last_parsed_values.get(&metadata_id) {
+      Some(value) => {
+        // Handle the case where metadata_id exists in the HashMap
+        last_parsed = Some(value);
+      }
+      None => {
+        // Handle the case where metadata_id does not exist in the HashMap
+        last_parsed = None;
+      }
+    }
 
-  //     add_body_to_database(&body_items, conn);
-  //   }
-  //   files_parsed += 1;
-  // }
+    // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
+    if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
+      // Extract text from the file
+      let text = extract_text_from_path(path.clone(), file_type.clone(), &app).await;
+      // If there is no text, still add this file so that next time its last_parsed is compared
+      // Chunk the text into 2000 character chunks
+      let chunks = chunk_text(text);
+      let body_items: Vec<BodyItem> = chunks
+        .iter()
+        .map(|chunk| {
+          BodyItem {
+            metadata_id: metadata_id, 
+            text: chunk.to_string(),
+            title: name.clone(),
+            url: path.clone(),
+            last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+          }
+        }).collect();
+      add_body_to_database(&body_items, conn);
+    }
+    files_parsed += 1;
+  }
 
-  // 1000 // return
   files_parsed
 }
 
-pub fn parse_text_and_store_in_db(
+pub async fn parse_text_and_store_in_db(
   files_data_vector: Vec<(i32, String, String, String, i64)>, 
   last_parsed_values: HashMap<i32, i64>,
   app: &tauri::AppHandle) {
@@ -422,7 +421,7 @@ pub fn parse_text_and_store_in_db(
     // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
     if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
       // Extract text from the file
-      let text = extract_text_from_path(path.clone(), file_type.clone(), &app);
+      let text = extract_text_from_path(path.clone(), file_type.clone(), &app).await;
       // If there is no text, still add this file so that next time its last_parsed is compared
       // Chunk the text into 2000 character chunks
       let chunks = chunk_text(text);
@@ -444,9 +443,9 @@ pub fn parse_text_and_store_in_db(
 }
 
 
-pub fn extract_text_from_path(path: String, file_type: String, app: &tauri::AppHandle) -> String {
+pub async fn extract_text_from_path(path: String, file_type: String, app: &tauri::AppHandle) -> String {
   let extractor: Extractor = Extractor::new();
-  let extracted_text = extractor.extract_text_from_file(path, file_type, app);
+  let extracted_text = extractor.extract_text_from_file(path, file_type, app).await;
   match extracted_text {
     Ok(text) => text,
     Err(e) => {

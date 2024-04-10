@@ -9,7 +9,7 @@ use crate::user_prefs::set_scan_running_status;
 use log::{error, info, trace, warn};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
+pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
   info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
   println!("File sync started");
   let mut conn = establish_connection();
@@ -33,7 +33,7 @@ pub fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
       let _files_added = walk_directory(&mut conn, &window, &home_directory);
       // Then start parsing the content of all files and add it to the body table
       println!("Parsing content from files");
-      let _files_parsed = parse_content_from_files(&mut conn, app.clone());
+      let _files_parsed = parse_content_from_files(&mut conn, app.clone()).await;
       // let files_parsed = 0;
       // Emit closing sync status to the frontend
       println!("Sending message to frontend: Sync operation completed");
