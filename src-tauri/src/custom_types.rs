@@ -1,4 +1,6 @@
 use serde::{Serialize, Deserialize};
+use diesel::r2d2::{Pool, ConnectionManager};
+use diesel::SqliteConnection;
 
 // create the error type that represents all errors possible in our program
 #[derive(Debug, thiserror::Error)]
@@ -77,9 +79,6 @@ pub struct DBStat {
 //     }
 //   }
 // }
-
-use diesel::r2d2::{Pool, ConnectionManager};
-use diesel::SqliteConnection;
 
 // Struct for Database Connection Pool
 pub(crate) struct DBConnPoolState {
