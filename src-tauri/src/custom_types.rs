@@ -80,9 +80,6 @@ pub struct DBStat {
 //   }
 // }
 
-use diesel::r2d2::{Pool, ConnectionManager};
-use diesel::SqliteConnection;
-
 // Struct for Database Connection Pool
 pub(crate) struct DBConnPoolState {
   pub conn_pool: Pool<ConnectionManager<SqliteConnection>>
