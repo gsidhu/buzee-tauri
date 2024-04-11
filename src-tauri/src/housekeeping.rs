@@ -1,9 +1,9 @@
 // use crate::custom_types::Error; // Import the Error type
 use dirs::document_dir;
 use crate::database::create_tables_if_not_exists;
-use crate::database::establish_connection;
+use crate::database::establish_direct_connection_to_db;
 use crate::utils::norm;
-use crate::user_prefs::{set_default_app_data, set_default_user_prefs, set_default_file_types, set_scan_running_status};
+use crate::user_prefs::{set_default_app_data, set_default_user_prefs, set_default_file_types};
 use log::LevelFilter;
 
 pub const APP_DIRECTORY: &str = r#"buzee-tauri"#;
@@ -60,7 +60,7 @@ pub fn initialize() -> () {
   // Set up logging
   setup_logging_file_path();
 
-  let mut conn = establish_connection();
+  let mut conn = establish_direct_connection_to_db();
   println!("Initializing database");
   create_tables_if_not_exists(&mut conn).unwrap();
 
@@ -70,7 +70,4 @@ pub fn initialize() -> () {
   set_default_user_prefs(&mut conn);
   // Set default file types
   set_default_file_types(&mut conn);
-
-  // On each launch, set the sync_running flag to false
-  set_scan_running_status(&mut conn, false, false);
 }

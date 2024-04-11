@@ -1,6 +1,6 @@
 // Handles for User Preferences and App Data
 
-use crate::custom_types::GlobalShortcutState;
+use crate::custom_types::{GlobalShortcutState, SyncRunningState};
 use std::time::{SystemTime, UNIX_EPOCH};
 use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use crate::database::models::{AppData, UserPrefs, FileTypes};
@@ -148,7 +148,8 @@ pub fn set_default_file_types(conn: &mut SqliteConnection) {
   }
 }
 
-pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_time: bool) {
+pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_time: bool, app: &tauri::AppHandle) {
+  println!("Setting scan_running status to: {}", status);
   if set_time {
     let _ = diesel::update(app_data::table)
       .set((
@@ -163,14 +164,17 @@ pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_ti
       .execute(conn)
       .unwrap();
   }
-}
 
+  let state_mutex = app.state::<Mutex<SyncRunningState>>();
+  let mut state = state_mutex.lock().unwrap();
+  state.sync_running = status;
+}
 
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 use std::str::FromStr;
 
-pub fn set_new_global_shortcut_in_db(new_shortcut_string: String) {
-  let mut conn = establish_connection();
+pub fn set_new_global_shortcut_in_db(new_shortcut_string: String, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)
     .set(user_preferences::global_shortcut.eq(new_shortcut_string))
     .execute(&mut conn)
@@ -182,7 +186,7 @@ pub fn set_global_shortcut_from_db(app: &tauri::AppHandle) {
   let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
   let mut state = state_mutex.lock().unwrap();
 
-  let mut conn = establish_connection();
+  let mut conn = establish_connection(&app);
   let global_shortcut_string = user_preferences::table
     .select(user_preferences::global_shortcut).load::<String>(&mut conn).unwrap();
   let global_shortcut_string = global_shortcut_string.first().unwrap();

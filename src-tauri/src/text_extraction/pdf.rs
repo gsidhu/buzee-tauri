@@ -28,7 +28,7 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
 
     // read the temporary file
     let temp_file_path = format!("{}/temp_output.txt", app_directory);
-    let text = txt::extract(&temp_file_path, app).unwrap();
+    let text = txt::extract(&temp_file_path, app)?;
 
     // return the extracted text
     return Ok(text)

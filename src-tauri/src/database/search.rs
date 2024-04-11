@@ -3,6 +3,7 @@ use crate::database::models::{DocumentSearchResult, MetadataFTSSearchResult};
 use crate::database::schema::metadata;
 use crate::indexing::all_allowed_filetypes;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection, TextExpressionMethods};
+use diesel::r2d2::{Pool, PooledConnection, ConnectionManager};
 use serde_json;
 
 use super::models::BodyFTSSearchResult;
@@ -94,7 +95,7 @@ pub fn search_fts_index(
     limit: i32,
     file_type: Option<String>,
     date_limit: Option<DateLimit>,
-    mut conn: SqliteConnection,
+    mut conn: PooledConnection<ConnectionManager<SqliteConnection>>,
 ) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
     println!(
         "search_fts_index: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
@@ -277,7 +278,7 @@ pub fn get_recently_opened_docs(
     page: i32,
     limit: i32,
     file_type: Option<String>,
-    mut conn: SqliteConnection,
+    mut conn: PooledConnection<ConnectionManager<SqliteConnection>>,
 ) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
@@ -324,7 +325,7 @@ pub fn get_recently_opened_docs(
 
 // Get the counts for all file_types from the document table
 pub fn get_counts_for_all_filetypes(
-    mut conn: SqliteConnection,
+    mut conn: PooledConnection<ConnectionManager<SqliteConnection>>,
 ) -> Result<Vec<DBStat>, diesel::result::Error> {
     // couldn't get COUNT -- GROUP BY to work so doing it manually for each filetype
     use crate::database::schema::document::dsl::*;
@@ -351,7 +352,7 @@ fn handle_special_case(
     limit: i32,
     where_date_limit: String,
     where_file_type: String,
-    mut conn: SqliteConnection,
+    mut conn: PooledConnection<ConnectionManager<SqliteConnection>>,
 ) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
     let query_segments: QuerySegments = parse_stringified_query_segments(&query);
     println!("query_segments: {:?}", query_segments);

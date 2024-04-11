@@ -3,14 +3,18 @@
 ## Sidecar (OCR) TODO
 - Add a page to let user OCR a PDF or image.
   - Add dialog to select file.
-- [x] Read output_text file only when the extraction process completes.
-- Divide PDF and non-PDF extraction into two child tokio threads.
-  - Keep track of the threads using a mutable state.
+  - Add "save to database" toggle.
 
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
-## - Figure out why sync button doesn't stop the process when PDFs are being indexed.
+## - Add UI to OCR PDF Image.
+## - Add UI for num/% files synced.
 
+- Sorting files by size for indexing.
+- Storing sync_running flag in mutex state. Seems to run quite well. More reliable than DB flag.
+- Storing connection pool in mutex state.
+- Reading `output_text` file only when the PDF extraction process completes.
+- Using diesel::r2d2 to manange a connection pool so db does not lock. 
 - Replaced extraction hashmap with async/await to make PDF extraction work.
 - Fixed textra installation script. Using `curl` instead of `wget`.
 - Removed unnecessary `docx` dependency. Using `dotext` for extracting docx, pptx and xlsx anyway.
@@ -136,9 +140,11 @@
   - [x] Add PDF parsing on Windows.
   - Add image text parsing.
   - Set up separate child processes for parsing (1) regular documents (2) pdfs and images (3) xlsx and csv.
-  - Use state management for storing reference to child processes. Use single sync button on the front end.
+    - Dividing into tokio threads makes the app panic quit when running read operations. Tried using a connection pool and it didn't help either. So, sticking to a single thread for all types of files for now. Maybe sort them by file size and run the smallest files first?
+  - [x] Use state management for storing reference to child processes. Use single sync button on the front end.
 - Detect paths/files in OneDrive, Google Drive, Dropbox, etc. and ignore them.
 - Add graceful error handling using logger instead of panic.
+- Clean up the connection requests using the pool.
 - Figure out how to pass types to tauri commands.
 - Add logging to a file + sentry/firebase events.
 - ? Add a tray icon and menubar window.

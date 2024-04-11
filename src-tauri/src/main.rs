@@ -4,6 +4,7 @@
 extern crate chrono;
 extern crate dotext;
 extern crate diesel;
+extern crate futures;
 extern crate lazy_static;
 extern crate log;
 extern crate mobi;

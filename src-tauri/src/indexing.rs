@@ -2,7 +2,7 @@ use crate::database::establish_connection;
 // use crate::database::crud::add_files_to_database;
 use crate::database::schema::{document, metadata, body, file_types};
 use crate::database::models::{DocumentItem, BodyItem, FileTypes};
-// use crate::db_sync::sync_status;
+use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::utils::{self, get_metadata, install_textra_from_github};
@@ -289,7 +289,7 @@ pub fn add_file_metadata_to_database(
 pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle) -> usize {
   let mut files_parsed = 0;
 
-  let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
+  let document_filetypes = ["docx", "md", "pptx", "txt", "pdf", "epub", "xlsx", "csv"];
   println!("Document filetypes: {:?}", document_filetypes);
   
   // let document_filetypes = ["pdf"];
@@ -302,27 +302,28 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
 
   // Get metadata_id, source_id, path, file_type and last_modified
   // For all files that have the filetype in the array above
-  let pdf_files_data = document::table
-    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
-    .filter(document::file_type.eq_any(["pdf"]))
-    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
-    .load::<(i32, String, String, String, i64)>(conn)
-    .unwrap();
+  // let pdf_files_data = document::table
+  //   .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
+  //   .filter(document::file_type.eq_any(["pdf"]))
+  //   .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
+  //   .load::<(i32, String, String, String, i64)>(conn)
+  //   .unwrap();
 
-  let pdf_metadata_ids_to_select: Vec<i32> = pdf_files_data.iter().map(|item| item.0).collect();
+  // let pdf_metadata_ids_to_select: Vec<i32> = pdf_files_data.iter().map(|item| item.0).collect();
 
-  let pdf_last_parsed_values: HashMap<i32, i64> = body::table
-    .filter(body::metadata_id.eq_any(pdf_metadata_ids_to_select))
-    .select((body::metadata_id, body::last_parsed))
-    .load::<(i32, i64)>(conn)
-    .unwrap()
-    .into_iter()
-    .collect();
+  // let pdf_last_parsed_values: HashMap<i32, i64> = body::table
+  //   .filter(body::metadata_id.eq_any(pdf_metadata_ids_to_select))
+  //   .select((body::metadata_id, body::last_parsed))
+  //   .load::<(i32, i64)>(conn)
+  //   .unwrap()
+  //   .into_iter()
+  //   .collect();
   
   let not_pdf_files_data = document::table
     .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
     .filter(document::file_type.eq_any(document_filetypes))
     .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
+    .order_by(document::size.asc())
     .load::<(i32, String, String, String, i64)>(conn)
     .unwrap();
 
@@ -336,29 +337,30 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     .into_iter()
     .collect();
 
-  println!("PDF files: {}", pdf_files_data.len());
+  // println!("PDF files: {}", pdf_files_data.len());
   println!("Not PDF files: {}", not_pdf_files_data.len());
 
-  // let app_clone = app.clone();
   // Spawn child processes to extract text from PDF and non-PDF files
-  // tokio::spawn(async move {
+  // let app_clone = app.clone();
+  // let pdf_parsing = tokio::spawn(async move {
   //   println!("Parsing PDF files");
   //   parse_text_and_store_in_db(pdf_files_data, pdf_last_parsed_values, &app).await;
   // });
-
-  // tokio::spawn(async move {
+  // let not_pdf_parsing = tokio::spawn(async move {
   //   println!("Parsing non-PDF files");
   //   parse_text_and_store_in_db(not_pdf_files_data, not_pdf_last_parsed_values, &app_clone).await;
   // });
+  // futures::future::join_all([pdf_parsing, not_pdf_parsing]).await;
 
-  for file_item in pdf_files_data {
+  let mut sync_running = sync_status(conn, &app);
+  for file_item in not_pdf_files_data {
     let metadata_id = file_item.0;
     let path = file_item.1;
     let name = file_item.2;
     let file_type = file_item.3;
     let last_modified = file_item.4;
     let last_parsed: Option<&i64>;
-    match pdf_last_parsed_values.get(&metadata_id) {
+    match not_pdf_last_parsed_values.get(&metadata_id) {
       Some(value) => {
         // Handle the case where metadata_id exists in the HashMap
         last_parsed = Some(value);
@@ -368,7 +370,6 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
         last_parsed = None;
       }
     }
-
     // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
     if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
       // Extract text from the file
@@ -388,8 +389,14 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
           }
         }).collect();
       add_body_to_database(&body_items, conn);
+      files_parsed += 1;
     }
-    files_parsed += 1;
+    // Check if sync_running is false, if so break the loop
+    if sync_running == "false" {
+      break;
+    }
+    // Update sync_running status
+    sync_running = sync_status(conn, &app);
   }
 
   files_parsed
@@ -399,7 +406,8 @@ pub async fn parse_text_and_store_in_db(
   files_data_vector: Vec<(i32, String, String, String, i64)>, 
   last_parsed_values: HashMap<i32, i64>,
   app: &tauri::AppHandle) {
-  let mut conn = establish_connection();
+  let mut conn = establish_connection(&app);
+  let mut sync_running = sync_status(&mut conn, &app);
   // Then parse and chunk the content and store it in the body table
   for file_item in files_data_vector {
     let metadata_id = file_item.0;
@@ -439,6 +447,13 @@ pub async fn parse_text_and_store_in_db(
 
       add_body_to_database(&body_items, &mut conn);
     }
+
+    // Check if sync_running is false, if so break the loop
+    if sync_running == "false" {
+      break;
+    }
+    // Update sync_running status
+    sync_running = sync_status(&mut conn, &app);
   }
 }
 
