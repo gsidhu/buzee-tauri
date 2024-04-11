@@ -89,6 +89,30 @@ declare global {
     message: string,
     data: string
   };
+
+  export type DragItem =
+  | string[]
+  | { data: string | Record<string, string>; types: string[] };
+
+  export type DragResult = "Dropped" | "Cancelled";
+
+  /**
+   * Logical position of the cursor.
+   */
+  export interface CursorPosition {
+    x: Number;
+    y: Number;
+  }
+
+  export interface Options {
+    item: DragItem;
+    icon: string;
+  }
+
+  export interface CallbackPayload {
+    result: DragResult;
+    cursorPos: CursorPosition;
+  }
 }
 
 export {};
