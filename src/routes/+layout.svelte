@@ -65,6 +65,11 @@
 		if (document) {
 			// document.oncontextmenu = function() { return false; }
 		}
+
+		// setup cron job
+		invoke("setup_cron_job").then((res) => {
+			console.log("setting up cron job");
+		});
   });
 
 	onDestroy(() => {

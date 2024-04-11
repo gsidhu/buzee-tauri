@@ -13,18 +13,18 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::custom_types::SyncRunningState;
 
 pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
-  info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
   println!("File sync started");
   let mut conn = establish_connection(&app);
 
   // On each click, check if sync is already running
-  let sync_running = sync_status(&mut conn, &app);
-  if sync_running == "true" {
+  let sync_running = sync_status(&app);
+  if sync_running.0 == "true" {
     println!("File sync already running; Stopping now");
     // Set sync status to false
     set_scan_running_status(&mut conn, false, true, &app);
     println!("File sync stopped");
   } else {
+    info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
     // Set sync status to true
     set_scan_running_status(&mut conn, true, true, &app);
     // Spawn the new task
@@ -48,19 +48,15 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
   }
 }
 
-pub fn sync_status(conn: &mut SqliteConnection, app: &AppHandle) -> String {
-  // let sync_running: Vec<bool> = app_data::table
-  //   .select(app_data::scan_running)
-  //   .load::<bool>(conn)
-  //   .expect("Error loading app_data");
-
+pub fn sync_status(app: &AppHandle) -> (String, i64) {
   let state_mutex = app.state::<Mutex<SyncRunningState>>();
   let state = state_mutex.lock().unwrap();
   let sync_running = &state.sync_running;
+  let last_sync_time = &state.last_sync_time;
   
   if sync_running == &true {
-    "true".to_string()
+    ("true".to_string(), *last_sync_time)
   } else {
-    "false".to_string()
+    ("false".to_string(), *last_sync_time)
   }
 }

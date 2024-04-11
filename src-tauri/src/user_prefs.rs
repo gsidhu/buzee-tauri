@@ -150,7 +150,13 @@ pub fn set_default_file_types(conn: &mut SqliteConnection) {
 
 pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_time: bool, app: &tauri::AppHandle) {
   println!("Setting scan_running status to: {}", status);
+  let state_mutex = app.state::<Mutex<SyncRunningState>>();
+  let mut state = state_mutex.lock().unwrap();
+  state.sync_running = status;
+
   if set_time {
+    state.last_sync_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+    
     let _ = diesel::update(app_data::table)
       .set((
           app_data::scan_running.eq(&status),
@@ -164,10 +170,6 @@ pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_ti
       .execute(conn)
       .unwrap();
   }
-
-  let state_mutex = app.state::<Mutex<SyncRunningState>>();
-  let mut state = state_mutex.lock().unwrap();
-  state.sync_running = status;
 }
 
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};

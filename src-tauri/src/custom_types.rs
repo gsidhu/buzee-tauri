@@ -96,13 +96,15 @@ impl DBConnPoolState {
 
 // Struct for Sync Running State
 pub(crate) struct SyncRunningState {
-  pub sync_running: bool
+  pub sync_running: bool,
+  pub last_sync_time: i64
 }
 
 impl Default for SyncRunningState {
   fn default() -> Self {
     Self {
-      sync_running: false
+      sync_running: false,
+      last_sync_time: 0
     }
   }
 }

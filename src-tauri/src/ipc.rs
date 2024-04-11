@@ -15,14 +15,12 @@ use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
 use tauri_plugin_shell;
-use tokio::sync::mpsc;
+use tokio::{sync::mpsc, time::{interval, Duration}};
 use tauri::menu::Menu;
 use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,};
 use log::{error, info, trace, warn};
-use schedule::{Agenda, Job};
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::process::Command;
-use tauri_plugin_shell::ShellExt;
 
 pub fn send_message_to_frontend(
     window: &tauri::WebviewWindow,
@@ -33,21 +31,24 @@ pub fn send_message_to_frontend(
   window.emit(&event, Payload { message, data }).unwrap();
 }
 
-// fn setup_cron_job(window: tauri::WebviewWindow) {
-//   let mut sched = Agenda::new();
-//   let window_clone = Arc::new(Mutex::new(window));
-//   sched.add(Job::new(move || {
-//     info!("Running background sync cron job");
-//     // convert Arc<std::sync::Mutex<tauri::Window>> to tauri::Window
-//     let window_clone = window_clone.lock().unwrap().clone();
-//     // run_sync_operation(window_clone);
-//   }, "0 * * * * *".parse().unwrap()));
-//   // Check and run pending jobs in agenda every 60 seconds
-//   loop {
-//     sched.run_pending();
-//     std::thread::sleep(std::time::Duration::from_millis(10000));
-//   }
-// }
+// Setup cron job for background sync
+#[tauri::command]
+async fn setup_cron_job(window: tauri::WebviewWindow, app: tauri::AppHandle) {
+  tokio::spawn(async move {
+    let mut interval = interval(Duration::from_millis(3600000));
+    loop {
+      interval.tick().await;
+      let sync_running = sync_status(&app);
+      println!("??? Sync running: {}", sync_running.0);
+      let current_timestamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
+      if sync_running.0 == "false" && current_timestamp - sync_running.1 > 3600 {
+        let window_clone = window.clone();
+        let app_clone = app.clone();
+        run_sync_operation(window_clone, app_clone).await;
+      }
+    }
+  });
+}
 
 // Get OS boolean
 #[tauri::command]
@@ -154,8 +155,7 @@ async fn run_file_sync(app: tauri::AppHandle, window: tauri::WebviewWindow) {
 // Get sync status
 #[tauri::command]
 fn get_sync_status(app: tauri::AppHandle) -> Result<String, Error> {
-  let mut conn = establish_connection(&app);
-  let sync_running = sync_status(&mut conn, &app);
+  let sync_running = sync_status(&app).0;
   Ok(sync_running)
 }
 
@@ -254,6 +254,7 @@ async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_stri
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
+      setup_cron_job,
       get_allowed_filetypes,
       get_os,
       open_file_or_folder,

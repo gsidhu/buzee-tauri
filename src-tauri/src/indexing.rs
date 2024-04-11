@@ -70,7 +70,7 @@ fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), 
 
                 // if exclude_path.iter().any(|x| curr_path.starts_with(x))
                 if skip_path.iter().any(|x| curr_path.contains(x)) {
-                    info!("skip path {}", curr_path);
+                    // info!("skip path {}", curr_path);
                     dir_entry.read_children_path = None;
                 }
             }
@@ -352,7 +352,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   // });
   // futures::future::join_all([pdf_parsing, not_pdf_parsing]).await;
 
-  let mut sync_running = sync_status(conn, &app);
+  let mut sync_running = sync_status(&app).0;
   for file_item in not_pdf_files_data {
     let metadata_id = file_item.0;
     let path = file_item.1;
@@ -396,7 +396,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
       break;
     }
     // Update sync_running status
-    sync_running = sync_status(conn, &app);
+    sync_running = sync_status(&app).0;
   }
 
   files_parsed
@@ -407,7 +407,7 @@ pub async fn parse_text_and_store_in_db(
   last_parsed_values: HashMap<i32, i64>,
   app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
-  let mut sync_running = sync_status(&mut conn, &app);
+  let mut sync_running = sync_status(&app).0;
   // Then parse and chunk the content and store it in the body table
   for file_item in files_data_vector {
     let metadata_id = file_item.0;
@@ -453,7 +453,7 @@ pub async fn parse_text_and_store_in_db(
       break;
     }
     // Update sync_running status
-    sync_running = sync_status(&mut conn, &app);
+    sync_running = sync_status(&app).0;
   }
 }
 
