@@ -8,7 +8,6 @@
 ## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
 ## - Add UI to OCR PDF Image.
-## - Add UI for num/% files synced.
 
 - Sorting files by size for indexing.
 - Storing sync_running flag in mutex state. Seems to run quite well. More reliable than DB flag.

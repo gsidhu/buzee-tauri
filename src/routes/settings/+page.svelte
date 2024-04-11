@@ -187,9 +187,9 @@
 		</table>
 		<div class="d-flex w-90 justify-content-between small-explanation">
 			<div>
-				<button class="btn btn-sm link-danger px-0" on:click={() => resetDefault()}
-					>Reset Default</button
-				>
+				<button class="btn btn-sm link-danger px-0" on:click={() => resetDefault()}>
+					Reset Default
+				</button>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
 			</div>
 			<div>

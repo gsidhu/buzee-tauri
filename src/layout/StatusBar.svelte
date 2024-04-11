@@ -197,6 +197,29 @@
 	<!-- Right end -->
 	<div class="col px-0 d-flex flex-row justify-content-end" id="status-bar-right">
 		{#if onboardingDone}
+			<!-- Notifications -->
+			<!-- <div class="dropup dropup-center px-0 mx-0 status-item">
+				<button
+					id="bg-sync-btn"
+					type="button"
+					class={`status-item px-1  ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
+					title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background sync is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+					disabled={syncCoolingPeriod}
+					data-bs-toggle="dropdown"
+					aria-expanded="false"
+					style="all: unset;"
+				>
+					<i id="bg-sync-icon" class='bi bi-bell' />
+				</button>
+				<ul class="dropdown-menu py-0 px-2" style="cursor: default;">
+					<div class="file-stats-header text-center">
+						<strong><small>Notifications</small></strong>
+					</div>
+					<hr class="mb-1 mt-0" />
+					<div><small>Files Indexed</small></div>
+					<div><small>124</small></div>
+				</ul>
+			</div> -->
 			<button
 				type="button"
 				class="px-1 mx-1 status-item"
@@ -232,11 +255,15 @@
 </div>
 
 <style lang="scss">
+	.code-pink {
+		color: var(--bs-code-color) !important;
+	}
 	.bg-code-pink {
 		background: var(--bs-code-color) !important;
 	}
 	.disabled-gray {
 		background: var(--bs-gray) !important;
+		color: white;
 		&:hover {
 			cursor: not-allowed !important;
 		}

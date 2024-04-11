@@ -57,6 +57,10 @@ body {
   width: 90% !important;
 }
 
+.br-0 {
+  border-radius: 0 !important;
+}
+
 .spin-right::before {
   transform-origin: 50% 50%;
   animation: spin-right-animation 3s linear 0s infinite normal both running;
