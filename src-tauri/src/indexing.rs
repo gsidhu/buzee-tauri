@@ -290,7 +290,7 @@ pub fn add_file_metadata_to_database(
 pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle) -> usize {
   let mut files_parsed = 0;
 
-  let document_filetypes = ["docx", "md", "pptx", "txt", "pdf", "epub", "xlsx", "csv"];
+  let document_filetypes = ["docx", "md", "pptx", "txt", "pdf", "epub"];
   println!("Document filetypes: {:?}", document_filetypes);
   
   // let document_filetypes = ["pdf"];

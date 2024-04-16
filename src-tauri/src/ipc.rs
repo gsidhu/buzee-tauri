@@ -164,7 +164,7 @@ fn get_sync_status(app: tauri::AppHandle) -> Result<String, Error> {
 #[tauri::command]
 fn get_search_suggestions(query: String, app: tauri::AppHandle) -> Result<Vec<String>, Error> {
   let mut conn = establish_connection(&app);
-  let suggestions = get_metadata_title_matches(query, &mut conn).unwrap();
+  let suggestions = get_metadata_title_matches(query, &mut conn).unwrap_or(vec![]);
   Ok(suggestions)
 }
 
@@ -183,7 +183,7 @@ fn run_search(
         query, page, limit, file_type, date_limit
     );
     let conn = establish_connection(&app);
-    let search_results = search_fts_index(query, page, limit, file_type, date_limit, conn).unwrap();
+    let search_results = search_fts_index(query, page, limit, file_type, date_limit, conn).unwrap_or(vec![]);
     Ok(search_results)
 }
 

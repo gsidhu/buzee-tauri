@@ -5,11 +5,12 @@
   - Add dialog to select file.
   - Add "save to database" toggle.
 
-## - Set up cron job to index every hour.
 ## - Add UI for setting global shortcut.
 ## - Add UI to OCR PDF Image.
 ## - Add user pref table. Connect to global shortcut, cron job etc.
 
+- Showing a little checkmark next to the filename for all files that have been indexed.
+- Added last_parsed column to the document table. Modified all models, schemas and functions accordingly.
 - Modified CSV and XLSX parser to store only unique words.
 - Removed all unused imports and functions.
 - Replaced function for handling not-query only. Should work more reliably now.
@@ -135,7 +136,7 @@
 
 ### Database
 - [x] Restructure database.
-- Add user prefs to database.
+- [x] Add user prefs to database.
 
 ### Backend
 - [x] Add search suggestions.
@@ -147,12 +148,13 @@
     - Dividing into tokio threads makes the app panic quit when running read operations. Tried using a connection pool and it didn't help either. So, sticking to a single thread for all types of files for now. Maybe sort them by file size and run the smallest files first?
   - [x] Use state management for storing reference to child processes. Use single sync button on the front end.
 - Detect paths/files in OneDrive, Google Drive, Dropbox, etc. and ignore them.
-- Add graceful error handling using logger instead of panic.
-- Clean up the connection requests using the pool.
+- Add graceful error handling (`unwrap_or`) using logger instead of panic (esp. on `unwrap` values).
+- [x] Clean up the connection requests using the pool.
 - Figure out how to pass types to tauri commands.
 - Add logging to a file + sentry/firebase events.
 - ? Add a tray icon and menubar window.
 - ? Implement `frecency`. Sort search results by `frecency`. Maybe weave `last_opened` into the formula?
+- ? Maybe use a separate index for search suggestions. It makes too many queries to the SQLite db.
 - Allow searching by `created_at`, `last_modified` or `last_opened`.
 - [x] Figure out how to add app menu and context menus.
 - [x] Add code for indexing file contents.

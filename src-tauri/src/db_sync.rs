@@ -30,7 +30,7 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
     tokio::spawn(async move {
       // Emit starting sync status to the frontend
       send_message_to_frontend(&window, "sync-status".to_string(), "sync-status".to_string(), "true".to_string());
-      let home_directory = get_home_directory().unwrap();
+      let home_directory = get_home_directory().unwrap_or("/".to_string());
       // Parse metadata of all files but only update the ones whose time metadata or size has changed
       let _files_added = walk_directory(&mut conn, &window, &home_directory);
       // Then start parsing the content of all files and add it to the body table
