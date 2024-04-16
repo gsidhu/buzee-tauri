@@ -7,7 +7,6 @@ use std::{collections::HashMap, path::PathBuf, sync::mpsc::channel};
 use serde::{ser::Serializer, Deserialize, Deserializer, Serialize};
 use tauri::{
     ipc::CallbackFn,
-    plugin::{Builder, TauriPlugin},
     AppHandle, Runtime, WebviewWindow,
 };
 

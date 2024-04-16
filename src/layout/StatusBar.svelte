@@ -181,7 +181,7 @@
 				</div>
 			</div>
 		{:else if onboardingDone}
-			<button
+			<!-- <button
 				id="bg-sync-btn"
 				type="button"
 				class={`px-1 mx-1 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
@@ -190,7 +190,7 @@
 				disabled={syncCoolingPeriod}
 			>
 				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />{` Sync${syncStatus ? 'ing' : ''}`}
-			</button>
+			</button> -->
 		{/if}
 	</div>
 
@@ -221,8 +221,18 @@
 				</ul>
 			</div> -->
 			<button
+				id="bg-sync-btn"
 				type="button"
-				class="px-1 mx-1 status-item"
+				class={`px-2 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
+				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background sync is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+				on:click={() => toggleBackgroundTextProcessing()}
+				disabled={syncCoolingPeriod}
+			>
+				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />
+			</button>
+			<button
+				type="button"
+				class="px-2 status-item"
 				title="View the fun stuff"
 				on:click={() => showStatusBarMenu('extras')}
 			>
@@ -231,7 +241,7 @@
 			{#if $compactViewMode}
 				<button
 					type="button"
-					class="px-1 mx-1 status-item"
+					class="px-2 status-item"
 					title="Switch to expanded view"
 					on:click={() => toggleCompactViewMode()}
 				>
@@ -240,7 +250,7 @@
 			{:else}
 				<button
 					type="button"
-					class="px-1 mx-1 status-item"
+					class="px-2 status-item"
 					title="Switch to compact view"
 					on:click={() => toggleCompactViewMode()}
 				>

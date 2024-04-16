@@ -10,6 +10,9 @@
 ## - Add UI to OCR PDF Image.
 ## - Add user pref table. Connect to global shortcut, cron job etc.
 
+- Modified CSV and XLSX parser to store only unique words.
+- Removed all unused imports and functions.
+- Replaced function for handling not-query only. Should work more reliably now.
 - Added cron job. Majestic.
 - Sorting files by size for indexing.
 - Storing sync_running flag in mutex state. Seems to run quite well. More reliable than DB flag.

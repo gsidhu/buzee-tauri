@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, set_global_shortcut_from_db, set_new_global_shortcut_in_db, set_scan_running_status};
+use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, set_global_shortcut_from_db, set_new_global_shortcut_in_db};
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
@@ -18,7 +18,7 @@ use tauri_plugin_shell;
 use tokio::{sync::mpsc, time::{interval, Duration}};
 use tauri::menu::Menu;
 use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,};
-use log::{error, info, trace, warn};
+// use log::info;
 use std::sync::Mutex;
 use std::process::Command;
 
@@ -35,13 +35,14 @@ pub fn send_message_to_frontend(
 #[tauri::command]
 async fn setup_cron_job(window: tauri::WebviewWindow, app: tauri::AppHandle) {
   tokio::spawn(async move {
-    let mut interval = interval(Duration::from_millis(3600000));
+    let mut interval = interval(Duration::from_millis(1800000));
+    interval.tick().await;
     loop {
       interval.tick().await;
       let sync_running = sync_status(&app);
       println!("??? Sync running: {}", sync_running.0);
       let current_timestamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
-      if sync_running.0 == "false" && current_timestamp - sync_running.1 > 3600 {
+      if sync_running.0 == "false" && current_timestamp - sync_running.1 > 1800 {
         let window_clone = window.clone();
         let app_clone = app.clone();
         run_sync_operation(window_clone, app_clone).await;

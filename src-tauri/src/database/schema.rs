@@ -12,6 +12,7 @@ table! {
       last_modified -> BigInt,
       last_opened -> BigInt,
       last_synced -> BigInt,
+      last_parsed -> BigInt,
       is_pinned -> Bool,
       frecency_rank -> Float,
       frecency_last_accessed -> BigInt,

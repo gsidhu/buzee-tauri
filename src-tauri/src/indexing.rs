@@ -5,12 +5,12 @@ use crate::database::models::{DocumentItem, BodyItem, FileTypes};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
-use crate::utils::{self, get_metadata, install_textra_from_github};
+use crate::utils::{self, get_metadata};
 use crate::text_extraction::Extractor;
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
-use log::{error, info, trace, warn};
+use log::info;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::HashMap;
 
@@ -168,6 +168,7 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_secs() as i64,
+            last_parsed: 0,
             is_pinned: false,
             frecency_rank: 0.0,
             frecency_last_accessed: 0,
@@ -389,6 +390,11 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
           }
         }).collect();
       add_body_to_database(&body_items, conn);
+      // update last_parsed in document table for this file
+      let _ = diesel::update(document::table.filter(document::id.eq(metadata_id)))
+        .set(document::last_parsed.eq(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64))
+        .execute(conn)
+        .unwrap();
       files_parsed += 1;
     }
     // Check if sync_running is false, if so break the loop
@@ -402,7 +408,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   files_parsed
 }
 
-pub async fn parse_text_and_store_in_db(
+pub async fn _parse_text_and_store_in_db(
   files_data_vector: Vec<(i32, String, String, String, i64)>, 
   last_parsed_values: HashMap<i32, i64>,
   app: &tauri::AppHandle) {
@@ -570,6 +576,7 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
         last_modified: folder_metadata.modified().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
         last_opened: folder_metadata.accessed().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
         last_synced: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
         is_pinned: false,
         frecency_rank: 0.0,
         frecency_last_accessed: 0,

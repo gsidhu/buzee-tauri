@@ -1,11 +1,9 @@
 use crate::custom_types::{DBStat, DateLimit, QuerySegments};
 use crate::database::models::{DocumentSearchResult, MetadataFTSSearchResult};
-use crate::database::schema::metadata;
 use crate::indexing::all_allowed_filetypes;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection, TextExpressionMethods};
-use diesel::r2d2::{Pool, PooledConnection, ConnectionManager};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
+use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_json;
-
 use super::models::BodyFTSSearchResult;
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
@@ -105,6 +103,7 @@ pub fn search_fts_index(
     let query_segments: QuerySegments = parse_stringified_query_segments(&query);
     println!("query_segments: {:?}", query_segments);
 
+    let file_type_clone = file_type.clone();
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
         if !file_type.contains(",") {
@@ -134,32 +133,35 @@ pub fn search_fts_index(
         "".to_string()
     };
 
+    let mut search_results: Vec<DocumentSearchResult> = Vec::new();
     // if there is only a NOT query, pass it to `handle_special_case` function
     if query_segments.quoted_segments.is_empty()
         && query_segments.greedy_segments.is_empty()
         && !query_segments.not_segments.is_empty()
     {
-        let search_results =
-            handle_special_case(query, page, limit, where_date_limit, where_file_type, conn);
-        return search_results;
+        // search_results =
+        //     handle_special_case_old(query, page, limit, where_date_limit, where_file_type, conn).unwrap();
+        search_results =
+            handle_special_case(query, page, limit, file_type_clone, conn).unwrap();
     }
+    // otherwise run the body and metadata fts queries as usual
+    else {
+        let match_string = create_match_statement(query_segments);
+        println!("match_string: {}", match_string);
 
-    let match_string = create_match_statement(query_segments);
-    println!("match_string: {}", match_string);
-
-    let body_fts_query = create_body_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
-    let body_search_results: Vec<DocumentSearchResult> =
-        diesel::sql_query(body_fts_query).load::<DocumentSearchResult>(&mut conn)?;
-    let metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
-    let metadata_search_results: Vec<DocumentSearchResult> =
-        diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn)?;
-
-    let mut search_results: Vec<DocumentSearchResult> = Vec::new();
-    // combine the results from body_fts and metadata_fts
-    for result in body_search_results.iter().chain(metadata_search_results.iter()) {
-        search_results.push(result.clone());
+        let body_fts_query = create_body_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
+        let body_search_results: Vec<DocumentSearchResult> =
+            diesel::sql_query(body_fts_query).load::<DocumentSearchResult>(&mut conn)?;
+        let metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
+        let metadata_search_results: Vec<DocumentSearchResult> =
+            diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn)?;
+        // combine the results from body_fts and metadata_fts
+        for result in metadata_search_results.iter().chain(body_search_results.iter()) {
+            search_results.push(result.clone());
+        }
     }
     // and order them by last_modified
+    // TODO: change this to frequency rank
     search_results.sort_by(|a, b| b.last_modified.cmp(&a.last_modified));
     // remove duplicates by checking if the id is the same
     search_results.dedup_by(|a, b| a.id == b.id);
@@ -179,8 +181,8 @@ fn create_body_fts_query(
         r#" 
             SELECT d.id, d.source_domain, d.created_at,
                 d.name, d.path, d.size, d.file_type,
-                d.last_modified, d.last_opened, d.last_synced, d.is_pinned,
-                d.frecency_rank, d.frecency_last_accessed, d.comment
+                d.last_modified, d.last_opened, d.last_synced, d.last_parsed,
+                d.is_pinned, d.frecency_rank, d.frecency_last_accessed, d.comment
             FROM (
                 SELECT DISTINCT metadata_id FROM body_fts
                 {match_clause}
@@ -214,8 +216,8 @@ fn create_body_fts_query(
         } else {
             "".to_string()
         },
-        limit = limit,
-        offset = page * limit
+        limit = limit*2,
+        offset = page * limit*2
     );
 
     println!("inner_query: {}", inner_query);
@@ -232,10 +234,10 @@ fn create_metadata_fts_query(
     // Give 5x weight to the title column (4th) in metadata_fts
     let inner_query = format!(
         r#"
-          SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified
+          SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified, d.last_parsed
           FROM metadata_fts m
           JOIN (
-              SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_modified
+              SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_modified, last_parsed
               FROM document
               {inner_where} {where_file_type} {where_date_limit}
           ) d ON m.source_id = d.id
@@ -265,8 +267,8 @@ fn create_metadata_fts_query(
         } else {
             "".to_string()
         },
-        limit = limit,
-        offset = page * limit
+        limit = limit*2,
+        offset = page * limit*2
     );
 
     println!("inner_query: {}", inner_query);
@@ -296,10 +298,10 @@ pub fn get_recently_opened_docs(
 
     let inner_query = format!(
         r#"
-        SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.last_modified, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced
+        SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.last_modified, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_parsed
         FROM metadata m
         JOIN (
-            SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced
+            SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_parsed
             FROM document
             {where_file_type}
         ) d ON m.source_id = d.id
@@ -345,8 +347,38 @@ pub fn get_counts_for_all_filetypes(
 }
 
 // Handle special case with NEGATIVE query only
-// We don't bother looking into body_fts here because it's not needed for eliminating results
+// Get recently opened docs (which is what the user was seeing when they typed the query)
+// Then filter out the results that match the negative query/queries
 fn handle_special_case(
+    query: String,
+    page: i32,
+    limit: i32,
+    file_type: Option<String>,
+    conn: PooledConnection<ConnectionManager<SqliteConnection>>,
+) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
+    let query_segments: QuerySegments = parse_stringified_query_segments(&query);
+    println!("query_segments: {:?}", query_segments);
+    let outer_search_results = get_recently_opened_docs(page, limit*2, file_type, conn).unwrap();
+    let mut search_results: Vec<DocumentSearchResult> = Vec::new();
+    // iterate over outer_search_results and remove any item where item.name or item.path contains any of query_segments.not_segments
+    for result in outer_search_results {
+        let mut found = false;
+        for not_segment in &query_segments.not_segments {
+            if result.name.contains(not_segment) || result.path.contains(not_segment) {
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            search_results.push(result);
+        }
+    }
+    Ok(search_results)
+}
+
+// Handle special case with NEGATIVE query only
+// We don't bother looking into body_fts here because it's not needed for eliminating results
+fn _handle_special_case_old(
     query: String,
     page: i32,
     limit: i32,
@@ -369,10 +401,10 @@ fn handle_special_case(
     // getting 5x limit results to catch OR cases that might be missed in first set
     let inner_query = format!(
         r#"
-          SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified
+          SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified, d.last_parsed
           FROM metadata_fts m
           JOIN (
-              SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_modified
+              SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_modified, last_parsed
               FROM document
               {inner_where} {where_file_type} {where_date_limit}
           ) d ON m.source_id = d.id
@@ -412,10 +444,10 @@ fn handle_special_case(
     // Run another query to get all documents for the given date_limit and file_type
     let outer_query = format!(
         r#"
-          SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified
+          SELECT m.source_domain, m.source_id as id, m.title as name, m.url as path, m.created_at, m.frecency_rank, m.frecency_last_accessed, d.file_type, d.size, d.is_pinned, d.comment, d.last_opened, d.last_synced, d.last_modified, d.last_parsed
           FROM metadata_fts m
           JOIN (
-              SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_modified
+              SELECT id, file_type, size, is_pinned, comment, last_opened, last_synced, last_modified, last_parsed
               FROM document
               {inner_where} {where_file_type_clone} {where_date_limit_clone}
               ORDER BY last_modified DESC
@@ -471,16 +503,16 @@ pub fn get_metadata_title_matches(
     println!("getting suggestions for: {}!", query);
     let inner_query = format!(
         r#"
-        SELECT snippet(metadata_fts, 4, '', '', '', 2) as title from metadata_fts WHERE metadata_fts MATCH '{}*' ORDER BY rank LIMIT 5;
-    "#,
+            SELECT snippet(metadata_fts, 4, '', '', '', 2) as title from metadata_fts WHERE metadata_fts MATCH '{}*' ORDER BY rank LIMIT 10;
+        "#,
         query
     );
     let keyword_suggestions: Vec<MetadataFTSSearchResult> = diesel::sql_query(inner_query).load::<MetadataFTSSearchResult>(conn)?;
     let mut suggestions: Vec<String> = keyword_suggestions.iter().map(|suggestion| suggestion.title.clone()).collect();
     let inner_query = format!(
         r#"
-        SELECT snippet(body_fts, 1, '', '', '', 2) as text from body_fts WHERE body_fts MATCH '{}*' LIMIT 5;
-    "#,
+            SELECT snippet(body_fts, 1, '', '', '', 2) as text from body_fts WHERE body_fts MATCH '{}*' LIMIT 10;
+        "#,
         query
     );
     let keyword_suggestions: Vec<BodyFTSSearchResult> = diesel::sql_query(inner_query).load::<BodyFTSSearchResult>(conn)?;
@@ -492,17 +524,19 @@ pub fn get_metadata_title_matches(
     suggestions = suggestions.iter().map(|s| s.trim().to_lowercase()).collect();
     // iterate over the suggestions and remove any item that does not contain the query
     suggestions.retain(|suggestion| suggestion.contains(&query));
+    // iterate over the suggestions and remove any item that contains any character other than alphanumeric, _, - and space
+    suggestions.retain(|suggestion| suggestion.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-' || c == ' '));
 
-    let file_suggestions = metadata::table
-        .select(metadata::title)
-        .filter(metadata::title.like(format!("%{}%", query)))
-        .order(metadata::last_modified.desc())
-        .limit(7)
-        .load::<String>(conn)?;
+    // let file_suggestions = metadata::table
+    //     .select(metadata::title)
+    //     .filter(metadata::title.like(format!("%{}%", query)))
+    //     .order(metadata::last_modified.desc())
+    //     .limit(7)
+    //     .load::<String>(conn)?;
 
-    for suggestion in &file_suggestions {
-        suggestions.push(suggestion.clone());
-    }
+    // for suggestion in &file_suggestions {
+    //     suggestions.push(suggestion.clone());
+    // }
 
     // remove duplicates
     suggestions.dedup();

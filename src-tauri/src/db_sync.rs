@@ -1,4 +1,3 @@
-use diesel::SqliteConnection;
 // use diesel::{QueryDsl, RunQueryDsl};
 use tauri::{AppHandle, Manager};
 use crate::database::establish_connection;
@@ -7,7 +6,7 @@ use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::indexing::{walk_directory, parse_content_from_files};
 use crate::user_prefs::set_scan_running_status;
-use log::{error, info, trace, warn};
+use log::info;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::custom_types::SyncRunningState;

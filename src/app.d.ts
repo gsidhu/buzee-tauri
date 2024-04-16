@@ -49,6 +49,7 @@ declare global {
     last_modified: number,
     last_opened: number,
     last_synced: number,
+    last_parsed: number,
     is_pinned: boolean,
     freceny_rank: number,
     frecency_last_accessed: number,

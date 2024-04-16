@@ -269,6 +269,15 @@
 											<FileTypeIcon filetype={String(cell.render())} />
 										{:else if cell.id === 'size'}
 											<span>{readableFileSize(Number(cell.render()))}</span>
+										{:else if cell.id === 'name'}
+											{#if $documentsShown[Number(row.id)].last_parsed > 0}
+												<span class="d-flex align-items-center gap-1">
+													<i class="bi bi-check-circle fs-small" title="Item contents scanned" style="font-size: 8px; color: var(--bs-success);"></i>
+													<Render of={cell.render()} />
+												</span>
+											{:else}
+												<span><Render of={cell.render()} /></span>
+											{/if}
 										{:else}
 											<span><Render of={cell.render()} /></span>
 										{/if}

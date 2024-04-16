@@ -5,7 +5,7 @@ use tauri_plugin_global_shortcut::Modifiers;
 use crate::housekeeping::get_app_directory;
 use std::process::Command;
 use crate::custom_types::Error;
-use log::{error, info, trace, warn};
+use log::info;
 
 pub fn get_metadata(path: &Path) -> io::Result<fs::Metadata> {
   // println!("Getting metadata for path: {:?}", path);
@@ -45,7 +45,7 @@ pub fn string_to_modifiers(modifier: &str) -> Modifiers {
   }
 }
 
-pub fn install_textra_from_github() -> Result<String, Error> {
+pub fn _install_textra_from_github() -> Result<String, Error> {
   #[cfg(not(target_os = "macos"))]
   {
     Ok("Textra is only supported on MacOS".to_string())

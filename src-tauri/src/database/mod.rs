@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 use tauri::Manager;
-use crate::custom_types::{DBConnPoolState, SyncRunningState};
+use crate::custom_types::DBConnPoolState;
 // use crate::custom_types::Error;
 use diesel::prelude::*;
 use diesel::r2d2::{Pool, PooledConnection, ConnectionManager};

@@ -36,6 +36,7 @@ let storedSelectedResult: DocumentSearchResult = {
   last_modified: 0,
   last_opened: 0,
   last_synced: 0,
+  last_parsed: 0,
   is_pinned: false,
   freceny_rank: 0,
   frecency_last_accessed: 0,

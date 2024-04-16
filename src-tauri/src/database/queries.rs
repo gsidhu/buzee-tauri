@@ -43,6 +43,7 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
     "last_modified" BIGINT NOT NULL,
     "last_opened" BIGINT NOT NULL DEFAULT 0,
     "last_synced" BIGINT NOT NULL DEFAULT 0,
+    "last_parsed" BIGINT NOT NULL DEFAULT 0,
     "is_pinned" BOOLEAN NOT NULL DEFAULT 0,
     "frecency_rank" REAL NOT NULL DEFAULT 0,
     "frecency_last_accessed" BIGINT,
@@ -226,13 +227,13 @@ pub const TRIGGER_UPDATE_BODY_FTS : &str = r#"
 "#;
 
 // Don't need this because deleting from body automatically removes from body_fts
-pub const TRIGGER_DELETE_BODY_FTS : &str = r#"
-  CREATE TRIGGER IF NOT EXISTS body_fts_delete_trigger
-  BEFORE DELETE ON body
-  BEGIN
-      DELETE FROM body_fts WHERE metadata_id = old.metadata_id;
-  END;
-"#;
+// pub const TRIGGER_DELETE_BODY_FTS : &str = r#"
+//   CREATE TRIGGER IF NOT EXISTS body_fts_delete_trigger
+//   BEFORE DELETE ON body
+//   BEGIN
+//       DELETE FROM body_fts WHERE metadata_id = old.metadata_id;
+//   END;
+// "#;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,26 +306,26 @@ pub const FILE_TYPES_TABLE_CREATE_STATEMENT : &str = r#"
 // label = label/folder of the email set by the user on the domain
 // attachment_count = number of attachments in the email
 // comment = user comment added in the app
-pub const EMAIL_TABLE_CREATE_STATEMENT : &str = r#"
-  CREATE TABLE IF NOT EXISTS "email" 
-  (
-    "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
-    "domain" text NOT NULL,
-    "sender" text NOT NULL,
-    "recipient" text NOT NULL,
-    "subject" text,
-    "sent_or_received_at" BIGINT,
-    "is_read" BOOLEAN NOT NULL DEFAULT 0,
-    "is_starred" BOOLEAN NOT NULL DEFAULT 0,
-    "is_archived" BOOLEAN NOT NULL DEFAULT 0,
-    "frecency_rank" REAL NOT NULL DEFAULT 0,
-    "frecency_last_accessed" BIGINT,
-    "thread_id" integer,
-    "label" text,
-    "attachment_count" integer,
-    "comment" text
-  );
-"#;
+// pub const EMAIL_TABLE_CREATE_STATEMENT : &str = r#"
+//   CREATE TABLE IF NOT EXISTS "email" 
+//   (
+//     "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
+//     "domain" text NOT NULL,
+//     "sender" text NOT NULL,
+//     "recipient" text NOT NULL,
+//     "subject" text,
+//     "sent_or_received_at" BIGINT,
+//     "is_read" BOOLEAN NOT NULL DEFAULT 0,
+//     "is_starred" BOOLEAN NOT NULL DEFAULT 0,
+//     "is_archived" BOOLEAN NOT NULL DEFAULT 0,
+//     "frecency_rank" REAL NOT NULL DEFAULT 0,
+//     "frecency_last_accessed" BIGINT,
+//     "thread_id" integer,
+//     "label" text,
+//     "attachment_count" integer,
+//     "comment" text
+//   );
+// "#;
 
 // domain = "chrome_bookmarks", "firefox_bookmarks", "pocket", "instapaper", "omnivore" etc.
 // title = title of the bookmark/article
@@ -339,26 +340,26 @@ pub const EMAIL_TABLE_CREATE_STATEMENT : &str = r#"
 // tags = tags added to the bookmark/article on the domain
 // frecency_rank = float to indicate the frecency of the bookmark/article
 // frecency_last_accessed = timestamp when the bookmark/article was last accessed using the app
-pub const BOOKMARK_TABLE_CREATE_STATEMENT : &str = r#"
-  CREATE TABLE IF NOT EXISTS "bookmark" 
-  (
-    "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
-    "domain" text NOT NULL,
-    "title" text NOT NULL,
-    "url" text NOT NULL,
-    "source" text,
-    "saved_at" BIGINT NOT NULL,
-    "read_at" BIGINT,
-    "word_count" integer,
-    "is_favorite" BOOLEAN NOT NULL DEFAULT 0,
-    "is_archived" BOOLEAN NOT NULL DEFAULT 0,
-    "is_read" BOOLEAN NOT NULL DEFAULT 0,
-    "tags" text,
-    "frecency_rank" REAL NOT NULL DEFAULT 0,
-    "frecency_last_accessed" BIGINT,
-    "comment" text
-  );
-"#;
+// pub const BOOKMARK_TABLE_CREATE_STATEMENT : &str = r#"
+//   CREATE TABLE IF NOT EXISTS "bookmark" 
+//   (
+//     "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
+//     "domain" text NOT NULL,
+//     "title" text NOT NULL,
+//     "url" text NOT NULL,
+//     "source" text,
+//     "saved_at" BIGINT NOT NULL,
+//     "read_at" BIGINT,
+//     "word_count" integer,
+//     "is_favorite" BOOLEAN NOT NULL DEFAULT 0,
+//     "is_archived" BOOLEAN NOT NULL DEFAULT 0,
+//     "is_read" BOOLEAN NOT NULL DEFAULT 0,
+//     "tags" text,
+//     "frecency_rank" REAL NOT NULL DEFAULT 0,
+//     "frecency_last_accessed" BIGINT,
+//     "comment" text
+//   );
+// "#;
 
 // domain = "chrome_history", "firefox_history", "safari_history", "edge_history", "newsletters", "rss_feeds", "podcasts",
 // url = url of the website
@@ -367,17 +368,17 @@ pub const BOOKMARK_TABLE_CREATE_STATEMENT : &str = r#"
 // is_bookmarked = boolean to indicate if the website is bookmarked on the domain
 // frecency_rank = float to indicate the frecency of the website
 // frecency_last_accessed = timestamp when the website was last accessed using the app
-pub const WEBSITE_TABLE_CREATE_STATEMENT : &str = r#"
-  CREATE TABLE IF NOT EXISTS "website" 
-  (
-    "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
-    "domain" text NOT NULL,
-    "url" text NOT NULL,
-    "title" text,
-    "last_visit_time" BIGINT,
-    "is_bookmarked" BOOLEAN NOT NULL DEFAULT 0,
-    "frecency_rank" REAL NOT NULL DEFAULT 0,
-    "frecency_last_accessed" BIGINT,
-    "comment" text
-  );
-"#;
+// pub const WEBSITE_TABLE_CREATE_STATEMENT : &str = r#"
+//   CREATE TABLE IF NOT EXISTS "website" 
+//   (
+//     "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
+//     "domain" text NOT NULL,
+//     "url" text NOT NULL,
+//     "title" text,
+//     "last_visit_time" BIGINT,
+//     "is_bookmarked" BOOLEAN NOT NULL DEFAULT 0,
+//     "frecency_rank" REAL NOT NULL DEFAULT 0,
+//     "frecency_last_accessed" BIGINT,
+//     "comment" text
+//   );
+// "#;
