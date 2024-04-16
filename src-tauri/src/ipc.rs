@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, set_global_shortcut_from_db, set_new_global_shortcut_in_db};
+use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, set_global_shortcut_state_from_db_value, set_new_global_shortcut_in_db, set_global_shortcut_flag_in_db};
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
@@ -242,14 +242,22 @@ fn open_context_menu(window: tauri::Window, option: String) {
     }
 }
 
+// Toggle the global shortcut flag in DB
+#[tauri::command]
+async fn set_global_shortcut_flag(app_handle: tauri::AppHandle, flag: bool) {
+  println!("Setting global shortcut flag to: {}", flag);
+  set_global_shortcut_flag_in_db(flag, &app_handle);
+  set_global_shortcut_state_from_db_value(&app_handle);
+}
 // Set new global shortcut in DB and update the global shortcut
 #[tauri::command]
 async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_string: String) {
   println!("Setting new global shortcut: {}", new_shortcut_string);
   set_new_global_shortcut_in_db(new_shortcut_string, &app_handle);
-  set_global_shortcut_from_db(&app_handle);
+  set_global_shortcut_state_from_db_value(&app_handle);
+  // Tell user to restart the app for changes to take effect
   // restart the app to set the new shortcut
-  app_handle.restart();
+  // app_handle.restart();
 }
 
 pub fn initialize() {
@@ -269,6 +277,7 @@ pub fn initialize() {
       get_db_stats,
       open_quicklook,
       open_context_menu,
+      set_global_shortcut_flag,
       set_new_global_shortcut,
       crate::drag::start_drag
     ])
@@ -287,20 +296,25 @@ pub fn initialize() {
           handle.manage(Mutex::new(SyncRunningState::default()));
         }
         {
-          set_global_shortcut_from_db(app.handle());
-          app.handle().plugin(
-            tauri_plugin_global_shortcut::Builder::new()
-              .with_shortcut(get_global_shortcut(app.handle()))?
-              .with_handler(|app_handle, shortcut| {
-                  let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut(app_handle);
-                  if shortcut.matches(global_shortcut_modifiers, global_shortcut_code) {
-                    println!("Global Shortcut Detected!");
-                    let main_window = app_handle.get_webview_window("main").unwrap();
-                    hide_or_show_window(main_window);
-                  }
-              })
-              .build(),
-          )?;
+          set_global_shortcut_state_from_db_value(app.handle());
+          if is_global_shortcut_enabled(app.handle()) {
+            println!("Global Shortcut is enabled");
+            app.handle().plugin(
+              tauri_plugin_global_shortcut::Builder::new()
+                .with_shortcut(get_global_shortcut(app.handle()))?
+                .with_handler(|app_handle, shortcut| {
+                    let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut(app_handle);
+                    if shortcut.matches(global_shortcut_modifiers, global_shortcut_code) {
+                      println!("Global Shortcut Detected!");
+                      let main_window = app_handle.get_webview_window("main").unwrap();
+                      hide_or_show_window(main_window);
+                    }
+                })
+                .build(),
+            )?;
+          } else {
+            println!("Global Shortcut is disabled");
+          }
         }
         {
           app.on_menu_event(|app_handle: &tauri::AppHandle, event| {

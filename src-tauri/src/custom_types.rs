@@ -113,12 +113,14 @@ impl Default for SyncRunningState {
 #[derive(Serialize, Clone)]
 pub(crate) struct GlobalShortcutState {
   pub shortcut_string: String,
+  pub shortcut_enabled: bool
 }
 
 impl Default for GlobalShortcutState {
     fn default() -> Self {
         Self {
-          shortcut_string: "Alt+Space".to_string()
+          shortcut_string: "Alt+Space".to_string(),
+          shortcut_enabled: false
         }
     }
 }

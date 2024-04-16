@@ -1,6 +1,7 @@
 // Handles for User Preferences and App Data
 
 use crate::custom_types::{GlobalShortcutState, SyncRunningState};
+use crate::database::schema::user_preferences::global_shortcut_enabled;
 use std::time::{SystemTime, UNIX_EPOCH};
 use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use crate::database::models::{AppData, UserPrefs, FileTypes};
@@ -172,6 +173,7 @@ pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_ti
   }
 }
 
+// Global Shortcut Functions
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 use std::str::FromStr;
 
@@ -183,18 +185,35 @@ pub fn set_new_global_shortcut_in_db(new_shortcut_string: String, app: &tauri::A
     .unwrap();
 }
 
-pub fn set_global_shortcut_from_db(app: &tauri::AppHandle) {
+pub fn set_global_shortcut_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::global_shortcut_enabled.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_global_shortcut_state_from_db_value(app: &tauri::AppHandle) {
   println!("Setting global shortcut to mutex state");
   let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
   let mut state = state_mutex.lock().unwrap();
 
   let mut conn = establish_connection(&app);
-  let global_shortcut_string = user_preferences::table
-    .select(user_preferences::global_shortcut).load::<String>(&mut conn).unwrap();
-  let global_shortcut_string = global_shortcut_string.first().unwrap();
-  state.shortcut_string = global_shortcut_string.to_string();
+  // get global_shortcut_enabled and global_shortcut values from user_preferences table
+  let global_shortcut_vals = user_preferences::table
+    .select((global_shortcut_enabled, user_preferences::global_shortcut))
+    .first::<(bool, String)>(&mut conn)
+    .expect("Error loading user_prefs");
 
+  state.shortcut_enabled = global_shortcut_vals.0;
+  state.shortcut_string = global_shortcut_vals.1.to_string();
   println!("Set global shortcut mutex state to: {}", state.shortcut_string);
+}
+
+pub fn is_global_shortcut_enabled(app: &tauri::AppHandle) -> bool {
+  let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
+  let state = state_mutex.lock().unwrap();
+  state.shortcut_enabled
 }
 
 pub fn get_global_shortcut(app: &tauri::AppHandle) -> Shortcut {

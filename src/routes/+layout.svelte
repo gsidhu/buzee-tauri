@@ -24,20 +24,25 @@
 	}
 
 	function testFn() {
+		invoke("set_global_shortcut_flag", { flag: true }).then((res) => {
+			console.log(res);
+		});
+
 		// invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
 		// 	console.log(res);
 		// });
-		invoke("enable_sidecar").then((res) => {
-			console.log("enabled sidecar");
-		});
-		const command = Command.sidecar('binaries/textra', [
-			'/Users/thatgurjot/Desktop/Gurjot_Arc.png',
-			'-o',
-			'/Users/thatgurjot/Desktop/output.txt',
-		])
-		command.execute().then((res) => {
-			console.log(res);
-		});
+
+		// invoke("enable_sidecar").then((res) => {
+		// 	console.log("enabled sidecar");
+		// });
+		// const command = Command.sidecar('binaries/textra', [
+		// 	'/Users/thatgurjot/Desktop/Gurjot_Arc.png',
+		// 	'-o',
+		// 	'/Users/thatgurjot/Desktop/output.txt',
+		// ])
+		// command.execute().then((res) => {
+		// 	console.log(res);
+		// });
 	}
 
 	onMount(async () => {
@@ -81,7 +86,7 @@
 <KeyboardListeners />
 <EventListeners />
 <main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
-	<!-- <button on:click={() => testFn()}>Test</button> -->
+	<button on:click={() => testFn()}>Test</button>
 	<slot />
 </main>
 
