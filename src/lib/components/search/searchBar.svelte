@@ -15,7 +15,7 @@
 	import { setExtensionCategory } from '$lib/utils/miscUtils';
 	import FiletypeDropdown from './FiletypeDropdown.svelte';
 	import SearchSuggestions from './searchSuggestions.svelte';
-	import { sendEvent } from '../../../utils/firebase';
+	import { sendEventToFirebase } from '../../../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
 
 	let isInputFocused = false;
@@ -40,7 +40,7 @@
 	async function triggerSearch() {
 		$resultsPageShown = 0; // reset the page number on each new search
 		$searchInProgress = true;
-		sendEvent('search-triggered', {
+		sendEventToFirebase('search-triggered', {
 			searchQuery: $searchQuery,
 			filetypeShown: $filetypeShown,
 			resultsPageShown: $resultsPageShown
@@ -55,7 +55,7 @@
 			$resultsPerPage,
 			filetypeToGet
 		);
-		sendEvent('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
+		sendEventToFirebase('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
 		$documentsShown = results;
 		$searchInProgress = false;
 		searchInputRef.blur();
@@ -64,7 +64,7 @@
 	function clearSearchQuery() {
 		$searchQuery = '';
 		$searchSuggestions = [];
-		sendEvent('click:clearSearchQuery');
+		sendEventToFirebase('click:clearSearchQuery');
 	}
 
 	onMount(() => {

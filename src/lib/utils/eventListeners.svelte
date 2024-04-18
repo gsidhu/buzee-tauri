@@ -3,7 +3,7 @@
   import { listen } from '@tauri-apps/api/event';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { sendEvent } from '../../utils/firebase';
+  import { sendEventToFirebase } from '../../utils/firebase';
   import { selectedResult } from '$lib/stores';
 
   async function startSerialEventListener() {

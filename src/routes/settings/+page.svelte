@@ -4,50 +4,73 @@
 	import PopoverIcon from '$lib/components/ui/popoverIcon.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { sendEvent } from '../../utils/firebase';
+	import { sendEventToFirebase } from '../../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
+	import { statusMessage } from '$lib/stores';
 
 	let launchAtStartup: boolean;
 	let globalShortcutEnabled: boolean;
+	let globalShortcut: String;
 	let automaticBackgroundSyncEnabled: boolean;
+	let detailedScanEnabled: boolean;
 	let isMac: boolean = true;
 	let isWin: boolean;
 	let userPreferences: UserPreferences;
 
 	function toggleLaunchAtStartup() {
 		launchAtStartup = !launchAtStartup;
-		sendEvent('click:toggleLaunchAtStartup', { launchAtStartup });
+		sendEventToFirebase('click:toggleLaunchAtStartup', { launchAtStartup });
+		$statusMessage = `Setting changed. Restarting the app...`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
 		window.settingsAPI?.toggleLaunchAtStartup();
 	}
 
 	function toggleGlobalShortcut() {
 		globalShortcutEnabled = !globalShortcutEnabled;
-		sendEvent('click:toggleGlobalShortcut', { globalShortcutEnabled });
+		sendEventToFirebase('click:toggleGlobalShortcut', { globalShortcutEnabled });
+		$statusMessage = `Setting changed. Restarting the app...`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "global_shortcut_enabled", value: globalShortcutEnabled}).then(() => {
 			console.log("Set global shortcut flag to: " + globalShortcutEnabled);
 		});
 	}
 
+	function toggleDetailedScan() {
+		detailedScanEnabled = !detailedScanEnabled;
+		sendEventToFirebase('click:toggleDetailedScan', { detailedScanEnabled });
+		$statusMessage = `Setting changed!`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
+		invoke("set_user_preference", {key: "detailed_scan", value: detailedScanEnabled}).then(() => {
+			console.log("Set detailed scan flag to: " + detailedScanEnabled);
+		});
+	}
+
 	function toggleAutomaticBackgroundSync() {
 		automaticBackgroundSyncEnabled = !automaticBackgroundSyncEnabled;
-		sendEvent('click:toggleAutomaticBackgroundSync', { automaticBackgroundSyncEnabled });
+		sendEventToFirebase('click:toggleAutomaticBackgroundSync', { automaticBackgroundSyncEnabled });
+		$statusMessage = `Setting changed!`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "automatic_background_sync", value: automaticBackgroundSyncEnabled}).then(() => {
 			console.log("Set automatic background sync flag to: " + automaticBackgroundSyncEnabled);
 		});
 	}
 
 	function resetDefault() {
-    sendEvent('click:resetDefault');
-		window.settingsAPI?.resetDefault();
+    sendEventToFirebase('click:resetDefault');
+		$statusMessage = `Settings reset. Restarting the app...`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
+		invoke("reset_user_preferences").then(() => {
+			console.log("User preferences reset to default");
+		});
 	}
 
 	function uninstallApp() {
-    sendEvent("click:uninstallApp");
+    sendEventToFirebase("click:uninstallApp");
 		goto('/uninstall');
 	}
 
 	function addDocsToDB() {
-		sendEvent('click:addDocsToDB');
+		sendEventToFirebase('click:addDocsToDB');
 		window.dbAPI?.addDocsToDB();
 	}
 
@@ -67,7 +90,13 @@
 			userPreferences = res;
 			launchAtStartup = userPreferences.launch_at_startup;
 			globalShortcutEnabled = userPreferences.global_shortcut_enabled;
+			globalShortcut = userPreferences.global_shortcut;
+			if (isMac) {
+				globalShortcut = globalShortcut.replace("CmdOrCtrl", "Cmd");
+				globalShortcut = globalShortcut.replace("Alt", "Option");
+			}
 			automaticBackgroundSyncEnabled = userPreferences.automatic_background_sync;
+			detailedScanEnabled = userPreferences.detailed_scan;
 		});
 	});
 </script>
@@ -95,7 +124,7 @@
 					<div class="d-flex align-items-center small-explanation gap-1">
 						Add more documents to search in Buzee
 						<PopoverIcon
-							title="By default, Buzee scans files in your Documents, Downloads and Desktop folders"
+							title="By default, Buzee scans your entire system. You can add files from external drives or network drives here."
 						/>
 					</div>
 				</td>
@@ -111,7 +140,7 @@
 				<td class="py-2" on:click={() => toggleLaunchAtStartup()}>
 					Launch at Startup
 					<div class="d-flex align-items-center small-explanation gap-1">
-						Whether to launch the app when you restart your computer
+						Launch the app automatically when your computer starts
 					</div>
 				</td>
 			</tr>
@@ -128,10 +157,10 @@
 						Allow Global Shortcut
 						<div class="d-flex align-items-center small-explanation gap-1">
 							{#if isMac}
-								<div>Pressing <code>Option+Space</code> will show the app from anywhere</div>
+								<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
 								<PopoverIcon title="Changes will take effect after the app restarts" />
 							{:else if isWin}
-								<div>Pressing <code>Alt+Space</code> will show the app from anywhere</div>
+								<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
 								<PopoverIcon title="Changes will take effect after the app restarts" />
 							{/if}
 						</div>
@@ -147,10 +176,26 @@
 					/>
 				</td>
 				<td class="py-2" on:click={() => toggleAutomaticBackgroundSync()}>
-					Allow Automatic Background Sync
+					Allow Automatic Background Scan
 					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>Buzee will automatically sync your data in the background periodically</div>
+						<div>Buzee will automatically scan your system in the background twice an hour</div>
 						<PopoverIcon title="We recommend keeping this setting enabled" />
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="text-center px-2"
+					><input
+						type="checkbox"
+						bind:checked={detailedScanEnabled}
+						on:click={() => toggleDetailedScan()}
+					/>
+				</td>
+				<td class="py-2" on:click={() => toggleDetailedScan()}>
+					Scan File Contents
+					<div class="d-flex align-items-center small-explanation gap-1">
+						<div>Buzee will scan file contents so you can search inside files</div>
+						<PopoverIcon title="Disabling this setting may improve speed but reduce quality of search results" />
 					</div>
 				</td>
 			</tr>

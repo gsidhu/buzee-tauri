@@ -23,7 +23,7 @@ type EventData = {
 	[key: string]: string | number | boolean;
 };
 
-// export function sendEvent(name: string, data?: EventData) {
+// export function sendEventToFirebase(name: string, data?: EventData) {
 // 	try {
 // 		if (analytics && process.env.NODE_ENV === 'production') {
 // 			logEvent(analytics, name, data);
@@ -33,6 +33,6 @@ type EventData = {
 // 	}
 // }
 
-export function sendEvent(name:string, data?: EventData) {
-	console.log("sendevent");
+export function sendEventToFirebase(name:string, data?: EventData) {
+	console.log("sendEventToFirebase");
 }

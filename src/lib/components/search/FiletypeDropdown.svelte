@@ -12,7 +12,7 @@
 	} from '$lib/stores';
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
 	import { categoriseExtensions, setExtensionCategory } from '$lib/utils/miscUtils';
-	import { sendEvent } from '../../../utils/firebase';
+	import { sendEventToFirebase } from '../../../utils/firebase';
 
 	export let searchBar = true;
 
@@ -32,7 +32,7 @@
 				filetypeToGet
 			);
 		}
-		sendEvent('click:showDocsForFileType', {
+		sendEventToFirebase('click:showDocsForFileType', {
 			searchQuery: $searchQuery,
       filetypeShown: $filetypeShown,
 			resultsPageShown: $resultsPageShown,

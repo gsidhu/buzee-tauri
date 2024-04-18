@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { compactViewMode } from '$lib/stores';
+	import { compactViewMode, statusMessage } from '$lib/stores';
 	import {
 		documentsShown,
 		searchInProgress,
@@ -9,7 +9,7 @@
 		windowBlurred
 	} from '$lib/stores';
 	import { selectAllRows } from '$lib/utils/fileUtils';
-	import { sendEvent } from '../utils/firebase';
+	import { sendEventToFirebase } from '../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
 	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 
@@ -25,7 +25,7 @@
 	const defaultData: Record<string, string> = { component: 'StatusBar' };
 
 	function showStatusBarMenu(option: string) {
-		sendEvent('click:showStatusBarMenu', { option, ...defaultData });
+		sendEventToFirebase('click:showStatusBarMenu', { option, ...defaultData });
 		invoke("open_context_menu", {option:"statusbar"}).then((res) => {});
 	}
 
@@ -39,7 +39,7 @@
 
 	function toggleCompactViewMode() {
 		$compactViewMode = !$compactViewMode;
-		sendEvent('click:toggleCompactViewMode', { $compactViewMode, ...defaultData });
+		sendEventToFirebase('click:toggleCompactViewMode', { $compactViewMode, ...defaultData });
 		if ($compactViewMode === true) {
 			document.querySelectorAll('td').forEach((el) => {
 				el.classList.add('compact-view');
@@ -57,29 +57,33 @@
 		}
 	}
 
-	async function toggleAppMode() {
-		sendEvent('click:toggleAppMode', { ...defaultData, appMode });
-		await window.electronAPI?.toggleAppMode();
-	}
-
 	async function toggleBackgroundTextProcessing() {
-		sendEvent('click:toggleBackgroundTextProcessing', { ...defaultData });
+		sendEventToFirebase('click:toggleBackgroundTextProcessing', { ...defaultData });
 		invoke("run_file_sync");
-		// disable `bg-sync-btn` for 10 seconds
+		if (syncStatus) {
+			$statusMessage = "Stopping background scan...";
+			setTimeout(() => {$statusMessage = "";}, 3000);
+		} else {
+			$statusMessage = "Starting background scan...";
+			setTimeout(() => {$statusMessage = "";}, 3000);
+		}
+		// disable `bg-sync-btn` for 5 seconds
 		// this allows any pending processes to complete when stopping the sync
 		const btn = document.getElementById('bg-sync-btn') as HTMLButtonElement | null;
 		if (btn) {
 			syncCoolingPeriod = true;
 			setTimeout(() => {
 				syncCoolingPeriod = false;
-			}, 10000);
+			}, 5000);
 		}
 	}
 
 	function goToSearch(from_onboarding: boolean = false) {
-		sendEvent('click:goToSearch', { ...defaultData });
+		sendEventToFirebase('click:goToSearch', { ...defaultData });
 		if (from_onboarding) {
-			goto('/search?highlight-search-bar=true&q=last%20month');
+			// start background processing to get file contents
+			toggleBackgroundTextProcessing();
+			goto('/search?highlight-search-bar=true&q=this%20month');
 		} else {
 			goto('/search');
 		}
@@ -189,12 +193,13 @@
 				id="bg-sync-btn"
 				type="button"
 				class={`px-1 mx-1 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
-				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background sync is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
 				on:click={() => toggleBackgroundTextProcessing()}
 				disabled={syncCoolingPeriod}
 			>
-				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />{` Sync${syncStatus ? 'ing' : ''}`}
+				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />{` Scan${syncStatus ? 'ing' : ''}`}
 			</button> -->
+			{$statusMessage}
 		{/if}
 	</div>
 
@@ -207,7 +212,7 @@
 					id="bg-sync-btn"
 					type="button"
 					class={`status-item px-1  ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
-					title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background sync is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+					title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
 					disabled={syncCoolingPeriod}
 					data-bs-toggle="dropdown"
 					aria-expanded="false"
@@ -228,7 +233,7 @@
 				id="bg-sync-btn"
 				type="button"
 				class={`px-2 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
-				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background sync is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
 				on:click={() => toggleBackgroundTextProcessing()}
 				disabled={syncCoolingPeriod}
 			>

@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
   import EventListeners from '$lib/utils/eventListeners.svelte';
-  import { sendEvent } from '../utils/firebase';
+  import { sendEventToFirebase } from '../utils/firebase';
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
 	import { Command } from '@tauri-apps/plugin-shell';
@@ -25,17 +25,17 @@
 	}
 
 	function testFn() {
-		invoke("get_user_preferences_state").then((res) => {
-			console.log(res);
-		});
+		// invoke("get_user_preferences_state").then((res) => {
+		// 	console.log(res);
+		// });
 
 		// invoke("set_global_shortcut_flag", { flag: true }).then((res) => {
 		// 	console.log(res);
 		// });
 
-		// invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
-		// 	console.log(res);
-		// });
+		invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
+			console.log(res);
+		});
 
 		// invoke("enable_sidecar").then((res) => {
 		// 	console.log("enabled sidecar");

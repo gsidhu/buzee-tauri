@@ -12,17 +12,34 @@ use std::sync::Mutex;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 
-pub fn set_default_user_prefs(conn: &mut SqliteConnection, bypass_flag: bool) {
+pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: bool) {
+  // on reset settings
+  if reset_settings_flag {
+    // reset all user preferences
+    let _ = diesel::update(user_preferences::table)
+      .set((
+        user_preferences::first_launch_done.eq(true),
+        user_preferences::onboarding_done.eq(true),
+        user_preferences::launch_at_startup.eq(true),
+        user_preferences::show_in_dock.eq(true),
+        user_preferences::global_shortcut_enabled.eq(true),
+        user_preferences::global_shortcut.eq("Alt+Space"),
+        user_preferences::automatic_background_sync.eq(true),
+        user_preferences::detailed_scan.eq(true),
+      ))
+      .execute(conn)
+      .unwrap();
+  }
+  
+  // on new install
   // get the first row from user_prefs table
   let existing_prefs = user_preferences::table
     .select(user_preferences::id)
     .load::<i32>(conn)
     .expect("Error loading user_prefs");
-
-  if existing_prefs.len() == 0 || bypass_flag {
-    // insert default user_prefs
+  if existing_prefs.len() == 0 {
     let new_user_prefs = UserPrefs {
-      first_launch_done: false,
+      first_launch_done: true,
       onboarding_done: false,
       launch_at_startup: true,
       show_in_dock: true,
@@ -32,7 +49,6 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, bypass_flag: bool) {
       detailed_scan: true,
       disallowed_paths: "".to_string(),
     };
-
     // insert new_user_prefs into the user_prefs table
     diesel::insert_into(user_preferences::table)
       .values(&new_user_prefs)
@@ -219,6 +235,22 @@ pub fn set_new_global_shortcut_in_db(new_shortcut_string: String, app: &tauri::A
   let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)
     .set(user_preferences::global_shortcut.eq(new_shortcut_string))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_onboarding_done_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::onboarding_done.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_detailed_scan_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::detailed_scan.eq(flag))
     .execute(&mut conn)
     .unwrap();
 }

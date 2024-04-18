@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Onboarding from '$lib/components/onboarding/onboarding.svelte';
-	// import StatusBar from '../../layout/StatusBar.svelte';
 
 	onMount(() => {
 	});
@@ -12,7 +11,6 @@
 	<div id="breathing" class="d-none"></div>
 	<div class="d-flex flex-column min-vh-100 justify-content-center align-items-center gap-3">
 		<Onboarding />
-		<!-- <StatusBar /> -->
 	</div>
 </div>
 

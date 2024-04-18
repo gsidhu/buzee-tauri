@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { clickRow, selectOneRow, selectAllRows } from './fileUtils';
 	import { documentsShown, shiftKeyPressed, metaKeyPressed } from '$lib/stores';
-	import { sendEvent } from '../../utils/firebase';
+	import { sendEventToFirebase } from '../../utils/firebase';
 	import { goto } from '$app/navigation';
 
 	let isMac = false;
@@ -50,7 +50,7 @@
 
 		if ($metaKeyPressed && e.code === 'KeyA') {
 			e.preventDefault();
-			sendEvent(eventPrefix + 'selectAllRow');
+			sendEventToFirebase(eventPrefix + 'selectAllRow');
 			selectAllRows(false);
 			return;
 		}
@@ -59,11 +59,11 @@
 			e.preventDefault();
 			if ($shiftKeyPressed) {
 				console.log('Cmd + Shift + F');
-				sendEvent(eventPrefix + 'toggleAppMode');
+				sendEventToFirebase(eventPrefix + 'toggleAppMode');
 				window.electronAPI?.toggleAppMode();
 			} else {
 				console.log('Cmd + F');
-				sendEvent(eventPrefix + 'focusSearchBar');
+				sendEventToFirebase(eventPrefix + 'focusSearchBar');
 				// if page is not /search, go to that page
 				if (window.location.pathname !== '/search') {
 					goto('/search?highlight-search-bar=true');
@@ -75,7 +75,7 @@
 
 		if (e.code === 'Escape') {
 			e.preventDefault();
-			sendEvent(eventPrefix + 'deselectAllRows');
+			sendEventToFirebase(eventPrefix + 'deselectAllRows');
 			selectAllRows(true);
 			document.body.focus();
 			return;
@@ -96,12 +96,12 @@
 
 			if (e.code === 'Space') {
 				e.preventDefault();
-				sendEvent(eventPrefix + 'openQuickLook');
+				sendEventToFirebase(eventPrefix + 'openQuickLook');
 				// window.electronAPI?.openQuickLook(result.path);
 				invoke("open_quicklook", { filePath: result.path })
 			} else if (e.code === 'Enter') {
 				e.preventDefault();
-				sendEvent(eventPrefix + 'openFile');
+				sendEventToFirebase(eventPrefix + 'openFile');
 				// window.electronAPI?.openFile(result.path);
 				invoke("open_file_or_folder", { filePath: result.path })
 			} else if (e.code === 'ArrowDown' && $metaKeyPressed && isMac) {
@@ -120,7 +120,7 @@
 			} else if (e.code === 'ArrowUp') {
 				e.preventDefault();
 				if (document.getElementsByClassName('selected').length > 2) {
-					sendEvent(eventPrefix + 'deselectAllRows');
+					sendEventToFirebase(eventPrefix + 'deselectAllRows');
 					selectAllRows(true);
 				}
 				if ($shiftKeyPressed) {
@@ -145,7 +145,7 @@
 			} else if (e.code === 'ArrowDown') {
 				e.preventDefault();
 				if (document.getElementsByClassName('selected').length > 2) {
-					sendEvent(eventPrefix + 'deselectAllRows');
+					sendEventToFirebase(eventPrefix + 'deselectAllRows');
 					selectAllRows(true);
 				}
 				if ($shiftKeyPressed) {

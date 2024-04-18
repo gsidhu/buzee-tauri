@@ -30,7 +30,7 @@
       <h3>Tips and Shortcuts</h3>
     </div>
     <h5>Keeping Buzee Updated</h5>
-    <p>Buzee automatically syncs data from your computer. You can always click the <code>Sync</code> button in the status bar at the bottom to run it manually.</p>
+    <p>Buzee automatically scans data from your computer. You can always click the <code><i class="bi bi-arrow-repeat"></i> Scan</code> button in the status bar at the bottom to run it manually.</p>
     <p>By default, Buzee scans files in your Documents, Downloads and Desktop folders. You can add more documents to search in Buzee using the <code>Add Documents</code> option in the <a href="/settings" class="purple">Settings</a>.</p>
     <h5>Keyboard Shortcuts</h5>
     <ul>

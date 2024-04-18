@@ -12,7 +12,7 @@
 	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
-	import { sendEvent } from '../../../utils/firebase';
+	import { sendEventToFirebase } from '../../../utils/firebase';
   
   function startDragging(filepath: string) {
 		const image64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADySURBVFiF7dcxSgNRFIXhT4Wx1NrCFCK4iEiCWxBcgjsQscteLMQlKCksLCLYWbkE3cEEJBaTgL5MzGReAhb3h9cc3tz7w0wxh3k6GKLEpOV5R7dmdiOGuEHR8vkBHvGBfpsBZcbymcBgunypxHZNVmCcITDjCee4x9kqAuvkeSpx95dEyiRz6SVuk6yPT5yml7cWCNTlTdnHK0Z4+5F3cYyTTQvAHi5wlOTXTWbnvoKVZm/6I1xKCIRACIRACIRACIRACPxLgbG8araIXVXt+8VOzcUeDvCCrzUtL3Cl+iVPS8scHVW7zann6SnxgMN02Ter0UNOfhP2XAAAAABJRU5ErkJggg==";
@@ -31,7 +31,7 @@
   }
 
 	function openFile(url: string) {
-		sendEvent('click:open_file');
+		sendEventToFirebase('click:open_file');
 		invoke('open_file_or_folder', { filePath: url });
 	}
 	function formatUpdatedTime(unixTime: number): string {
@@ -72,7 +72,7 @@
 		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
 		result: DocumentSearchResult
 	) {
-		sendEvent('right_click:result_context_menu');
+		sendEventToFirebase('right_click:result_context_menu');
 		clickRow(e, $shiftKeyPressed);
 		// window.menuAPI?.showResultsContextMenu(result);
 		$selectedResult = result;

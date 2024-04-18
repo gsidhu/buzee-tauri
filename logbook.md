@@ -7,8 +7,11 @@
 
 ## - Add UI for setting global shortcut.
 ## - Add UI to OCR PDF Image.
-## - Use status bar center to tell user what the app is doing. E.g. "opening file", "restarting app", "setting state" etc.
 
+- Connected settings to backend. Detailed Scan, Automatic Scan, Global Shortcut settings are respected.
+- Using `scan` instead of sync in all user-facing copy.
+- Showing brief message in status bar to tell user what the app is doing. E.g. "restarting" or "starting/stopping scan"
+- Change `sendEvent` to `sendEventToFirebase`.
 - Show size instead of last_opened in results table.
 - Moved StatusBar to +layout.svelte to show it across the app.
 - Added graceful_restart function that sets the sync_running flag to false, waits for 3 seconds, then restarts the app.
@@ -172,12 +175,12 @@
 
 ### Front-end
 - Connect loading spinners during onboarding, sync and search to the backend.
-- Show feedback to the user about what dates are being parsed. Maybe as a popover button?
+- ? Show feedback to the user about what dates are being parsed. Maybe as a popover button?
 - [x] Add icons for new file types.
 - Disable default right-click context menu.
 - [x] Put double quotes on punctuation marks when cleaning query to make it work with the MATCH syntax
 - [x] Display counter of number of files logged when indexing during onboarding.
-- Add a Preview sidebar that shows a thumbnail and complete metadata of the selected file.
+- ? Add a Preview sidebar that shows a thumbnail and complete metadata of the selected file.
 - Allow user to add/remove file types and categories.
 - Update Document Stats to reflect categories and # files indexed.
 - Add infinite scroll to search results. (Need Punnu's help for this.)

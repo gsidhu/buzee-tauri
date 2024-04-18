@@ -1,5 +1,6 @@
 <script lang="ts">
   import { listen } from '@tauri-apps/api/event';
+  import { invoke } from '@tauri-apps/api/core';
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import { fly, fade } from 'svelte/transition';
 	import ConfettiButton from "../ui/confettiButton.svelte";
@@ -14,6 +15,9 @@
     unlisten = await listen<Payload>('files-added', (event: any) => {
       if (event.payload.message === "files_added_complete") {
 			  processingDone = true;
+        invoke("set_user_preference", {key: "onboarding_done", value: true}).then(() => {
+          console.log("Set onboarding done flag to: " + true);
+        });
       }
 		});
   })

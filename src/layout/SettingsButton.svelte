@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-	import { sendEvent } from '../utils/firebase';
+	import { sendEventToFirebase } from '../utils/firebase';
 	import { goto } from '$app/navigation';
 
   var onSearchPage: boolean = false;
 
   function openSettingsMenu() {
-    sendEvent("click:settings_button_click");
+    sendEventToFirebase("click:settings_button_click");
     goto('/settings');
     // window.menuAPI?.showSettingsMenu();
   }

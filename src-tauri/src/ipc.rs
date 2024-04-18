@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_user_preferences_state_from_db_value};
+use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::graceful_restart;
 use crate::window::hide_or_show_window;
 use serde_json;
@@ -266,31 +266,37 @@ async fn reset_user_preferences(app_handle: tauri::AppHandle) {
 }
 
 #[tauri::command]
-async fn set_user_preference(app_handle: tauri::AppHandle, key: String, value: bool) {
+async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::AppHandle, key: String, value: bool) {
   println!("Setting {} to {}", key, value);
   let mut conn = establish_connection(&app_handle);
   match key.as_str() {
     "launch_at_startup" => {
       // set_launch_at_startup_in_db(value, &app_handle);
     }
-    "show_in_dock" => {
-      // set_show_in_dock_in_db(value, &app_handle);
+    "onboarding_done" => {
+      set_onboarding_done_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
     }
     "automatic_background_sync" => {
       set_automatic_background_sync_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
+      if value == true {
+        setup_cron_job(window, app_handle).await;
+      }
     }
     "detailed_scan" => {
-      // set_detailed_scan_in_db(value, &app_handle);
+      set_detailed_scan_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
     }
     "global_shortcut_enabled" => {
       set_global_shortcut_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
+      graceful_restart(app_handle, &mut conn);
     }
     _ => {
       println!("Invalid key");
     } 
   }
-  set_user_preferences_state_from_db_value(&app_handle);
-  graceful_restart(app_handle, &mut conn);
 }
 
 // Set new global shortcut in DB and update the global shortcut

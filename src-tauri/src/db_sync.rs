@@ -9,7 +9,7 @@ use crate::user_prefs::set_scan_running_status;
 use log::info;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
-use crate::custom_types::SyncRunningState;
+use crate::custom_types::{SyncRunningState, UserPreferencesState};
 
 pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
   println!("File sync started");
@@ -26,6 +26,11 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
     info!("FILE SYNC STARTED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
     // Set sync status to true
     set_scan_running_status(&mut conn, true, true, &app);
+
+    let app_clone = app.clone();
+    let state_mutex = app_clone.state::<Mutex<UserPreferencesState>>();
+    let state = state_mutex.lock().unwrap();
+    let detailed_scan_allowed = state.detailed_scan;
     // Spawn the new task
     tokio::spawn(async move {
       // Emit starting sync status to the frontend
@@ -33,11 +38,13 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
       let home_directory = get_home_directory().unwrap_or("/".to_string());
       // Parse metadata of all files but only update the ones whose time metadata or size has changed
       let _files_added = walk_directory(&mut conn, &window, &home_directory);
-      // Then start parsing the content of all files and add it to the body table
-      println!("Parsing content from files");
-      let files_parsed = parse_content_from_files(&mut conn, app.clone()).await;
-      println!("Files parsed: {}", files_parsed);
-      // let files_parsed = 0;
+
+      if detailed_scan_allowed {
+        // Then start parsing the content of all files and add it to the body table
+        println!("Parsing content from files");
+        let files_parsed = parse_content_from_files(&mut conn, app.clone()).await;
+        println!("Files parsed: {}", files_parsed);
+      }
       // Emit closing sync status to the frontend
       println!("Sending message to frontend: Sync operation completed");
       send_message_to_frontend(&window, "sync-status".to_string(), "sync-status".to_string(), "false".to_string());
