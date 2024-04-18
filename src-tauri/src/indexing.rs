@@ -371,6 +371,10 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
         last_parsed = None;
       }
     }
+    // 1. BEFORE EXTRACTING TEXT: Break the loop if sync_running is false
+    if sync_running == "false" {
+      break;
+    }
     // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
     if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
       // Extract text from the file
@@ -397,7 +401,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
         .unwrap();
       files_parsed += 1;
     }
-    // Check if sync_running is false, if so break the loop
+    // 2. AFTER ADDING TO DB: Break the loop if sync_running is false
     if sync_running == "false" {
       break;
     }

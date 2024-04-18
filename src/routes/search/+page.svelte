@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import ResultsTable from '$lib/components/results/resultsTable.svelte';
-	import StatusBar from '../../layout/StatusBar.svelte';
+	// import StatusBar from '../../layout/StatusBar.svelte';
 	import TopBar from '../../layout/TopBar.svelte';
 </script>
 
@@ -10,7 +10,7 @@
 		<TopBar />
 	</div>
 	<ResultsTable />
-	<StatusBar onboardingDone />
+	<!-- <StatusBar onboardingDone /> -->
 </div>
 
 <style>

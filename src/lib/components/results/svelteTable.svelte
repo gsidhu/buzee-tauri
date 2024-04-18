@@ -116,22 +116,35 @@
 			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
 			plugins: {
 				resize: {
-					initialWidth: 125,
-					minWidth: 125,
-					maxWidth: 150
+					initialWidth: 100,
+					minWidth: 100,
+					maxWidth: 100
 				}
 			}
 		}),
+		// table.column({
+		// 	header: 'Last Opened',
+		// 	accessor: 'frecency_last_accessed',
+		// 	id: 'lastOpened',
+		// 	cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
+		// 	plugins: {
+		// 		resize: {
+		// 			initialWidth: 100,
+		// 			minWidth: 100,
+		// 			maxWidth: 100
+		// 		}
+		// 	}
+		// }),
 		table.column({
-			header: 'Last Opened',
-			accessor: 'frecency_last_accessed',
-			id: 'lastOpened',
-			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
+			header: 'Size',
+			accessor: 'size',
+			id: 'size',
+			cell: ({ value }: { value: number }) => readableFileSize(value) ?? "",
 			plugins: {
 				resize: {
-					initialWidth: 125,
-					minWidth: 125,
-					maxWidth: 150
+					initialWidth: 75,
+					minWidth: 75,
+					maxWidth: 75
 				}
 			}
 		}),
@@ -267,8 +280,6 @@
 									>
 										{#if cell.id === 'file_type'}
 											<FileTypeIcon filetype={String(cell.render())} />
-										{:else if cell.id === 'size'}
-											<span>{readableFileSize(Number(cell.render()))}</span>
 										{:else if cell.id === 'name'}
 											{#if $documentsShown[Number(row.id)].last_parsed > 0}
 												<span class="d-flex align-items-center gap-1">

@@ -124,3 +124,33 @@ impl Default for GlobalShortcutState {
         }
     }
 }
+
+// Struct for User Preference
+#[derive(Serialize, Clone)]
+pub(crate) struct UserPreferencesState {
+  pub first_launch_done: bool,
+  pub onboarding_done: bool,
+  pub launch_at_startup: bool,
+  pub show_in_dock: bool,
+  pub global_shortcut_enabled: bool,
+  pub global_shortcut: String,
+  pub automatic_background_sync: bool,
+  pub detailed_scan: bool,
+  pub disallowed_paths: String,
+}
+
+impl Default for UserPreferencesState {
+    fn default() -> Self {
+        Self {
+          first_launch_done: false,
+          onboarding_done: false,
+          launch_at_startup: true,
+          show_in_dock: true,
+          global_shortcut_enabled: true,
+          global_shortcut: "Alt+Space".to_string(),
+          automatic_background_sync: true,
+          detailed_scan: true,
+          disallowed_paths: "".to_string(),
+        }
+    }
+}

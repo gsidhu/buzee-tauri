@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import StatusBar from '../layout/StatusBar.svelte';
 	import { goto } from '$app/navigation';
 	import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
   import EventListeners from '$lib/utils/eventListeners.svelte';
@@ -24,9 +25,13 @@
 	}
 
 	function testFn() {
-		invoke("set_global_shortcut_flag", { flag: true }).then((res) => {
+		invoke("get_user_preferences_state").then((res) => {
 			console.log(res);
 		});
+
+		// invoke("set_global_shortcut_flag", { flag: true }).then((res) => {
+		// 	console.log(res);
+		// });
 
 		// invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
 		// 	console.log(res);
@@ -86,8 +91,9 @@
 <KeyboardListeners />
 <EventListeners />
 <main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
-	<button on:click={() => testFn()}>Test</button>
+	<!-- <button on:click={() => testFn()}>Test</button> -->
 	<slot />
+	<StatusBar onboardingDone />
 </main>
 
 <style>

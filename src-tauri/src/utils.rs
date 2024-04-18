@@ -1,8 +1,10 @@
 use std::fs;
 use std::io;
 use std::path::Path;
+use diesel::SqliteConnection;
 use tauri_plugin_global_shortcut::Modifiers;
 use crate::housekeeping::get_app_directory;
+use crate::user_prefs::set_scan_running_status;
 use std::process::Command;
 use crate::custom_types::Error;
 use log::info;
@@ -45,6 +47,13 @@ pub fn string_to_modifiers(modifier: &str) -> Modifiers {
   }
 }
 
+pub fn graceful_restart(app: tauri::AppHandle, conn: &mut SqliteConnection) {
+  set_scan_running_status(conn, false, true, &app);
+  // wait for 3 seconds
+  std::thread::sleep(std::time::Duration::from_secs(3));
+  // restart the app
+  app.restart();
+}
 pub fn _install_textra_from_github() -> Result<String, Error> {
   #[cfg(not(target_os = "macos"))]
   {

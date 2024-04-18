@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { pinMode, compactViewMode } from '$lib/stores';
+	import { compactViewMode } from '$lib/stores';
 	import {
 		documentsShown,
-		resultsPerPage,
-		searchQuery,
-		filetypeShown,
-		resultsPageShown,
 		searchInProgress,
 		dbCreationInProgress,
 		windowBlurred
 	} from '$lib/stores';
 	import { selectAllRows } from '$lib/utils/fileUtils';
-	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
 	import { sendEvent } from '../utils/firebase';
-	import { page } from '$app/stores';
 	import { invoke } from '@tauri-apps/api/core';
 	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 
@@ -32,7 +26,6 @@
 
 	function showStatusBarMenu(option: string) {
 		sendEvent('click:showStatusBarMenu', { option, ...defaultData });
-		// window.menuAPI?.showStatusBarMenu(option);
 		invoke("open_context_menu", {option:"statusbar"}).then((res) => {});
 	}
 
@@ -83,9 +76,13 @@
 		}
 	}
 
-	function goToSearch() {
+	function goToSearch(from_onboarding: boolean = false) {
 		sendEvent('click:goToSearch', { ...defaultData });
-		goto('/search?highlight-search-bar=true&q=last%20month');
+		if (from_onboarding) {
+			goto('/search?highlight-search-bar=true&q=last%20month');
+		} else {
+			goto('/search');
+		}
 	}
 
 	function update_files_added_count(filesAddedPayload: Payload) {
@@ -149,7 +146,14 @@
 	<!-- Left end -->
 	<div class="col px-0 d-flex flex-row justify-content-start" id="status-bar-left">
 		{#if onboardingDone}
-			Showing {numFiles} {numFiles === 1 ? "file" : "files"}
+			<button
+				type="button"
+				class="px-1 mx-1 status-item"
+				on:click={() => goToSearch()}
+				title="View search results"
+			>
+				Showing {numFiles} {numFiles === 1 ? "result" : "results"}
+			</button>
 		{:else if dbReady || $dbCreationInProgress}
 			<div>
 				{#if $dbCreationInProgress}
@@ -169,7 +173,7 @@
 			<button
 				type="button"
 				class="px-1 mx-1 status-item"
-				on:click={() => goToSearch()}
+				on:click={() => goToSearch(true)}
 				title="Scan complete. Start searching!"
 			>
 				<i class="bi bi-check-circle" />
@@ -242,7 +246,7 @@
 				<button
 					type="button"
 					class="px-2 status-item"
-					title="Switch to expanded view"
+					title="Show results in normal view"
 					on:click={() => toggleCompactViewMode()}
 				>
 					<i class="bi bi-arrows-expand" />
@@ -251,7 +255,7 @@
 				<button
 					type="button"
 					class="px-2 status-item"
-					title="Switch to compact view"
+					title="Show results in compact view"
 					on:click={() => toggleCompactViewMode()}
 				>
 					<i class="bi bi-arrows-collapse" />

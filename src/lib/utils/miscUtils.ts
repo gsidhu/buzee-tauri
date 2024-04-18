@@ -17,11 +17,11 @@ export function readableFileSize(fileSize: number): string {
 	if (fileSize < 1000) {
 		return fileSize + ' B';
 	} else if (fileSize < 1000000) {
-		return (fileSize / 1000).toFixed(2) + ' KB';
+		return (fileSize / 1000).toFixed(1) + ' KB';
 	} else if (fileSize < 1000000000) {
-		return (fileSize / 1000000).toFixed(2) + ' MB';
+		return (fileSize / 1000000).toFixed(1) + ' MB';
 	}
-	return (fileSize / 1000000000).toFixed(2) + ' GB';
+	return (fileSize / 1000000000).toFixed(1) + ' GB';
 }
 
 export function resetColumnSize() {

@@ -67,7 +67,7 @@ pub fn initialize() -> () {
   // Set default app data
   set_default_app_data(&mut conn);
   // Set default user prefs
-  set_default_user_prefs(&mut conn);
+  set_default_user_prefs(&mut conn, false);
   // Set default file types
   set_default_file_types(&mut conn);
 }

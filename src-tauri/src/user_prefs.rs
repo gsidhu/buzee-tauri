@@ -1,24 +1,25 @@
 // Handles for User Preferences and App Data
 
-use crate::custom_types::{GlobalShortcutState, SyncRunningState};
-use crate::database::schema::user_preferences::global_shortcut_enabled;
-use std::time::{SystemTime, UNIX_EPOCH};
 use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
+use crate::custom_types::{UserPreferencesState, SyncRunningState};
 use crate::database::models::{AppData, UserPrefs, FileTypes};
 use crate::database::schema::{app_data, user_preferences, file_types};
 use crate::database::establish_connection;
 use crate::utils::string_to_modifiers;
+use std::time::{SystemTime, UNIX_EPOCH};
+use std::str::FromStr;
 use std::sync::Mutex;
 use tauri::Manager;
+use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
 
-pub fn set_default_user_prefs(conn: &mut SqliteConnection) {
+pub fn set_default_user_prefs(conn: &mut SqliteConnection, bypass_flag: bool) {
   // get the first row from user_prefs table
   let existing_prefs = user_preferences::table
     .select(user_preferences::id)
     .load::<i32>(conn)
     .expect("Error loading user_prefs");
 
-  if existing_prefs.len() == 0 {
+  if existing_prefs.len() == 0 || bypass_flag {
     // insert default user_prefs
     let new_user_prefs = UserPrefs {
       first_launch_done: false,
@@ -173,9 +174,46 @@ pub fn set_scan_running_status(conn: &mut SqliteConnection, status: bool, set_ti
   }
 }
 
-// Global Shortcut Functions
-use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut};
-use std::str::FromStr;
+// User Preferences Functions
+pub fn return_user_prefs_state(app: &tauri::AppHandle) -> UserPreferencesState {
+  let state_mutex = app.state::<Mutex<UserPreferencesState>>();
+  let state = state_mutex.lock().unwrap();
+  state.clone()
+}
+
+pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
+  println!("Setting user preferences to mutex state");
+  let state_mutex = app.state::<Mutex<UserPreferencesState>>();
+  let mut state = state_mutex.lock().unwrap();
+
+  let mut conn = establish_connection(&app);
+  // get all columns except ID from user_preferences table
+  let user_preferences_from_db = user_preferences::table
+    .select((
+      user_preferences::first_launch_done,
+      user_preferences::onboarding_done,
+      user_preferences::launch_at_startup,
+      user_preferences::show_in_dock,
+      user_preferences::global_shortcut_enabled,
+      user_preferences::global_shortcut,
+      user_preferences::automatic_background_sync,
+      user_preferences::detailed_scan,
+      user_preferences::disallowed_paths,
+    ))
+    .first::<UserPrefs>(&mut conn)
+    .expect("Error loading user_prefs");
+
+  // set state values from user_preferences_from_db
+  state.first_launch_done = user_preferences_from_db.first_launch_done;
+  state.onboarding_done = user_preferences_from_db.onboarding_done;
+  state.launch_at_startup = user_preferences_from_db.launch_at_startup;
+  state.show_in_dock = user_preferences_from_db.show_in_dock;
+  state.global_shortcut_enabled = user_preferences_from_db.global_shortcut_enabled;
+  state.global_shortcut = user_preferences_from_db.global_shortcut;
+  state.automatic_background_sync = user_preferences_from_db.automatic_background_sync;
+  state.detailed_scan = user_preferences_from_db.detailed_scan;
+  state.disallowed_paths = user_preferences_from_db.disallowed_paths;
+}
 
 pub fn set_new_global_shortcut_in_db(new_shortcut_string: String, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
@@ -193,27 +231,18 @@ pub fn set_global_shortcut_flag_in_db(flag: bool, app: &tauri::AppHandle) {
     .unwrap();
 }
 
-pub fn set_global_shortcut_state_from_db_value(app: &tauri::AppHandle) {
-  println!("Setting global shortcut to mutex state");
-  let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
-  let mut state = state_mutex.lock().unwrap();
-
+pub fn set_automatic_background_sync_flag_in_db(flag: bool, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
-  // get global_shortcut_enabled and global_shortcut values from user_preferences table
-  let global_shortcut_vals = user_preferences::table
-    .select((global_shortcut_enabled, user_preferences::global_shortcut))
-    .first::<(bool, String)>(&mut conn)
-    .expect("Error loading user_prefs");
-
-  state.shortcut_enabled = global_shortcut_vals.0;
-  state.shortcut_string = global_shortcut_vals.1.to_string();
-  println!("Set global shortcut mutex state to: {}", state.shortcut_string);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::automatic_background_sync.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
 }
 
 pub fn is_global_shortcut_enabled(app: &tauri::AppHandle) -> bool {
-  let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
+  let state_mutex = app.state::<Mutex<UserPreferencesState>>();
   let state = state_mutex.lock().unwrap();
-  state.shortcut_enabled
+  state.global_shortcut_enabled
 }
 
 pub fn get_global_shortcut(app: &tauri::AppHandle) -> Shortcut {
@@ -240,9 +269,9 @@ pub fn get_modifiers_and_code_from_global_shortcut(app: &tauri::AppHandle) -> (M
 }
 
 fn set_modifiers_and_code_from_state(app: &tauri::AppHandle) -> (Vec<Modifiers>, Code) {
-  let state_mutex = app.state::<Mutex<GlobalShortcutState>>();
+  let state_mutex = app.state::<Mutex<UserPreferencesState>>();
   let state = state_mutex.lock().unwrap();
-  let global_shortcut_string = &state.shortcut_string;
+  let global_shortcut_string = &state.global_shortcut;
   println!("global_shortcut_string2: {:?}", global_shortcut_string);
   let mut splits: Vec<&str> = global_shortcut_string.split("+").collect();
   let key = Code::from_str(splits.last().unwrap()).unwrap();

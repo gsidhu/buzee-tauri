@@ -1,7 +1,7 @@
 // Inter-Process Communication between Rust and SvelteKit
 // The idea is to eventually keep only callers here and move the actual logic to other files. This way, for creating a web app, we just have to convert this file into an API and call the same functions from the frontend.
 
-use crate::custom_types::{DBStat, DateLimit, Error, Payload, DBConnPoolState, GlobalShortcutState, SyncRunningState};
+use crate::custom_types::{DBStat, DateLimit, Error, Payload, DBConnPoolState, UserPreferencesState, SyncRunningState};
 use crate::database::{establish_connection, get_connection_pool};
 use crate::database::models::DocumentSearchResult;
 use crate::database::search::{
@@ -10,7 +10,8 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, set_global_shortcut_state_from_db_value, set_new_global_shortcut_in_db, set_global_shortcut_flag_in_db};
+use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_user_preferences_state_from_db_value};
+use crate::utils::graceful_restart;
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
@@ -34,21 +35,27 @@ pub fn send_message_to_frontend(
 // Setup cron job for background sync
 #[tauri::command]
 async fn setup_cron_job(window: tauri::WebviewWindow, app: tauri::AppHandle) {
-  tokio::spawn(async move {
-    let mut interval = interval(Duration::from_millis(1800000));
-    interval.tick().await;
-    loop {
+  let app_clone = app.clone();
+  let state_mutex = app_clone.state::<Mutex<UserPreferencesState>>();
+  let state = state_mutex.lock().unwrap();
+  if state.automatic_background_sync {
+    tokio::spawn(async move {
+      let mut interval = interval(Duration::from_secs(1800));
+      // first tick happens immediately, so get it out of the way
       interval.tick().await;
-      let sync_running = sync_status(&app);
-      println!("??? Sync running: {}", sync_running.0);
-      let current_timestamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
-      if sync_running.0 == "false" && current_timestamp - sync_running.1 > 1800 {
-        let window_clone = window.clone();
-        let app_clone = app.clone();
-        run_sync_operation(window_clone, app_clone).await;
+      loop {
+        interval.tick().await;
+        let sync_running = sync_status(&app);
+        println!("??? Sync running: {}", sync_running.0);
+        let current_timestamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
+        if sync_running.0 == "false" && current_timestamp - sync_running.1 > 1800 {
+          let window_clone = window.clone();
+          let app_clone = app.clone();
+          run_sync_operation(window_clone, app_clone).await;
+        }
       }
-    }
-  });
+    });
+  }
 }
 
 // Get OS boolean
@@ -242,19 +249,58 @@ fn open_context_menu(window: tauri::Window, option: String) {
     }
 }
 
-// Toggle the global shortcut flag in DB
+// Get UserPreferencesState
+
 #[tauri::command]
-async fn set_global_shortcut_flag(app_handle: tauri::AppHandle, flag: bool) {
-  println!("Setting global shortcut flag to: {}", flag);
-  set_global_shortcut_flag_in_db(flag, &app_handle);
-  set_global_shortcut_state_from_db_value(&app_handle);
+async fn get_user_preferences_state(app_handle: tauri::AppHandle) -> UserPreferencesState {
+  return_user_prefs_state(&app_handle)
 }
+
+// Set user preference in DB and State
+#[tauri::command]
+async fn reset_user_preferences(app_handle: tauri::AppHandle) {
+  let mut conn = establish_connection(&app_handle);
+  set_default_user_prefs(&mut conn, true);
+  set_user_preferences_state_from_db_value(&app_handle);
+  graceful_restart(app_handle, &mut conn);
+}
+
+#[tauri::command]
+async fn set_user_preference(app_handle: tauri::AppHandle, key: String, value: bool) {
+  println!("Setting {} to {}", key, value);
+  let mut conn = establish_connection(&app_handle);
+  match key.as_str() {
+    "launch_at_startup" => {
+      // set_launch_at_startup_in_db(value, &app_handle);
+    }
+    "show_in_dock" => {
+      // set_show_in_dock_in_db(value, &app_handle);
+    }
+    "automatic_background_sync" => {
+      set_automatic_background_sync_flag_in_db(value, &app_handle);
+    }
+    "detailed_scan" => {
+      // set_detailed_scan_in_db(value, &app_handle);
+    }
+    "global_shortcut_enabled" => {
+      set_global_shortcut_flag_in_db(value, &app_handle);
+    }
+    _ => {
+      println!("Invalid key");
+    } 
+  }
+  set_user_preferences_state_from_db_value(&app_handle);
+  graceful_restart(app_handle, &mut conn);
+}
+
 // Set new global shortcut in DB and update the global shortcut
 #[tauri::command]
 async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_string: String) {
   println!("Setting new global shortcut: {}", new_shortcut_string);
+  let mut conn = establish_connection(&app_handle);
   set_new_global_shortcut_in_db(new_shortcut_string, &app_handle);
-  set_global_shortcut_state_from_db_value(&app_handle);
+  set_user_preferences_state_from_db_value(&app_handle);
+  graceful_restart(app_handle, &mut conn);
   // Tell user to restart the app for changes to take effect
   // restart the app to set the new shortcut
   // app_handle.restart();
@@ -277,9 +323,11 @@ pub fn initialize() {
       get_db_stats,
       open_quicklook,
       open_context_menu,
-      set_global_shortcut_flag,
+      set_user_preference,
       set_new_global_shortcut,
-      crate::drag::start_drag
+      crate::drag::start_drag,
+      get_user_preferences_state,
+      reset_user_preferences
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {
@@ -290,13 +338,13 @@ pub fn initialize() {
           // db connection pool
           let pool = get_connection_pool();
           handle.manage(Mutex::new(DBConnPoolState::new(pool)));
-          // global shortcut state
-          handle.manage(Mutex::new(GlobalShortcutState::default()));
+          // user preferences state
+          handle.manage(Mutex::new(UserPreferencesState::default()));
+          set_user_preferences_state_from_db_value(app.handle());
           // sync running state
           handle.manage(Mutex::new(SyncRunningState::default()));
         }
         {
-          set_global_shortcut_state_from_db_value(app.handle());
           if is_global_shortcut_enabled(app.handle()) {
             println!("Global Shortcut is enabled");
             app.handle().plugin(

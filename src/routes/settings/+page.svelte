@@ -7,23 +7,12 @@
 	import { sendEvent } from '../../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
 
-	let showInDock: boolean;
 	let launchAtStartup: boolean;
-	let globalShortcutsEnabled: boolean;
+	let globalShortcutEnabled: boolean;
 	let automaticBackgroundSyncEnabled: boolean;
 	let isMac: boolean = true;
 	let isWin: boolean;
 	let userPreferences: UserPreferences;
-
-	async function getUserPreferences() {
-		return await window.settingsAPI?.getUserPreferences();
-	}
-
-	function toggleDockIcon() {
-		showInDock = !showInDock;
-		sendEvent('click:toggleDockIcon', { showInDock });
-		window.settingsAPI?.toggleDockIcon();
-	}
 
 	function toggleLaunchAtStartup() {
 		launchAtStartup = !launchAtStartup;
@@ -31,16 +20,20 @@
 		window.settingsAPI?.toggleLaunchAtStartup();
 	}
 
-	function toggleGlobalShortcuts() {
-		globalShortcutsEnabled = !globalShortcutsEnabled;
-		sendEvent('click:toggleGlobalShortcuts', { globalShortcutsEnabled });
-		window.settingsAPI?.toggleGlobalShortcuts();
+	function toggleGlobalShortcut() {
+		globalShortcutEnabled = !globalShortcutEnabled;
+		sendEvent('click:toggleGlobalShortcut', { globalShortcutEnabled });
+		invoke("set_user_preference", {key: "global_shortcut_enabled", value: globalShortcutEnabled}).then(() => {
+			console.log("Set global shortcut flag to: " + globalShortcutEnabled);
+		});
 	}
 
 	function toggleAutomaticBackgroundSync() {
 		automaticBackgroundSyncEnabled = !automaticBackgroundSyncEnabled;
 		sendEvent('click:toggleAutomaticBackgroundSync', { automaticBackgroundSyncEnabled });
-		window.settingsAPI?.toggleAutomaticBackgroundSync();
+		invoke("set_user_preference", {key: "automatic_background_sync", value: automaticBackgroundSyncEnabled}).then(() => {
+			console.log("Set automatic background sync flag to: " + automaticBackgroundSyncEnabled);
+		});
 	}
 
 	function resetDefault() {
@@ -67,15 +60,15 @@
 				isMac = false;
 			}
 		});
-		// isWin = window.constants.isWin();
-		// getUserPreferences().then((res) => {
-		// 	userPreferences = res;
-		// 	console.log(userPreferences);
-		// 	showInDock = userPreferences.showInDock; 
-		// 	launchAtStartup = userPreferences.launchAtStartup;
-		// 	globalShortcutsEnabled = userPreferences.globalShortcutsEnabled;
-		// 	automaticBackgroundSyncEnabled = userPreferences.automaticBackgroundSync;
-		// });
+
+		invoke("get_user_preferences_state").then((res) => {
+			console.log(res);
+			// @ts-ignore
+			userPreferences = res;
+			launchAtStartup = userPreferences.launch_at_startup;
+			globalShortcutEnabled = userPreferences.global_shortcut_enabled;
+			automaticBackgroundSyncEnabled = userPreferences.automatic_background_sync;
+		});
 	});
 </script>
 
@@ -109,29 +102,6 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2"
-					><input type="checkbox" bind:checked={showInDock} on:click={() => toggleDockIcon()} /></td
-				>
-				<td class="py-2" on:click={() => toggleDockIcon()}>
-					{#if isMac}
-						Show in Dock
-						<div class="d-flex align-items-center small-explanation gap-1">
-							Whether to show the app icon in the dock
-							<PopoverIcon
-								title="The app icon always appears on restarts, then follows user settings"
-							/>
-						</div>
-					{:else if isWin}
-						Show in Taskbar
-						<div class="d-flex align-items-center small-explanation gap-1">
-							Whether to show the app icon in the taskbar
-						</div>
-					{:else}
-						Show in Taskbar
-					{/if}
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2"
 					><input
 						type="checkbox"
 						bind:checked={launchAtStartup}
@@ -150,11 +120,11 @@
 					<td class="text-center px-2"
 						><input
 							type="checkbox"
-							bind:checked={globalShortcutsEnabled}
-							on:click={() => toggleGlobalShortcuts()}
+							bind:checked={globalShortcutEnabled}
+							on:click={() => toggleGlobalShortcut()}
 						/>
 					</td>
-					<td class="py-2" on:click={() => toggleGlobalShortcuts()}>
+					<td class="py-2" on:click={() => toggleGlobalShortcut()}>
 						Allow Global Shortcut
 						<div class="d-flex align-items-center small-explanation gap-1">
 							{#if isMac}

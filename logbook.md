@@ -7,10 +7,12 @@
 
 ## - Add UI for setting global shortcut.
 ## - Add UI to OCR PDF Image.
-## - Add user pref table. Connect to global shortcut, cron job etc.
+## - Use status bar center to tell user what the app is doing. E.g. "opening file", "restarting app", "setting state" etc.
 
-## - Create a user pref Mutex State. Merge global shortcut state into it. Pull it from the DB on app start. Send it to the frontend when showing the settings page. Change value in both DB and Mutex when user makes changes in the settings page.
-
+- Show size instead of last_opened in results table.
+- Moved StatusBar to +layout.svelte to show it across the app.
+- Added graceful_restart function that sets the sync_running flag to false, waits for 3 seconds, then restarts the app.
+- Created a user pref Mutex State. Merge global shortcut state into it. Pull it from the DB on app start. Send it to the frontend when showing the settings page. Change value in both DB and Mutex when user makes changes in the settings page.
 - Added functions/commands for toggling the global shortcut.
 - Showing a little checkmark next to the filename for all files that have been indexed.
 - Added last_parsed column to the document table. Modified all models, schemas and functions accordingly.
