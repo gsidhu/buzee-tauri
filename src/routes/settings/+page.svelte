@@ -144,29 +144,27 @@
 					</div>
 				</td>
 			</tr>
-			{#if isMac || isWin}
-				<tr>
-					<td class="text-center px-2"
-						><input
-							type="checkbox"
-							bind:checked={globalShortcutEnabled}
-							on:click={() => toggleGlobalShortcut()}
-						/>
-					</td>
-					<td class="py-2" on:click={() => toggleGlobalShortcut()}>
-						Allow Global Shortcut
-						<div class="d-flex align-items-center small-explanation gap-1">
-							{#if isMac}
-								<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
-								<PopoverIcon title="Changes will take effect after the app restarts" />
-							{:else if isWin}
-								<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
-								<PopoverIcon title="Changes will take effect after the app restarts" />
-							{/if}
-						</div>
-					</td>
-				</tr>
-			{/if}
+			<tr>
+				<td class="text-center px-2"
+					><input
+						type="checkbox"
+						bind:checked={globalShortcutEnabled}
+						on:click={() => toggleGlobalShortcut()}
+					/>
+				</td>
+				<td class="py-2" on:click={() => toggleGlobalShortcut()}>
+					Allow Global Shortcut
+					<div class="d-flex align-items-center small-explanation gap-1">
+						{#if isMac}
+							<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
+							<PopoverIcon title="Changes will take effect after the app restarts" />
+						{:else}
+							<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
+							<PopoverIcon title="Changes will take effect after the app restarts" />
+						{/if}
+					</div>
+				</td>
+			</tr>
 			<tr>
 				<td class="text-center px-2"
 					><input

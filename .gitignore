@@ -11,3 +11,4 @@ vite.config.ts.timestamp-*
 test.js
 .vs
 src-tauri/binaries
+src-tauri/temp_output

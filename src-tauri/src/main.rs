@@ -11,6 +11,8 @@ extern crate mobi;
 extern crate epub;
 extern crate regex;
 extern crate serde_json;
+extern crate reqwest;
+extern crate zip;
 
 mod utils;
 mod custom_types;

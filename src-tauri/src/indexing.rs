@@ -291,6 +291,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   let mut files_parsed = 0;
 
   let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
+  // let document_filetypes = ["txt"];
   println!("Document filetypes: {:?}", document_filetypes);
   
   // let allowed_filetypes = all_allowed_filetypes(conn, true);

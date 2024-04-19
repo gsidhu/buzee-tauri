@@ -54,6 +54,7 @@ pub fn graceful_restart(app: tauri::AppHandle, conn: &mut SqliteConnection) {
   // restart the app
   app.restart();
 }
+
 pub fn _install_textra_from_github() -> Result<String, Error> {
   #[cfg(not(target_os = "macos"))]
   {
@@ -116,6 +117,47 @@ pub fn _install_textra_from_github() -> Result<String, Error> {
       info!("Textra installation stdout: {}", stdout);
       info!("Textra installation stderr: {}", stderr);
       Ok(stderr)
+    }
+  }
+}
+
+pub async fn install_poppler_from_github() -> Result<String, Error> {
+  #[cfg(not(target_os = "windows"))]
+  {
+    Ok("Textra is only supported on Windows".to_string())
+  }
+  #[cfg(target_os = "windows")]
+  {
+    let download_uri = "https://github.com/oschwartz10612/poppler-windows/releases/download/v24.02.0-0/Release-24.02.0-0.zip";
+    let app_directory = get_app_directory();
+    // check if poppler exe exists
+    let poppler_path = format!("{}\\poppler-24.02.0\\Library\\bin\\pdftoppm.exe", app_directory);
+    let poppler_exists = Path::new(&poppler_path).exists();
+    println!("Poppler exists: {}", poppler_exists);
+    if poppler_exists {
+      println!("Poppler is already installed");
+      return Ok("Poppler is already installed".to_string());
+    } else {
+      println!("Downloading and installing Poppler");
+      // download poppler using reqwest
+      let app_directory_clone = app_directory.clone();
+      let response = reqwest::get(download_uri).await.unwrap();
+      let mut file = std::fs::File::create(format!("{}\\poppler.zip", &app_directory_clone)).unwrap();
+      let mut content =  std::io::Cursor::new(response.bytes().await.unwrap());
+      std::io::copy(&mut content, &mut file).unwrap();
+
+      // unzip poppler.zip using zip crate
+      let mut archive = zip::ZipArchive::new(fs::File::open(format!("{}/poppler.zip", &app_directory)).unwrap()).unwrap();
+      archive.extract(&app_directory).unwrap();
+      // remove poppler.zip
+      fs::remove_file(format!("{}\\poppler.zip", &app_directory)).unwrap();
+      // check if poppler exe exists
+      let poppler_path = format!("{}\\poppler-24.02.0\\Library\\bin\\pdftoppm.exe", &app_directory);
+      if Path::new(&poppler_path).exists() {
+        return Ok("Poppler is installed".to_string());
+      } else {
+        return Ok("Failed to install Poppler".to_string());
+      }
     }
   }
 }

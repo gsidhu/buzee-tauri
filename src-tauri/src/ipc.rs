@@ -22,6 +22,7 @@ use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statu
 // use log::info;
 use std::sync::Mutex;
 use std::process::Command;
+use dirs::home_dir;
 
 pub fn send_message_to_frontend(
     window: &tauri::WebviewWindow,

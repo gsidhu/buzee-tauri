@@ -47,3 +47,5 @@ schedule = "0.1.0"
 futures = "0.3.30"
 base64 = "0.21"
 serialize-to-javascript = "0.1.1"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+zip = "0.6"

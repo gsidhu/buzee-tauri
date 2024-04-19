@@ -37,7 +37,11 @@
             "-o",
             {
               "validator": "\\S+"
-            }
+            },
+            "--poppler_path",
+            {
+              "validator": "\\S+"
+            }	
           ],
           "cmd": "",
           "name": "binaries/winocr",

@@ -11,6 +11,7 @@
 ## - Add app updater.
 ## - Use GitHub action to build.
 
+- Made Windows OCR work. Downloads Poppler if doesn't exist. Fixed winocr_cli to make things work.
 - Added Windows OCR sidecar.
 - Reorder indexing so all regular docs are indexed first, then PDFs (then eventually, XLSX and CSV).
 - Added MacOS code signing and notarization. Have to export env variables to shell before running `tauri build`. Or use the GitHub action.
