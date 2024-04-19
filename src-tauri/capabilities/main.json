@@ -27,6 +27,21 @@
           "cmd": "",
           "name": "binaries/textra",
           "sidecar": true
+        },
+        {
+          "args": [
+            "-i",
+            {
+              "validator": "\\S+"
+            },
+            "-o",
+            {
+              "validator": "\\S+"
+            }
+          ],
+          "cmd": "",
+          "name": "binaries/winocr",
+          "sidecar": true
         }
       ]
     },

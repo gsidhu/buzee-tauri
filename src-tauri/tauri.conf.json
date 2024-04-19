@@ -33,6 +33,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/textra"]
+    "externalBin": ["binaries/textra", "binaries/winocr"]
   }
 }

@@ -290,10 +290,9 @@ pub fn add_file_metadata_to_database(
 pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle) -> usize {
   let mut files_parsed = 0;
 
-  let document_filetypes = ["docx", "md", "pptx", "txt", "pdf", "epub"];
+  let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
   println!("Document filetypes: {:?}", document_filetypes);
   
-  // let document_filetypes = ["pdf"];
   // let allowed_filetypes = all_allowed_filetypes(conn, true);
   // let document_filetypes: Vec<String> = allowed_filetypes
   //   .iter()
@@ -303,22 +302,20 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
 
   // Get metadata_id, source_id, path, file_type and last_modified
   // For all files that have the filetype in the array above
-  // let pdf_files_data = document::table
-  //   .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
-  //   .filter(document::file_type.eq_any(["pdf"]))
-  //   .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
-  //   .load::<(i32, String, String, String, i64)>(conn)
-  //   .unwrap();
-
-  // let pdf_metadata_ids_to_select: Vec<i32> = pdf_files_data.iter().map(|item| item.0).collect();
-
-  // let pdf_last_parsed_values: HashMap<i32, i64> = body::table
-  //   .filter(body::metadata_id.eq_any(pdf_metadata_ids_to_select))
-  //   .select((body::metadata_id, body::last_parsed))
-  //   .load::<(i32, i64)>(conn)
-  //   .unwrap()
-  //   .into_iter()
-  //   .collect();
+  let pdf_files_data = document::table
+    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
+    .filter(document::file_type.eq_any(["pdf"]))
+    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
+    .load::<(i32, String, String, String, i64)>(conn)
+    .unwrap();
+  let pdf_metadata_ids_to_select: Vec<i32> = pdf_files_data.iter().map(|item| item.0).collect();
+  let pdf_last_parsed_values: HashMap<i32, i64> = body::table
+    .filter(body::metadata_id.eq_any(pdf_metadata_ids_to_select))
+    .select((body::metadata_id, body::last_parsed))
+    .load::<(i32, i64)>(conn)
+    .unwrap()
+    .into_iter()
+    .collect();
   
   let not_pdf_files_data = document::table
     .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
@@ -327,9 +324,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     .order_by(document::size.asc())
     .load::<(i32, String, String, String, i64)>(conn)
     .unwrap();
-
   let not_pdf_metadata_ids_to_select: Vec<i32> = not_pdf_files_data.iter().map(|item| item.0).collect();
-
   let not_pdf_last_parsed_values: HashMap<i32, i64> = body::table
     .filter(body::metadata_id.eq_any(not_pdf_metadata_ids_to_select))
     .select((body::metadata_id, body::last_parsed))
@@ -338,30 +333,24 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     .into_iter()
     .collect();
 
-  // println!("PDF files: {}", pdf_files_data.len());
+  println!("PDF files: {}", pdf_files_data.len());
   println!("Not PDF files: {}", not_pdf_files_data.len());
 
-  // Spawn child processes to extract text from PDF and non-PDF files
-  // let app_clone = app.clone();
-  // let pdf_parsing = tokio::spawn(async move {
-  //   println!("Parsing PDF files");
-  //   parse_text_and_store_in_db(pdf_files_data, pdf_last_parsed_values, &app).await;
-  // });
-  // let not_pdf_parsing = tokio::spawn(async move {
-  //   println!("Parsing non-PDF files");
-  //   parse_text_and_store_in_db(not_pdf_files_data, not_pdf_last_parsed_values, &app_clone).await;
-  // });
-  // futures::future::join_all([pdf_parsing, not_pdf_parsing]).await;
+  // Append the pdf_files_data to not_pdf_files_data
+  let all_files_data = not_pdf_files_data.clone();
+  let all_last_parsed_values = not_pdf_last_parsed_values.clone();
+  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
+  let all_last_parsed_values: HashMap<i32, i64> = all_last_parsed_values.into_iter().chain(pdf_last_parsed_values.into_iter()).collect();
 
   let mut sync_running = sync_status(&app).0;
-  for file_item in not_pdf_files_data {
+  for file_item in all_files_data {
     let metadata_id = file_item.0;
     let path = file_item.1;
     let name = file_item.2;
     let file_type = file_item.3;
     let last_modified = file_item.4;
     let last_parsed: Option<&i64>;
-    match not_pdf_last_parsed_values.get(&metadata_id) {
+    match all_last_parsed_values.get(&metadata_id) {
       Some(value) => {
         // Handle the case where metadata_id exists in the HashMap
         last_parsed = Some(value);

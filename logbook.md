@@ -5,9 +5,15 @@
   - Add dialog to select file.
   - Add "save to database" toggle.
 
+## - Figure out how to suppress the extra app icon when calling the sidecar binary.
 ## - Add UI for setting global shortcut.
 ## - Add UI to OCR PDF Image.
+## - Add app updater.
+## - Use GitHub action to build.
 
+- Added Windows OCR sidecar.
+- Reorder indexing so all regular docs are indexed first, then PDFs (then eventually, XLSX and CSV).
+- Added MacOS code signing and notarization. Have to export env variables to shell before running `tauri build`. Or use the GitHub action.
 - Connected settings to backend. Detailed Scan, Automatic Scan, Global Shortcut settings are respected.
 - Using `scan` instead of sync in all user-facing copy.
 - Showing brief message in status bar to tell user what the app is doing. E.g. "restarting" or "starting/stopping scan"
