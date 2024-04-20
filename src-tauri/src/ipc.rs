@@ -395,6 +395,10 @@ pub fn initialize() {
             contextmenu_receiver(app_handle, event);
           });
         }
+        {
+          // Set activation poicy to Accessory to prevent the app icon from showing on the dock
+          // app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+        }
         Ok(())
     })
     .menu(|app_handle| Menu::default(app_handle))

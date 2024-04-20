@@ -26,7 +26,7 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
       // so we just poll the stderr to keep the loop running till the extraction completes
       if let CommandEvent::Stderr(line) = event {
         let _output_line = String::from_utf8(line).unwrap();
-        // println!("text: {}", output_line);
+        // println!("textra stderr: {}", output_line);
       }
     }
 

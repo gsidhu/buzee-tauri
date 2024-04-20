@@ -1,5 +1,3 @@
-use crate::database::establish_connection;
-// use crate::database::crud::add_files_to_database;
 use crate::database::schema::{document, metadata, body, file_types};
 use crate::database::models::{DocumentItem, BodyItem, FileTypes};
 use crate::db_sync::sync_status;
@@ -291,7 +289,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   let mut files_parsed = 0;
 
   let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
-  // let document_filetypes = ["txt"];
+  // let document_filetypes: [&str; 1] = ["md"];
   println!("Document filetypes: {:?}", document_filetypes);
   
   // let allowed_filetypes = all_allowed_filetypes(conn, true);
@@ -368,6 +366,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
     if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
       // Extract text from the file
+      // info!("Extracting text from: {}", path.clone());
       let text = extract_text_from_path(path.clone(), file_type.clone(), &app).await;
       // If there is no text, still add this file so that next time its last_parsed is compared
       // Chunk the text into 2000 character chunks
@@ -401,62 +400,6 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
 
   files_parsed
 }
-
-pub async fn _parse_text_and_store_in_db(
-  files_data_vector: Vec<(i32, String, String, String, i64)>, 
-  last_parsed_values: HashMap<i32, i64>,
-  app: &tauri::AppHandle) {
-  let mut conn = establish_connection(&app);
-  let mut sync_running = sync_status(&app).0;
-  // Then parse and chunk the content and store it in the body table
-  for file_item in files_data_vector {
-    let metadata_id = file_item.0;
-    let path = file_item.1;
-    let name = file_item.2;
-    let file_type = file_item.3;
-    let last_modified = file_item.4;
-    let last_parsed: Option<&i64>;
-    match last_parsed_values.get(&metadata_id) {
-      Some(value) => {
-        // Handle the case where metadata_id exists in the HashMap
-        last_parsed = Some(value);
-      }
-      None => {
-        // Handle the case where metadata_id does not exist in the HashMap
-        last_parsed = None;
-      }
-    }  
-    // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
-    if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
-      // Extract text from the file
-      let text = extract_text_from_path(path.clone(), file_type.clone(), &app).await;
-      // If there is no text, still add this file so that next time its last_parsed is compared
-      // Chunk the text into 2000 character chunks
-      let chunks = chunk_text(text);
-      let body_items: Vec<BodyItem> = chunks
-        .iter()
-        .map(|chunk| {
-          BodyItem {
-            metadata_id: metadata_id, 
-            text: chunk.to_string(),
-            title: name.clone(),
-            url: path.clone(),
-            last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-          }
-        }).collect();
-
-      add_body_to_database(&body_items, &mut conn);
-    }
-
-    // Check if sync_running is false, if so break the loop
-    if sync_running == "false" {
-      break;
-    }
-    // Update sync_running status
-    sync_running = sync_status(&app).0;
-  }
-}
-
 
 pub async fn extract_text_from_path(path: String, file_type: String, app: &tauri::AppHandle) -> String {
   let extractor: Extractor = Extractor::new();

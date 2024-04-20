@@ -235,7 +235,10 @@
 				id="bg-sync-btn"
 				type="button"
 				class={`px-2 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
-				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+				title={syncCoolingPeriod ? 
+				`${userAskedToDisable ? "Shutting down background processes. Please wait." : "Booting up. Please wait for a few seconds."}` 
+				: 
+				`Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
 				on:click={() => toggleBackgroundTextProcessing()}
 				disabled={syncCoolingPeriod}
 			>
