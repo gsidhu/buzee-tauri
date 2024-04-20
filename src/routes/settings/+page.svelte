@@ -76,19 +76,6 @@
 		window.dbAPI?.addDocsToDB();
 	}
 
-	const notAllowedKeys = [
-		'Backspace',
-		'Enter',
-		'Shift',
-		'Tab',
-		'Alt',
-		'Meta',
-		'Option',
-		'Control',
-		'CapsLock',
-		'Escape',
-	];
-
 	function setNewGlobalShortcut() {
 		// ensure that globalShortcutModifers[1] is not empty and different from globalShortcutModifiers[0]
 		if (globalShortcutModifiers[1] === globalShortcutModifiers[0]) {
@@ -152,23 +139,25 @@
 		});
 
 		const shortcutInput = document.getElementById('shortcut-input');
-    shortcutInput?.addEventListener('keydown', function(event) {
-			if (!notAllowedKeys.includes(event.key)) {
-				// if event.key is not alphanumeric, space or F1-F24, return
-				if (!/^[a-zA-Z0-9 ]+$/.test(event.key) && !/^F\d{1,2}$/.test(event.key)) {
-					return;
-				}
-        event.preventDefault(); // Prevent the default action of the keypress
-				console.log("pressed:", event.key);
-        let shortcut = '';
-        // Add the pressed key to the shortcut
+    	shortcutInput?.addEventListener('keydown', function(event) {
+			event.preventDefault(); // Prevent the default action of the keypress
+			if (event.key === 'Backspace' || event.key === 'Delete') {
+				// if the pressed key is backspace or delete, clear the input field
+				(shortcutInput as HTMLInputElement).value = '';
+				globalShortcutCode = '';
+				return;
+			}
+			// if event.key is alphanumeric, space or F1-F24, proceed
+			console.log("pressed:", event.key);
+        	if (event.key.match(/^[a-zA-Z0-9]$/) || event.key.match(/^F[1-2]?[0-9]$/) || event.key === ' ') {
+				let shortcut = '';
 				if (event.key === ' ') shortcut = 'Space';
-        else shortcut = event.key.toUpperCase();
-        // Update the input field value with the captured shortcut
+				else shortcut = event.key.toUpperCase();
+				// Update the input field value with the captured shortcut
 				(shortcutInput as HTMLInputElement).value = shortcut;
 				globalShortcutCode = shortcut;
 			}
-    });
+    	});
 	});
 </script>
 
@@ -227,10 +216,22 @@
 					Allow Global Shortcut
 					<div class="d-flex align-items-center small-explanation gap-1">
 						{#if isMac}
-							<div>Pressing <button type="button" data-bs-toggle="modal" data-bs-target="#global-shortcut-modal"><code>{globalShortcut}</code></button> will show the app from anywhere</div>
+							<div>
+								Pressing <button
+									type="button"
+									data-bs-toggle="modal"
+									data-bs-target="#global-shortcut-modal"><code>{globalShortcut}</code></button
+								> will show the app from anywhere
+							</div>
 							<PopoverIcon title="Changes will take effect after the app restarts" />
 						{:else}
-							<div>Pressing <button type="button" data-bs-toggle="modal" data-bs-target="#global-shortcut-modal"><code>{globalShortcut}</code></button> will show the app from anywhere</div>
+							<div>
+								Pressing <button
+									type="button"
+									data-bs-toggle="modal"
+									data-bs-target="#global-shortcut-modal"><code>{globalShortcut}</code></button
+								> will show the app from anywhere
+							</div>
 							<PopoverIcon title="Changes will take effect after the app restarts" />
 						{/if}
 					</div>
@@ -264,7 +265,9 @@
 					Scan File Contents
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Buzee will scan file contents so you can search inside files</div>
-						<PopoverIcon title="Disabling this setting may improve speed but reduce quality of search results" />
+						<PopoverIcon
+							title="Disabling this setting may improve speed but reduce quality of search results"
+						/>
 					</div>
 				</td>
 			</tr>
@@ -287,27 +290,33 @@
 </div>
 
 <!-- Global Shortcut Modal -->
-<div class="modal fade" id="global-shortcut-modal" tabindex="-1" aria-labelledby="globalShortcutModal" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-6" id="globalShortcutModal">Change Global Shortcut</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Pressing the global shortcut shows the app from anywhere.</p>
+<div
+	class="modal fade"
+	id="global-shortcut-modal"
+	tabindex="-1"
+	aria-labelledby="globalShortcutModal"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-6" id="globalShortcutModal">Change Global Shortcut</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>Pressing the global shortcut shows the app from anywhere.</p>
 				<p>Current shortcut: <code>{globalShortcut}</code></p>
 				<p>Set new shortcut below:</p>
 				<div class="row row-cols-3">
 					<div class="col-4 d-flex align-items-center">
 						<select bind:value={globalShortcutModifiers[0]}>
 							{#if isMac}
-							<option value="Super">Command (⌘)</option>
-							<option value="Alt">Option (⌥)</option>
-							<option value="Control">Control (^)</option>
+								<option value="Super">Command (⌘)</option>
+								<option value="Alt">Option (⌥)</option>
+								<option value="Control">Control (^)</option>
 							{:else}
-							<option value="Control">Control</option>
-							<option value="Alt">Alt</option>
+								<option value="Control">Control</option>
+								<option value="Alt">Alt</option>
 							{/if}
 							<option value="Shift">Shift</option>
 						</select>
@@ -316,29 +325,40 @@
 						<select bind:value={globalShortcutModifiers[1]}>
 							<option value=""></option>
 							{#if isMac}
-							<option value="Super">Command (⌘)</option>
-							<option value="Alt">Option (⌥)</option>
-							<option value="Control">Control (^)</option>
+								<option value="Super">Command (⌘)</option>
+								<option value="Alt">Option (⌥)</option>
+								<option value="Control">Control (^)</option>
 							{:else}
-							<option value="Control">Control</option>
-							<option value="Alt">Alt</option>
+								<option value="Control">Control</option>
+								<option value="Alt">Alt</option>
 							{/if}
 							<option value="Shift">Shift</option>
 						</select>
 					</div>
 					<div class="col-4">
-						<input type="text" id="shortcut-input" class="form-control" placeholder="Key" bind:value={globalShortcutCode} />
+						<input
+							type="text"
+							id="shortcut-input"
+							class="form-control"
+							placeholder="Key"
+							bind:value={globalShortcutCode}
+						/>
 					</div>
 				</div>
-      </div>
+			</div>
 			<div class="modal-footer d-flex justify-content-between">
 				<small class="small-explanation">Changes will take effect on app restart</small>
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal" aria-label="Save" on:click={() => setNewGlobalShortcut()}>Save</button>
-      </div>
-    </div>
-  </div>
+				<button
+					type="button"
+					class="btn btn-success"
+					data-bs-dismiss="modal"
+					aria-label="Save"
+					on:click={() => setNewGlobalShortcut()}>Save</button
+				>
+			</div>
+		</div>
+	</div>
 </div>
-
 
 <style lang="scss">
 	.small-explanation {

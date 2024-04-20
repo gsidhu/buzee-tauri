@@ -11,7 +11,9 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Add app updater.
 ## - Use GitHub action to build. Figure out how to package sidecars for specific OS.
 ## - Add ignore paths to indexing functions. Put {app_directory}/temp_output.txt in it.
+## - Figure out how to make AltGr work same as Alt on Windows.
 
+- Tested global shortcut setting UI on Windows. Works.
 - Using modified textra binary. Set the activation policy to accessory. Now extra app icon does not show up. [Discussion here](https://discord.com/channels/616186924390023171/1230776346767003678/1231205322845196288)
 - Add UI for setting global shortcut. Works on Mac. Windows needs to be tested.
 - Also added a switch_off flag to the sync process so repeat requests are ignored.
