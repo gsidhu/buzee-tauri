@@ -139,7 +139,7 @@
 		});
 
 		const shortcutInput = document.getElementById('shortcut-input');
-    	shortcutInput?.addEventListener('keydown', function(event) {
+		shortcutInput?.addEventListener('keydown', function(event) {
 			event.preventDefault(); // Prevent the default action of the keypress
 			if (event.key === 'Backspace' || event.key === 'Delete') {
 				// if the pressed key is backspace or delete, clear the input field
@@ -149,7 +149,7 @@
 			}
 			// if event.key is alphanumeric, space or F1-F24, proceed
 			console.log("pressed:", event.key);
-        	if (event.key.match(/^[a-zA-Z0-9]$/) || event.key.match(/^F[1-2]?[0-9]$/) || event.key === ' ') {
+      if (event.key.match(/^[a-zA-Z0-9]$/) || event.key.match(/^F[1-2]?[0-9]$/) || event.key === ' ') {
 				let shortcut = '';
 				if (event.key === ' ') shortcut = 'Space';
 				else shortcut = event.key.toUpperCase();
@@ -157,7 +157,7 @@
 				(shortcutInput as HTMLInputElement).value = shortcut;
 				globalShortcutCode = shortcut;
 			}
-    	});
+		});
 	});
 </script>
 
