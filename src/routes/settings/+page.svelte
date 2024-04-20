@@ -339,12 +339,19 @@
 						<input
 							type="text"
 							id="shortcut-input"
-							class="form-control"
+							class={`form-control ${globalShortcutCode === '' ? 'border-danger' : ''}`}
 							placeholder="Key"
 							bind:value={globalShortcutCode}
 						/>
 					</div>
 				</div>
+				{#if globalShortcutCode === ""}
+					<small class="text-danger small-explanation">Shortcut value cannot be empty</small>
+					{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}<br/>{/if}
+				{/if}
+				{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}
+					<small class="text-danger small-explanation">Both modifier keys cannot be the same</small>
+				{/if}
 			</div>
 			<div class="modal-footer d-flex justify-content-between">
 				<small class="small-explanation">Changes will take effect on app restart</small>
@@ -353,6 +360,7 @@
 					class="btn btn-success"
 					data-bs-dismiss="modal"
 					aria-label="Save"
+					disabled={globalShortcutCode === "" || globalShortcutModifiers[1] === globalShortcutModifiers[0]}
 					on:click={() => setNewGlobalShortcut()}>Save</button
 				>
 			</div>

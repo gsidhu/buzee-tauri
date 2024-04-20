@@ -2,7 +2,6 @@
 
 Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr on Windows.
 
-## Sidecar (OCR) TODO
 - Add a page to let user OCR a PDF or image.
   - Add dialog to select file.
   - Add "save to database" toggle.
@@ -13,6 +12,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Add ignore paths to indexing functions. Put {app_directory}/temp_output.txt in it.
 ## - Figure out how to make AltGr work same as Alt on Windows.
 
+- Fixed edge case when setting empty global shortcut. Or setting both modifier keys as the same. Showing error as well.
 - Tested global shortcut setting UI on Windows. Works.
 - Using modified textra binary. Set the activation policy to accessory. Now extra app icon does not show up. [Discussion here](https://discord.com/channels/616186924390023171/1230776346767003678/1231205322845196288)
 - Add UI for setting global shortcut. Works on Mac. Windows needs to be tested.
