@@ -1,6 +1,6 @@
 {
-  "productName": "buzee",
-  "version": "0.0.0",
+  "productName": "Buzee",
+  "version": "0.1.0",
   "identifier": "inc.buzilla.buzee",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -33,6 +33,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/winocr"]
+    "externalBin": ["binaries/textra"]
   }
 }

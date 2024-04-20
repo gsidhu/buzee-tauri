@@ -119,7 +119,7 @@
 						<i class="bi bi-plus-circle" />
 					</button>
 				</td>
-				<td class="py-2" on:click={() => addDocsToDB()}>
+				<td class="py-2">
 					Add Documents
 					<div class="d-flex align-items-center small-explanation gap-1">
 						Add more documents to search in Buzee
@@ -137,7 +137,7 @@
 						on:click={() => toggleLaunchAtStartup()}
 					/></td
 				>
-				<td class="py-2" on:click={() => toggleLaunchAtStartup()}>
+				<td class="py-2">
 					Launch at Startup
 					<div class="d-flex align-items-center small-explanation gap-1">
 						Launch the app automatically when your computer starts
@@ -152,11 +152,11 @@
 						on:click={() => toggleGlobalShortcut()}
 					/>
 				</td>
-				<td class="py-2" on:click={() => toggleGlobalShortcut()}>
+				<td class="py-2">
 					Allow Global Shortcut
 					<div class="d-flex align-items-center small-explanation gap-1">
 						{#if isMac}
-							<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
+							<div>Pressing <button id="change-global-shortcut" on:click={() => console.log("change shortcut!")}><code>{globalShortcut}</code></button> will show the app from anywhere</div>
 							<PopoverIcon title="Changes will take effect after the app restarts" />
 						{:else}
 							<div>Pressing <code>{globalShortcut}</code> will show the app from anywhere</div>
@@ -173,7 +173,7 @@
 						on:click={() => toggleAutomaticBackgroundSync()}
 					/>
 				</td>
-				<td class="py-2" on:click={() => toggleAutomaticBackgroundSync()}>
+				<td class="py-2">
 					Allow Automatic Background Scan
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Buzee will automatically scan your system in the background twice an hour</div>
@@ -189,7 +189,7 @@
 						on:click={() => toggleDetailedScan()}
 					/>
 				</td>
-				<td class="py-2" on:click={() => toggleDetailedScan()}>
+				<td class="py-2">
 					Scan File Contents
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Buzee will scan file contents so you can search inside files</div>
@@ -236,10 +236,13 @@
 
 	tr {
 		&:not(.skip-hover):hover {
-			cursor: pointer;
-			// background-color: var(--bs-gray-100);
+			cursor: default;
 			color: var(--purple);
 		}
+	}
+
+	#change-global-shortcut:hover {
+		text-decoration: underline;
 	}
 
 	i {
@@ -247,6 +250,7 @@
 	}
 
 	input[type='checkbox'] {
+		cursor: pointer;
 		appearance: none;
 		position: relative;
 		display: inline-block;

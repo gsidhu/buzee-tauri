@@ -1,5 +1,7 @@
 # Logbook
 
+Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr on Windows.
+
 ## Sidecar (OCR) TODO
 - Add a page to let user OCR a PDF or image.
   - Add dialog to select file.
@@ -10,7 +12,10 @@
 ## - Add UI to OCR PDF Image.
 ## - Add app updater.
 ## - Use GitHub action to build.
+## - Add ignore paths to indexing functions. Put {app_directory}/temp_output.txt in it.
 
+- Also added a switch_off flag to the sync process so repeat requests are ignored.
+- Keeping the background sync button in the statusbar disabled for as long as the sync process doesn't stop. This is to prevent multiple sync processes from running at the same time.
 - Made Windows OCR work. Downloads Poppler if doesn't exist. Fixed winocr_cli to make things work.
 - Added Windows OCR sidecar.
 - Reorder indexing so all regular docs are indexed first, then PDFs (then eventually, XLSX and CSV).

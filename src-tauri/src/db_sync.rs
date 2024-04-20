@@ -11,13 +11,13 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::custom_types::{SyncRunningState, UserPreferencesState};
 
-pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
+pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, switch_off: bool) {
   println!("File sync started");
   let mut conn = establish_connection(&app);
 
   // On each click, check if sync is already running
   let sync_running = sync_status(&app);
-  if sync_running.0 == "true" {
+  if sync_running.0 == "true" || switch_off {
     println!("File sync already running; Stopping now");
     // Set sync status to false
     set_scan_running_status(&mut conn, false, true, &app);
@@ -47,8 +47,8 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle) {
       }
       // Emit closing sync status to the frontend
       println!("Sending message to frontend: Sync operation completed");
-      send_message_to_frontend(&window, "sync-status".to_string(), "sync-status".to_string(), "false".to_string());
       set_scan_running_status(&mut conn, false, true, &app);
+      send_message_to_frontend(&window, "sync-status".to_string(), "sync-status".to_string(), "false".to_string());
       info!("FILE SYNC FINISHED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
     });
   }

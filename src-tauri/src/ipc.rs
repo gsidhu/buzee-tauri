@@ -52,7 +52,7 @@ async fn setup_cron_job(window: tauri::WebviewWindow, app: tauri::AppHandle) {
         if sync_running.0 == "false" && current_timestamp - sync_running.1 > 1800 {
           let window_clone = window.clone();
           let app_clone = app.clone();
-          run_sync_operation(window_clone, app_clone).await;
+          run_sync_operation(window_clone, app_clone, false).await;
         }
       }
     });
@@ -157,8 +157,8 @@ async fn run_file_indexing(window: tauri::WebviewWindow, app: tauri::AppHandle) 
 
 // Run file sync
 #[tauri::command]
-async fn run_file_sync(app: tauri::AppHandle, window: tauri::WebviewWindow) {
-  run_sync_operation(window, app).await;
+async fn run_file_sync(switch_off: bool, app: tauri::AppHandle, window: tauri::WebviewWindow) {
+  run_sync_operation(window, app, switch_off).await;
 }
 
 // Get sync status

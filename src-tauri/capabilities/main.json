@@ -38,7 +38,7 @@
             {
               "validator": "\\S+"
             },
-            "--poppler_path",
+            "--poppler-path",
             {
               "validator": "\\S+"
             }	

@@ -18,6 +18,7 @@
 	let isMac = false;
 	let syncStatus = false;
 	let syncCoolingPeriod = false;
+	let userAskedToDisable = false;
 	let appMode = 'menubar';
 	let numFiles: number = 0;
 	let showingResults: boolean = false;
@@ -59,23 +60,33 @@
 
 	async function toggleBackgroundTextProcessing() {
 		sendEventToFirebase('click:toggleBackgroundTextProcessing', { ...defaultData });
-		invoke("run_file_sync");
+		// if syncStatus is true, switch_off is true, so we want to stop the sync
+		invoke("run_file_sync", {switchOff: syncStatus});
 		if (syncStatus) {
 			$statusMessage = "Stopping background scan...";
 			setTimeout(() => {$statusMessage = "";}, 3000);
+			userAskedToDisable = true;
 		} else {
 			$statusMessage = "Starting background scan...";
 			setTimeout(() => {$statusMessage = "";}, 3000);
 		}
 		// disable `bg-sync-btn` for 5 seconds
 		// this allows any pending processes to complete when stopping the sync
-		const btn = document.getElementById('bg-sync-btn') as HTMLButtonElement | null;
-		if (btn) {
-			syncCoolingPeriod = true;
-			setTimeout(() => {
+		syncCoolingPeriod = true;
+		setTimeout(() => {
+			// if userAskedToDisable and sync is still running, then keep the cooling period on
+			if (userAskedToDisable && syncStatus) {
+				syncCoolingPeriod = true;
+			} else {
 				syncCoolingPeriod = false;
-			}, 5000);
-		}
+			}
+		}, 5000);
+	}
+
+	// if syncStatus is false, then reset cooling period and userAskedToDisable
+	$: if (!syncStatus) {
+		userAskedToDisable = false;
+		syncCoolingPeriod = false;
 	}
 
 	function goToSearch(from_onboarding: boolean = false) {
@@ -122,6 +133,7 @@
 		unlisten_files_added = await listen<Payload>('files-added', (event: any) => {
 			update_files_added_count(event.payload);
 		});
+		// Listen for sync status changes from inside the Tokio process in db_sync.rs
 		unlisten_sync_status = await listen<Payload>('sync-status', (event: any) => {
 			syncStatus = event.payload.data === 'true';
 		});
@@ -189,16 +201,6 @@
 				</div>
 			</div>
 		{:else if onboardingDone}
-			<!-- <button
-				id="bg-sync-btn"
-				type="button"
-				class={`px-1 mx-1 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
-				title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
-				on:click={() => toggleBackgroundTextProcessing()}
-				disabled={syncCoolingPeriod}
-			>
-				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />{` Scan${syncStatus ? 'ing' : ''}`}
-			</button> -->
 			{$statusMessage}
 		{/if}
 	</div>
