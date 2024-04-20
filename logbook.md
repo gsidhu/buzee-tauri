@@ -7,7 +7,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
   - Add dialog to select file.
   - Add "save to database" toggle.
 
-## - Figure out how to suppress the extra app icon when calling the sidecar binary.
+## - Figure out how to suppress the extra app icon when calling the sidecar binary. Tried with a test shell app and no icon showed up. So it probably has to do with textra. Should try setting Activation Policy and build my own textra.
 ## - Add UI to OCR PDF Image.
 ## - Add app updater.
 ## - Use GitHub action to build. Figure out how to package sidecars for specific OS.

@@ -233,7 +233,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
 
 pub fn fix_global_shortcut_string(new_shortcut_string: String) -> String {
   let mut new_shortcut_code: String = new_shortcut_string.split("+").last().unwrap().to_string();
-  if new_shortcut_code != "Space" || !new_shortcut_code.contains("Key") || !new_shortcut_code.contains("Digit") {
+  if new_shortcut_code != "Space" && !new_shortcut_code.contains("Key") && !new_shortcut_code.contains("Digit") {
     // if new_shortcut_code is alphabet, add Key to the beginning
     // if new_shortcut_code is a number, add Digit to the beginning
     if new_shortcut_code.chars().all(char::is_alphabetic) {

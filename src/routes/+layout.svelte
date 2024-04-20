@@ -33,13 +33,13 @@
 		// 	console.log(res);
 		// });
 
-		invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
-			console.log(res);
-		});
-
-		// invoke("enable_sidecar").then((res) => {
-		// 	console.log("enabled sidecar");
+		// invoke("set_new_global_shortcut", { newShortcutString: "Alt+Shift+Space" }).then((res) => {
+		// 	console.log(res);
 		// });
+
+		invoke("run_sidecar").then((res) => {
+			console.log("running or ran sidecar");
+		});
 		// const command = Command.sidecar('binaries/textra', [
 		// 	'/Users/thatgurjot/Desktop/Gurjot_Arc.png',
 		// 	'-o',

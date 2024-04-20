@@ -18,6 +18,16 @@
           "args": [
             {
               "validator": "\\S+"
+            }
+          ],
+          "cmd": "",
+          "name": "binaries/test",
+          "sidecar": true
+        },
+        {
+          "args": [
+            {
+              "validator": "\\S+"
             },
             "-o",
             {

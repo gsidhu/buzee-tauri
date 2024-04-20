@@ -315,6 +315,21 @@ async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_stri
   // app_handle.restart();
 }
 
+// #[tauri::command]
+// async fn run_sidecar(app: tauri::AppHandle) {
+//   use tauri_plugin_shell::{ShellExt, process::CommandEvent};
+//   let sidecar_command = app.shell().sidecar("test").unwrap().args(["buzeeeeee"]);
+//   let (mut rx, mut _child) = sidecar_command.spawn().unwrap();
+//   let mut text = String::new();
+//   while let Some(event) = rx.recv().await {
+//     if let CommandEvent::Stdout(line) = event {
+//       let output_line = String::from_utf8(line).unwrap();
+//       text += &output_line;
+//       println!("sidecaaar text: {}", text);
+//     }
+//   }
+// }
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
