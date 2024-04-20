@@ -121,6 +121,7 @@ pub fn _install_textra_from_github() -> Result<String, Error> {
   }
 }
 
+#[cfg(target_os = "windows")]
 pub async fn install_poppler_from_github() -> Result<String, Error> {
   #[cfg(not(target_os = "windows"))]
   {

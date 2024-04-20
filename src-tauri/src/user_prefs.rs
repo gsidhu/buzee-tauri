@@ -231,6 +231,29 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
   state.disallowed_paths = user_preferences_from_db.disallowed_paths;
 }
 
+pub fn fix_global_shortcut_string(new_shortcut_string: String) -> String {
+  let mut new_shortcut_code: String = new_shortcut_string.split("+").last().unwrap().to_string();
+  if new_shortcut_code != "Space" || !new_shortcut_code.contains("Key") || !new_shortcut_code.contains("Digit") {
+    // if new_shortcut_code is alphabet, add Key to the beginning
+    // if new_shortcut_code is a number, add Digit to the beginning
+    if new_shortcut_code.chars().all(char::is_alphabetic) {
+      let formatted_shortcut_code = format!("Key{}", &new_shortcut_code);
+      new_shortcut_code = formatted_shortcut_code;
+    } else if new_shortcut_code.chars().all(char::is_numeric) {
+      let formatted_shortcut_code = format!("Digit{}", &new_shortcut_code);
+      new_shortcut_code = formatted_shortcut_code;
+    }
+  }
+
+  // replace the last element of the split string with the new_shortcut_code
+  let mut splits: Vec<&str> = new_shortcut_string.split("+").collect();
+  splits.pop();
+  splits.push(&new_shortcut_code);
+  let new_shortcut_string = splits.join("+");
+  println!("new_shortcut_string: {:?}", new_shortcut_string);
+  new_shortcut_string.to_string()
+}
+
 pub fn set_new_global_shortcut_in_db(new_shortcut_string: String, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)

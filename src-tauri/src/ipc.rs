@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
-use crate::user_prefs::{get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_user_preferences_state_from_db_value};
+use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::graceful_restart;
 use crate::window::hide_or_show_window;
 use serde_json;
@@ -22,6 +22,7 @@ use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statu
 // use log::info;
 use std::sync::Mutex;
 use std::process::Command;
+#[cfg(target_os = "windows")]
 use dirs::home_dir;
 
 pub fn send_message_to_frontend(
@@ -304,6 +305,7 @@ async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::Ap
 #[tauri::command]
 async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_string: String) {
   println!("Setting new global shortcut: {}", new_shortcut_string);
+  let new_shortcut_string = fix_global_shortcut_string(new_shortcut_string);
   let mut conn = establish_connection(&app_handle);
   set_new_global_shortcut_in_db(new_shortcut_string, &app_handle);
   set_user_preferences_state_from_db_value(&app_handle);
@@ -338,7 +340,6 @@ pub fn initialize() {
     ])
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {
-        #[cfg(desktop)]
         {
           // manage state(s)
           let handle = app.handle();
@@ -359,6 +360,7 @@ pub fn initialize() {
                 .with_shortcut(get_global_shortcut(app.handle()))?
                 .with_handler(|app_handle, shortcut| {
                     let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut(app_handle);
+                    println!("shortcut: {:?}", shortcut);
                     if shortcut.matches(global_shortcut_modifiers, global_shortcut_code) {
                       println!("Global Shortcut Detected!");
                       let main_window = app_handle.get_webview_window("main").unwrap();

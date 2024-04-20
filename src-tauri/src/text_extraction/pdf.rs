@@ -3,6 +3,7 @@ use std::error::Error;
 use tauri_plugin_shell::{ShellExt, process::CommandEvent};
 use crate::housekeeping::get_app_directory;
 use crate::text_extraction::txt;
+#[cfg(target_os = "windows")]
 use crate::utils::install_poppler_from_github;
 
 pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {

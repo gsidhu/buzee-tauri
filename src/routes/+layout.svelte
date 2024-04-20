@@ -8,7 +8,7 @@
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
 	import { Command } from '@tauri-apps/plugin-shell';
-	import { windowBlurred } from '$lib/stores';
+	import { windowBlurred, cronJobSet } from '$lib/stores';
 
 	var appMode: string = "menubar";
   var isMac: boolean = false;
@@ -77,9 +77,12 @@
 		}
 
 		// setup cron job
-		invoke("setup_cron_job").then((res) => {
-			console.log("setting up cron job");
-		});
+		if (!cronJobSet) {
+			invoke("setup_cron_job").then((res) => {
+				console.log("setting up cron job");
+				$cronJobSet = true;
+			});
+		}
   });
 
 	onDestroy(() => {

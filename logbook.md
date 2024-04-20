@@ -8,12 +8,12 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
   - Add "save to database" toggle.
 
 ## - Figure out how to suppress the extra app icon when calling the sidecar binary.
-## - Add UI for setting global shortcut.
 ## - Add UI to OCR PDF Image.
 ## - Add app updater.
-## - Use GitHub action to build.
+## - Use GitHub action to build. Figure out how to package sidecars for specific OS.
 ## - Add ignore paths to indexing functions. Put {app_directory}/temp_output.txt in it.
 
+- Add UI for setting global shortcut. Works on Mac. Windows needs to be tested.
 - Also added a switch_off flag to the sync process so repeat requests are ignored.
 - Keeping the background sync button in the statusbar disabled for as long as the sync process doesn't stop. This is to prevent multiple sync processes from running at the same time.
 - Made Windows OCR work. Downloads Poppler if doesn't exist. Fixed winocr_cli to make things work.
