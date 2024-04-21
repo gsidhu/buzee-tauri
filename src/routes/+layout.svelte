@@ -66,12 +66,6 @@
 				await update.downloadAndInstall();
 				await invoke("polite_restart");
 			}
-		} else {
-			await message('You are on the latest version. Stay awesome!', { 
-				title: 'No Update Available',
-				kind: 'info',
-				okLabel: 'OK'
-			});
 		}
 	}
 
