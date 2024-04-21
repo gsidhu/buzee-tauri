@@ -9,6 +9,8 @@
 	import { listen } from '@tauri-apps/api/event';
 	import { Command } from '@tauri-apps/plugin-shell';
 	import { windowBlurred, cronJobSet } from '$lib/stores';
+	import { check } from '@tauri-apps/plugin-updater';
+	import { ask, message } from '@tauri-apps/plugin-dialog';
 
 	var appMode: string = "menubar";
   var isMac: boolean = false;
@@ -50,6 +52,29 @@
 		// });
 	}
 
+	async function checkForAppUpdates() {
+		// const update = { version: "v1.0.0", body: "buzee"};
+		const update = await check();
+		if (update?.available) {
+			const yes = await ask(`Update to ${update.version} is available!\n\nRelease notes: ${update.body}`, { 
+				title: 'Update Available',
+				kind: 'info',
+				okLabel: 'Update',
+				cancelLabel: 'Cancel'
+			});
+			if (yes) {
+				await update.downloadAndInstall();
+				await invoke("polite_restart");
+			}
+		} else {
+			await message('You are on the latest version. Stay awesome!', { 
+				title: 'No Update Available',
+				kind: 'info',
+				okLabel: 'OK'
+			});
+		}
+	}
+
 	onMount(async () => {
     // startSerialEventListener();
 		invoke("get_os").then((res) => {
@@ -83,6 +108,8 @@
 				$cronJobSet = true;
 			});
 		}
+		// check for app updates
+		checkForAppUpdates();
   });
 
 	onDestroy(() => {
