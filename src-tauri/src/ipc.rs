@@ -60,6 +60,12 @@ async fn setup_cron_job(window: tauri::WebviewWindow, app: tauri::AppHandle) {
   }
 }
 
+#[tauri::command]
+async fn polite_restart(app: tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  graceful_restart(app, &mut conn, 30);
+}
+
 // Get OS boolean
 #[tauri::command]
 fn get_os() -> Result<String, Error> {
@@ -264,7 +270,7 @@ async fn reset_user_preferences(app_handle: tauri::AppHandle) {
   let mut conn = establish_connection(&app_handle);
   set_default_user_prefs(&mut conn, true);
   set_user_preferences_state_from_db_value(&app_handle);
-  graceful_restart(app_handle, &mut conn);
+  graceful_restart(app_handle, &mut conn, 30);
 }
 
 #[tauri::command]
@@ -293,7 +299,7 @@ async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::Ap
     "global_shortcut_enabled" => {
       set_global_shortcut_flag_in_db(value, &app_handle);
       set_user_preferences_state_from_db_value(&app_handle);
-      graceful_restart(app_handle, &mut conn);
+      graceful_restart(app_handle, &mut conn, 30);
     }
     _ => {
       println!("Invalid key");
@@ -309,7 +315,7 @@ async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_stri
   let mut conn = establish_connection(&app_handle);
   set_new_global_shortcut_in_db(new_shortcut_string, &app_handle);
   set_user_preferences_state_from_db_value(&app_handle);
-  graceful_restart(app_handle, &mut conn);
+  graceful_restart(app_handle, &mut conn, 30);
   // Tell user to restart the app for changes to take effect
   // restart the app to set the new shortcut
   // app_handle.restart();
@@ -334,6 +340,7 @@ pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       setup_cron_job,
+      polite_restart,
       get_allowed_filetypes,
       get_os,
       open_file_or_folder,
@@ -354,6 +361,8 @@ pub fn initialize() {
       reset_user_preferences
     ])
     .plugin(tauri_plugin_shell::init())
+    .plugin(tauri_plugin_updater::Builder::new().build())
+    .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
         {
           // manage state(s)

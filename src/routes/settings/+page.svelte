@@ -7,6 +7,8 @@
 	import { sendEventToFirebase } from '../../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
 	import { statusMessage } from '$lib/stores';
+	import { check } from '@tauri-apps/plugin-updater';
+	import { ask } from '@tauri-apps/plugin-dialog';
 
 	let launchAtStartup: boolean;
 	let globalShortcutEnabled: boolean;
@@ -95,6 +97,23 @@
 		if (isMac) {
 			globalShortcut = globalShortcut.replace("Alt", "Option");
 			globalShortcut = globalShortcut.replace("Super", "Command");
+		}
+	}
+
+	async function checkForAppUpdates() {
+		// const update = { version: "v1.0.0", body: "buzee"};
+		const update = await check();
+		if (update?.available) {
+			const yes = await ask(`Update to ${update.version} is available!\n\nRelease notes: ${update.body}`, { 
+				title: 'Update Available',
+				kind: 'info',
+				okLabel: 'Update',
+				cancelLabel: 'Cancel'
+			});
+			if (yes) {
+				await update.downloadAndInstall();
+				await invoke("polite_restart");
+			}
 		}
 	}
 
@@ -272,12 +291,17 @@
 				</td>
 			</tr>
 		</table>
-		<div class="d-flex w-90 justify-content-between small-explanation">
+		<div class="d-flex w-90 justify-content-between small-explanation settings-links">
 			<div>
 				<button class="btn btn-sm link-danger px-0" on:click={() => resetDefault()}>
 					Reset Default
 				</button>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
+			</div>
+			<div>
+				<button class="btn btn-sm link-primary px-0" on:click={() => checkForAppUpdates()}>
+					Check for Updates
+				</button>
 			</div>
 			<div>
 				<button class="btn btn-sm link-danger px-0" on:click={() => uninstallApp()}
@@ -381,7 +405,7 @@
 		}
 	}
 
-	.link-danger {
+	.settings-links > div > button {
 		&:hover {
 			text-decoration: underline;
 		}

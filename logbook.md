@@ -7,11 +7,14 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
   - Add "save to database" toggle.
 
 ## - Add UI to OCR PDF Image.
-## - Add app updater.
 ## - Use GitHub action to build. Figure out how to package sidecars for specific OS.
 ## - Add ignore paths to indexing functions. Put {app_directory}/temp_output.txt in it.
 ## - Figure out how to make AltGr work same as Alt on Windows.
 
+- Added app updater.
+  - Created public/private signing keys for the updater. Password stored in Bitwarden.
+  - Added `plugin-updater` and `plugin-dialog` to the project.
+  - Added 'Check for Updates' button in the settings page.
 - Fixed edge case when setting empty global shortcut. Or setting both modifier keys as the same. Showing error as well.
 - Tested global shortcut setting UI on Windows. Works.
 - Using modified textra binary. Set the activation policy to accessory. Now extra app icon does not show up. [Discussion here](https://discord.com/channels/616186924390023171/1230776346767003678/1231205322845196288)

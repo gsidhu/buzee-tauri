@@ -3,6 +3,7 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
+  "platforms": ["macOS", "windows"],
   "permissions": [
     "path:default",
     "event:default",
@@ -11,6 +12,12 @@
     "resources:default",
     "menu:default",
     "tray:default",
+    "dialog:default",
+    "dialog:allow-ask",
+    "dialog:allow-confirm",
+    "dialog:allow-message",
+    "dialog:allow-open",
+    "dialog:allow-save",
     {
       "identifier": "shell:allow-execute",
       "allow": [

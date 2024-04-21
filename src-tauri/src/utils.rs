@@ -3,6 +3,7 @@ use std::io;
 use std::path::Path;
 use diesel::SqliteConnection;
 use tauri_plugin_global_shortcut::Modifiers;
+use crate::db_sync::sync_status;
 use crate::housekeeping::get_app_directory;
 use crate::user_prefs::set_scan_running_status;
 use std::process::Command;
@@ -47,10 +48,15 @@ pub fn string_to_modifiers(modifier: &str) -> Modifiers {
   }
 }
 
-pub fn graceful_restart(app: tauri::AppHandle, conn: &mut SqliteConnection) {
-  set_scan_running_status(conn, false, true, &app);
-  // wait for 3 seconds
-  std::thread::sleep(std::time::Duration::from_secs(3));
+pub fn graceful_restart(app: tauri::AppHandle, conn: &mut SqliteConnection, wait_time: u64) {
+  let sync_running = sync_status(&app);
+  
+  // if sync is running, wait for it to finish
+  if sync_running.0 == "true" {
+    set_scan_running_status(conn, false, true, &app);
+    std::thread::sleep(std::time::Duration::from_secs(wait_time));
+  }
+  
   // restart the app
   app.restart();
 }

@@ -34,5 +34,13 @@
       "icons/icon.ico"
     ],
     "externalBin": ["binaries/textra"]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/gsidhu/buzee-releases/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlDNUE4MUQwOTU3MTA0M0MKUldROEJIR1YwSUZhbkNCMkRPOUZBVE9PN3lJODJnL1A0dHVBSU8vVjZhczNCMEJmRTMyVFVmTCsK"
+    }
   }
 }

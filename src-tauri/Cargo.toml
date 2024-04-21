@@ -1,7 +1,7 @@
 [package]
-name = "buzee-tauri"
-version = "0.0.0"
-description = "A Tauri App"
+name = "buzee"
+version = "0.1.0"
+description = "Find your documents, effortlessly"
 authors = ["Buzilla Inc."]
 edition = "2021"
 
@@ -22,6 +22,8 @@ tauri-build = { version = "2.0.0-beta", features = [] }
 [dependencies]
 tauri = { version = "2.0.0-beta", features = [] }
 tauri-plugin-shell = "2.0.0-beta"
+tauri-plugin-updater = "2.0.0-beta"
+tauri-plugin-dialog = "2.0.0-beta"
 drag = { path = "./crates/drag", version = "0.4.0", features = [ "serde" ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
