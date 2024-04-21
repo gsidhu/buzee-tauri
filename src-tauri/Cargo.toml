@@ -22,7 +22,7 @@ tauri-build = { version = "2.0.0-beta", features = [] }
 [dependencies]
 tauri = { version = "2.0.0-beta", features = [] }
 tauri-plugin-shell = "2.0.0-beta"
-tauri-plugin-updater = "2.0.0-beta"
+tauri-plugin-updater = { version = "2.0.0-beta", features = ["rustls-tls"] }
 tauri-plugin-dialog = "2.0.0-beta"
 drag = { path = "./crates/drag", version = "0.4.0", features = [ "serde" ] }
 serde = { version = "1", features = ["derive"] }

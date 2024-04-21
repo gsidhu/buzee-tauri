@@ -8,7 +8,7 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import { statusMessage } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
-	import { ask } from '@tauri-apps/plugin-dialog';
+	import { ask, message } from '@tauri-apps/plugin-dialog';
 
 	let launchAtStartup: boolean;
 	let globalShortcutEnabled: boolean;
@@ -114,6 +114,12 @@
 				await update.downloadAndInstall();
 				await invoke("polite_restart");
 			}
+		} else {
+			await message('You are on the latest version. Stay awesome!', { 
+				title: 'No Update Available',
+				kind: 'info',
+				okLabel: 'OK'
+			});
 		}
 	}
 
