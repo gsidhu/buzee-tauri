@@ -103,8 +103,15 @@
 	async function checkForAppUpdates() {
 		// const update = { version: "v1.0.0", body: "buzee"};
 		const update = await check();
-		if (update?.available) {
-			const yes = await ask(`Update to ${update.version} is available!\n\nRelease notes: ${update.body}`, { 
+		if (update === null) {
+			await message('Failed to check for updates.\nPlease try again later.', { 
+				title: 'Error',
+				kind: 'error',
+				okLabel: 'OK'
+			});
+			return;
+		} else if (update.available) {
+			const yes = await ask(`Update to v${update.version} is available!\n\nRelease notes: ${update.body}`, { 
 				title: 'Update Available',
 				kind: 'info',
 				okLabel: 'Update',
