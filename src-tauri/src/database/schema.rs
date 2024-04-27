@@ -94,8 +94,7 @@ table! {
     global_shortcut_enabled -> Bool,
     global_shortcut -> Text,
     automatic_background_sync -> Bool,
-    detailed_scan -> Bool,
-    disallowed_paths -> Text,
+    detailed_scan -> Bool
   }
 }
 
@@ -109,6 +108,15 @@ table! {
     app_language -> Text,
     last_scan_time -> BigInt,
     scan_running -> Bool,
+  }
+}
+
+table! {
+  ignore_list (id) {
+    id -> Integer,
+    path -> Text,
+    ignore_indexing -> Bool,
+    ignore_content -> Bool,
   }
 }
 

@@ -3,20 +3,20 @@
 
 use crate::custom_types::{DBStat, DateLimit, Error, Payload, DBConnPoolState, UserPreferencesState, SyncRunningState};
 use crate::database::{establish_connection, get_connection_pool};
-use crate::database::models::DocumentSearchResult;
+use crate::database::models::{DocumentSearchResult, IgnoreList};
 use crate::database::search::{
     get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index, get_metadata_title_matches,
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::housekeeping;
-use crate::indexing::{all_allowed_filetypes, walk_directory};
+use crate::indexing::{all_allowed_filetypes, add_path_to_ignore_list, get_all_ignored_paths};
 use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::graceful_restart;
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
 use tauri_plugin_shell;
-use tokio::{sync::mpsc, time::{interval, Duration}};
+use tokio::time::{interval, Duration};
 use tauri::menu::Menu;
 use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,};
 // use log::info;
@@ -156,6 +156,21 @@ async fn run_file_indexing(window: tauri::WebviewWindow, app: tauri::AppHandle, 
 async fn run_file_sync(switch_off: bool, app: tauri::AppHandle, window: tauri::WebviewWindow, file_paths: Vec<String>) {
   run_sync_operation(window, app, switch_off, file_paths).await;
 }
+
+// Ignore file or folder path
+#[tauri::command]
+async fn ignore_file_or_folder(app: tauri::AppHandle, path: String, should_ignore_indexing: bool, should_ignore_content: bool) {
+  let mut conn = establish_connection(&app);
+  add_path_to_ignore_list(path, should_ignore_indexing, should_ignore_content, &mut conn).unwrap();
+}
+
+// Ignore file or folder path
+#[tauri::command]
+async fn show_ignored_paths(app: tauri::AppHandle) -> Result<Vec<IgnoreList>, Error> {
+  let mut conn = establish_connection(&app);
+  Ok(get_all_ignored_paths(&mut conn))
+}
+
 
 // Get sync status
 #[tauri::command]
@@ -347,7 +362,9 @@ pub fn initialize() {
       set_new_global_shortcut,
       crate::drag::start_drag,
       get_user_preferences_state,
-      reset_user_preferences
+      reset_user_preferences,
+      ignore_file_or_folder,
+      show_ignored_paths
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_updater::Builder::new().build())

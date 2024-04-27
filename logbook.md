@@ -8,12 +8,15 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 
 ## - Add UI to OCR PDF Image.
 ## - Use GitHub action to build. Figure out how to package sidecars for specific OS.
-## - Add ignore paths to indexing functions. Put {app_directory}/temp_output.txt in it.
 ## - Figure out how to make AltGr work same as Alt on Windows.
-
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
+## - Show ignore list in settings. Allow user to modify there and bulk import/export list.
+## - Make DB and functions respect the ignore list.
 
+- Created new DB table for Ignore List. User can now ignore the file completely or ignore only the file text.
+- Removed disallowed_paths from userprefs table, state and store.
+- Added Ignore List page in Settings.
 - Added UI for ignoring files/folders.
 - User can now add files or folders from network/external drives from the Settings.
 - Calling the GlobalShortcut will now only _show_ the window. Not hide it. If user wants to hide, they can press the minimise button or move to another app/screen.

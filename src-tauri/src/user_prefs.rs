@@ -46,8 +46,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
       global_shortcut_enabled: true,
       global_shortcut: "Alt+Space".to_string(),
       automatic_background_sync: true,
-      detailed_scan: true,
-      disallowed_paths: "".to_string(),
+      detailed_scan: true
     };
     // insert new_user_prefs into the user_prefs table
     diesel::insert_into(user_preferences::table)
@@ -213,8 +212,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
       user_preferences::global_shortcut_enabled,
       user_preferences::global_shortcut,
       user_preferences::automatic_background_sync,
-      user_preferences::detailed_scan,
-      user_preferences::disallowed_paths,
+      user_preferences::detailed_scan
     ))
     .first::<UserPrefs>(&mut conn)
     .expect("Error loading user_prefs");
@@ -228,7 +226,6 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
   state.global_shortcut = user_preferences_from_db.global_shortcut;
   state.automatic_background_sync = user_preferences_from_db.automatic_background_sync;
   state.detailed_scan = user_preferences_from_db.detailed_scan;
-  state.disallowed_paths = user_preferences_from_db.disallowed_paths;
 }
 
 pub fn fix_global_shortcut_string(new_shortcut_string: String) -> String {

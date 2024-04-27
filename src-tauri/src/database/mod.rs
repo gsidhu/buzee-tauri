@@ -17,6 +17,7 @@ use queries::{
   TRIGGER_INSERT_BODY_FTS, TRIGGER_UPDATE_BODY_FTS,
   USER_PREFS_TABLE_CREATE_STATEMENT,
   APP_DATA_TABLE_CREATE_STATEMENT,
+  IGNORE_LIST_TABLE_CREATE_STATEMENT,
   FILE_TYPES_TABLE_CREATE_STATEMENT
 };
 
@@ -95,6 +96,7 @@ pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize,
   // User Prefs and App Data Tables
   diesel::sql_query(USER_PREFS_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(APP_DATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(IGNORE_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(FILE_TYPES_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   
   // Data Tables

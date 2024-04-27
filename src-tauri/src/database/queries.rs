@@ -253,8 +253,7 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
     global_shortcut_enabled BOOLEAN NOT NULL DEFAULT 1,
     global_shortcut TEXT NOT NULL DEFAULT "Alt+Space",
     automatic_background_sync BOOLEAN NOT NULL DEFAULT 1,
-    detailed_scan BOOLEAN NOT NULL DEFAULT 1,
-    disallowed_paths TEXT NOT NULL DEFAULT ""
+    detailed_scan BOOLEAN NOT NULL DEFAULT 1
   );
 "#;
 
@@ -270,6 +269,17 @@ pub const APP_DATA_TABLE_CREATE_STATEMENT : &str = r#"
     app_language TEXT NOT NULL DEFAULT "en",
     last_scan_time BIGINT NOT NULL DEFAULT 0,
     scan_running BOOLEAN NOT NULL DEFAULT 0
+  );
+"#;
+
+// IGNORE_LIST stores paths to ignore during scanning
+pub const IGNORE_LIST_TABLE_CREATE_STATEMENT : &str = r#"
+  CREATE TABLE IF NOT EXISTS "ignore_list" 
+  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    path TEXT NOT NULL,
+    ignore_indexing BOOLEAN NOT NULL DEFAULT 0,
+    ignore_content BOOLEAN NOT NULL DEFAULT 0
   );
 "#;
 

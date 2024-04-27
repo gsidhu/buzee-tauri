@@ -11,6 +11,7 @@ pub fn searchresult_context_menu(window: &Window) {
   let ignore_submenu = Submenu::with_items(manager, "Ignore", true, &[
     &MenuItem::with_id(manager, "ignore_item", "Ignore this Item", true, None::<&str>).unwrap(),
     &MenuItem::with_id(manager, "ignore_folder", "Ignore Parent Folder", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_text", "Ignore File Text", true, None::<&str>).unwrap(),
   ]).unwrap();
   let context_menu = Menu::with_items(manager, &[
     #[cfg(target_os = "macos")]
@@ -66,6 +67,9 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
     }
     "ignore_folder" => {
       app.emit("ignore-folder", Payload { message: "Ignore Folder".into(), data: "".into() }).unwrap();
+    }
+    "ignore_text" => {
+      app.emit("ignore-text", Payload { message: "Ignore Text".into(), data: "".into() }).unwrap();
     }
     "app_folder" => {
       let app_dir_path = get_app_directory();

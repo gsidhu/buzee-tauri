@@ -1,6 +1,6 @@
 use crate::custom_types::Error;
-use crate::database::schema::{document, metadata, body, file_types};
-use crate::database::models::{DocumentItem, BodyItem, FileTypes};
+use crate::database::schema::{document, metadata, body, ignore_list, file_types};
+use crate::database::models::{BodyItem, DocumentItem, FileTypes, IgnoreList};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
@@ -9,7 +9,7 @@ use crate::text_extraction::Extractor;
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
-use log::{info, error};
+// use log::{info, error};
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::HashMap;
@@ -543,4 +543,26 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
     .values(folder_items)
     .execute(conn)
     .unwrap();
+}
+
+pub fn add_path_to_ignore_list(path: String, ignore_indexing: bool, ignore_content: bool, conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
+  diesel::insert_into(ignore_list::table)
+    .values(IgnoreList {
+      path,
+      ignore_indexing,
+      ignore_content
+    })
+    .execute(conn)
+}
+
+pub fn get_all_ignored_paths(conn: &mut SqliteConnection) -> Vec<IgnoreList> {
+  // get all columns from ignore_list except id
+  ignore_list::table
+    .select((
+      ignore_list::path,
+      ignore_list::ignore_indexing,
+      ignore_list::ignore_content
+    ))
+    .load::<IgnoreList>(conn)
+    .unwrap()
 }

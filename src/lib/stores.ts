@@ -54,7 +54,6 @@ let storedSearchSuggestions: string[] = [];
 export const userPreferences = writable({
   "automatic_background_sync": true,
   "detailed_scan": true,
-  "disallowed_paths": "",
   "first_launch_done": true,
   "global_shortcut": "Alt+Space",
   "global_shortcut_enabled": true,

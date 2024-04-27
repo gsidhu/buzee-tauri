@@ -318,7 +318,7 @@
 				<td class="py-2">
 					Allow Automatic Background Scan
 					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>Buzee will automatically scan your system in the background twice an hour</div>
+						<div>Buzee will automatically scan your system in the background</div>
 						<PopoverIcon title="We recommend keeping this setting enabled" />
 					</div>
 				</td>
@@ -332,29 +332,45 @@
 					/>
 				</td>
 				<td class="py-2">
-					Scan File Contents
+					Scan File Text
 					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>Buzee will scan file contents so you can search inside files</div>
+						<div>Buzee will scan file text so you can search inside files</div>
 						<PopoverIcon
 							title="Disabling this setting may improve speed but reduce quality of search results"
 						/>
 					</div>
 				</td>
 			</tr>
+			<tr>
+				<td class="text-center px-2">
+					<button class="btn" on:click={() => goto('/settings/ignore')}>
+						<div class="d-flex">
+							<i class="bi bi-file-earmark-x" />
+							<i class="bi bi-folder-x" />
+						</div>
+					</button>
+				</td>
+				<td class="py-2">
+					Ignore List
+					<div class="d-flex align-items-center small-explanation gap-1">
+						<div>List of files and folders that you want Buzee to ignore</div>
+					</div>
+				</td>
+			</tr>
 		</table>
-		<div class="d-flex w-90 justify-content-between small-explanation settings-links">
-			<div>
+		<div class="row row-cols-1 row-cols-sm-3 w-90 justify-content-between settings-links">
+			<div class="col text-start mobile-text-center">
 				<button class="btn btn-sm link-danger px-0" on:click={() => resetDefault()}>
 					Reset Default
 				</button>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
 			</div>
-			<div>
+			<div class="col text-center">
 				<button class="btn btn-sm link-primary px-0" on:click={() => checkForAppUpdates()}>
 					Check for Updates
 				</button>
 			</div>
-			<div>
+			<div class="col text-end mobile-text-center">
 				<button class="btn btn-sm link-danger px-0" on:click={() => uninstallApp()}
 					>Uninstall App</button
 				>
@@ -460,6 +476,18 @@
 		&:hover {
 			text-decoration: underline;
 		}
+
+		@media (min-width: 576px) {
+			font-size: 0.7rem;
+			font-weight: 300;
+			padding: 0;
+			background-color: inherit;
+			color: var(--bs-gray);
+
+			.btn {
+				font-size: inherit;
+			}	
+		}
 	}
 
 	tr {
@@ -514,5 +542,11 @@
 	:focus-visible {
 		outline: 2px solid dodgerblue;
 		outline-offset: 2px;
+	}
+
+	.mobile-text-center {
+		@media (max-width: 576px) {
+			text-align: center !important;
+		}
 	}
 </style>

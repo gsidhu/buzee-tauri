@@ -3,7 +3,7 @@
 
 use diesel::prelude::*;
 use diesel::Insertable;
-use super::schema::{document, metadata, metadata_fts, body, body_fts, user_preferences, app_data, file_types};
+use super::schema::{document, metadata, metadata_fts, body, body_fts, user_preferences, app_data, ignore_list, file_types};
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -18,8 +18,7 @@ pub struct UserPrefs {
     pub global_shortcut_enabled: bool,
     pub global_shortcut: String,
     pub automatic_background_sync: bool,
-    pub detailed_scan: bool,
-    pub disallowed_paths: String,
+    pub detailed_scan: bool
 }
 
 // This struct is for CRUD on the app_data table
@@ -33,6 +32,15 @@ pub struct AppData {
     pub app_language: String,
     pub last_scan_time: i64,
     pub scan_running: bool
+}
+
+// This struct is for CRUD on the ignore_list table
+#[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = ignore_list)]
+pub struct IgnoreList {
+    pub path: String,
+    pub ignore_indexing: bool,
+    pub ignore_content: bool,
 }
 
 // This struct is for CRUD on the file_types table
