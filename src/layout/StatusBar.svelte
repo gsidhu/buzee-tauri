@@ -12,10 +12,11 @@
 	import { sendEventToFirebase } from '../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
 	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-
+	
 	export let onboardingDone = false;
 	let darkMode = false;
 	let isMac = false;
+	let fileSyncFinished = false;
 	let syncStatus = false;
 	let syncCoolingPeriod = false;
 	let userAskedToDisable = false;
@@ -61,7 +62,7 @@
 	async function toggleBackgroundTextProcessing() {
 		sendEventToFirebase('click:toggleBackgroundTextProcessing', { ...defaultData });
 		// if syncStatus is true, switch_off is true, so we want to stop the sync
-		invoke("run_file_sync", {switchOff: syncStatus});
+		invoke("run_file_sync", {switchOff: syncStatus, filePaths: []});
 		if (syncStatus) {
 			$statusMessage = "Stopping background scan...";
 			setTimeout(() => {$statusMessage = "";}, 3000);
@@ -130,12 +131,17 @@
 				isMac = false;
 			}
 		});
+		// Listener for when every batch (500) of files gets added to the database
 		unlisten_files_added = await listen<Payload>('files-added', (event: any) => {
 			update_files_added_count(event.payload);
 		});
-		// Listen for sync status changes from inside the Tokio process in db_sync.rs
+		// Listener for sync status changes from inside the Tokio process in db_sync.rs
 		unlisten_sync_status = await listen<Payload>('sync-status', (event: any) => {
 			syncStatus = event.payload.data === 'true';
+		});
+		// Listener for when the db_sync process is done
+		unlisten_sync_status = await listen<Payload>('file-sync-finished', (event: any) => {
+			fileSyncFinished = event.payload.data === 'true';
 		});
 
 		// Ask for sync status on each mount to keep it updated in case of page changes
@@ -246,6 +252,7 @@
 			</button>
 			<button
 				type="button"
+				id="status-bar-extras"
 				class="px-2 status-item"
 				title="View the fun stuff"
 				on:click={() => showStatusBarMenu('extras')}

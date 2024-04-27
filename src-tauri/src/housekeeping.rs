@@ -4,7 +4,7 @@ use crate::database::create_tables_if_not_exists;
 use crate::database::establish_direct_connection_to_db;
 use crate::utils::norm;
 use crate::user_prefs::{set_default_app_data, set_default_user_prefs, set_default_file_types};
-use log::LevelFilter;
+use log::{info, LevelFilter};
 
 pub const APP_DIRECTORY: &str = r#"buzee-tauri"#;
 
@@ -50,6 +50,7 @@ pub fn setup_logging_file_path() {
   let logging_file_path = norm(&logging_file_path);
   println!("Logging to file: {}", &logging_file_path);
   let _ = simple_logging::log_to_file(logging_file_path, LevelFilter::Info);
+  info!("Logger initialized!");
 }
 
 // Initialisation function called on each app load

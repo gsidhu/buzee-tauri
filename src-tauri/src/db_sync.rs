@@ -11,7 +11,10 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::custom_types::{SyncRunningState, UserPreferencesState};
 
-pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, switch_off: bool) {
+pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, switch_off: bool, file_paths: Vec<String>) {
+  println!("file paths: {:?}", file_paths);
+  let mut file_paths = file_paths;
+
   println!("File sync started");
   let mut conn = establish_connection(&app);
 
@@ -37,7 +40,10 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, sw
       send_message_to_frontend(&window, "sync-status".to_string(), "sync-status".to_string(), "true".to_string());
       let home_directory = get_home_directory().unwrap_or("/".to_string());
       // Parse metadata of all files but only update the ones whose time metadata or size has changed
-      let _files_added = walk_directory(&mut conn, &window, &home_directory);
+      if file_paths.len() == 0 {
+        file_paths.push(home_directory.clone());
+      }
+      let _files_added = walk_directory(&mut conn, &window, file_paths);
 
       if detailed_scan_allowed {
         // Then start parsing the content of all files and add it to the body table
@@ -50,6 +56,7 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, sw
       set_scan_running_status(&mut conn, false, true, &app);
       send_message_to_frontend(&window, "sync-status".to_string(), "sync-status".to_string(), "false".to_string());
       info!("FILE SYNC FINISHED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
+      send_message_to_frontend(&window, "file-sync-finished".to_string(), "sync-finished".to_string(), "true".to_string());
     });
   }
 }

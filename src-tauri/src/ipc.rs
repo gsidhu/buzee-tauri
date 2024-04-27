@@ -53,7 +53,7 @@ async fn setup_cron_job(window: tauri::WebviewWindow, app: tauri::AppHandle) {
         if sync_running.0 == "false" && current_timestamp - sync_running.1 > 1800 {
           let window_clone = window.clone();
           let app_clone = app.clone();
-          run_sync_operation(window_clone, app_clone, false).await;
+          run_sync_operation(window_clone, app_clone, false, Vec::new()).await;
         }
       }
     });
@@ -148,11 +148,13 @@ async fn run_file_indexing(window: tauri::WebviewWindow, app: tauri::AppHandle) 
   let (sender, mut receiver) = mpsc::channel::<usize>(1);
 
   tokio::spawn(async move {
-      let files_added = walk_directory(&mut connection, &window, &home_directory);
-      sender
-          .send(files_added)
-          .await
-          .expect("Failed to send data through channel");
+    let mut file_paths: Vec<String> = Vec::new();
+    file_paths.push(home_directory.clone());
+    let files_added = walk_directory(&mut connection, &window, file_paths);
+    sender
+        .send(files_added)
+        .await
+        .expect("Failed to send data through channel");
   });
 
   // Receive the result from the channel asynchronously
@@ -164,8 +166,8 @@ async fn run_file_indexing(window: tauri::WebviewWindow, app: tauri::AppHandle) 
 
 // Run file sync
 #[tauri::command]
-async fn run_file_sync(switch_off: bool, app: tauri::AppHandle, window: tauri::WebviewWindow) {
-  run_sync_operation(window, app, switch_off).await;
+async fn run_file_sync(switch_off: bool, app: tauri::AppHandle, window: tauri::WebviewWindow, file_paths: Vec<String>) {
+  run_sync_operation(window, app, switch_off, file_paths).await;
 }
 
 // Get sync status

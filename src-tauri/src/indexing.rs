@@ -1,3 +1,4 @@
+use crate::custom_types::Error;
 use crate::database::schema::{document, metadata, body, file_types};
 use crate::database::models::{DocumentItem, BodyItem, FileTypes};
 use crate::db_sync::sync_status;
@@ -8,7 +9,8 @@ use crate::text_extraction::Extractor;
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
-use log::info;
+use log::{info, error};
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::HashMap;
 
@@ -76,8 +78,89 @@ fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), 
     })
 }
 
-pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow, path: &str) -> usize {
-    info!("Logger initialized!");
+pub fn create_document_item(file_path: PathBuf, allowed_extensions: &Vec<String>) -> Result<DocumentItem, Error> {
+  // if the path does not exist or is not a file, continue
+  if !file_path.exists() || !file_path.is_file() {
+      // println!("Folder maybe?: {}", path.to_str().unwrap());
+      return Err(Error::new("Path does not exist or is not a file"));
+  }
+
+  let filename = file_path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+  let mut extension = file_path.extension().and_then(|s| s.to_str());
+
+  // if extension is not in allowed filetypes, continue
+  if extension.is_none() || !allowed_extensions.contains(&extension.unwrap().to_string()) {
+      // println!("ignoring file");
+      return Err(Error::new("Extension is not in allowed filetypes"));
+  }
+  // if filename starts with a dot or ~$, continue
+  if filename.starts_with(".") || filename.starts_with("~$") {
+      // println!("ignoring file");
+      return Err(Error::new("Filename starts with a dot or ~$"));
+  }
+
+  let metadata = get_metadata(&file_path).unwrap();
+  // if metadata is a symlink or shortcut file, continue
+  if metadata.file_type().is_symlink() {
+      // println!("ignoring shortcut");
+      return Err(Error::new("File is a symlink"));
+  }
+
+  let is_folder = metadata.is_dir();
+  if is_folder {
+      extension = Some("folder");
+  }
+  let filesize = metadata.len();
+
+  // get UNIX timestamp for last_modified, last_opened and created_at and store it as text string
+  let last_modified_secs = metadata
+      .modified()
+      .unwrap()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_secs();
+  let created_at = metadata
+      .created()
+      .unwrap()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_secs();
+  let last_opened = metadata
+      .accessed()
+      .unwrap()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_secs();
+
+  // If extension is None or is_folder is true, continue
+  if extension.is_none() || is_folder {
+    return Err(Error::new("Extension is None or is_folder is true"));
+  }
+
+  let file_item = DocumentItem {
+    source_domain: "local".to_string(),
+    created_at: created_at as i64,
+    name: filename.to_string(),
+    path: file_path.to_str().unwrap().to_string(),
+    size: Some(filesize as f64),
+    file_type: extension.unwrap().to_string(),
+    last_modified: last_modified_secs as i64,
+    last_opened: last_opened as i64,
+    last_synced: SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_secs() as i64,
+    last_parsed: 0,
+    is_pinned: false,
+    frecency_rank: 0.0,
+    frecency_last_accessed: 0,
+    comment: None,
+  };
+
+  Ok(file_item)
+}
+
+pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow, file_paths: Vec<String>) -> usize {
     let mut files_array: Vec<DocumentItem> = vec![];
     let all_forbidden_directories = get_all_forbidden_directories();
     let mut files_added = 0;
@@ -87,119 +170,51 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
         .map(|filetype| filetype.file_type.to_string())
         .collect();
 
-    let walk_dir = build_walk_dir(&path.to_string(), all_forbidden_directories);
-
-    // for entry in WalkDir::new(path) {
-    for entry in walk_dir {
+    for path in file_paths {
+      println!("Indexing file path: {}", path);
+      let walk_dir = build_walk_dir(&path, all_forbidden_directories.clone());
+      
+      for entry in walk_dir {
         let entry = entry.unwrap();
-        let path = entry.path();
+        let entry_path = entry.path();
         // info!("Indexing: {}", path.to_str().unwrap());
 
-        // if the path does not exist or is not a file, continue
-        if !path.exists() || !path.is_file() {
-            // println!("Folder maybe?: {}", path.to_str().unwrap());
+        let file_item = create_document_item(entry_path, &allowed_extensions);
+        let file_item = match file_item {
+          Ok(file_item) => file_item,
+          Err(_e) => {
+            // error!("Error creating document item: {}", e);
             continue;
-        }
-
-        let filename = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
-        let mut extension = path.extension().and_then(|s| s.to_str());
-
-        // if extension is not in allowed filetypes, continue
-        if extension.is_none() || !allowed_extensions.contains(&extension.unwrap().to_string()) {
-            // println!("ignoring file");
-            continue;
-        }
-        // if filename starts with a dot or ~$, continue
-        if filename.starts_with(".") || filename.starts_with("~$") {
-            // println!("ignoring file");
-            continue;
-        }
-
-        let metadata = get_metadata(&path).unwrap();
-        // if metadata is a symlink or shortcut file, continue
-        if metadata.file_type().is_symlink() {
-            // println!("ignoring shortcut");
-            continue;
-        }
-
-        let is_folder = metadata.is_dir();
-        if is_folder {
-            extension = Some("folder");
-        }
-        let filesize = metadata.len();
-
-        // get UNIX timestamp for last_modified, last_opened and created_at and store it as text string
-        let last_modified_secs = metadata
-            .modified()
-            .unwrap()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-        let created_at = metadata
-            .created()
-            .unwrap()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-        let last_opened = metadata
-            .accessed()
-            .unwrap()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-
-        // If extension is None or is_folder is true, continue
-        if extension.is_none() || is_folder {
-            continue;
-        }
-
-        let file_item = DocumentItem {
-            source_domain: "local".to_string(),
-            created_at: created_at as i64,
-            name: filename.to_string(),
-            path: path.to_str().unwrap().to_string(),
-            size: Some(filesize as f64),
-            file_type: extension.unwrap().to_string(),
-            last_modified: last_modified_secs as i64,
-            last_opened: last_opened as i64,
-            last_synced: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs() as i64,
-            last_parsed: 0,
-            is_pinned: false,
-            frecency_rank: 0.0,
-            frecency_last_accessed: 0,
-            comment: None,
+          }
         };
-
         files_array.push(file_item);
 
         // if there are 500 items in files_array, add them to the database and clear the array
         if files_array.len() == 500 {
-            add_file_metadata_to_database(&files_array, conn);
-            files_added += files_array.len();
-            send_message_to_frontend(
-                &window,
-                "files-added".to_string(),
-                "files_added".to_string(),
-                files_added.to_string(),
-            );
-            files_array.clear();
+          add_file_metadata_to_database(&files_array, conn);
+          files_added += files_array.len();
+          send_message_to_frontend(
+            &window,
+            "files-added".to_string(),
+            "files_added".to_string(),
+            files_added.to_string(),
+          );
+          files_array.clear();
         }
-    }
-    // process the leftover files from the last iteration (because count may be < 500)
-    if files_array.len() > 0 {
-      // let cloned_files_array = files_array.clone();
-      add_file_metadata_to_database(&files_array, conn);
-      files_added += files_array.len();
-      send_message_to_frontend(
-          &window,
-          "files-added".to_string(),
-          "files_added_complete".to_string(),
-          files_added.to_string(),
-      );
-      files_array.clear();
+      }
+      // process the leftover files from the last iteration (because count may be < 500)
+      if files_array.len() > 0 {
+        // let cloned_files_array = files_array.clone();
+        add_file_metadata_to_database(&files_array, conn);
+        files_added += files_array.len();
+        send_message_to_frontend(
+            &window,
+            "files-added".to_string(),
+            "files_added_complete".to_string(),
+            files_added.to_string(),
+        );
+        files_array.clear();
+      }
     }
 
     // remove files from the database that do not exist in the filesystem

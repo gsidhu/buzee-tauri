@@ -14,6 +14,8 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
 
+- Changed indexing/scan functions so they take a file_path array instead of a single file_path. This will allow user to select remote/external drives from the Settings.
+- Split DocumentItem creation out of the monolith walk_directory function.
 - Added app updater.
   - Created public/private signing keys for the updater. Password stored in Bitwarden.
   - Added `plugin-updater` and `plugin-dialog` to the project.

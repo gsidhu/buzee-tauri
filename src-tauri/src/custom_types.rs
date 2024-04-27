@@ -7,6 +7,12 @@ pub enum Error {
   Io(#[from] std::io::Error)
 }
 
+impl Error {
+  pub fn new(message: &str) -> Self {
+    Self::Io(std::io::Error::new(std::io::ErrorKind::Other, message))
+  }
+}
+
 // we must manually implement serde::Serialize
 impl serde::Serialize for Error {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
