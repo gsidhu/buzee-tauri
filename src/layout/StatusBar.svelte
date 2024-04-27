@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { compactViewMode, statusMessage } from '$lib/stores';
+	import { compactViewMode, statusMessage, onSearchPage, userPreferences } from '$lib/stores';
 	import {
 		documentsShown,
 		searchInProgress,
@@ -13,7 +13,6 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 	
-	export let onboardingDone = false;
 	let darkMode = false;
 	let isMac = false;
 	let fileSyncFinished = false;
@@ -24,6 +23,7 @@
 	let numFiles: number = 0;
 	let showingResults: boolean = false;
 	let dbReady = false;
+	let filesAddedCount = 0;
 	const defaultData: Record<string, string> = { component: 'StatusBar' };
 
 	function showStatusBarMenu(option: string) {
@@ -102,25 +102,20 @@
 	}
 
 	function update_files_added_count(filesAddedPayload: Payload) {
-		if (filesAddedSpan) {
-			if (filesAddedPayload.message == "files_added_complete") {
-				$dbCreationInProgress = false;
-				dbReady = true;
-			}
-			filesAddedSpan.innerHTML = filesAddedPayload.data.toString();
+		filesAddedCount = parseInt(filesAddedPayload.data);
+		if (filesAddedPayload.message == "files_added_complete") {
+			$dbCreationInProgress = false;
+			dbReady = true;
 		}
 	}
 
 	// FOR ONBOARDING PROCESS
 	let unlisten_files_added:UnlistenFn;
-	let filesAddedSpan: HTMLElement | null;
-
-	$: if ($dbCreationInProgress) {
-		filesAddedSpan = document.getElementById('files-added');
-	}
 
 	// FOR SYNC STATUS WHEN CLICKED
 	let unlisten_sync_status:UnlistenFn;
+	// FOR FILE SYNC FINISHED
+	let unlisten_file_sync_finished:UnlistenFn;
 
 	onMount(async () => {
 		invoke("get_os").then((res) => {
@@ -131,22 +126,32 @@
 				isMac = false;
 			}
 		});
+
+		invoke("get_user_preferences_state").then((res) => {
+			// @ts-ignore
+			$userPreferences = res;
+		});
+
 		// Listener for when every batch (500) of files gets added to the database
 		unlisten_files_added = await listen<Payload>('files-added', (event: any) => {
+			console.log("Files added: ", event.payload);
 			update_files_added_count(event.payload);
+			if (event.payload.message === "files_added_complete") {
+				$userPreferences.onboarding_done = true;
+			}
 		});
 		// Listener for sync status changes from inside the Tokio process in db_sync.rs
 		unlisten_sync_status = await listen<Payload>('sync-status', (event: any) => {
 			syncStatus = event.payload.data === 'true';
 		});
 		// Listener for when the db_sync process is done
-		unlisten_sync_status = await listen<Payload>('file-sync-finished', (event: any) => {
+		unlisten_file_sync_finished = await listen<Payload>('file-sync-finished', (event: any) => {
 			fileSyncFinished = event.payload.data === 'true';
 		});
 
 		// Ask for sync status on each mount to keep it updated in case of page changes
 		syncStatus = await invoke("get_sync_status") === 'true';
-		
+
 		// on renderer launch
 		appMode = "window";
 	});
@@ -154,6 +159,7 @@
 	onDestroy(() => {
 		unlisten_files_added();
 		unlisten_sync_status();
+		unlisten_file_sync_finished();
 	});
 </script>
 
@@ -167,19 +173,28 @@
 >
 	<!-- Left end -->
 	<div class="col px-0 d-flex flex-row justify-content-start" id="status-bar-left">
-		{#if onboardingDone}
-			<button
-				type="button"
-				class="px-1 mx-1 status-item"
-				on:click={() => goToSearch()}
-				title="View search results"
-			>
-				Showing {numFiles} {numFiles === 1 ? "result" : "results"}
-			</button>
+		{#if $userPreferences.onboarding_done}
+			{#if $onSearchPage}
+				<button
+					type="button"
+					class="px-1 mx-1 status-item"
+					on:click={() => goToSearch()}
+					title="View search results"
+				>
+					Showing {numFiles} {numFiles === 1 ? "result" : "results"}
+				</button>
+			{:else}
+				<!-- This is used on the Settings page when adding docs manually -->
+				<div>
+					{#if $dbCreationInProgress}
+						Scanning... {filesAddedCount}	files added
+					{/if}
+				</div>
+			{/if}
 		{:else if dbReady || $dbCreationInProgress}
 			<div>
 				{#if $dbCreationInProgress}
-					Scanning...
+					Scanning... {filesAddedCount}	files added
 				{:else if dbReady}
 					Scan complete!
 				{/if}
@@ -191,7 +206,9 @@
 
 	<!-- Center -->
 	<div class="col px-0 d-flex flex-row justify-content-center" id="status-bar-center">
-		{#if dbReady}
+		{#if $userPreferences.onboarding_done}
+			{$statusMessage}
+		{:else if dbReady}
 			<button
 				type="button"
 				class="px-1 mx-1 status-item"
@@ -206,14 +223,12 @@
 					<span class="visually-hidden">Loading...</span>
 				</div>
 			</div>
-		{:else if onboardingDone}
-			{$statusMessage}
 		{/if}
 	</div>
 
 	<!-- Right end -->
 	<div class="col px-0 d-flex flex-row justify-content-end" id="status-bar-right">
-		{#if onboardingDone}
+		{#if $userPreferences.onboarding_done}
 			<!-- Notifications -->
 			<!-- <div class="dropup dropup-center px-0 mx-0 status-item">
 				<button
@@ -279,9 +294,6 @@
 				</button>
 			{/if}
 		{/if}
-		<div class={dbReady || $dbCreationInProgress ? "" : "d-none"}>
-			<span id="files-added">0</span> files added
-		</div>
 	</div>
 </div>
 

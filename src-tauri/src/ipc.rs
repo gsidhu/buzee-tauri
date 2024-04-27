@@ -7,7 +7,7 @@ use crate::database::models::DocumentSearchResult;
 use crate::database::search::{
     get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index, get_metadata_title_matches,
 };
-use crate::db_sync::{run_sync_operation, sync_status};
+use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, walk_directory};
 use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_user_preferences_state_from_db_value};
@@ -139,28 +139,15 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
 
 // Run file indexing ONLY
 #[tauri::command]
-async fn run_file_indexing(window: tauri::WebviewWindow, app: tauri::AppHandle) -> Result<String, Error> {
-  let mut connection = establish_connection(&app);
+async fn run_file_indexing(window: tauri::WebviewWindow, app: tauri::AppHandle, file_paths: Vec<String>) -> Result<String, Error> {
   println!("File watcher started");
-  let home_directory = housekeeping::get_home_directory().unwrap();
-  println!("Home directory: {}", home_directory);
-
-  let (sender, mut receiver) = mpsc::channel::<usize>(1);
-
-  tokio::spawn(async move {
-    let mut file_paths: Vec<String> = Vec::new();
-    file_paths.push(home_directory.clone());
-    let files_added = walk_directory(&mut connection, &window, file_paths);
-    sender
-        .send(files_added)
-        .await
-        .expect("Failed to send data through channel");
-  });
-
-  // Receive the result from the channel asynchronously
-  if let Some(files_added) = receiver.recv().await {
-      println!("Files added: {}", files_added);
+  let mut file_paths = file_paths;
+  if file_paths.len() == 0 {
+    let home_directory = housekeeping::get_home_directory().unwrap();
+    println!("Home directory: {}", home_directory);
+    file_paths.push(home_directory);
   }
+  add_specific_folders(&window, &app, file_paths).await;
   Ok("File indexing complete".to_string())
 }
 

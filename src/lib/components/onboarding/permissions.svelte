@@ -9,7 +9,7 @@
   let showWaiting = false;
   function startFileScan() {
     $dbCreationInProgress = true;
-    invoke("run_file_indexing")
+    invoke("run_file_indexing", { filePaths: [] })
     showWaiting = true;
 	}
 

@@ -3,8 +3,7 @@
   import { page } from '$app/stores';
 	import { sendEventToFirebase } from '../utils/firebase';
 	import { goto } from '$app/navigation';
-
-  var onSearchPage: boolean = false;
+  import { onSearchPage } from '$lib/stores';
 
   function openSettingsMenu() {
     sendEventToFirebase("click:settings_button_click");
@@ -18,9 +17,9 @@
 			const route = value.url.pathname;
 			if (route) {
 				if (route === '/search') {
-          onSearchPage = true;
+          $onSearchPage = true;
         } else {
-          onSearchPage = false;
+          $onSearchPage = false;
         }
 			}
 		});
@@ -29,7 +28,7 @@
 </script>
 
 <div id="settings-button-div" class="no-drag">
-  {#if onSearchPage}
+  {#if $onSearchPage}
     <button class="btn link-dark" title="Open Settings" on:click={() => openSettingsMenu()}>
       <i id="settings-button" class="bi bi-gear" aria-label="Settings" aria-hidden="true"/>
     </button>

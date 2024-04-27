@@ -8,7 +8,7 @@
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
 	import { Command } from '@tauri-apps/plugin-shell';
-	import { windowBlurred, cronJobSet } from '$lib/stores';
+	import { windowBlurred, cronJobSet, userPreferences } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, message } from '@tauri-apps/plugin-dialog';
 
@@ -81,6 +81,9 @@
 		});
     appMode = "window";
 
+		// get user preferences
+		$userPreferences = await invoke("get_user_preferences_state");
+
 		// Grayscale contents when window blurs
 		if (window) {
 			window.addEventListener("focus", () => {
@@ -117,7 +120,7 @@
 <main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
 	<!-- <button on:click={() => testFn()}>Test</button> -->
 	<slot />
-	<StatusBar onboardingDone />
+	<StatusBar />
 </main>
 
 <style>

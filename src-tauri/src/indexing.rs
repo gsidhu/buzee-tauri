@@ -193,6 +193,8 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
         if files_array.len() == 500 {
           add_file_metadata_to_database(&files_array, conn);
           files_added += files_array.len();
+          // This message gives incremental updates to the frontend
+          // And is necessary for setting dbReady = true in the frontend
           send_message_to_frontend(
             &window,
             "files-added".to_string(),
@@ -207,6 +209,7 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
         // let cloned_files_array = files_array.clone();
         add_file_metadata_to_database(&files_array, conn);
         files_added += files_array.len();
+        // This message sets onboardingDone = true in the frontend
         send_message_to_frontend(
             &window,
             "files-added".to_string(),
@@ -493,7 +496,7 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
     .map(|file| std::path::Path::new(file).parent().unwrap().to_str().unwrap().to_string())
     .collect();
   
-  println!("All folders: {}", all_folders.len());
+  println!("All folders (= Num files): {}", all_folders.len());
   // Get all existing folders from the database
   let existing_folders = document::table
     .select(document::path)

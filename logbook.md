@@ -14,7 +14,10 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
 
-- Changed indexing/scan functions so they take a file_path array instead of a single file_path. This will allow user to select remote/external drives from the Settings.
+- User can now add files or folders from network/external drives from the Settings.
+- Calling the GlobalShortcut will now only _show_ the window. Not hide it. If user wants to hide, they can press the minimise button or move to another app/screen.
+- Fixed Svelte store variables for setting StatusBar items. Setting UserPreferences in the store on app load.
+- Changed indexing/scan functions so they take a file_path array instead of a single file_path. This will allow user to select network/external drives from the Settings.
 - Split DocumentItem creation out of the monolith walk_directory function.
 - Added app updater.
   - Created public/private signing keys for the updater. Password stored in Bitwarden.

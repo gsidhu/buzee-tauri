@@ -73,3 +73,18 @@ pub fn sync_status(app: &AppHandle) -> (String, i64) {
     ("false".to_string(), *last_sync_time)
   }
 }
+
+
+pub async fn add_specific_folders(window: &tauri::WebviewWindow, app: &AppHandle, file_paths: Vec<String>) {
+  println!("file paths: {:?}", file_paths);
+  println!("Adding specific folders...");
+  let mut conn = establish_connection(&app);
+  let window = window.clone();
+  // Spawn the new task
+  tokio::spawn(async move {
+    // Parse metadata of all files but only update the ones whose time metadata or size has changed
+    if file_paths.len() > 0 {
+      let _files_added = walk_directory(&mut conn, &window, file_paths);
+    }
+  });
+}

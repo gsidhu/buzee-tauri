@@ -6,9 +6,9 @@
 	import { goto } from '$app/navigation';
 	import { sendEventToFirebase } from '../../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
-	import { statusMessage } from '$lib/stores';
+	import { statusMessage, userPreferences, dbCreationInProgress } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
-	import { ask, message } from '@tauri-apps/plugin-dialog';
+	import { ask, open, message } from '@tauri-apps/plugin-dialog';
 
 	let launchAtStartup: boolean;
 	let globalShortcutEnabled: boolean;
@@ -18,13 +18,11 @@
 	let automaticBackgroundSyncEnabled: boolean;
 	let detailedScanEnabled: boolean;
 	let isMac: boolean = true;
-	let isWin: boolean;
-	let userPreferences: UserPreferences;
 
 	function toggleLaunchAtStartup() {
 		launchAtStartup = !launchAtStartup;
 		sendEventToFirebase('click:toggleLaunchAtStartup', { launchAtStartup });
-		$statusMessage = `Setting changed. Restarting the app...`;
+		$statusMessage = `Setting changed!`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		window.settingsAPI?.toggleLaunchAtStartup();
 	}
@@ -73,9 +71,49 @@
 		goto('/uninstall');
 	}
 
-	function addDocsToDB() {
+	async function addDocsToDB() {
 		sendEventToFirebase('click:addDocsToDB');
-		window.dbAPI?.addDocsToDB();
+		const yesFolders = await ask("Would you like to add individual files or complete folders?", { 
+			title: 'Files or Folders',
+			kind: 'info',
+			okLabel: 'Folders',
+			cancelLabel: 'Files'
+		});
+		let filePaths: String[] = [];
+		if (yesFolders) {
+			let folderPaths = await open({ 
+				title: 'Add Folders',
+				directory: true,
+				recursive: true,
+				multiple: true,
+				canCreateDirectories: false
+			});
+			if (folderPaths === null) {
+				return;
+			}
+			filePaths = folderPaths;
+		} else {
+			let filePathObjects = await open({ 
+				title: 'Add Files',
+				directory: false,
+				multiple: true,
+				canCreateDirectories: false
+			});
+			if (filePathObjects === null) {
+				return;
+			}
+			filePaths = filePathObjects.map((file) => file.path);
+		}
+		$statusMessage = "Adding documents to the database...";
+		$dbCreationInProgress = true;
+		invoke("run_file_indexing", {filePaths: filePaths }).then((res) => {
+			console.log(res);
+			$statusMessage = "Documents added successfully!";
+			setTimeout(() => {
+				$statusMessage = "";
+				$dbCreationInProgress = false;
+			}, 3000);
+		});
 	}
 
 	function setNewGlobalShortcut() {
@@ -143,10 +181,10 @@
 		invoke("get_user_preferences_state").then((res) => {
 			console.log(res);
 			// @ts-ignore
-			userPreferences = res;
-			launchAtStartup = userPreferences.launch_at_startup;
-			globalShortcutEnabled = userPreferences.global_shortcut_enabled;
-			globalShortcut = userPreferences.global_shortcut;
+			$userPreferences = res;
+			launchAtStartup = $userPreferences.launch_at_startup;
+			globalShortcutEnabled = $userPreferences.global_shortcut_enabled;
+			globalShortcut = $userPreferences.global_shortcut;
 			console.log(globalShortcut);
 			globalShortcut = globalShortcut.replace("Key", "");
 			globalShortcut = globalShortcut.replace("Digit", "");
@@ -166,8 +204,8 @@
 				globalShortcut = globalShortcut.replace("Super", "Command");
 			}
 			console.log(globalShortcut);
-			automaticBackgroundSyncEnabled = userPreferences.automatic_background_sync;
-			detailedScanEnabled = userPreferences.detailed_scan;
+			automaticBackgroundSyncEnabled = $userPreferences.automatic_background_sync;
+			detailedScanEnabled = $userPreferences.detailed_scan;
 		});
 
 		const shortcutInput = document.getElementById('shortcut-input');

@@ -2,12 +2,8 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { getDocumentsFromDB } from '$lib/utils/dbUtils';
-	import { documentsShown, resultsPerPage } from '$lib/stores';
-	import { invoke } from "@tauri-apps/api/core";
-
-	async function getUserPreferences() {
-		return await window.settingsAPI?.getUserPreferences();
-	}
+	import { documentsShown, resultsPerPage, userPreferences } from '$lib/stores';
+	import { invoke } from '@tauri-apps/api/core';
 
 	function reroute(flag: boolean) {
 		if (flag) {
@@ -23,16 +19,9 @@
 		// Load the first page of documents whenever the app loads
 		// TODO: Replace this with pinned documents later
 		$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, 'any');
-
-		getUserPreferences().then((res) => {
-			// reroute(res.onboardingDone);
-			reroute(true);
-		});
-
+		console.log("page:", $userPreferences);
+		// get user preferences here because this somehow loads before layout finishes its onMount
+		$userPreferences = await invoke("get_user_preferences_state");
+		reroute($userPreferences.onboarding_done);
 	});
 </script>
-
-<!-- <button class="btn btn-primary" on:click={() => openFileFolder()}>Open File Folder</button>
-<button class="btn btn-primary" on:click={() => runFileIndexing()}>Run File Indexing</button>
-
-<button class="btn btn-primary" on:click={() => runSearch()}>Run Search</button> -->

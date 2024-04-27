@@ -51,8 +51,21 @@ let storedAllowedExtensions: FileTypesDropdown = {
 let storedSearchSuggestions: string[] = [];
 
 // 2. Set the stored value or a sane default.
+export const userPreferences = writable({
+  "automatic_background_sync": true,
+  "detailed_scan": true,
+  "disallowed_paths": "",
+  "first_launch_done": true,
+  "global_shortcut": "Alt+Space",
+  "global_shortcut_enabled": true,
+  "launch_at_startup": true,
+  "onboarding_done": false,
+  "show_in_dock": true
+})
 export const pinMode = writable(false)
 export const cronJobSet = writable(false)
+export const onSearchPage = writable(false)
+export const onboardingDone = writable(false)
 export const searchQuery = writable(storedSearchQuery || '')
 export const searchSuggestions = writable(storedSearchSuggestions || [])
 export const documentsShown = writable(storedDocumentsShown || [])
