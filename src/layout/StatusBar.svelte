@@ -134,7 +134,6 @@
 
 		// Listener for when every batch (500) of files gets added to the database
 		unlisten_files_added = await listen<Payload>('files-added', (event: any) => {
-			console.log("Files added: ", event.payload);
 			update_files_added_count(event.payload);
 			if (event.payload.message === "files_added_complete") {
 				$userPreferences.onboarding_done = true;
@@ -172,40 +171,36 @@
   `}
 >
 	<!-- Left end -->
-	<div class="col px-0 d-flex flex-row justify-content-start" id="status-bar-left">
+	<div class="col px-0 d-flex flex-row justify-content-start disable-select cursor-default" id="status-bar-left">
 		{#if $userPreferences.onboarding_done}
 			{#if $onSearchPage}
-				<button
+				<!-- <button
 					type="button"
 					class="px-1 mx-1 status-item"
 					on:click={() => goToSearch()}
 					title="View search results"
-				>
-					Showing {numFiles} {numFiles === 1 ? "result" : "results"}
-				</button>
+				> -->
+				Showing {numFiles} {numFiles === 1 ? "result" : "results"}
+				<!-- </button> -->
 			{:else}
 				<!-- This is used on the Settings page when adding docs manually -->
-				<div>
-					{#if $dbCreationInProgress}
-						Scanning... {filesAddedCount}	files added
-					{/if}
-				</div>
-			{/if}
-		{:else if dbReady || $dbCreationInProgress}
-			<div>
 				{#if $dbCreationInProgress}
 					Scanning... {filesAddedCount}	files added
-				{:else if dbReady}
-					Scan complete!
 				{/if}
-			</div>
+			{/if}
+		{:else if dbReady || $dbCreationInProgress}
+			{#if $dbCreationInProgress}
+				Scanning... {filesAddedCount}	files added
+			{:else if dbReady}
+				Scan complete!
+			{/if}
 		{:else}
-			<div>Hello!</div>
+			Hello!
 		{/if}
 	</div>
 
 	<!-- Center -->
-	<div class="col px-0 d-flex flex-row justify-content-center" id="status-bar-center">
+	<div class="col px-0 d-flex flex-row justify-content-center disable-select cursor-default" id="status-bar-center">
 		{#if $userPreferences.onboarding_done}
 			{$statusMessage}
 		{:else if dbReady}
@@ -227,7 +222,7 @@
 	</div>
 
 	<!-- Right end -->
-	<div class="col px-0 d-flex flex-row justify-content-end" id="status-bar-right">
+	<div class="col px-0 d-flex flex-row justify-content-end disable-select" id="status-bar-right">
 		{#if $userPreferences.onboarding_done}
 			<!-- Notifications -->
 			<!-- <div class="dropup dropup-center px-0 mx-0 status-item">

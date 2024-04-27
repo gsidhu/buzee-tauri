@@ -34,6 +34,7 @@
 		sendEventToFirebase('click:open_file');
 		invoke('open_file_or_folder', { filePath: url });
 	}
+	
 	function formatUpdatedTime(unixTime: number): string {
 		if (unixTime === 0) {
 			return 'Never';

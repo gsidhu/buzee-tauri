@@ -3,17 +3,22 @@ use crate::housekeeping::get_app_directory;
 
 // Import the Error type
 use tauri::{
-  menu::{Menu, MenuEvent, MenuId, MenuItem}, Manager, Window
+  menu::{Menu, MenuEvent, MenuId, MenuItem, Submenu}, Manager, Window
 };
 
 pub fn searchresult_context_menu(window: &Window) {
   let manager = window.app_handle();
+  let ignore_submenu = Submenu::with_items(manager, "Ignore", true, &[
+    &MenuItem::with_id(manager, "ignore_item", "Ignore this Item", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_folder", "Ignore Parent Folder", true, None::<&str>).unwrap(),
+  ]).unwrap();
   let context_menu = Menu::with_items(manager, &[
     #[cfg(target_os = "macos")]
     &MenuItem::with_id(manager, "preview", "Show Preview", true, None::<&str>).unwrap(),
 
     &MenuItem::with_id(manager, "open", "Open File", true, None::<&str>).unwrap(),
     &MenuItem::with_id(manager, "open_folder", "Open Folder", true, None::<&str>).unwrap(),
+    &ignore_submenu,
   ]).unwrap();
 
   window.popup_menu(&context_menu).unwrap();
@@ -55,6 +60,12 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
     }
     "open_folder" => {
       app.emit("open-folder", Payload { message: "Open Folder".into(), data: "".into() }).unwrap();
+    }
+    "ignore_item" => {
+      app.emit("ignore-item", Payload { message: "Ignore Item".into(), data: "".into() }).unwrap();
+    }
+    "ignore_folder" => {
+      app.emit("ignore-folder", Payload { message: "Ignore Folder".into(), data: "".into() }).unwrap();
     }
     "app_folder" => {
       let app_dir_path = get_app_directory();

@@ -38,6 +38,14 @@ body {
   -webkit-user-drag: none;
 }
 
+.disable-select {
+  user-select: none;
+}
+
+.cursor-default {
+  cursor: default;
+}
+
 .grayscale {
   /* filter: grayscale(.7); */
   color: gray;
