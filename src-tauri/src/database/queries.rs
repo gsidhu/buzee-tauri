@@ -191,15 +191,15 @@ pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
       WHERE source_table = 'document' AND source_id = OLD.id;
   END;
 "#;
-pub const TRIGGER_DELETE_DOCUMENT_METADATA : &str = r#"
-  CREATE TRIGGER IF NOT EXISTS delete_document_metadata
-  BEFORE DELETE ON document
-  BEGIN
-      DELETE FROM body WHERE metadata_id = (SELECT id FROM metadata WHERE source_table = 'document' AND source_id = OLD.id);
-      DELETE FROM metadata WHERE source_table = 'document' AND source_id = OLD.id;
-      DELETE FROM metadata_fts WHERE source_table = 'document' AND source_id = OLD.id;
-  END;
-"#;
+// pub const TRIGGER_DELETE_DOCUMENT_METADATA : &str = r#"
+//   CREATE TRIGGER IF NOT EXISTS delete_document_metadata
+//   BEFORE DELETE ON document
+//   BEGIN
+//       DELETE FROM body WHERE metadata_id = (SELECT id FROM metadata WHERE source_table = 'document' AND source_id = OLD.id);
+//       DELETE FROM metadata WHERE source_table = 'document' AND source_id = OLD.id;
+//       DELETE FROM metadata_fts WHERE source_table = 'document' AND source_id = OLD.id;
+//   END;
+// "#;
 
 
 /*
@@ -279,8 +279,19 @@ pub const IGNORE_LIST_TABLE_CREATE_STATEMENT : &str = r#"
   (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     path TEXT NOT NULL,
+    is_folder BOOLEAN NOT NULL DEFAULT 0,
     ignore_indexing BOOLEAN NOT NULL DEFAULT 0,
     ignore_content BOOLEAN NOT NULL DEFAULT 0
+  );
+"#;
+
+// ALLOW_LIST stores paths that the user manually adds. This list supercedes the IGNORE_LIST.
+pub const ALLOW_LIST_TABLE_CREATE_STATEMENT : &str = r#"
+  CREATE TABLE IF NOT EXISTS "allow_list" 
+  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    path TEXT NOT NULL,
+    is_folder BOOLEAN NOT NULL DEFAULT 0
   );
 "#;
 

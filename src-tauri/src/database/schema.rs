@@ -116,8 +116,17 @@ table! {
   ignore_list (id) {
     id -> Integer,
     path -> Text,
+    is_folder -> Bool,
     ignore_indexing -> Bool,
     ignore_content -> Bool,
+  }
+}
+
+table! {
+  allow_list (id) {
+    id -> Integer,
+    path -> Text,
+    is_folder -> Bool
   }
 }
 

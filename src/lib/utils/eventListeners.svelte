@@ -4,7 +4,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { sendEventToFirebase } from '../../utils/firebase';
-  import { selectedResult } from '$lib/stores';
+  import { selectedResult, documentsShown, statusMessage, disableInteraction, syncStatus } from '$lib/stores';
   import { confirm } from '@tauri-apps/plugin-dialog';
 
   async function startSerialEventListener() {
@@ -22,7 +22,21 @@
         okLabel: 'Yes',
         cancelLabel: 'No'
       });
-      if (result) invoke('ignore_file_or_folder', { path: $selectedResult.path, shouldIgnoreIndexing: true, shouldIgnoreContent: true });
+      if (result) {
+        $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
+        $syncStatus = true;
+        $disableInteraction = true;
+        invoke('ignore_file_or_folder', { path: $selectedResult.path, isDirectory: fileOrFolder === "folder" ? true : false, shouldIgnoreIndexing: true, shouldIgnoreContent: true }).then(() => {
+          $statusMessage = `Removed!`;
+          $syncStatus = false;
+          $disableInteraction = false;
+          setTimeout(() => {
+            $statusMessage = '';
+          }, 2000);
+        });
+        // remove $selectedResult from $documentsShown
+        documentsShown.update((docs) => docs.filter(doc => doc.path !== $selectedResult.path));
+      }
       else return;
     });
     await listen<Payload>('ignore-folder', async (event: any) => {
@@ -36,7 +50,21 @@
         okLabel: 'Yes',
         cancelLabel: 'No'
       });
-      if (result) invoke('ignore_file_or_folder', { path: parentFolder, shouldIgnoreIndexing: true, shouldIgnoreContent: true });
+      if (result) {
+        $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
+        $syncStatus = true;
+        $disableInteraction = true;
+        invoke('ignore_file_or_folder', { path: parentFolder, isDirectory: fileOrFolder === "folder" ? true : false, shouldIgnoreIndexing: true, shouldIgnoreContent: true }).then(() => {
+          $statusMessage = `Removed!`;
+          $syncStatus = false;
+          $disableInteraction = false;
+          setTimeout(() => {
+            $statusMessage = '';
+          }, 2000);
+        });
+        // remove $selectedResult from $documentsShown
+        documentsShown.update((docs) => docs.filter(doc => doc.path !== $selectedResult.path));
+      }
       else return;
     });
     await listen<Payload>('ignore-text', async (event: any) => {
@@ -50,7 +78,19 @@
         okLabel: 'Yes',
         cancelLabel: 'No'
       });
-      if (result) invoke('ignore_file_or_folder', { path: parentFolder, shouldIgnoreIndexing: false, shouldIgnoreContent: true });
+      if (result) {
+        $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
+        $syncStatus = true;
+        $disableInteraction = true;
+        invoke('ignore_file_or_folder', { path: parentFolder, isDirectory: fileOrFolder === "folder" ? true : false, shouldIgnoreIndexing: false, shouldIgnoreContent: true }).then(() => {
+          $statusMessage = `Removed!`;
+          $syncStatus = false;
+          $disableInteraction = false;
+          setTimeout(() => {
+            $statusMessage = '';
+          }, 2000);
+        });
+      }
       else return;
     });
     await listen<Payload>('show-preview', (event: any) => {

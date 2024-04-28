@@ -87,6 +87,7 @@
 
 	async function addDocsToDB() {
 		sendEventToFirebase('click:addDocsToDB');
+		let isFolder = true;
 		const yesFolders = await ask("Would you like to add individual files or complete folders?", { 
 			title: 'Files or Folders',
 			kind: 'info',
@@ -117,10 +118,11 @@
 				return;
 			}
 			filePaths = filePathObjects.map((file) => file.path);
+			isFolder = false;
 		}
 		$statusMessage = "Adding documents to the database...";
 		$dbCreationInProgress = true;
-		invoke("run_file_indexing", {filePaths: filePaths }).then((res) => {
+		invoke("run_file_indexing", {filePaths: filePaths, isFolder: isFolder }).then((res) => {
 			console.log(res);
 			$statusMessage = "Documents added successfully!";
 			setTimeout(() => {

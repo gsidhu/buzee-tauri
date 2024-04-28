@@ -17,5 +17,19 @@
 			<i class="bi bi-file-earmark-x" /> <i class="bi bi-folder-x" />
 		</div>
 		<h3>Ignore List</h3>
+		<p>Any files or folders that you manually add from the Settings will be automatically removed from the Ignore List.</p>
+
+		<button>Remove Item</button>
+		<h6>SvelteTable: Ignore Completely</h6>
+		<small>Dialog menu to add items</small>
+
+		<h6>SvelteTable: Ignore Text</h6>
+		<small>Dialog menu to add items</small>
+
+		<button>Clear List</button>
+		<button>Export List (to use in Buzee later)</button>
+		<button>Import List (from a previous Buzee installation)</button>
+		
+		<small>On each save/import, run a formatting check + assign isFolder attribute before passing to the database</small>
   </div>
 </div>

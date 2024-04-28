@@ -38,8 +38,9 @@ body {
   -webkit-user-drag: none;
 }
 
-.disable-select {
+.disable-interaction {
   user-select: none;
+  pointer-events: none;
 }
 
 .cursor-default {

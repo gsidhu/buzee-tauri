@@ -13,11 +13,12 @@ use queries::{
   METADATA_TABLE_CREATE_STATEMENT, 
   METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT,
   BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT,
-  TRIGGER_INSERT_DOCUMENT_METADATA, TRIGGER_UPDATE_DOCUMENT_METADATA, TRIGGER_DELETE_DOCUMENT_METADATA,
+  TRIGGER_INSERT_DOCUMENT_METADATA, TRIGGER_UPDATE_DOCUMENT_METADATA,
   TRIGGER_INSERT_BODY_FTS, TRIGGER_UPDATE_BODY_FTS,
   USER_PREFS_TABLE_CREATE_STATEMENT,
   APP_DATA_TABLE_CREATE_STATEMENT,
   IGNORE_LIST_TABLE_CREATE_STATEMENT,
+  ALLOW_LIST_TABLE_CREATE_STATEMENT,
   FILE_TYPES_TABLE_CREATE_STATEMENT
 };
 
@@ -72,6 +73,7 @@ pub fn establish_connection(app: &tauri::AppHandle) -> PooledConnection<Connecti
   diesel::sql_query("PRAGMA journal_mode = WAL;").execute(&mut connection).unwrap();
   diesel::sql_query("PRAGMA cache_size = 1000000000;").execute(&mut connection).unwrap();
   diesel::sql_query("PRAGMA synchronous = NORMAL;").execute(&mut connection).unwrap();
+  diesel::sql_query("PRAGMA auto_vacuum = FULL;").execute(&mut connection).unwrap();
 
   connection
 }
@@ -87,6 +89,7 @@ pub fn establish_direct_connection_to_db() -> SqliteConnection {
   diesel::sql_query("PRAGMA journal_mode = WAL;").execute(&mut connection).unwrap();
   diesel::sql_query("PRAGMA cache_size = 1000000000;").execute(&mut connection).unwrap();
   diesel::sql_query("PRAGMA synchronous = NORMAL;").execute(&mut connection).unwrap();
+  diesel::sql_query("PRAGMA auto_vacuum = FULL;").execute(&mut connection).unwrap();
 
   connection
 }
@@ -96,6 +99,7 @@ pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize,
   // User Prefs and App Data Tables
   diesel::sql_query(USER_PREFS_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(APP_DATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(ALLOW_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(IGNORE_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(FILE_TYPES_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   
@@ -109,7 +113,6 @@ pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize,
   // Triggers
   diesel::sql_query(TRIGGER_INSERT_DOCUMENT_METADATA.to_string()).execute(conn)?;
   diesel::sql_query(TRIGGER_UPDATE_DOCUMENT_METADATA.to_string()).execute(conn)?;
-  diesel::sql_query(TRIGGER_DELETE_DOCUMENT_METADATA.to_string()).execute(conn)?;
   diesel::sql_query(TRIGGER_INSERT_BODY_FTS.to_string()).execute(conn)?;
   diesel::sql_query(TRIGGER_UPDATE_BODY_FTS.to_string()).execute(conn)?;
   Ok(1)

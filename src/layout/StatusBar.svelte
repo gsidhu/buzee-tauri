@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { compactViewMode, statusMessage, onSearchPage, userPreferences } from '$lib/stores';
+	import { compactViewMode, statusMessage, onSearchPage, userPreferences, syncStatus } from '$lib/stores';
 	import {
 		documentsShown,
 		searchInProgress,
@@ -16,7 +16,6 @@
 	let darkMode = false;
 	let isMac = false;
 	let fileSyncFinished = false;
-	let syncStatus = false;
 	let syncCoolingPeriod = false;
 	let userAskedToDisable = false;
 	let appMode = 'menubar';
@@ -61,9 +60,9 @@
 
 	async function toggleBackgroundTextProcessing() {
 		sendEventToFirebase('click:toggleBackgroundTextProcessing', { ...defaultData });
-		// if syncStatus is true, switch_off is true, so we want to stop the sync
-		invoke("run_file_sync", {switchOff: syncStatus, filePaths: []});
-		if (syncStatus) {
+		// if $syncStatus is true, switch_off is true, so we want to stop the sync
+		invoke("run_file_sync", {switchOff: $syncStatus, filePaths: []});
+		if ($syncStatus) {
 			$statusMessage = "Stopping background scan...";
 			setTimeout(() => {$statusMessage = "";}, 3000);
 			userAskedToDisable = true;
@@ -76,7 +75,7 @@
 		syncCoolingPeriod = true;
 		setTimeout(() => {
 			// if userAskedToDisable and sync is still running, then keep the cooling period on
-			if (userAskedToDisable && syncStatus) {
+			if (userAskedToDisable && $syncStatus) {
 				syncCoolingPeriod = true;
 			} else {
 				syncCoolingPeriod = false;
@@ -84,8 +83,8 @@
 		}, 5000);
 	}
 
-	// if syncStatus is false, then reset cooling period and userAskedToDisable
-	$: if (!syncStatus) {
+	// if $syncStatus is false, then reset cooling period and userAskedToDisable
+	$: if (!$syncStatus) {
 		userAskedToDisable = false;
 		syncCoolingPeriod = false;
 	}
@@ -141,7 +140,7 @@
 		});
 		// Listener for sync status changes from inside the Tokio process in db_sync.rs
 		unlisten_sync_status = await listen<Payload>('sync-status', (event: any) => {
-			syncStatus = event.payload.data === 'true';
+			$syncStatus = event.payload.data === 'true';
 		});
 		// Listener for when the db_sync process is done
 		unlisten_file_sync_finished = await listen<Payload>('file-sync-finished', (event: any) => {
@@ -149,7 +148,7 @@
 		});
 
 		// Ask for sync status on each mount to keep it updated in case of page changes
-		syncStatus = await invoke("get_sync_status") === 'true';
+		$syncStatus = await invoke("get_sync_status") === 'true';
 
 		// on renderer launch
 		appMode = "window";
@@ -229,8 +228,8 @@
 				<button
 					id="bg-sync-btn"
 					type="button"
-					class={`status-item px-1  ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
-					title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+					class={`status-item px-1  ${$syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
+					title={syncCoolingPeriod ? 'Please wait for a few seconds...' : `Background scan is ${$syncStatus ? 'running' : 'stopped'}. Click to ${$syncStatus ? 'stop' : 'start'}.`}
 					disabled={syncCoolingPeriod}
 					data-bs-toggle="dropdown"
 					aria-expanded="false"
@@ -250,15 +249,15 @@
 			<button
 				id="bg-sync-btn"
 				type="button"
-				class={`px-2 status-item ${syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
+				class={`px-2 status-item ${$syncStatus ? (syncCoolingPeriod ? 'disabled-gray' : 'bg-code-pink') : ''}`}
 				title={syncCoolingPeriod ? 
 				`${userAskedToDisable ? "Shutting down background processes. Please wait." : "Booting up. Please wait for a few seconds."}` 
 				: 
-				`Background scan is ${syncStatus ? 'running' : 'stopped'}. Click to ${syncStatus ? 'stop' : 'start'}.`}
+				`Background scan is ${$syncStatus ? 'running' : 'stopped'}. Click to ${$syncStatus ? 'stop' : 'start'}.`}
 				on:click={() => toggleBackgroundTextProcessing()}
 				disabled={syncCoolingPeriod}
 			>
-				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${syncStatus ? 'spin-right' : ''}`} />
+				<i id="bg-sync-icon" class={`bi bi-arrow-repeat ${$syncStatus ? 'spin-right' : ''}`} />
 			</button>
 			<button
 				type="button"

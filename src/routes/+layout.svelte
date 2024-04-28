@@ -8,7 +8,7 @@
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
 	import { Command } from '@tauri-apps/plugin-shell';
-	import { windowBlurred, cronJobSet, userPreferences } from '$lib/stores';
+	import { windowBlurred, cronJobSet, userPreferences, disableInteraction } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, message } from '@tauri-apps/plugin-dialog';
 
@@ -69,6 +69,17 @@
 		}
 	}
 
+	$: if ($disableInteraction === true) {
+		console.log("disabling");
+		document.body.classList.add('disable-interaction');
+		document.getElementById('message-modal-trigger')?.click();
+	}
+
+	$: if ($disableInteraction === false) {
+		console.log("enabling");
+		document.body.classList.remove('disable-interaction');
+	}
+
 	onMount(async () => {
     // startSerialEventListener();
 		invoke("get_os").then((res) => {
@@ -122,6 +133,35 @@
 	<slot />
 	<StatusBar />
 </main>
+
+<button id="message-modal-trigger" type="button" class="d-none" data-bs-toggle="modal" data-bs-target="#message-modal"></button>
+
+<!-- Message Modal -->
+<div
+	class="modal fade"
+	id="message-modal"
+	tabindex="-1"
+	aria-labelledby="messageModal"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-6">Updating the Database</h1>
+				<button disabled={$disableInteraction} type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>
+					{#if $disableInteraction}
+						Please wait for a few moments while Buzee updates its database...
+					{:else}
+						All done! You can now close this message.
+					{/if}
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
 
 <style>
 	.main-container {

@@ -1,6 +1,6 @@
 use crate::custom_types::Error;
-use crate::database::schema::{document, metadata, body, ignore_list, file_types};
-use crate::database::models::{BodyItem, DocumentItem, FileTypes, IgnoreList};
+use crate::database::schema::{document, metadata, body, metadata_fts, body_fts, ignore_list, allow_list, file_types};
+use crate::database::models::{BodyItem, DocumentItem, FileTypes, IgnoreList, AllowList};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
@@ -169,6 +169,12 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
         .iter()
         .map(|filetype| filetype.file_type.to_string())
         .collect();
+    let ignored_items = get_all_ignored_paths(conn);
+    let ignored_files: Vec<IgnoreList> = ignored_items.iter().filter(|item| !item.is_folder).cloned().collect();
+    let ignored_folders: Vec<IgnoreList> = ignored_items.iter().filter(|item| item.is_folder).cloned().collect();
+    let allowed_items = get_all_allowed_paths(conn);
+    let allowed_files: Vec<AllowList> = allowed_items.iter().filter(|item| !item.is_folder).cloned().collect();
+    let allowed_folders: Vec<AllowList> = allowed_items.iter().filter(|item| item.is_folder).cloned().collect();
 
     for path in file_paths {
       println!("Indexing file path: {}", path);
@@ -187,6 +193,23 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
             continue;
           }
         };
+
+        // if file is in the ignored_files list and ignore_indexing is true
+        if ignored_files.iter().any(|item| item.path == file_item.path && item.ignore_indexing) {
+          // if file is not in allowed_files or file path does not start with a path in allowed_folders, continue
+          if !allowed_files.iter().any(|item| item.path == file_item.path) && !allowed_folders.iter().any(|item| file_item.path.starts_with(&item.path)) {
+            continue;
+          }
+        }
+        // if file path starts with a path in the ignored_folders
+        if ignored_folders.iter().any(|item| file_item.path.starts_with(&item.path) && item.ignore_indexing) {
+          // if file is not in allowed_files or file path does not start with a path in allowed_folders, continue
+          if !allowed_files.iter().any(|item| item.path == file_item.path) && !allowed_folders.iter().any(|item| file_item.path.starts_with(&item.path)) {
+            continue;
+          }
+        }
+
+        // if all clear, add file_item to files_array
         files_array.push(file_item);
 
         // if there are 500 items in files_array, add them to the database and clear the array
@@ -221,7 +244,7 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
     }
 
     // remove files from the database that do not exist in the filesystem
-    remove_nonexistent_files(conn);
+    remove_nonexistent_and_ignored_files(conn);
     // add folders to the database
     add_folders_to_db(conn);
     // return number of files_added
@@ -317,23 +340,17 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   //   .map(|filetype| filetype.file_type.to_string())
   //   .collect();
 
+
+  let ignored_items = get_all_ignored_paths(conn);
+  let ignored_files: Vec<IgnoreList> = ignored_items.iter().filter(|item| !item.is_folder).cloned().collect();
+  let ignored_folders: Vec<IgnoreList> = ignored_items.iter().filter(|item| item.is_folder).cloned().collect();
+  
+  let allowed_items = get_all_allowed_paths(conn);
+  let allowed_files: Vec<AllowList> = allowed_items.iter().filter(|item| !item.is_folder).cloned().collect();
+  let allowed_folders: Vec<AllowList> = allowed_items.iter().filter(|item| item.is_folder).cloned().collect();
+  
   // Get metadata_id, source_id, path, file_type and last_modified
   // For all files that have the filetype in the array above
-  let pdf_files_data = document::table
-    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
-    .filter(document::file_type.eq_any(["pdf"]))
-    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
-    .load::<(i32, String, String, String, i64)>(conn)
-    .unwrap();
-  let pdf_metadata_ids_to_select: Vec<i32> = pdf_files_data.iter().map(|item| item.0).collect();
-  let pdf_last_parsed_values: HashMap<i32, i64> = body::table
-    .filter(body::metadata_id.eq_any(pdf_metadata_ids_to_select))
-    .select((body::metadata_id, body::last_parsed))
-    .load::<(i32, i64)>(conn)
-    .unwrap()
-    .into_iter()
-    .collect();
-  
   let not_pdf_files_data = document::table
     .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
     .filter(document::file_type.eq_any(document_filetypes))
@@ -341,25 +358,55 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     .order_by(document::size.asc())
     .load::<(i32, String, String, String, i64)>(conn)
     .unwrap();
-  let not_pdf_metadata_ids_to_select: Vec<i32> = not_pdf_files_data.iter().map(|item| item.0).collect();
-  let not_pdf_last_parsed_values: HashMap<i32, i64> = body::table
-    .filter(body::metadata_id.eq_any(not_pdf_metadata_ids_to_select))
+  // Get the same for all PDF files
+  let pdf_files_data = document::table
+    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
+    .filter(document::file_type.eq_any(["pdf"]))
+    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
+    .load::<(i32, String, String, String, i64)>(conn)
+    .unwrap();
+  
+  println!("PDF files: {}", pdf_files_data.len());
+  println!("Not PDF files: {}", not_pdf_files_data.len());
+  
+  // Append the pdf_files_data to not_pdf_files_data
+  let all_files_data = not_pdf_files_data.clone();
+  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
+  
+  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().filter(|item| {
+    let path = item.1.clone();
+    // Check if the file is in the allowed_files list
+    if allowed_files.iter().any(|allowed_file| path.contains(&allowed_file.path)) {
+      return true;
+    }
+    // Check if the file path starts with a path in the allowed_folders list
+    if allowed_folders.iter().any(|allowed_folder| path.starts_with(&allowed_folder.path)) {
+      return true;
+    }
+    // Check if the file is in the ignored_files list
+    if ignored_files.iter().any(|ignored_file| path.contains(&ignored_file.path)) {
+      return false;
+    }
+    // Check if the file path starts with a path in the ignored_folders list
+    if ignored_folders.iter().any(|ignored_folder| path.starts_with(&ignored_folder.path)) {
+      return false;
+    }
+    true
+  }).collect();
+  
+  let metadata_ids_to_select: Vec<i32> = all_files_data.iter().map(|item| item.0).collect();
+  let all_last_parsed_values: HashMap<i32, i64> = body::table
+    .filter(body::metadata_id.eq_any(metadata_ids_to_select))
     .select((body::metadata_id, body::last_parsed))
     .load::<(i32, i64)>(conn)
     .unwrap()
     .into_iter()
     .collect();
 
-  println!("PDF files: {}", pdf_files_data.len());
-  println!("Not PDF files: {}", not_pdf_files_data.len());
-
-  // Append the pdf_files_data to not_pdf_files_data
-  let all_files_data = not_pdf_files_data.clone();
-  let all_last_parsed_values = not_pdf_last_parsed_values.clone();
-  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
-  let all_last_parsed_values: HashMap<i32, i64> = all_last_parsed_values.into_iter().chain(pdf_last_parsed_values.into_iter()).collect();
-
+  // Get sync_running status
   let mut sync_running = sync_status(&app).0;
+
+  // Iterate over all_files_data and extract text from each file
   for file_item in all_files_data {
     let metadata_id = file_item.0;
     let path = file_item.1;
@@ -463,23 +510,107 @@ fn add_body_to_database(body_items: &Vec<BodyItem>, connection: &mut SqliteConne
   }
 }
 
-pub fn remove_nonexistent_files(conn: &mut SqliteConnection) {
-  let all_files = document::table
+pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
+  let all_file_paths = document::table
     .select(document::path)
     .load::<String>(conn)
     .unwrap();
-  let mut nonexistent_files: Vec<String> = vec![];
-  for file in all_files {
-    if !std::path::Path::new(&file).exists() {
-      nonexistent_files.push(file);
+
+  // add all files whose path is in the ignore_list
+  let ignored_items = get_all_ignored_paths(conn);
+  // divide ignored_items into ignored_files and ignored_folders based on is_folder
+  let ignored_files: Vec<IgnoreList> = ignored_items.iter().filter(|item| !item.is_folder).cloned().collect();
+  let ignored_folders: Vec<IgnoreList> = ignored_items.iter().filter(|item| item.is_folder).cloned().collect();
+
+  let allowed_items = get_all_allowed_paths(conn);
+  let allowed_files: Vec<AllowList> = allowed_items.iter().filter(|item| !item.is_folder).cloned().collect();
+  let allowed_folders: Vec<AllowList> = allowed_items.iter().filter(|item| item.is_folder).cloned().collect();
+
+  println!("All files: {}", &all_file_paths.len());
+
+  let mut files_to_remove: Vec<String> = vec![];
+  for path in all_file_paths {
+    // if path does not exist, add it to files_to_remove
+    if !std::path::Path::new(&path).exists() {
+      files_to_remove.push(path.clone());
+    }
+    // if path is in the allowed_files list, continue
+    if allowed_files.iter().any(|item| item.path == *path) {
+      continue;
+    }
+    // if path starts with a folder in the allowed_folders list, continue
+    if allowed_folders.iter().any(|item| path.starts_with(&item.path)) {
+      continue;
+    }
+    // if path is in the ignored_files list, continue
+    if ignored_files.iter().any(|item| item.path == *path) {
+      files_to_remove.push(path.clone());
+    }
+    // if path starts with a folder in the ignored_folders list, continue
+    if ignored_folders.iter().any(|item| path.starts_with(&item.path)) {
+      files_to_remove.push(path.clone());
     }
   }
-  if nonexistent_files.len() > 0 {
-    let _ = diesel::delete(document::table
-      .filter(document::path.eq_any(nonexistent_files)))
-      .execute(conn)
-      .unwrap();
+
+  println!("Files to remove: {}", files_to_remove.len());
+
+  if files_to_remove.len() > 0 {
+    println!("Removing {} files", files_to_remove.len());
+    // create transactions of 100 files each
+    let mut chunked_files_to_remove: Vec<Vec<String>> = vec![];
+    let mut chunk: Vec<String> = vec![];
+    for file in files_to_remove {
+      if chunk.len() == 100 {
+        chunked_files_to_remove.push(chunk.clone());
+        chunk.clear();
+      }
+      chunk.push(file);
+    }
+    chunked_files_to_remove.push(chunk.clone());
+    // remove files from the database
+    for chunks_of_files_to_remove in chunked_files_to_remove {
+      println!("Removing {} files from chunk", chunks_of_files_to_remove.len());
+      remove_vector_of_file_paths_from_db(chunks_of_files_to_remove, conn);
+    }
   }
+}
+
+fn remove_vector_of_file_paths_from_db(file_paths: Vec<String>, conn: &mut SqliteConnection) {
+  let file_paths_clone = file_paths.clone();
+  // get metadata_id for all file_paths
+  let metadata_ids = document::table
+    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
+    .filter(document::path.eq_any(file_paths_clone))
+    .select(metadata::id)
+    .load::<i32>(conn)
+    .unwrap();
+
+  // first delete from body_fts, then body, then metadata_fts, then metadata, then document
+  // delete from body_fts
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::delete(body_fts::table.filter(body_fts::metadata_id.eq_any(metadata_ids.clone())))
+      .execute(connection)
+  }).unwrap();
+  // delete from body
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::delete(body::table.filter(body::metadata_id.eq_any(metadata_ids.clone())))
+      .execute(connection)
+  }).unwrap();
+  // delete from metadata_fts
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::delete(metadata_fts::table.filter(metadata_fts::id.eq_any(metadata_ids.clone())))
+      .execute(connection)
+  }).unwrap();
+  // delete from metadata
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::delete(metadata::table.filter(metadata::id.eq_any(metadata_ids.clone())))
+      .execute(connection)
+  }).unwrap();
+  // delete from document
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::delete(document::table.filter(document::path.eq_any(file_paths)))
+      .execute(connection)
+  }).unwrap();
 }
 
 pub fn add_folders_to_db(conn: &mut SqliteConnection) {
@@ -545,10 +676,14 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
     .unwrap();
 }
 
-pub fn add_path_to_ignore_list(path: String, ignore_indexing: bool, ignore_content: bool, conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
+pub fn add_path_to_ignore_list(path: String, is_folder: bool, ignore_indexing: bool, ignore_content: bool, conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
+  // remove path from allow_list if it exists
+  let _ = diesel::delete(allow_list::table.filter(allow_list::path.eq(path.clone()))).execute(conn);
+  // add path to ignore_list
   diesel::insert_into(ignore_list::table)
     .values(IgnoreList {
       path,
+      is_folder,
       ignore_indexing,
       ignore_content
     })
@@ -560,9 +695,33 @@ pub fn get_all_ignored_paths(conn: &mut SqliteConnection) -> Vec<IgnoreList> {
   ignore_list::table
     .select((
       ignore_list::path,
+      ignore_list::is_folder,
       ignore_list::ignore_indexing,
       ignore_list::ignore_content
     ))
     .load::<IgnoreList>(conn)
+    .unwrap()
+}
+
+pub fn add_path_to_allow_list(path: String, is_folder: bool, conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
+  // remove path from ignore_list if it exists
+  let _ = diesel::delete(ignore_list::table.filter(ignore_list::path.eq(path.clone()))).execute(conn);
+  // add path to allow_list
+  diesel::insert_into(allow_list::table)
+    .values(AllowList {
+      path,
+      is_folder
+    })
+    .execute(conn)
+}
+
+pub fn get_all_allowed_paths(conn: &mut SqliteConnection) -> Vec<AllowList> {
+  // get all columns from allow_list except id
+  allow_list::table
+    .select((
+      allow_list::path,
+      allow_list::is_folder,
+    ))
+    .load::<AllowList>(conn)
     .unwrap()
 }

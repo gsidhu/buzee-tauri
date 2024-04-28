@@ -3,7 +3,7 @@
 
 use diesel::prelude::*;
 use diesel::Insertable;
-use super::schema::{document, metadata, metadata_fts, body, body_fts, user_preferences, app_data, ignore_list, file_types};
+use super::schema::{document, metadata, metadata_fts, body, body_fts, user_preferences, app_data, ignore_list, allow_list, file_types};
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -40,8 +40,17 @@ pub struct AppData {
 #[diesel(table_name = ignore_list)]
 pub struct IgnoreList {
     pub path: String,
+    pub is_folder: bool,
     pub ignore_indexing: bool,
     pub ignore_content: bool,
+}
+
+// This struct is for CRUD on the allow_list table
+#[derive(Serialize, Deserialize, Insertable, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+#[diesel(table_name = allow_list)]
+pub struct AllowList {
+    pub path: String,
+    pub is_folder: bool,
 }
 
 // This struct is for CRUD on the file_types table
