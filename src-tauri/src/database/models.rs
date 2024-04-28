@@ -13,6 +13,7 @@ use serde::Serialize;
 pub struct UserPrefs {
     pub first_launch_done: bool,
     pub onboarding_done: bool,
+    pub show_search_suggestions: bool,
     pub launch_at_startup: bool,
     pub show_in_dock: bool,
     pub global_shortcut_enabled: bool,

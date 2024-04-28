@@ -9,7 +9,8 @@
 		searchInProgress,
 		compactViewMode,
 		allowedExtensions,
-		searchSuggestions
+		searchSuggestions,
+		userPreferences
 	} from '$lib/stores';
 	import { searchDocuments } from '$lib/utils/dbUtils';
 	import { setExtensionCategory } from '$lib/utils/miscUtils';
@@ -25,7 +26,7 @@
   let selectedSuggestionItem = -1;
 	let getSuggestions = true;
 
-	$: if ($searchQuery.length >= 3 && getSuggestions) {
+	$: if ($searchQuery.length >= 3 && getSuggestions && $userPreferences.show_search_suggestions) {
 		getSearchSuggestions();
 	} else if ($searchQuery.length < 3) {
 		$searchSuggestions = [];
@@ -150,11 +151,13 @@
 			</div>
 		</div>
 	</div>
-	<SearchSuggestions
-      isSearchSuggestionsVisible={isInputFocused && $searchSuggestions.length > 0}
-      {selectedSuggestionItem}
-      {triggerSearch}
-	  />
+	{#if $userPreferences.show_search_suggestions}
+		<SearchSuggestions
+			isSearchSuggestionsVisible={isInputFocused && $searchSuggestions.length > 0}
+			{selectedSuggestionItem}
+			{triggerSearch}
+		/>
+	{/if}
 </div>
 
 <style lang="scss">

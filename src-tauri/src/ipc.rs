@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::housekeeping;
 use crate::indexing::{all_allowed_filetypes, add_path_to_ignore_list, get_all_ignored_paths};
-use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_user_preferences_state_from_db_value};
+use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::graceful_restart;
 use crate::window::hide_or_show_window;
 use serde_json;
@@ -171,7 +171,6 @@ async fn show_ignored_paths(app: tauri::AppHandle) -> Result<Vec<IgnoreList>, Er
   Ok(get_all_ignored_paths(&mut conn))
 }
 
-
 // Get sync status
 #[tauri::command]
 fn get_sync_status(app: tauri::AppHandle) -> Result<String, Error> {
@@ -283,7 +282,12 @@ async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::Ap
   let mut conn = establish_connection(&app_handle);
   match key.as_str() {
     "launch_at_startup" => {
-      // set_launch_at_startup_in_db(value, &app_handle);
+      set_launch_at_startup_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
+    }
+    "show_search_suggestions" => {
+      set_show_search_suggestions_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
     }
     "onboarding_done" => {
       set_onboarding_done_flag_in_db(value, &app_handle);

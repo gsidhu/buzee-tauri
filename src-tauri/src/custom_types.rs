@@ -136,6 +136,7 @@ impl Default for GlobalShortcutState {
 pub(crate) struct UserPreferencesState {
   pub first_launch_done: bool,
   pub onboarding_done: bool,
+  pub show_search_suggestions: bool,
   pub launch_at_startup: bool,
   pub show_in_dock: bool,
   pub global_shortcut_enabled: bool,
@@ -149,6 +150,7 @@ impl Default for UserPreferencesState {
         Self {
           first_launch_done: false,
           onboarding_done: false,
+          show_search_suggestions: true,
           launch_at_startup: true,
           show_in_dock: true,
           global_shortcut_enabled: true,

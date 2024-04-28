@@ -57,6 +57,7 @@ export const userPreferences = writable({
   "first_launch_done": true,
   "global_shortcut": "Alt+Space",
   "global_shortcut_enabled": true,
+  "show_search_suggestions": true,
   "launch_at_startup": true,
   "onboarding_done": false,
   "show_in_dock": true

@@ -10,6 +10,7 @@
 	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, open, message } from '@tauri-apps/plugin-dialog';
 
+	let showSearchSuggestions: boolean;
 	let launchAtStartup: boolean;
 	let globalShortcutEnabled: boolean;
 	let globalShortcut: String;
@@ -19,12 +20,25 @@
 	let detailedScanEnabled: boolean;
 	let isMac: boolean = true;
 
+	function toggleShowSearchSuggestions() {
+		showSearchSuggestions = !showSearchSuggestions;
+		$userPreferences.show_search_suggestions = showSearchSuggestions;
+		sendEventToFirebase('click:toggleShowSearchSuggestions', { showSearchSuggestions });
+		$statusMessage = `Setting changed!`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
+		invoke("set_user_preference", {key: "show_search_suggestions", value: showSearchSuggestions}).then(() => {
+			console.log("Set show search suggestions flag to: " + showSearchSuggestions);
+		});
+	}
+
 	function toggleLaunchAtStartup() {
 		launchAtStartup = !launchAtStartup;
 		sendEventToFirebase('click:toggleLaunchAtStartup', { launchAtStartup });
 		$statusMessage = `Setting changed!`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
-		window.settingsAPI?.toggleLaunchAtStartup();
+		invoke("set_user_preference", {key: "launch_at_startup", value: launchAtStartup}).then(() => {
+			console.log("Set launch at startup flag to: " + showSearchSuggestions);
+		});
 	}
 
 	function toggleGlobalShortcut() {
@@ -182,6 +196,7 @@
 			console.log(res);
 			// @ts-ignore
 			$userPreferences = res;
+			showSearchSuggestions = $userPreferences.show_search_suggestions;
 			launchAtStartup = $userPreferences.launch_at_startup;
 			globalShortcutEnabled = $userPreferences.global_shortcut_enabled;
 			globalShortcut = $userPreferences.global_shortcut;
@@ -256,6 +271,21 @@
 						<PopoverIcon
 							title="By default, Buzee scans your entire system. You can add files from external drives or network drives here."
 						/>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="text-center px-2"
+					><input
+						type="checkbox"
+						bind:checked={showSearchSuggestions}
+						on:click={() => toggleShowSearchSuggestions()}
+					/></td
+				>
+				<td class="py-2">
+					Show Search Suggestions
+					<div class="d-flex align-items-center small-explanation gap-1">
+						Buzee will suggest search terms from your documents
 					</div>
 				</td>
 			</tr>
@@ -466,10 +496,6 @@
 		padding: 0;
 		background-color: inherit;
 		color: var(--bs-gray);
-
-		.btn {
-			font-size: inherit;
-		}
 	}
 
 	.settings-links > div > button {

@@ -14,6 +14,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Show ignore list in settings. Allow user to modify there and bulk import/export list.
 ## - Make DB and functions respect the ignore list.
 
+- Added search suggestions toggle in settings and user prefs.
 - Created new DB table for Ignore List. User can now ignore the file completely or ignore only the file text.
 - Removed disallowed_paths from userprefs table, state and store.
 - Added Ignore List page in Settings.

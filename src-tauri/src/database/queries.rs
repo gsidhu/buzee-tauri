@@ -248,6 +248,7 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     first_launch_done BOOLEAN NOT NULL DEFAULT 0,
     onboarding_done BOOLEAN NOT NULL DEFAULT 0,
+    show_search_suggestions BOOLEAN NOT NULL DEFAULT 0,
     launch_at_startup BOOLEAN NOT NULL DEFAULT 0,
     show_in_dock BOOLEAN NOT NULL DEFAULT 1,
     global_shortcut_enabled BOOLEAN NOT NULL DEFAULT 1,

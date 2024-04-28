@@ -89,6 +89,7 @@ table! {
     id -> Integer,
     first_launch_done -> Bool,
     onboarding_done -> Bool,
+    show_search_suggestions -> Bool,
     launch_at_startup -> Bool,
     show_in_dock -> Bool,
     global_shortcut_enabled -> Bool,

@@ -41,6 +41,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
     let new_user_prefs = UserPrefs {
       first_launch_done: true,
       onboarding_done: false,
+      show_search_suggestions: true,
       launch_at_startup: true,
       show_in_dock: true,
       global_shortcut_enabled: true,
@@ -207,6 +208,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
     .select((
       user_preferences::first_launch_done,
       user_preferences::onboarding_done,
+      user_preferences::show_search_suggestions,
       user_preferences::launch_at_startup,
       user_preferences::show_in_dock,
       user_preferences::global_shortcut_enabled,
@@ -220,6 +222,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
   // set state values from user_preferences_from_db
   state.first_launch_done = user_preferences_from_db.first_launch_done;
   state.onboarding_done = user_preferences_from_db.onboarding_done;
+  state.show_search_suggestions = user_preferences_from_db.show_search_suggestions;
   state.launch_at_startup = user_preferences_from_db.launch_at_startup;
   state.show_in_dock = user_preferences_from_db.show_in_dock;
   state.global_shortcut_enabled = user_preferences_from_db.global_shortcut_enabled;
@@ -263,6 +266,22 @@ pub fn set_onboarding_done_flag_in_db(flag: bool, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)
     .set(user_preferences::onboarding_done.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_launch_at_startup_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::launch_at_startup.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_show_search_suggestions_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::show_search_suggestions.eq(flag))
     .execute(&mut conn)
     .unwrap();
 }
