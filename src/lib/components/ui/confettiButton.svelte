@@ -9,6 +9,8 @@
 	export let showText = true;
 	export let showSpinner = false;
 	export let title = '';
+  export let dataBSToggle = '';
+  export let dataBSTarget = '';
 	export let type = 'confetti-button';
 	export let isDisabled = false;
 
@@ -35,6 +37,8 @@
 	class={`btn ${marginClass} ${type}`}
 	on:click={(e) => animateButton(e)}
 	{title}
+  data-bs-toggle={dataBSToggle}
+  data-bs-target={dataBSTarget}
 	disabled={isDisabled}
 >
 	{#if showSpinner}

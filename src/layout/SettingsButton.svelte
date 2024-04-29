@@ -11,6 +11,8 @@
     // window.menuAPI?.showSettingsMenu();
   }
 
+  let onSettingsSubPage = false;
+
   onMount(() => {
 		// add an event listener to every time the page changes
 		page.subscribe((value) => {
@@ -20,6 +22,11 @@
           $onSearchPage = true;
         } else {
           $onSearchPage = false;
+          if (route.startsWith('/settings/')) {
+            onSettingsSubPage = true;
+          } else {
+            onSettingsSubPage = false;
+          }
         }
 			}
 		});
@@ -33,10 +40,17 @@
       <i id="settings-button" class="bi bi-gear" aria-label="Settings" aria-hidden="true"/>
     </button>
   {:else}
-    <a href="/search" id="search-button" class="d-block link-dark" title="Back to Search">
-      <i class="bi bi-arrow-left-short" aria-label="Back"></i>
-      <i class="bi bi-search" aria-label="Search"/>
-    </a>
+    {#if onSettingsSubPage}
+      <a href="/settings" id="settings-button" class="d-block link-dark" title="Back to Settings">
+        <i class="bi bi-arrow-left-short" aria-label="Back"></i>
+        <i class="bi bi-gear" aria-label="Settings"/>
+      </a>
+    {:else}
+      <a href="/search" id="search-button" class="d-block link-dark" title="Back to Search">
+        <i class="bi bi-arrow-left-short" aria-label="Back"></i>
+        <i class="bi bi-search" aria-label="Search"/>
+      </a>
+    {/if}
   {/if}
 </div>
 
@@ -51,7 +65,7 @@
     color: var(--hot-pink) !important;
   }
 
-  #search-button:hover {
+  a:hover {
     transform: scale(1.1);
     color: var(--hot-pink) !important;
   }

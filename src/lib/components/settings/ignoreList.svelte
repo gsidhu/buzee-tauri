@@ -12,7 +12,7 @@
 			accessor: 'path'
 		}),
 		table.column({
-			header: 'Ignore Indexing',
+			header: 'Ignore Scanning',
 			accessor: 'ignore_indexing',
 			cell: ({ value }: { value: boolean }) => value ? 'Yes' : 'No'
 		}),
@@ -89,9 +89,12 @@
 									title={String(cell.render())}
 								>
 									{#if cell.id === 'path' }
-										<span class="d-flex align-items-center gap-1">
-											<input type="checkbox" bind:checked={isSelected[row.id]} />
-											<span><Render of={cell.render()} /></span>
+										<span class="d-flex align-items-center gap-2">
+											<input id={`select-row-${row.id}`} type="checkbox" bind:checked={isSelected[row.id]} />
+											<label class="form-check-label" for={`select-row-${row.id}`}>
+												<Render of={cell.render()} />
+											</label>
+											<!-- <span><Render of={cell.render()} /></span> -->
 										</span>
 									{:else}
 										<span><Render of={cell.render()} /></span>
@@ -116,11 +119,17 @@
 	</table>
 	{#if $ignoredPaths.length > 0 }
 		<div class="text-center">
-			<button type="button" class="btn-sm" on:click={() => removeFromList()}>Remove selected items from list</button>
+			<!-- <button type="button" class="btn-sm" on:click={() => removeFromList()}>Remove selected items from list</button> -->
+			<button class="btn btn-sm link-danger px-0" on:click={() => removeFromList()}>
+				Remove selected items from list
+			</button>
 		</div>
 	{/if}
 
 <style lang="scss">
+	.btn.link-danger:hover {
+		text-decoration: underline;
+	}
 	.path-col {
 		width: 50vw;
 		max-width: 50vw;

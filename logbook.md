@@ -11,8 +11,8 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Figure out how to make AltGr work same as Alt on Windows.
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
-## - Add modal to select and add folder to Ignore List.
 
+- Added modal to select and add folder to Ignore List.
 - Added file type list in settings.
 - Added function to get parsed file text for a row. Not using anywhere cuz not sure where to put it right now, will move it to Preview pane eventually.
 - Showing Ignore List in settings. User can remove items from it. TODO: Add bulk import/export.
