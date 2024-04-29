@@ -5,45 +5,46 @@
   import { invoke } from "@tauri-apps/api/core";
 
   let dbStats: DBStat[] = [];
+  let totalItems = 0;
   let totalDocs = 0;
   let docStats: DBStat[] = [];
-  let allDocCount = 0;
   let statPercentage: DBStat[] = [];
   const officePDFTypes = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'];
 	const allDocTypes = [...officePDFTypes, 'pages', 'numbers', 'key', 'txt', 'md', 'csv'];
 
   async function updateDBStats() {
-    let dbStats: DBStat[] = await invoke('get_db_stats');
+    dbStats = await invoke('get_db_stats');
+    // remove duplicates from dbStats
+    dbStats = dbStats.filter((stat, index, self) =>
+      index === self.findIndex((t) => (
+        t.file_type === stat.file_type
+      ))
+    );
     
-    totalDocs = dbStats.reduce((acc, curr) => acc + curr.count, 0);
-    // dbStats.map((stat) => {
-      // statPercentage.push({
-      //   'file_type': stat.file_type,
-      //   'count': Math.round(100*stat.count/totalDocs)
-      // })
-    // })
-    totalDocs = dbStats.reduce((acc, curr) => acc + curr.count, 0);
-    // those items from dbStats where file_type is in allDocTypes
-    docStats = dbStats.filter((stat) => allDocTypes.indexOf(stat.file_type) > -1);
+    totalItems = dbStats.reduce((acc, curr) => acc + curr.count, 0);
+
     dbStats.map((stat) => {
       if (allDocTypes.indexOf(stat.file_type) > -1) {
-        allDocCount += stat.count;
         statPercentage.push({
           file_type: stat.file_type,
-          count: Math.round((100 * stat.count) / totalDocs)
+          count: Math.round((100 * stat.count) / totalItems)
         });
       }
     });
+
+    docStats = dbStats.filter((stat) => allDocTypes.indexOf(stat.file_type) > -1);
+    totalDocs = docStats.reduce((acc, curr) => acc + curr.count, 0);
+    
     let sumStatPercentages = statPercentage.reduce((acc, curr) => acc + curr.count, 0);
+    
     statPercentage.push({
       file_type: 'other',
       count: 100 - sumStatPercentages
     });
     docStats.push({
       file_type: 'other',
-      count: totalDocs - allDocCount
+      count: totalItems - totalDocs
     });
-
   }
 
   // function saveUniqueDocumentProfile() {
@@ -72,7 +73,7 @@
   })
 </script>
 
-<h6 class="text-center">Unique Document Profile</h6>
+<h6 class="text-center cursor-default">Your Unique Document Profile</h6>
 <div class="progress-stacked w-90 mx-auto">
   {#each docStats as stat, index}
     <div
@@ -92,42 +93,50 @@
       >
         <PopoverIcon
           icon={stat.file_type === "other"
-          ? 'jpg'
+          ? 'other-file-folder'
           : stat.file_type
           }
           filetypeicon={true}
-          title={`${stat.count} ${stat.file_type} files`}
+          title={`${stat.count} ${stat.file_type} files (${statPercentage[index].count}%)`}
         />
       </div>
     </div>
   {/each}
 </div>
 
-<div class="col-10 mx-auto my-2">
-  <div class="row row-cols-2">
+<div class="col-10 mx-auto my-4 cursor-default">
+  <div class="row row-cols-sm-2 row-cols-1">
     {#each docStats as stat}
       {#if stat.count > 0}
         <div class="col">
           <div class="row row-cols-2">
-            <div class="col">
+            <div class="col-8">
               <FileTypeIcon filetype={
                 stat.file_type === "other"
-                    ? 'jpg'
+                    ? 'folder'
                     : stat.file_type
               }/>
               <small>{stat.file_type}</small>
             </div>
-            <div class="col text-end"><small>{stat.count}</small></div>
+            <div class="col-4 text-end"><small>{stat.count}</small></div>
           </div>
         </div>
       {/if}
     {/each}
     <div class="col">
       <div class="row row-cols-2">
-        <div class="col">
-          <i class="bi bi-circle-fill pe-2" style={`color: var(--purple)`}/><small>Total</small>
+        <div class="col-8">
+          <i class="bi bi-circle-fill pe-2" style={`color: var(--purple)`}/><small>Total Docs</small>
         </div>
-        <div class="col text-end"><small>{totalDocs}</small></div>
+        <div class="col-4 text-end"><small>{totalDocs}</small></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="row row-cols-2">
+        <div class="col-8">
+          <i class="bi bi-circle-fill pe-2" style={`color: var(--hot-pink)`}/><small>Total Files</small>
+        </div>
+        <div class="col-4 text-end"><small>{totalItems}</small></div>
       </div>
     </div>
   </div>

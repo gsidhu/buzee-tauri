@@ -364,7 +364,7 @@ fn handle_special_case(
     for result in outer_search_results {
         let mut found = false;
         for not_segment in &query_segments.not_segments {
-            if result.name.contains(not_segment) || result.path.contains(not_segment) {
+            if result.name.contains(not_segment) || result.path.contains(not_segment) || result.file_type.contains(not_segment) {
                 found = true;
                 break;
             }

@@ -128,7 +128,7 @@
 
 <KeyboardListeners />
 <EventListeners />
-<main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
+<main class={`min-vh-100 main-container cursor-default ${$windowBlurred ? "grayscale" : ""}`}>
 	<!-- <button on:click={() => testFn()}>Test</button> -->
 	<slot />
 	<StatusBar />

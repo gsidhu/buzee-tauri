@@ -13,10 +13,11 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Check if app updater works on Windows.
 ## - Show ignore list in settings. Allow user to modify there and bulk import/export list.
 ## - Add file type editor in settings. Similar to ignore list.
-## - Make DB Stats work correctly.
 ## - Show parsed file text in context menu. Later move it to Preview pane.
 ## - Show "Load More" button at end of results. (If #results < 50)
 
+- Fixed minor bug in search function: negative query only wasn't eliminating based on filetype.
+- Fixed DB Stats. Shows correct numbers now.
 - Database and functions respect the ignore list and allow list.
 - The allow list supercedes the ignore list.
 - Created an allow_list table to store manually added paths to files/folders.
