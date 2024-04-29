@@ -1,8 +1,18 @@
 <script lang="ts">
   import { fade } from 'svelte/transition';
   import TopBar from '../../../layout/TopBar.svelte';
-	import PopoverIcon from '$lib/components/ui/popoverIcon.svelte';
+	import { invoke } from '@tauri-apps/api/core';
 	import { onMount } from 'svelte';
+	import IgnoreList from '$lib/components/settings/ignoreList.svelte';
+  import { ignoredPaths } from '$lib/stores';
+
+	onMount(() => {
+		invoke("show_ignored_paths").then((res) => {
+			// @ts-ignore
+			$ignoredPaths = res;
+			console.log(ignoredPaths);
+		})
+	});
 
 </script>
 
@@ -17,9 +27,13 @@
 			<i class="bi bi-file-earmark-x" /> <i class="bi bi-folder-x" />
 		</div>
 		<h3>Ignore List</h3>
-		<p>Any files or folders that you manually add from the Settings will be automatically removed from the Ignore List.</p>
+    <p class="text-center">Any files or folders that you manually add from the Settings will be automatically removed from this list</p>
 
-		<button>Remove Item</button>
+    {#key $ignoredPaths.length }
+      <IgnoreList />
+    {/key}
+
+		<!-- <button>Remove Item</button>
 		<h6>SvelteTable: Ignore Completely</h6>
 		<small>Dialog menu to add items</small>
 
@@ -30,6 +44,6 @@
 		<button>Export List (to use in Buzee later)</button>
 		<button>Import List (from a previous Buzee installation)</button>
 		
-		<small>On each save/import, run a formatting check + assign isFolder attribute before passing to the database</small>
+		<small>On each save/import, run a formatting check + assign isFolder attribute before passing to the database</small> -->
   </div>
 </div>

@@ -63,9 +63,20 @@ declare global {
     added_by_user: boolean,
   }
 
+  interface IgnoreListType {
+    path: string,
+    ignore_indexing: boolean,
+    ignore_content: boolean,
+    is_folder: boolean,
+  }
+
   interface FileTypesDropdown {
     categories: string[],
     items: FileTypes[]
+  }
+
+  interface StringBooleanObject {
+    [key: string]: boolean;
   }
 
   // type ElectronStore = import('electron-store');

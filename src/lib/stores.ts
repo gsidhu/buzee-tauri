@@ -49,6 +49,7 @@ let storedAllowedExtensions: FileTypesDropdown = {
 };
 
 let storedSearchSuggestions: string[] = [];
+let storedIgnoredPaths: IgnoreListType[] = [];
 
 // 2. Set the stored value or a sane default.
 export const userPreferences = writable({
@@ -78,6 +79,7 @@ export const resultsPerPage = writable(25)
 export const statusMessage = writable("")
 export const compactViewMode = writable(storedCompactViewMode || false)
 export const selectedResult = writable(storedSelectedResult || {})
+export const ignoredPaths = writable(storedIgnoredPaths || [])
 // export const searchTrigger = writable(storedSearchTrigger || false)
 // export const searchResults = writable(storedSearchResults || '')
 // export const searchHistory = writable(storedSearchHistory || '')

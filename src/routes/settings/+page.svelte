@@ -266,7 +266,7 @@
 						<i class="bi bi-plus-circle" />
 					</button>
 				</td>
-				<td class="py-2">
+				<td class="py-2 skip-hover">
 					Add Documents
 					<div class="d-flex align-items-center small-explanation gap-1">
 						Add more documents to search in Buzee
@@ -284,7 +284,7 @@
 						on:click={() => toggleShowSearchSuggestions()}
 					/></td
 				>
-				<td class="py-2">
+				<td class="py-2 skip-hover">
 					Show Search Suggestions
 					<div class="d-flex align-items-center small-explanation gap-1">
 						Buzee will suggest search terms from your documents
@@ -299,7 +299,7 @@
 						on:click={() => toggleLaunchAtStartup()}
 					/></td
 				>
-				<td class="py-2">
+				<td class="py-2 skip-hover">
 					Launch at Startup
 					<div class="d-flex align-items-center small-explanation gap-1">
 						Launch the app automatically when your computer starts
@@ -314,7 +314,7 @@
 						on:click={() => toggleGlobalShortcut()}
 					/>
 				</td>
-				<td class="py-2">
+				<td class="py-2 skip-hover">
 					Allow Global Shortcut
 					<div class="d-flex align-items-center small-explanation gap-1">
 						{#if isMac}
@@ -347,7 +347,7 @@
 						on:click={() => toggleAutomaticBackgroundSync()}
 					/>
 				</td>
-				<td class="py-2">
+				<td class="py-2 skip-hover">
 					Allow Automatic Background Scan
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Buzee will automatically scan your system in the background</div>
@@ -363,7 +363,7 @@
 						on:click={() => toggleDetailedScan()}
 					/>
 				</td>
-				<td class="py-2">
+				<td class="py-2 skip-hover">
 					Scan File Text
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Buzee will scan file text so you can search inside files</div>
@@ -382,7 +382,7 @@
 						</div>
 					</button>
 				</td>
-				<td class="py-2">
+				<td class="py-2 skip-hover">
 					Ignore List
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>List of files and folders that you want Buzee to ignore</div>
@@ -518,7 +518,7 @@
 		}
 	}
 
-	tr {
+	td {
 		&:not(.skip-hover):hover {
 			cursor: default;
 			color: var(--purple);

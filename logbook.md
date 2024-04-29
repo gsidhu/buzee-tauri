@@ -11,10 +11,10 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Figure out how to make AltGr work same as Alt on Windows.
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
-## - Show ignore list in settings. Allow user to modify there and bulk import/export list.
 ## - Add file type editor in settings. Similar to ignore list.
 ## - Show parsed file text in context menu. Later move it to Preview pane.
 
+- Showing Ignore List in settings. User can remove items from it. TODO: Add bulk import/export.
 - Added "Load More" button at end of results (only if #results > 50). TODO: It scrolls to back to top because the whole table is re-rendered because of the #key in resultTable.svelte.
 - Fixed minor bug in search function: negative query only wasn't eliminating based on filetype.
 - Fixed DB Stats. Shows correct numbers now.

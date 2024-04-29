@@ -24,6 +24,7 @@
 	}
 
 	async function loadMoreResults() {
+		// Same function as triggerSearch, but with a different page number and appending results
 		console.log("Loading more results...");
 		$resultsPageShown += 1; // increment the page number on each new search
 		$searchInProgress = true;
@@ -308,7 +309,7 @@
 							on:contextmenu={(e) => showContextMenu(e, $documentsShown[Number(row.id)])}
 							on:dblclick={() => openFile($documentsShown[Number(row.id)].path)}
 							draggable="true"
-							on:dragstart={startDragging($documentsShown[Number(row.id)].path)}
+							on:dragstart={(event) => startDragging($documentsShown[Number(row.id)].path)}
 						>
 							{#each row.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs>

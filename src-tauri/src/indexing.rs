@@ -703,6 +703,15 @@ pub fn get_all_ignored_paths(conn: &mut SqliteConnection) -> Vec<IgnoreList> {
     .unwrap()
 }
 
+pub fn remove_paths_from_ignore_list(paths: Vec<String>, conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
+  println!("Removing {} paths from ignore_list", paths.len());
+  // remove paths from ignore_list
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::delete(ignore_list::table.filter(ignore_list::path.eq_any(paths)))
+      .execute(connection)
+  })
+}
+
 pub fn add_path_to_allow_list(path: String, is_folder: bool, conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
   // remove path from ignore_list if it exists
   let _ = diesel::delete(ignore_list::table.filter(ignore_list::path.eq(path.clone()))).execute(conn);

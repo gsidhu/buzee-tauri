@@ -8,7 +8,7 @@ use crate::database::search::{
     get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index, get_metadata_title_matches,
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
-use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files};
+use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
 use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::graceful_restart;
 use crate::window::hide_or_show_window;
@@ -156,6 +156,13 @@ async fn ignore_file_or_folder(app: tauri::AppHandle, path: String, is_directory
   let mut conn = establish_connection(&app);
   add_path_to_ignore_list(path, is_directory, should_ignore_indexing, should_ignore_content, &mut conn).unwrap();
   remove_nonexistent_and_ignored_files(&mut conn);
+}
+
+// Remove list of paths from Ignore List
+#[tauri::command]
+async fn remove_from_ignore_list(app: tauri::AppHandle, paths: Vec<String>) {
+  let mut conn = establish_connection(&app);
+  let _ = remove_paths_from_ignore_list(paths, &mut conn);
 }
 
 // Ignore file or folder path
@@ -362,7 +369,8 @@ pub fn initialize() {
       get_user_preferences_state,
       reset_user_preferences,
       ignore_file_or_folder,
-      show_ignored_paths
+      show_ignored_paths,
+      remove_from_ignore_list
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_updater::Builder::new().build())
