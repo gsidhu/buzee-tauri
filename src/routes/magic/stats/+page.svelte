@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import TopBar from "../../layout/TopBar.svelte";
+  import TopBar from "../../../layout/TopBar.svelte";
 	import UniqueDocumentProfile from "$lib/components/stats/UniqueDocumentProfile.svelte";
 </script>
 

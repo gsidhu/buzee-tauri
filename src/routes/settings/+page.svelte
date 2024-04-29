@@ -407,18 +407,18 @@
 		</table>
 		<div class="row row-cols-1 row-cols-sm-3 w-90 justify-content-between settings-links">
 			<div class="col text-start mobile-text-center">
-				<button class="btn btn-sm link-danger px-0" on:click={() => resetDefault()}>
+				<button type="button" class="btn btn-sm link-danger px-0" on:click={() => resetDefault()}>
 					Reset Default
 				</button>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
 			</div>
 			<div class="col text-center">
-				<button class="btn btn-sm link-primary px-0" on:click={() => checkForAppUpdates()}>
+				<button type="button" class="btn btn-sm link-primary px-0" on:click={() => checkForAppUpdates()}>
 					Check for Updates
 				</button>
 			</div>
 			<div class="col text-end mobile-text-center">
-				<button class="btn btn-sm link-danger px-0" on:click={() => uninstallApp()}
+				<button type="button" class="btn btn-sm link-danger px-0" on:click={() => uninstallApp()}
 					>Uninstall App</button
 				>
 				<PopoverIcon title="Delete all data and uninstall the app" />
@@ -515,11 +515,11 @@
 		color: var(--bs-gray);
 	}
 
-	.settings-links > div > button {
-		&:hover {
-			text-decoration: underline;
-		}
+	.settings-links > div > button:hover {
+		text-decoration: underline;
+	}
 
+	.settings-links > div {
 		@media (min-width: 576px) {
 			font-size: 0.7rem;
 			font-weight: 300;

@@ -98,13 +98,13 @@
     });
     // Status Bar - Fun Stuff
     await listen<Payload>('document-stats', (event: any) => {
-      goto("/stats");
+      goto("/magic/stats");
     });
     await listen<Payload>('deep-breathing', (event: any) => {
-      goto("/deep-breathing");
+      goto("/magic/deep-breathing");
     });
     await listen<Payload>('tips-and-shortcuts', (event: any) => {
-      goto("/tips");
+      goto("/magic/tips");
     });
 	}
 

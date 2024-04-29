@@ -27,7 +27,8 @@
 
 	function showStatusBarMenu(option: string) {
 		sendEventToFirebase('click:showStatusBarMenu', { option, ...defaultData });
-		invoke("open_context_menu", {option:"statusbar"}).then((res) => {});
+		// invoke("open_context_menu", {option:"statusbar"}).then((res) => {});
+		goto("/magic/");
 	}
 
 	function reCalculateOnDocsShownChange() {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import TopBar from "../../layout/TopBar.svelte";
+  import TopBar from "../../../layout/TopBar.svelte";
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
