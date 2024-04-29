@@ -3,7 +3,9 @@
 	import moment from 'moment';
 	import { onMount } from 'svelte';
 	import { readable } from 'svelte/store';
-	import { documentsShown, shiftKeyPressed, compactViewMode, selectedResult } from '$lib/stores';
+	import { documentsShown, shiftKeyPressed, compactViewMode, selectedResult, resultsPageShown, searchInProgress, filetypeShown, allowedExtensions, searchQuery, resultsPerPage } from '$lib/stores';
+	import { searchDocuments } from '$lib/utils/dbUtils';
+	import { setExtensionCategory } from '$lib/utils/miscUtils';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
 	import FiletypeDropdown from '$lib/components/search/FiletypeDropdown.svelte';
 	// @ts-ignore
@@ -13,6 +15,41 @@
 	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { sendEventToFirebase } from '../../../utils/firebase';
+	import ConfettiButton from '../ui/confettiButton.svelte';
+
+	let noMoreResults = false;
+
+	$: if ($documentsShown.length < 50) {
+		noMoreResults = true;
+	}
+
+	async function loadMoreResults() {
+		console.log("Loading more results...");
+		$resultsPageShown += 1; // increment the page number on each new search
+		$searchInProgress = true;
+		sendEventToFirebase('search-triggered', {
+			searchQuery: $searchQuery,
+			filetypeShown: $filetypeShown,
+			resultsPageShown: $resultsPageShown
+		});
+		let filetypeToGet = $filetypeShown;
+		if (filetypeToGet !== 'any') {
+			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
+		}
+		let results = await searchDocuments(
+			$searchQuery,
+			$resultsPageShown,
+			$resultsPerPage,
+			filetypeToGet
+		);
+		sendEventToFirebase('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
+		if (results.length === 0) {
+			noMoreResults = true;
+		} else {
+			$documentsShown = [...$documentsShown, ...results];
+		}
+		$searchInProgress = false;
+	}
   
   function startDragging(filepath: string) {
 		const image64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADySURBVFiF7dcxSgNRFIXhT4Wx1NrCFCK4iEiCWxBcgjsQscteLMQlKCksLCLYWbkE3cEEJBaTgL5MzGReAhb3h9cc3tz7w0wxh3k6GKLEpOV5R7dmdiOGuEHR8vkBHvGBfpsBZcbymcBgunypxHZNVmCcITDjCee4x9kqAuvkeSpx95dEyiRz6SVuk6yPT5yml7cWCNTlTdnHK0Z4+5F3cYyTTQvAHi5wlOTXTWbnvoKVZm/6I1xKCIRACIRACIRACIRACPxLgbG8araIXVXt+8VOzcUeDvCCrzUtL3Cl+iVPS8scHVW7zann6SnxgMN02Ter0UNOfhP2XAAAAABJRU5ErkJggg==";
@@ -181,7 +218,6 @@
 	// hideForId['lastOpened'] = true;
 
 	onMount(() => {
-		console.log("docs shown:", $documentsShown);
 		// select the first result when loading new search results
 		$selectedResult = $documentsShown[0];
 		let firstResult = document.querySelector('.result-0') as HTMLElement | null;
@@ -256,7 +292,7 @@
 			</Subscribe>
 		{/each}
 	</thead>
-	{#key $documentsShown.length}
+	<!-- {#key $documentsShown.length} -->
 		{#if $documentsShown.length > 0}
 			<tbody {...$tableBodyAttrs}>
 				{#each $rows as row (row.id)}
@@ -299,9 +335,21 @@
 						</tr>
 					</Subscribe>
 				{/each}
+				{#if !noMoreResults}
+					<tr class="table-row text-center" draggable="false">
+						<td>
+							<ConfettiButton 
+								label="Load more"
+								type="confetti-button btn-sm"
+								showText={!$searchInProgress}
+								showSpinner={$searchInProgress}
+								handleClick={() => loadMoreResults()} />
+						</td>
+					</tr>
+				{/if}
 			</tbody>
 		{/if}
-	{/key}
+	<!-- {/key} -->
 </table>
 
 {#if $documentsShown.length <= 0}
@@ -433,7 +481,7 @@
 		overflow-y: scroll;
 		overflow-x: auto !important;
 		max-height: calc(
-			100vh - 100px
-		); /* set maximum height so rows don't hide outside the viewport; 100px is roughly the height of the topbar + thead + statusbar */
+			100vh - 110px
+		); /* set maximum height so rows don't hide outside the viewport; 110px is roughly the height of the topbar + thead + statusbar + loadMore button */
 	}
 </style>

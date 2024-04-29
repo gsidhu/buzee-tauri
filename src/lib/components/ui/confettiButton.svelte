@@ -9,7 +9,7 @@
 	export let showText = true;
 	export let showSpinner = false;
 	export let title = '';
-	let type = 'confetti-button';
+	export let type = 'confetti-button';
 	export let isDisabled = false;
 
   function animateButton(e: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }) {
