@@ -45,6 +45,7 @@
 		invoke('get_allowed_filetypes').then((res) => {
 			// @ts-ignore
 			$allowedExtensions = categoriseExtensions(JSON.parse(res));
+			console.log("ext:", $allowedExtensions);
 		});
 	});
 </script>

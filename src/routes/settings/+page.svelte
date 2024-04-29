@@ -389,6 +389,21 @@
 					</div>
 				</td>
 			</tr>
+			<tr>
+				<td class="text-center px-2">
+					<button class="btn" on:click={() => goto('/settings/filetype')}>
+						<div class="d-flex">
+							<i class="bi bi-file-earmark" />
+						</div>
+					</button>
+				</td>
+				<td class="py-2 skip-hover">
+					File Type List
+					<div class="d-flex align-items-center small-explanation gap-1">
+						<div>List of file types that Buzee should scan</div>
+					</div>
+				</td>
+			</tr>
 		</table>
 		<div class="row row-cols-1 row-cols-sm-3 w-90 justify-content-between settings-links">
 			<div class="col text-start mobile-text-center">

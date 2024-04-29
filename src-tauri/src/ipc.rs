@@ -5,7 +5,7 @@ use crate::custom_types::{DBStat, DateLimit, Error, Payload, DBConnPoolState, Us
 use crate::database::{establish_connection, get_connection_pool};
 use crate::database::models::{DocumentSearchResult, IgnoreList};
 use crate::database::search::{
-    get_counts_for_all_filetypes, get_recently_opened_docs, search_fts_index, get_metadata_title_matches,
+    get_counts_for_all_filetypes, get_metadata_title_matches, get_parsed_text_for_file, get_recently_opened_docs, search_fts_index
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
@@ -227,6 +227,14 @@ fn get_db_stats(app: tauri::AppHandle) -> Result<Vec<DBStat>, Error> {
     Ok(db_stats)
 }
 
+// Get parsed text for file
+#[tauri::command]
+async fn get_text_for_file(file_path: String, app: tauri::AppHandle) -> Result<Vec<String>, Error> {
+    let mut conn = establish_connection(&app);
+    let text = get_parsed_text_for_file(file_path, &mut conn).unwrap();
+    Ok(text)
+}
+
 // Open QuickLook (MacOS) or Peek (Windows)
 #[tauri::command]
 fn open_quicklook(file_path: String) -> Result<String, Error> {
@@ -361,6 +369,7 @@ pub fn initialize() {
       run_search,
       get_recent_docs,
       get_db_stats,
+      get_text_for_file,
       open_quicklook,
       open_context_menu,
       set_user_preference,

@@ -5,6 +5,7 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_json;
 use super::models::BodyFTSSearchResult;
+use super::schema::{body, body_fts};
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
     let parsed_json = serde_json::from_str(json_string);
@@ -542,4 +543,22 @@ pub fn get_metadata_title_matches(
     suggestions.dedup();
 
     Ok(suggestions)
+}
+
+// Get parsed text for file
+pub fn get_parsed_text_for_file(file_path: String, conn: &mut SqliteConnection) -> Result<Vec<String>, diesel::result::Error> {
+    // get all rows from body_fts::table where url is equal to file_path
+    let inner_query = format!(
+        r#"
+            SELECT text FROM body WHERE url = '{}';
+        "#,
+        file_path
+    );
+    let parsed_text_rows: Vec<BodyFTSSearchResult> = diesel::sql_query(inner_query).load::<BodyFTSSearchResult>(conn)?;
+
+    let mut parsed_text_vec: Vec<String> = Vec::new();
+    for text in parsed_text_rows {
+        parsed_text_vec.push(text.text);
+    }
+    Ok(parsed_text_vec)
 }
