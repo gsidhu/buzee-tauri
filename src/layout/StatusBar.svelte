@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { compactViewMode, statusMessage, onSearchPage, userPreferences, syncStatus } from '$lib/stores';
+	import { isMac, compactViewMode, statusMessage, onSearchPage, userPreferences, syncStatus } from '$lib/stores';
 	import {
 		documentsShown,
 		searchInProgress,
@@ -14,7 +14,6 @@
 	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 	
 	let darkMode = false;
-	let isMac = false;
 	let fileSyncFinished = false;
 	let syncCoolingPeriod = false;
 	let userAskedToDisable = false;
@@ -121,9 +120,9 @@
 		invoke("get_os").then((res) => {
 			// @ts-ignore
 			if (res == "macos") {
-				isMac = true;
+				$isMac = true;
 			} else {
-				isMac = false;
+				$isMac = false;
 			}
 		});
 

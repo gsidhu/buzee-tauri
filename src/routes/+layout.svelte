@@ -8,12 +8,11 @@
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
 	import { Command } from '@tauri-apps/plugin-shell';
-	import { windowBlurred, cronJobSet, userPreferences, disableInteraction } from '$lib/stores';
+	import { isMac, windowBlurred, cronJobSet, userPreferences, disableInteraction } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, message } from '@tauri-apps/plugin-dialog';
 
 	var appMode: string = "menubar";
-  var isMac: boolean = false;
 
 	async function maximiseWindow() {
 		console.log('double click');
@@ -85,9 +84,9 @@
 		invoke("get_os").then((res) => {
 			// @ts-ignore
 			if (res == "macos") {
-				isMac = true;
+				$isMac = true;
 			} else {
-				isMac = false;
+				$isMac = false;
 			}
 		});
     appMode = "window";

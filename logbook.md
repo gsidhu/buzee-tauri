@@ -7,6 +7,10 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
 
+- Removed all link- buttons. Using a standardised button look.
+- Set contextmenu ipc function to `async` so it works on Windows.
+- Changed all dialog text because Windows renders it differently from Mac. The main message has to be short and the details have to be in the body.
+- Moved isMac to Svelte store.
 - Added a scratch pad to fun stuff.
 - Added external link to Deadline.
 - Added Error page that redirects to home page automatically.

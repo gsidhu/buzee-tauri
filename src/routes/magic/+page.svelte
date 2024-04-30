@@ -4,21 +4,12 @@
   import { fade } from "svelte/transition";
   import { goto } from "$app/navigation";
   import TopBar from "../../layout/TopBar.svelte";
-  let isMac = false;
 
 	async function openDeadlineInBrowser() {
 		await invoke("open_file_or_folder", { filePath: "https://buzo.tools/deadline/" });
 	}
 
   onMount(() => {
-    invoke("get_os").then((res) => {
-			// @ts-ignore
-			if (res == "macos") {
-				isMac = true;
-			} else {
-				isMac = false;
-			}
-		});
   })
 
 </script>

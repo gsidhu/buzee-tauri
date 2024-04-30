@@ -3,17 +3,9 @@
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import TopBar from "../../../layout/TopBar.svelte";
-  let isMac = false;
+  import { isMac } from '$lib/stores';
 
   onMount(() => {
-    invoke("get_os").then((res) => {
-			// @ts-ignore
-			if (res == "macos") {
-				isMac = true;
-			} else {
-				isMac = false;
-			}
-		});
   })
 
 </script>
@@ -34,16 +26,16 @@
     <p>By default, Buzee scans files in your Documents, Downloads and Desktop folders. You can add more documents to search in Buzee using the <code>Add Documents</code> option in the <a href="/settings" class="purple">Settings</a>.</p>
     <h5>Keyboard Shortcuts</h5>
     <ul>
-      <li>Press <code>{isMac ? "⌘" : "Ctrl"} + Space</code> anywhere to show/hide the app</li>
-      <li>In the app, press <code>{isMac ? "⌘" : "Ctrl"} + F</code> to go the search bar</li>
+      <li>Press <code>{$isMac ? "⌘" : "Ctrl"} + Space</code> anywhere to show/hide the app</li>
+      <li>In the app, press <code>{$isMac ? "⌘" : "Ctrl"} + F</code> to go the search bar</li>
       <li>Press <code>Enter</code> on a selected row to open the document</li>
       <li>Press <code>O</code> on a selected row to open the folder containing the document</li>
-      {#if isMac}
+      {#if $isMac}
         <li>Press <code>Space</code> on a selected row to quickly preview the document</li>
       {/if}
       <li>Use the <code>↑ ↓</code> arrow keys to move between search results</li>
     </ul>
-    {#if isMac}
+    {#if $isMac}
       <p>To easily access search with Buzee, you can either click the Menubar icon at the top of your screen, or right-click the app’s icon in the Dock and choose <code>Options > Keep in Dock</code>.</p>
     {:else}
       <p>To easily access search with Buzee, right-click the app’s icon in the Taskbar and then choose <code>Pin to Taskbar</code>. You can also make the <a href="https://support.microsoft.com/en-us/windows/how-to-use-the-taskbar-in-windows-0657a50f-0cc7-dbfd-ae6b-05020b195b07#ID0ERBBBBDDD-button" target="_blank">app icon show in the system tray</a> from Windows settings.</p>

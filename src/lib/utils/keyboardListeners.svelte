@@ -2,19 +2,9 @@
 	import { invoke } from "@tauri-apps/api/core";
 	import { onMount } from 'svelte';
 	import { clickRow, selectOneRow, selectAllRows } from './fileUtils';
-	import { documentsShown, shiftKeyPressed, metaKeyPressed } from '$lib/stores';
+	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed } from '$lib/stores';
 	import { sendEventToFirebase } from '../../utils/firebase';
 	import { goto } from '$app/navigation';
-
-	let isMac = false;
-	invoke("get_os").then((res) => {
-		// @ts-ignore
-		if (res == "macos") {
-			isMac = true;
-		} else {
-			isMac = false;
-		}
-	});
 
 	const allowedKeys = [
 		'Space',
@@ -113,7 +103,7 @@
 				sendEventToFirebase(eventPrefix + 'openFile');
 				// window.electronAPI?.openFile(result.path);
 				invoke("open_file_or_folder", { filePath: result.path })
-			} else if (e.code === 'ArrowDown' && $metaKeyPressed && isMac) {
+			} else if (e.code === 'ArrowDown' && $metaKeyPressed && $isMac) {
 				e.preventDefault();
 				// window.electronAPI?.openFile(result.path);
 				invoke("open_file_or_folder", { filePath: result.path })

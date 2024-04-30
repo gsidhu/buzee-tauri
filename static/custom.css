@@ -52,6 +52,14 @@ body {
   color: gray;
 }
 
+.border-hover-purple:hover {
+  border-color: var(--purple) !important;
+}
+
+.hover-purple:hover {
+  color: var(--purple) !important;
+}
+
 .page-icon {
   color: var(--hot-pink);
   font-size: xxx-large;

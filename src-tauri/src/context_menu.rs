@@ -9,7 +9,7 @@ use tauri::{
 pub fn searchresult_context_menu(window: &Window) {
   let manager = window.app_handle();
   let ignore_submenu = Submenu::with_items(manager, "Ignore", true, &[
-    &MenuItem::with_id(manager, "ignore_item", "Ignore this Item", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_item", "Ignore This", true, None::<&str>).unwrap(),
     &MenuItem::with_id(manager, "ignore_folder", "Ignore Parent Folder", true, None::<&str>).unwrap(),
     &MenuItem::with_id(manager, "ignore_text", "Ignore File Text", true, None::<&str>).unwrap(),
   ]).unwrap();

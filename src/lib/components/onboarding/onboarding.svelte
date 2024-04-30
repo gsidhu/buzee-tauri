@@ -5,6 +5,7 @@
   import { fly, fade } from 'svelte/transition';
 	import ConfettiButton from "../ui/confettiButton.svelte";
 	import Permissions from "./permissions.svelte";
+  import { goto } from '$app/navigation';
 	import { onDestroy, onMount } from 'svelte';
 
   let processingDone = false;
@@ -43,7 +44,10 @@
     <Permissions />
   {/if}
   <div id="processing-complete" class={`mt-5 text-center small ${processingDone ? 'faded' : 'hidden'} `} in:fade={{ delay: 200, duration: 1000 }}>
-    Buzee is ready. <a class="link-dark" href="/search?highlight-search-bar=true&q=last%20month">Start searching!</a>
+    <p>Buzee is ready.</p>
+    <button type="button" class="btn btn-sm text-dark border-2 border-dark rounded border-hover-purple" on:click={() => goto("/search?highlight-search-bar=true&q=last%20month")}>
+      Start searching!
+    </button>
   </div>
 </div>
 

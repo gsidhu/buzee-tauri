@@ -7,17 +7,8 @@
 
   var onSearchPage: boolean = false;
   var appMode: string = "menubar";
-  var isMac: boolean = false;
 
   onMount(async () => {
-    invoke("get_os").then((res) => {
-			// @ts-ignore
-			if (res == "macos") {
-				isMac = true;
-			} else {
-				isMac = false;
-			}
-		});
     // appMode = await window.electronAPI?.getAppMode();
     appMode = "window";
 		// add an event listener to every time the page changes

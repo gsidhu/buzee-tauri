@@ -6,7 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { sendEventToFirebase } from '../../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
-	import { statusMessage, userPreferences, dbCreationInProgress } from '$lib/stores';
+	import { isMac, statusMessage, userPreferences, dbCreationInProgress } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, open, message } from '@tauri-apps/plugin-dialog';
 
@@ -18,7 +18,6 @@
 	let globalShortcutCode: String = "Space";
 	let automaticBackgroundSyncEnabled: boolean;
 	let detailedScanEnabled: boolean;
-	let isMac: boolean = true;
 
 	function toggleShowSearchSuggestions() {
 		showSearchSuggestions = !showSearchSuggestions;
@@ -148,7 +147,7 @@
 		invoke("set_new_global_shortcut", { newShortcutString: globalShortcut }).then((res) => {
 			console.log(res);
 		});
-		if (isMac) {
+		if ($isMac) {
 			globalShortcut = globalShortcut.replace("Alt", "Option");
 			globalShortcut = globalShortcut.replace("Super", "Command");
 		}
@@ -188,9 +187,9 @@
 		invoke("get_os").then((res) => {
 			// @ts-ignore
 			if (res == "macos") {
-				isMac = true;
+				$isMac = true;
 			} else {
-				isMac = false;
+				$isMac = false;
 			}
 		});
 
@@ -216,7 +215,7 @@
 			}
 			console.log(globalShortcutModifiers);
 			console.log(globalShortcutCode);
-			if (isMac) {
+			if ($isMac) {
 				globalShortcut = globalShortcut.replace("Alt", "Option");
 				globalShortcut = globalShortcut.replace("Super", "Command");
 			}
@@ -351,21 +350,22 @@
 				<td class="py-2 skip-hover">
 					Allow Global Shortcut
 					<div class="d-flex align-items-center small-explanation gap-1">
-						{#if isMac}
+						{#if $isMac}
 							<div>
 								Pressing <button
 									type="button"
+									class="btn btn-sm py-0 border-2 border-light rounded border-hover-purple"
 									data-bs-toggle="modal"
-									data-bs-target="#global-shortcut-modal"><code>{globalShortcut}</code></button
-								> will show the app from anywhere
+									data-bs-target="#global-shortcut-modal"><code class="small-explanation">{globalShortcut}</code></button> will show the app from anywhere
 							</div>
 							<PopoverIcon title="Changes will take effect after the app restarts" />
 						{:else}
 							<div>
 								Pressing <button
 									type="button"
+									class="btn btn-sm py-0 border-2 border-light rounded border-hover-purple"
 									data-bs-toggle="modal"
-									data-bs-target="#global-shortcut-modal"><code>{globalShortcut}</code></button
+									data-bs-target="#global-shortcut-modal"><code class="small-explanation">{globalShortcut}</code></button
 								> will show the app from anywhere
 							</div>
 							<PopoverIcon title="Changes will take effect after the app restarts" />
@@ -408,24 +408,24 @@
 				</td>
 			</tr>
 		</table>
-		<div class="row row-cols-1 row-cols-sm-3 w-90 justify-content-between settings-links">
+		<div class="row row-cols-1 row-cols-sm-2 w-90 justify-content-between settings-links">
 			<div class="col text-start mobile-text-center">
-				<button type="button" class="btn btn-sm link-danger px-0" on:click={() => resetDefault()}>
+				<button type="button" class="btn btn-sm text-danger border-2 border-light rounded border-hover-purple" on:click={() => resetDefault()}>
 					Reset Default
 				</button>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
 			</div>
-			<div class="col text-center">
-				<button type="button" class="btn btn-sm link-primary px-0" on:click={() => checkForAppUpdates()}>
+			<div class="col text-end">
+				<button type="button" class="btn btn-sm text-primary border-2 border-light rounded border-hover-purple" on:click={() => checkForAppUpdates()}>
 					Check for Updates
 				</button>
 			</div>
-			<div class="col text-end mobile-text-center">
+			<!-- <div class="col text-end mobile-text-center">
 				<button type="button" class="btn btn-sm link-danger px-0" on:click={() => uninstallApp()}
 					>Uninstall App</button
 				>
 				<PopoverIcon title="Delete all data and uninstall the app" />
-			</div>
+			</div> -->
 		</div>
 	</div>
 </div>
@@ -451,7 +451,7 @@
 				<div class="row row-cols-3">
 					<div class="col-4 d-flex align-items-center">
 						<select bind:value={globalShortcutModifiers[0]}>
-							{#if isMac}
+							{#if $isMac}
 								<option value="Super">Command (⌘)</option>
 								<option value="Alt">Option (⌥)</option>
 								<option value="Control">Control (^)</option>
@@ -465,7 +465,7 @@
 					<div class="col-4 d-flex align-items-center">
 						<select bind:value={globalShortcutModifiers[1]}>
 							<option value=""></option>
-							{#if isMac}
+							{#if $isMac}
 								<option value="Super">Command (⌘)</option>
 								<option value="Alt">Option (⌥)</option>
 								<option value="Control">Control (^)</option>
@@ -515,12 +515,15 @@
 		font-weight: 300;
 		padding: 0;
 		background-color: inherit;
-		color: var(--bs-gray);
+
+		&:not(code) {
+			color: var(--bs-gray);
+		}
 	}
 
-	.settings-links > div > button:hover {
-		text-decoration: underline;
-	}
+	// .settings-links > div > button:hover {
+	// 	text-decoration: underline;
+	// }
 
 	.settings-links > div {
 		@media (min-width: 576px) {

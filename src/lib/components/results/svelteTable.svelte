@@ -16,6 +16,7 @@
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { sendEventToFirebase } from '../../../utils/firebase';
 	import ConfettiButton from '../ui/confettiButton.svelte';
+	import { goto } from "$app/navigation";
 
 	let noMoreResults = false;
 
@@ -107,7 +108,7 @@
 		}
 	}
 
-	function showContextMenu(
+	async function showContextMenu(
 		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
 		result: DocumentSearchResult
 	) {
@@ -115,7 +116,7 @@
 		clickRow(e, $shiftKeyPressed);
 		// window.menuAPI?.showResultsContextMenu(result);
 		$selectedResult = result;
-		invoke("open_context_menu", {option:"searchresult"}).then((res) => {});
+		await invoke("open_context_menu", {option:"searchresult"});
 	}
 
 	const table = createTable(readable($documentsShown), {
@@ -360,8 +361,8 @@
 		<div class="d-flex flex-column text-light-emphasis text-center small gap-2">
 			<span>Try modifying your query? You can be more specific like –</span>
 			<span><code>last year "annual report" -pdf</code></span>
-			<a href="/tips" class="purple">View all tips and shortcuts</a>
 		</div>
+		<button type="button" class="my-2 btn btn-sm purple border-hover-purple border-2 border-light rounded" on:click={() => goto('/magic/tips-shortcuts')}>View all tips and shortcuts</button>
 	</div>
 {/if}
 

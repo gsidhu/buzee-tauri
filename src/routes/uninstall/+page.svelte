@@ -3,21 +3,13 @@
   import TopBar from "../../layout/TopBar.svelte";
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
-  let isMac: boolean = true;
+  import { isMac } from '$lib/stores';
 
   function openFolder(path: string) {
     window.electronAPI?.openFileFolder(path);
   }
 
   onMount(() => {
-    invoke("get_os").then((res) => {
-			// @ts-ignore
-			if (res == "macos") {
-				isMac = true;
-			} else {
-				isMac = false;
-			}
-		});
   });
 </script>
 
@@ -38,7 +30,7 @@
       <!-- svelte-ignore a11y-invalid-attribute -->
       <li><a href="#" tabindex=0 role="button" on:click={() => openFolder('appData')}>Delete the App Data</a>.</li>
     <li>
-      {#if isMac}
+      {#if $isMac}
         <!-- svelte-ignore a11y-invalid-attribute -->
         Quit the app and delete it from the <a href="#" tabindex=0 role="button" on:click={() => openFolder('uninstall')}>Applications folder</a>.
       {:else}

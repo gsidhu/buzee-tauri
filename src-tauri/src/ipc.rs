@@ -272,7 +272,18 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
     Ok("Opened QuickLook!".into())
 }
 
-// Context Menu
+// Context Menu on Windows has to be async
+#[cfg(target_os = "windows")]
+#[tauri::command]
+async fn open_context_menu(window: tauri::Window, option: String) {
+    match option.as_str() {
+        "searchresult" => searchresult_context_menu(&window),
+        "statusbar" => statusbar_context_menu(&window),
+        _ => println!("Invalid context menu option"),
+    }
+}
+// Context Menu on MacOS does not work if it is async
+#[cfg(target_os = "macos")]
 #[tauri::command]
 fn open_context_menu(window: tauri::Window, option: String) {
     match option.as_str() {
