@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
+  import { trackEvent } from '@aptabase/web';
   import ConfettiButton from '../ui/confettiButton.svelte';
 	import Game from './game.svelte';
   let showBreathing = false;
@@ -40,6 +41,7 @@
   }
 
   function startBreathingAnimation() {
+    trackEvent("onboarding:breathing_animation");
     showBreathing = true;
     breathingAnimation();
   }

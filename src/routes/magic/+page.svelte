@@ -3,13 +3,21 @@
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import { goto } from "$app/navigation";
+	import { trackEvent } from '@aptabase/web';
   import TopBar from "../../layout/TopBar.svelte";
 
 	async function openDeadlineInBrowser() {
+		trackEvent("magic:deadline");
 		await invoke("open_file_or_folder", { filePath: "https://buzo.tools/deadline/" });
 	}
 
+	function gotoMagicPage(page: string) {
+		trackEvent(`magic:${page}`);
+		goto(`/magic/${page}`);
+	}
+
   onMount(() => {
+		trackEvent("magic:homepage");
   })
 
 </script>
@@ -41,11 +49,11 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/magic/deep-breathing')}>
+					<button class="btn" on:click={() => gotoMagicPage('deep-breathing')}>
             <i class="bi bi-yin-yang" />
 					</button>
 				</td>
-				<td class="py-2" role="button" on:click={() => goto('/magic/deep-breathing')}>
+				<td class="py-2" role="button" on:click={() => gotoMagicPage('deep-breathing')}>
 					Deep Breathing
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Take a few moments to yourself</div>
@@ -54,11 +62,11 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/magic/stats')}>
+					<button class="btn" on:click={() => gotoMagicPage('stats')}>
             <i class="bi bi-pie-chart" />
 					</button>
 				</td>
-				<td class="py-2" role="button" on:click={() => goto('/magic/stats')}>
+				<td class="py-2" role="button" on:click={() => gotoMagicPage('stats')}>
 					Document Stats
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>See what your Unique Document Profile looks like</div>
@@ -67,11 +75,11 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/magic/extract-text')}>
+					<button class="btn" on:click={() => gotoMagicPage('extract-text')}>
             <i class="bi bi-body-text" />
 					</button>
 				</td>
-				<td class="py-2" role="button" on:click={() => goto('/magic/extract-text')}>
+				<td class="py-2" role="button" on:click={() => gotoMagicPage('extract-text')}>
 					Extract Text from PDF or Image
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Extract text from any kind of PDF or image file</div>
@@ -80,11 +88,11 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/magic/scratchpad')}>
+					<button class="btn" on:click={() => gotoMagicPage('scratchpad')}>
             <i class="bi bi-journal-text" />
 					</button>
 				</td>
-				<td class="py-2" role="button" on:click={() => goto('/magic/scratchpad')}>
+				<td class="py-2" role="button" on:click={() => gotoMagicPage('scratchpad')}>
 					Scratch Pad
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>A place to keep copied text, notes, and thoughts</div>
@@ -93,11 +101,11 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/magic/tips-shortcuts')}>
+					<button class="btn" on:click={() => gotoMagicPage('tips')}>
             <i class="bi bi-lightbulb" />
 					</button>
 				</td>
-				<td class="py-2" role="button" on:click={() => goto('/magic/tips-shortcuts')}>
+				<td class="py-2" role="button" on:click={() => gotoMagicPage('tips')}>
 					Tips & Shortcuts
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Read some hints to get the best out of Buzee</div>

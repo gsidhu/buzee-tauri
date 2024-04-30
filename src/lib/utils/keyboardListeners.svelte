@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { clickRow, selectOneRow, selectAllRows } from './fileUtils';
 	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed } from '$lib/stores';
-	import { sendEventToFirebase } from '../../utils/firebase';
+	import { trackEvent } from '@aptabase/web';
 	import { goto } from '$app/navigation';
 
 	const allowedKeys = [
@@ -42,14 +42,14 @@
 		// Easter Egg: Go straight to Scratch Pad
 		if ($metaKeyPressed && $shiftKeyPressed && e.code === 'KeyS') {
 			e.preventDefault();
-			sendEventToFirebase(eventPrefix + 'goToScratchPad');
+			trackEvent(eventPrefix + 'goToScratchPad');
 			goto('/magic/scratchpad');
 			return;
 		}
 
 		if ($metaKeyPressed && e.code === 'KeyA') {
 			e.preventDefault();
-			sendEventToFirebase(eventPrefix + 'selectAllRow');
+			trackEvent(eventPrefix + 'selectAllRow');
 			selectAllRows(false);
 			return;
 		}
@@ -58,11 +58,11 @@
 			e.preventDefault();
 			if ($shiftKeyPressed) {
 				console.log('Cmd + Shift + F');
-				sendEventToFirebase(eventPrefix + 'toggleAppMode');
+				trackEvent(eventPrefix + 'toggleAppMode');
 				window.electronAPI?.toggleAppMode();
 			} else {
 				console.log('Cmd + F');
-				sendEventToFirebase(eventPrefix + 'focusSearchBar');
+				trackEvent(eventPrefix + 'focusSearchBar');
 				// if page is not /search, go to that page
 				if (window.location.pathname !== '/search') {
 					goto('/search?highlight-search-bar=true');
@@ -74,7 +74,7 @@
 
 		if (e.code === 'Escape') {
 			e.preventDefault();
-			sendEventToFirebase(eventPrefix + 'deselectAllRows');
+			trackEvent(eventPrefix + 'deselectAllRows');
 			selectAllRows(true);
 			document.body.focus();
 			return;
@@ -95,12 +95,12 @@
 
 			if (e.code === 'Space') {
 				e.preventDefault();
-				sendEventToFirebase(eventPrefix + 'openQuickLook');
+				trackEvent(eventPrefix + 'openQuickLook');
 				// window.electronAPI?.openQuickLook(result.path);
 				invoke("open_quicklook", { filePath: result.path })
 			} else if (e.code === 'Enter') {
 				e.preventDefault();
-				sendEventToFirebase(eventPrefix + 'openFile');
+				trackEvent(eventPrefix + 'openFile');
 				// window.electronAPI?.openFile(result.path);
 				invoke("open_file_or_folder", { filePath: result.path })
 			} else if (e.code === 'ArrowDown' && $metaKeyPressed && $isMac) {
@@ -119,7 +119,7 @@
 			} else if (e.code === 'ArrowUp') {
 				e.preventDefault();
 				if (document.getElementsByClassName('selected').length > 2) {
-					sendEventToFirebase(eventPrefix + 'deselectAllRows');
+					trackEvent(eventPrefix + 'deselectAllRows');
 					selectAllRows(true);
 				}
 				if ($shiftKeyPressed) {
@@ -144,7 +144,7 @@
 			} else if (e.code === 'ArrowDown') {
 				e.preventDefault();
 				if (document.getElementsByClassName('selected').length > 2) {
-					sendEventToFirebase(eventPrefix + 'deselectAllRows');
+					trackEvent(eventPrefix + 'deselectAllRows');
 					selectAllRows(true);
 				}
 				if ($shiftKeyPressed) {

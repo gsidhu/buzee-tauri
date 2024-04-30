@@ -12,11 +12,12 @@
 	} from '$lib/stores';
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
 	import { categoriseExtensions, setExtensionCategory } from '$lib/utils/miscUtils';
-	import { sendEventToFirebase } from '../../../utils/firebase';
+	import { trackEvent } from '@aptabase/web';
 
 	export let searchBar = true;
 
 	async function showDocsForFiletype() {
+		trackEvent('click:showDocsForFileType');
 		$searchInProgress = true;
 		let filetypeToGet = $filetypeShown;
 		if (filetypeToGet !== 'any') {
@@ -32,11 +33,6 @@
 				filetypeToGet
 			);
 		}
-		sendEventToFirebase('click:showDocsForFileType', {
-			searchQuery: $searchQuery,
-      filetypeShown: $filetypeShown,
-			resultsPageShown: $resultsPageShown,
-		});
 		$searchInProgress = false;
 	}
 

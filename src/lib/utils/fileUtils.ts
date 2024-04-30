@@ -1,5 +1,3 @@
-import { sendEventToFirebase } from '../../utils/firebase';
-
 export async function startFileScan() {
 	const result = await window.electronAPI.startFileScan();
 	return result;
@@ -58,6 +56,5 @@ export function clickRow(
 		row.classList.add('selected');
 		(row as HTMLDivElement).focus();
 	}
-	sendEventToFirebase('click:clickRow');
 	return;
 }

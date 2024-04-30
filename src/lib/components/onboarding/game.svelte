@@ -3,6 +3,8 @@
 	import Question from './question.svelte';
 	import PopoverIcon from '../ui/popoverIcon.svelte';
 	import { invoke } from '@tauri-apps/api/core';
+	import { trackEvent } from '@aptabase/web';
+	import { onMount } from 'svelte';
 	let showResults = false;
 	let showStats = false;
 	let currentQuestionIndex = 0;
@@ -92,6 +94,10 @@
 			answer: 0
 		}
 	];
+
+	onMount(() => {
+		trackEvent('onboarding:game:start');
+	});
 </script>
 
 <div in:fly={{ delay: 200, y: 100 }}>

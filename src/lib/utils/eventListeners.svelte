@@ -3,16 +3,18 @@
   import { listen } from '@tauri-apps/api/event';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { sendEventToFirebase } from '../../utils/firebase';
+  import { trackEvent } from '@aptabase/web';
   import { isMac, selectedResult, documentsShown, statusMessage, disableInteraction, syncStatus } from '$lib/stores';
   import { confirm } from '@tauri-apps/plugin-dialog';
 
   async function startSerialEventListener() {
     // Result Row
     await listen<Payload>('open', (event: any) => {
+      trackEvent('openFileOrFolder');
       invoke('open_file_or_folder', { filePath: $selectedResult.path });
     });
     await listen<Payload>('open-folder', (event: any) => {
+      trackEvent('openParentFolder');
       invoke('open_folder_containing_file', { filePath: $selectedResult.path });
     });
     await listen<Payload>('ignore-item', async (event: any) => {      
@@ -34,6 +36,7 @@
         });
       }
       if (result) {
+        trackEvent(`ignore:${fileOrFolder}`);
         $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
         $syncStatus = true;
         $disableInteraction = true;
@@ -73,6 +76,7 @@
         });
       }
       if (result) {
+        trackEvent(`ignore:${fileOrFolder}-parent`);
         $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
         $syncStatus = true;
         $disableInteraction = true;
@@ -112,6 +116,7 @@
         });
       }
       if (result) {
+        trackEvent(`ignore:${fileOrFolder}-text`);
         $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
         $syncStatus = true;
         $disableInteraction = true;
@@ -127,16 +132,20 @@
       else return;
     });
     await listen<Payload>('show-preview', (event: any) => {
+      trackEvent('showPreview');
       invoke('open_quicklook', { filePath: $selectedResult.path });
     });
     // Status Bar - Fun Stuff
     await listen<Payload>('document-stats', (event: any) => {
+      trackEvent('magic:stats');
       goto("/magic/stats");
     });
     await listen<Payload>('deep-breathing', (event: any) => {
+      trackEvent('magic:deep-breathing');
       goto("/magic/deep-breathing");
     });
     await listen<Payload>('tips-and-shortcuts', (event: any) => {
+      trackEvent('magic:tips');
       goto("/magic/tips");
     });
 	}

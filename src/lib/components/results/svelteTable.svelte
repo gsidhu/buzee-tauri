@@ -14,7 +14,7 @@
 	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
-	import { sendEventToFirebase } from '../../../utils/firebase';
+	import { trackEvent } from '@aptabase/web';
 	import ConfettiButton from '../ui/confettiButton.svelte';
 	import { goto } from "$app/navigation";
 
@@ -29,8 +29,7 @@
 		console.log("Loading more results...");
 		$resultsPageShown += 1; // increment the page number on each new search
 		$searchInProgress = true;
-		sendEventToFirebase('search-triggered', {
-			searchQuery: $searchQuery,
+		trackEvent('loadMoreResults', {
 			filetypeShown: $filetypeShown,
 			resultsPageShown: $resultsPageShown
 		});
@@ -44,7 +43,6 @@
 			$resultsPerPage,
 			filetypeToGet
 		);
-		sendEventToFirebase('search-results', { searchQuery: $searchQuery, resultsLength: results?.length });
 		if (results.length === 0) {
 			noMoreResults = true;
 		} else {
@@ -70,7 +68,7 @@
   }
 
 	function openFile(url: string) {
-		sendEventToFirebase('click:open_file');
+		trackEvent('click:openFile');
 		invoke('open_file_or_folder', { filePath: url });
 	}
 	
@@ -112,7 +110,7 @@
 		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
 		result: DocumentSearchResult
 	) {
-		sendEventToFirebase('right_click:result_context_menu');
+		trackEvent('right_click:resultContextMenu');
 		clickRow(e, $shiftKeyPressed);
 		// window.menuAPI?.showResultsContextMenu(result);
 		$selectedResult = result;
@@ -362,7 +360,7 @@
 			<span>Try modifying your query? You can be more specific like –</span>
 			<span><code>last year "annual report" -pdf</code></span>
 		</div>
-		<button type="button" class="my-2 btn btn-sm purple border-hover-purple border-2 border-light rounded" on:click={() => goto('/magic/tips-shortcuts')}>View all tips and shortcuts</button>
+		<button type="button" class="my-2 btn btn-sm purple border-hover-purple border-2 border-light rounded" on:click={() => goto('/magic/tips')}>View all tips and shortcuts</button>
 	</div>
 {/if}
 

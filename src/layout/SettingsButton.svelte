@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-	import { sendEventToFirebase } from '../utils/firebase';
+	import { trackEvent } from '@aptabase/web';
 	import { goto } from '$app/navigation';
   import { onSearchPage } from '$lib/stores';
 
   function openSettingsMenu() {
-    sendEventToFirebase("click:settings_button_click");
+    trackEvent("click:openSettingsMenu");
     goto('/settings');
     // window.menuAPI?.showSettingsMenu();
   }

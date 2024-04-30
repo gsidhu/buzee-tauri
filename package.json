@@ -13,8 +13,7 @@
 		"tauri": "tauri"
 	},
 	"dependencies": {
-		"@sentry/sveltekit": "^7.91.0",
-		"@sentry/wizard": "^3.20.1",
+		"@aptabase/web": "^0.4.2",
 		"@tauri-apps/api": ">=2.0.0-beta.0",
 		"@tauri-apps/plugin-dialog": "^2.0.0-beta.2",
 		"@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
@@ -22,7 +21,6 @@
 		"compromise": "^14.10.1",
 		"compromise-dates": "^3.4.2",
 		"dotenv": "^16.3.1",
-		"firebase": "^10.7.1",
 		"moment": "^2.30.0"
 	},
 	"devDependencies": {

@@ -3,8 +3,10 @@
 	export let selectedSuggestionItem = 0;
   export let triggerSearch = () => {};
   import {searchQuery, searchSuggestions} from '$lib/stores';
+  import { trackEvent } from '@aptabase/web';
 
   function searchTrigger(searchItem: string) {
+    trackEvent('search-suggestion-clicked');
     // if user clicks on a suggestion, double quote the query
     $searchQuery = '"' + searchItem + '"';
     triggerSearch();

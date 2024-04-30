@@ -9,9 +9,9 @@
 		windowBlurred
 	} from '$lib/stores';
 	import { selectAllRows } from '$lib/utils/fileUtils';
-	import { sendEventToFirebase } from '../utils/firebase';
 	import { invoke } from '@tauri-apps/api/core';
 	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+	import { trackEvent } from '@aptabase/web';
 	
 	let darkMode = false;
 	let fileSyncFinished = false;
@@ -22,10 +22,8 @@
 	let showingResults: boolean = false;
 	let dbReady = false;
 	let filesAddedCount = 0;
-	const defaultData: Record<string, string> = { component: 'StatusBar' };
 
 	function showStatusBarMenu(option: string) {
-		sendEventToFirebase('click:showStatusBarMenu', { option, ...defaultData });
 		// invoke("open_context_menu", {option:"statusbar"}).then((res) => {});
 		goto("/magic/");
 	}
@@ -40,7 +38,7 @@
 
 	function toggleCompactViewMode() {
 		$compactViewMode = !$compactViewMode;
-		sendEventToFirebase('click:toggleCompactViewMode', { $compactViewMode, ...defaultData });
+		trackEvent('click:toggleCompactViewMode', { compactViewMode: $compactViewMode });
 		if ($compactViewMode === true) {
 			document.querySelectorAll('td').forEach((el) => {
 				el.classList.add('compact-view');
@@ -59,7 +57,7 @@
 	}
 
 	async function toggleBackgroundTextProcessing() {
-		sendEventToFirebase('click:toggleBackgroundTextProcessing', { ...defaultData });
+		trackEvent('click:toggleBackgroundTextProcessing', { syncStats: $syncStatus });
 		// if $syncStatus is true, switch_off is true, so we want to stop the sync
 		invoke("run_file_sync", {switchOff: $syncStatus, filePaths: []});
 		if ($syncStatus) {
@@ -90,7 +88,7 @@
 	}
 
 	function goToSearch(from_onboarding: boolean = false) {
-		sendEventToFirebase('click:goToSearch', { ...defaultData });
+		trackEvent('click:goToSearch');
 		if (from_onboarding) {
 			// start background processing to get file contents
 			toggleBackgroundTextProcessing();

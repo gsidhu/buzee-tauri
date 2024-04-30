@@ -60,6 +60,10 @@ body {
   color: var(--purple) !important;
 }
 
+.text-underline {
+  text-decoration: underline;
+}
+
 .page-icon {
   color: var(--hot-pink);
   font-size: xxx-large;

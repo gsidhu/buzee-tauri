@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import StatusBar from '../layout/StatusBar.svelte';
-	import { goto } from '$app/navigation';
+	// import { goto } from '$app/navigation';
 	import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
   import EventListeners from '$lib/utils/eventListeners.svelte';
-  import { sendEventToFirebase } from '../utils/firebase';
+  import { trackEvent } from '@aptabase/web';
   import { invoke } from "@tauri-apps/api/core";
 	import { listen } from '@tauri-apps/api/event';
-	import { Command } from '@tauri-apps/plugin-shell';
+	// import { Command } from '@tauri-apps/plugin-shell';
 	import { isMac, windowBlurred, cronJobSet, userPreferences, disableInteraction } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
-	import { ask, message } from '@tauri-apps/plugin-dialog';
+	import { ask } from '@tauri-apps/plugin-dialog';
 
 	var appMode: string = "menubar";
 
@@ -62,6 +62,7 @@
 				cancelLabel: 'Cancel'
 			});
 			if (yes) {
+				trackEvent("click:update_button_click");
 				await update.downloadAndInstall();
 				await invoke("polite_restart");
 			}

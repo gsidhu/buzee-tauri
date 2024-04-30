@@ -7,9 +7,15 @@
 	import Permissions from "./permissions.svelte";
   import { goto } from '$app/navigation';
 	import { onDestroy, onMount } from 'svelte';
+  import { trackEvent } from '@aptabase/web';
 
   let processingDone = false;
   let showPermissions = false;
+
+  function gotoSearch() {
+    goto("/search?highlight-search-bar=true&q=last%20month");
+    trackEvent("onboarding:complete");
+  }
 
   let unlisten:UnlistenFn;
   onMount(async () => {
@@ -45,7 +51,7 @@
   {/if}
   <div id="processing-complete" class={`mt-5 text-center small ${processingDone ? 'faded' : 'hidden'} `} in:fade={{ delay: 200, duration: 1000 }}>
     <p>Buzee is ready.</p>
-    <button type="button" class="btn btn-sm text-dark border-2 border-dark rounded border-hover-purple" on:click={() => goto("/search?highlight-search-bar=true&q=last%20month")}>
+    <button type="button" class="btn btn-sm text-dark border-2 border-dark rounded border-hover-purple" on:click={() => gotoSearch()}>
       Start searching!
     </button>
   </div>

@@ -7,6 +7,8 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
 
+- Removed all code and packages for Firebase and Sentry.
+- Replaced Firebase Analytics with Aptabase.
 - Removed all link- buttons. Using a standardised button look.
 - Set contextmenu ipc function to `async` so it works on Windows.
 - Changed all dialog text because Windows renders it differently from Mac. The main message has to be short and the details have to be in the body.
@@ -57,7 +59,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Connected settings to backend. Detailed Scan, Automatic Scan, Global Shortcut settings are respected.
 - Using `scan` instead of sync in all user-facing copy.
 - Showing brief message in status bar to tell user what the app is doing. E.g. "restarting" or "starting/stopping scan"
-- Change `sendEvent` to `sendEventToFirebase`.
+- Change `sendEvent` to `trackEvent`.
 - Show size instead of last_opened in results table.
 - Moved StatusBar to +layout.svelte to show it across the app.
 - Added graceful_restart function that sets the sync_running flag to false, waits for 3 seconds, then restarts the app.

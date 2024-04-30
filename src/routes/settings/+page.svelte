@@ -4,7 +4,7 @@
 	import PopoverIcon from '$lib/components/ui/popoverIcon.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { sendEventToFirebase } from '../../utils/firebase';
+	import { trackEvent } from '@aptabase/web';
 	import { invoke } from '@tauri-apps/api/core';
 	import { isMac, statusMessage, userPreferences, dbCreationInProgress } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
@@ -22,7 +22,7 @@
 	function toggleShowSearchSuggestions() {
 		showSearchSuggestions = !showSearchSuggestions;
 		$userPreferences.show_search_suggestions = showSearchSuggestions;
-		sendEventToFirebase('click:toggleShowSearchSuggestions', { showSearchSuggestions });
+		trackEvent('click:toggleShowSearchSuggestions', { showSearchSuggestions });
 		$statusMessage = `Setting changed!`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "show_search_suggestions", value: showSearchSuggestions}).then(() => {
@@ -32,7 +32,7 @@
 
 	function toggleLaunchAtStartup() {
 		launchAtStartup = !launchAtStartup;
-		sendEventToFirebase('click:toggleLaunchAtStartup', { launchAtStartup });
+		trackEvent('click:toggleLaunchAtStartup', { launchAtStartup });
 		$statusMessage = `Setting changed!`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "launch_at_startup", value: launchAtStartup}).then(() => {
@@ -42,7 +42,7 @@
 
 	function toggleGlobalShortcut() {
 		globalShortcutEnabled = !globalShortcutEnabled;
-		sendEventToFirebase('click:toggleGlobalShortcut', { globalShortcutEnabled });
+		trackEvent('click:toggleGlobalShortcut', { globalShortcutEnabled });
 		$statusMessage = `Setting changed. Restarting the app...`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "global_shortcut_enabled", value: globalShortcutEnabled}).then(() => {
@@ -52,7 +52,7 @@
 
 	function toggleDetailedScan() {
 		detailedScanEnabled = !detailedScanEnabled;
-		sendEventToFirebase('click:toggleDetailedScan', { detailedScanEnabled });
+		trackEvent('click:toggleDetailedScan', { detailedScanEnabled });
 		$statusMessage = `Setting changed!`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "detailed_scan", value: detailedScanEnabled}).then(() => {
@@ -62,7 +62,7 @@
 
 	function toggleAutomaticBackgroundSync() {
 		automaticBackgroundSyncEnabled = !automaticBackgroundSyncEnabled;
-		sendEventToFirebase('click:toggleAutomaticBackgroundSync', { automaticBackgroundSyncEnabled });
+		trackEvent('click:toggleAutomaticBackgroundSync', { automaticBackgroundSyncEnabled });
 		$statusMessage = `Setting changed!`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "automatic_background_sync", value: automaticBackgroundSyncEnabled}).then(() => {
@@ -71,7 +71,7 @@
 	}
 
 	function resetDefault() {
-    sendEventToFirebase('click:resetDefault');
+    trackEvent('click:resetDefault');
 		$statusMessage = `Settings reset. Restarting the app...`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("reset_user_preferences").then(() => {
@@ -80,12 +80,12 @@
 	}
 
 	function uninstallApp() {
-    sendEventToFirebase("click:uninstallApp");
+    trackEvent("click:uninstallApp");
 		goto('/uninstall');
 	}
 
 	async function addDocsToDB() {
-		sendEventToFirebase('click:addDocsToDB');
+		trackEvent('click:addDocsToDB');
 		let isFolder = true;
 		const yesFolders = await ask("Would you like to add individual files or complete folders?", { 
 			title: 'Files or Folders',
@@ -409,13 +409,13 @@
 			</tr>
 		</table>
 		<div class="row row-cols-1 row-cols-sm-2 w-90 justify-content-between settings-links">
-			<div class="col text-start mobile-text-center">
+			<div class="col text-start mobile-text-center my-1">
 				<button type="button" class="btn btn-sm text-danger border-2 border-light rounded border-hover-purple" on:click={() => resetDefault()}>
 					Reset Default
 				</button>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
 			</div>
-			<div class="col text-end">
+			<div class="col text-end mobile-text-center my-1">
 				<button type="button" class="btn btn-sm text-primary border-2 border-light rounded border-hover-purple" on:click={() => checkForAppUpdates()}>
 					Check for Updates
 				</button>
@@ -426,6 +426,12 @@
 				>
 				<PopoverIcon title="Delete all data and uninstall the app" />
 			</div> -->
+		</div>
+		<div class="col-sm-10 mx-auto text-center my-4">
+			<p class="mb-0 small-explanation fw-medium">Buzee Promise</p>
+			<small class="small-explanation">
+				Your personal data <span class="fw-medium">never, ever</span> leaves your computer. We sometimes collect anonymous usage data to make Buzee even better. Read more on our website.
+			</small>
 		</div>
 	</div>
 </div>
