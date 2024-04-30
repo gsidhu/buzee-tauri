@@ -2,16 +2,15 @@
 
 Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr on Windows.
 
-- Add a page to let user OCR a PDF or image.
-  - Add dialog to select file.
-  - Add "save to database" toggle.
-
-## - Add UI to OCR PDF Image.
 ## - Use GitHub action to build. Figure out how to package sidecars for specific OS.
 ## - Figure out how to make AltGr work same as Alt on Windows.
 ## - Check why app updater does not restart the app.
 ## - Check if app updater works on Windows.
 
+- Added a scratch pad to fun stuff.
+- Added external link to Deadline.
+- Added Error page that redirects to home page automatically.
+- Added page to extract text from PDF or Image.
 - Added base Magic / Fun Stuff page.
 - Added modal to select and add folder to Ignore List.
 - Added file type list in settings.

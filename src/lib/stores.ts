@@ -95,6 +95,7 @@ export const mouseDown = writable(false);
 export const searchInProgress = writable(false);
 export const dbCreationInProgress = writable(false);
 export const windowBlurred = writable(false);
+export const scratchPadText = writable("")
 
 // 3. Anytime the store changes, update the local storage value.
 if(typeof window !== "undefined") {
@@ -106,6 +107,7 @@ if(typeof window !== "undefined") {
   resultsPerPage.subscribe(value => { localStorage.resultsPerPage = value })
   statusMessage.subscribe(value => { localStorage.statusMessage = value })
   compactViewMode.subscribe(value => { localStorage.compactViewMode = value })
+  scratchPadText.subscribe(value => { localStorage.scratchPadText = value })
   // searchTrigger.subscribe(value => { localStorage.searchTrigger = value })
   // searchResults.subscribe(value => { localStorage.searchResults = value })
   // searchHistory.subscribe(value => { localStorage.searchHistory = value })

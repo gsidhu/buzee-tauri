@@ -260,13 +260,14 @@
 		</div>
 		<h3>Settings</h3>
 		<table class="table table-bordered w-90 mb-0">
+			<!-- Buttons / Links -->
 			<tr>
 				<td class="text-center px-2">
 					<button class="btn" on:click={() => addDocsToDB()}>
 						<i class="bi bi-plus-circle" />
 					</button>
 				</td>
-				<td class="py-2 skip-hover">
+				<td class="py-2" role="button" on:click={() => addDocsToDB()}>
 					Add Documents
 					<div class="d-flex align-items-center small-explanation gap-1">
 						Add more documents to search in Buzee
@@ -276,6 +277,39 @@
 					</div>
 				</td>
 			</tr>
+			<tr>
+				<td class="text-center px-2">
+					<button class="btn" on:click={() => goto('/settings/ignore')}>
+						<div class="d-flex">
+							<i class="bi bi-file-earmark-x" />
+							<i class="bi bi-folder-x" />
+						</div>
+					</button>
+				</td>
+				<td class="py-2" role="button" on:click={() => goto('/settings/ignore')}>
+					Ignore List
+					<div class="d-flex align-items-center small-explanation gap-1">
+						<div>List of files and folders that you want Buzee to ignore</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="text-center px-2">
+					<button class="btn" on:click={() => goto('/settings/filetype')}>
+						<div class="d-flex">
+							<i class="bi bi-file-earmark" />
+						</div>
+					</button>
+				</td>
+				<td class="py-2" role="button" on:click={() => goto('/settings/filetype')}>
+					File Type List
+					<div class="d-flex align-items-center small-explanation gap-1">
+						<div>List of file types that Buzee should scan</div>
+					</div>
+				</td>
+			</tr>
+
+			<!-- On/Off Toggles -->
 			<tr>
 				<td class="text-center px-2"
 					><input
@@ -370,37 +404,6 @@
 						<PopoverIcon
 							title="Disabling this setting may improve speed but reduce quality of search results"
 						/>
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/settings/ignore')}>
-						<div class="d-flex">
-							<i class="bi bi-file-earmark-x" />
-							<i class="bi bi-folder-x" />
-						</div>
-					</button>
-				</td>
-				<td class="py-2 skip-hover">
-					Ignore List
-					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>List of files and folders that you want Buzee to ignore</div>
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/settings/filetype')}>
-						<div class="d-flex">
-							<i class="bi bi-file-earmark" />
-						</div>
-					</button>
-				</td>
-				<td class="py-2 skip-hover">
-					File Type List
-					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>List of file types that Buzee should scan</div>
 					</div>
 				</td>
 			</tr>
@@ -533,7 +536,7 @@
 		}
 	}
 
-	td {
+	tr {
 		&:not(.skip-hover):hover {
 			cursor: default;
 			color: var(--purple);

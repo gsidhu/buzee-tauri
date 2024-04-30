@@ -1,10 +1,11 @@
-use std::fs;
-use std::io;
+use std::{fs, io, io::Write};
 use std::path::Path;
 use diesel::SqliteConnection;
 use tauri_plugin_global_shortcut::Modifiers;
+use crate::database::search::get_parsed_text_for_file;
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_app_directory;
+use crate::indexing::extract_text_from_path;
 use crate::user_prefs::set_scan_running_status;
 use std::process::Command;
 use crate::custom_types::Error;
@@ -167,4 +168,22 @@ pub async fn install_poppler_from_github() -> Result<String, Error> {
       }
     }
   }
+}
+
+pub async fn extract_text_from_pdf(file_path: String, conn: &mut SqliteConnection, app: &tauri::AppHandle) -> Result<Vec<String>, Error> {
+  // check if file_path's text already exists in body_fts
+  // by calling get_parsed_text_for_file
+  let mut text = get_parsed_text_for_file(file_path.clone(), conn).unwrap();
+  if text.is_empty() {
+    // otherwise call extract_text_from_path
+    let extracted_text = extract_text_from_path(file_path, "pdf".to_string(), app).await;
+    // break extracted_text at line breaks and insert into text Vector
+    text = extracted_text.split("\n").map(|s| s.to_string()).collect();
+  }
+  Ok(text)
+}
+
+pub async fn save_text_to_file(file_path: String, text: String) {
+  let mut file = fs::File::create(file_path).unwrap();
+  file.write_all(text.as_bytes()).unwrap();
 }

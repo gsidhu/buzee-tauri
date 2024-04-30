@@ -5,7 +5,6 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_json;
 use super::models::BodyFTSSearchResult;
-use super::schema::{body, body_fts};
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
     let parsed_json = serde_json::from_str(json_string);

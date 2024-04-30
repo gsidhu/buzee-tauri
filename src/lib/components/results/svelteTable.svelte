@@ -354,8 +354,8 @@
 </table>
 
 {#if $documentsShown.length <= 0}
-	<div class="d-flex flex-column px-4 py-2 mx-auto align-items-center justify-content-center">
-		<img class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
+	<div class="d-flex flex-column px-4 py-2 mx-auto align-items-center justify-content-center min-vh-80">
+		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
 		<h3>No Results</h3>
 		<div class="d-flex flex-column text-light-emphasis text-center small gap-2">
 			<span>Try modifying your query? You can be more specific like –</span>
@@ -366,6 +366,12 @@
 {/if}
 
 <style lang="scss">
+	.min-vh-80 {
+		min-height: 80vh !important;
+	}
+	#buzee-logo-img {
+		max-width: 200px;
+	}
 	table {
 		border-spacing: 0;
 		width: 100%;

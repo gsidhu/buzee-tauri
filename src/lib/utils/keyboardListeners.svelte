@@ -22,6 +22,7 @@
 		'KeyO',
 		'KeyA',
 		'KeyF',
+		'KeyS',
 		'ShiftLeft',
 		'ShiftRight',
 		'Tab',
@@ -47,6 +48,14 @@
 		}
 		if (document.activeElement instanceof HTMLInputElement) return;
 		if (allowedKeys.indexOf(e.code) < 0) return;
+
+		// Easter Egg: Go straight to Scratch Pad
+		if ($metaKeyPressed && $shiftKeyPressed && e.code === 'KeyS') {
+			e.preventDefault();
+			sendEventToFirebase(eventPrefix + 'goToScratchPad');
+			goto('/magic/scratchpad');
+			return;
+		}
 
 		if ($metaKeyPressed && e.code === 'KeyA') {
 			e.preventDefault();

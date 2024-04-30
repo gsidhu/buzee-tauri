@@ -13,7 +13,7 @@ pub fn extract(filepath: &String, _app: &tauri::AppHandle) -> Result<String, Box
     } else {
         let file_contents = read_to_string(filepath)?;
         let lines: Vec<String> = file_contents.lines().map(|line| line.to_string()).collect();
-        text = lines.join("\n");
+        text = lines.join("\n\n");
     }
     Ok(text)
 }
@@ -21,6 +21,6 @@ pub fn extract(filepath: &String, _app: &tauri::AppHandle) -> Result<String, Box
 pub fn extract_large_file(filepath: &String) -> Result<String, Box<dyn Error>> {
     let file_buffer = File::open(filepath)?;
     let reader = BufReader::new(file_buffer);
-    let text = reader.lines().map(|line| line.unwrap()).collect::<Vec<String>>().join("\n");
+    let text = reader.lines().map(|line| line.unwrap()).collect::<Vec<String>>().join("\n\n");
     Ok(text)
 }
