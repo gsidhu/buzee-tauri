@@ -17,12 +17,22 @@
     });
     await listen<Payload>('ignore-item', async (event: any) => {      
       const fileOrFolder = $selectedResult.file_type === 'folder' ? 'folder' : 'file';
-      const result = await confirm(
-        `${isMac ? "" : `Are you sure you want Buzee to ignore this ${fileOrFolder}?\n\n`}${$selectedResult.path}\n\nThis ${fileOrFolder === "folder" ? "folder and its contents" : "file"} will no longer show in Buzee's search results. You can always change this in the Settings.`, {
-          title: `${isMac ? `Are you sure you want Buzee to ignore this ${fileOrFolder}?` : `Ignore this ${fileOrFolder}?`}`,
-          okLabel: 'Yes',
-          cancelLabel: 'No'
-      });
+      let result: boolean = false;
+      if (isMac) {
+        result = await confirm(
+          `${$selectedResult.path}\n\nThis ${fileOrFolder === "folder" ? "folder and its contents" : "file"} will no longer show in Buzee's search results. You can always change this in the Settings.`, {
+            title: `Are you sure you want Buzee to ignore this ${fileOrFolder}?`,
+            okLabel: 'Yes',
+            cancelLabel: 'No'
+        });
+      } else {
+        result = await confirm(
+          `Are you sure you want Buzee to ignore this ${fileOrFolder}?\n\n${$selectedResult.path}\n\nThis ${fileOrFolder === "folder" ? "folder and its contents" : "file"} will no longer show in Buzee's search results. You can always change this in the Settings.`, {
+            title: `Ignore this ${fileOrFolder}?`,
+            okLabel: 'Yes',
+            cancelLabel: 'No'
+        });
+      }
       if (result) {
         $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
         $syncStatus = true;
@@ -46,12 +56,22 @@
       if ($selectedResult.path.includes('/')) parentFolder = $selectedResult.path.split('/').slice(0, -1).join('/');
       else if ($selectedResult.path.includes('\\')) parentFolder = $selectedResult.path.split('\\').slice(0, -1).join('\\');
 
-      const result = await confirm(
-        `${isMac ? "" : `Are you sure you want Buzee to ignore this ${fileOrFolder}'s parent folder?\n\n`}${parentFolder}\n\nThe contents of this folder will no longer show in Buzee's search results. You can always change this in the Settings.`, {
-          title: `${isMac ? `Are you sure you want Buzee to ignore this ${fileOrFolder}'s parent folder?` : `Ignore this ${fileOrFolder}'s parent folder?`}`,
-          okLabel: 'Yes',
-          cancelLabel: 'No'
-      });
+      let result: boolean = false;
+      if (isMac) {
+        result = await confirm(
+          `${parentFolder}\n\nThe contents of this folder will no longer show in Buzee's search results. You can always change this in the Settings.`, {
+            title: `Are you sure you want Buzee to ignore this ${fileOrFolder}'s parent folder?`,
+            okLabel: 'Yes',
+            cancelLabel: 'No'
+        });
+      } else {
+        result = await confirm(
+          `Are you sure you want Buzee to ignore this ${fileOrFolder}'s parent folder?\n\n${parentFolder}\n\nThe contents of this folder will no longer show in Buzee's search results. You can always change this in the Settings.`, {
+            title: `Ignore this ${fileOrFolder}'s parent folder?`,
+            okLabel: 'Yes',
+            cancelLabel: 'No'
+        });
+      }
       if (result) {
         $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
         $syncStatus = true;
@@ -74,13 +94,23 @@
       let parentFolder = '';
       if ($selectedResult.path.includes('/')) parentFolder = $selectedResult.path.split('/').slice(0, -1).join('/');
       else if ($selectedResult.path.includes('\\')) parentFolder = $selectedResult.path.split('\\').slice(0, -1).join('\\');
-
-      const result = await confirm(
-        `${isMac ? "" : `Are you sure you want Buzee to ignore the text of ${fileOrFolder === 'folder' ? "all files in this folder" : "this file"}?\n\n`}${parentFolder}\n\nThe text of ${fileOrFolder === "folder" ? "all files in this folder" : "this file"} will no longer be scanned by Buzee. You can always change this in the Settings.`, {
-          title: `${isMac ? `Are you sure you want Buzee to ignore the text of ${fileOrFolder === "folder" ? "all files in this folder" : "this file"}?` : `Ignore the text?`}`,
-          okLabel: 'Yes',
-          cancelLabel: 'No'
-      });
+      
+      let result: boolean = false;
+      if (isMac) {
+        result = await confirm(
+          `${parentFolder}\n\nThe text of ${fileOrFolder === "folder" ? "all files in this folder" : "this file"} will no longer be scanned by Buzee. You can always change this in the Settings.`, {
+            title: `Are you sure you want Buzee to ignore the text of ${fileOrFolder === "folder" ? "all files in this folder" : "this file"}?`,
+            okLabel: 'Yes',
+            cancelLabel: 'No'
+        });
+      } else {
+        result = await confirm(
+          `Are you sure you want Buzee to ignore the text of ${fileOrFolder === 'folder' ? "all files in this folder" : "this file"}?\n\n${parentFolder}\n\nThe text of ${fileOrFolder === "folder" ? "all files in this folder" : "this file"} will no longer be scanned by Buzee. You can always change this in the Settings.`, {
+            title: `Ignore text?`,
+            okLabel: 'Yes',
+            cancelLabel: 'No'
+        });
+      }
       if (result) {
         $statusMessage = `Removing ${fileOrFolder}... Please wait.`;
         $syncStatus = true;
