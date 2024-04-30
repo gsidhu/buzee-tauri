@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import TopBar from "../../../layout/TopBar.svelte";

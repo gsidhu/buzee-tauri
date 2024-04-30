@@ -67,11 +67,11 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/magic/extract-pdf')}>
+					<button class="btn" on:click={() => goto('/magic/extract-text')}>
             <i class="bi bi-body-text" />
 					</button>
 				</td>
-				<td class="py-2" role="button" on:click={() => goto('/magic/extract-pdf')}>
+				<td class="py-2" role="button" on:click={() => goto('/magic/extract-text')}>
 					Extract Text from PDF or Image
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>Extract text from any kind of PDF or image file</div>

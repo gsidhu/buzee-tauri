@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import TopBar from "../../../layout/TopBar.svelte";
-	import ConfettiButton from "$lib/components/ui/confettiButton.svelte";
-  import { open, save } from '@tauri-apps/plugin-dialog';
+  import { save } from '@tauri-apps/plugin-dialog';
   import { invoke } from "@tauri-apps/api/core";
   import { scratchPadText } from '$lib/stores';
 
@@ -22,6 +22,12 @@
       await invoke("open_folder_containing_file", { filePath });
     }
   }
+
+  onMount(() => {
+    if (document) {
+      document.querySelector('textarea')?.focus();
+    }
+  });
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>

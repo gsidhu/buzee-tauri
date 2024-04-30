@@ -18,7 +18,7 @@
     await listen<Payload>('ignore-item', async (event: any) => {      
       const fileOrFolder = $selectedResult.file_type === 'folder' ? 'folder' : 'file';
       let result: boolean = false;
-      if (isMac) {
+      if ($isMac) {
         result = await confirm(
           `${$selectedResult.path}\n\nThis ${fileOrFolder === "folder" ? "folder and its contents" : "file"} will no longer show in Buzee's search results. You can always change this in the Settings.`, {
             title: `Are you sure you want Buzee to ignore this ${fileOrFolder}?`,
@@ -57,7 +57,7 @@
       else if ($selectedResult.path.includes('\\')) parentFolder = $selectedResult.path.split('\\').slice(0, -1).join('\\');
 
       let result: boolean = false;
-      if (isMac) {
+      if ($isMac) {
         result = await confirm(
           `${parentFolder}\n\nThe contents of this folder will no longer show in Buzee's search results. You can always change this in the Settings.`, {
             title: `Are you sure you want Buzee to ignore this ${fileOrFolder}'s parent folder?`,
@@ -96,7 +96,7 @@
       else if ($selectedResult.path.includes('\\')) parentFolder = $selectedResult.path.split('\\').slice(0, -1).join('\\');
       
       let result: boolean = false;
-      if (isMac) {
+      if ($isMac) {
         result = await confirm(
           `${parentFolder}\n\nThe text of ${fileOrFolder === "folder" ? "all files in this folder" : "this file"} will no longer be scanned by Buzee. You can always change this in the Settings.`, {
             title: `Are you sure you want Buzee to ignore the text of ${fileOrFolder === "folder" ? "all files in this folder" : "this file"}?`,
