@@ -129,9 +129,9 @@
 			accessor: 'file_type',
 			plugins: {
 				resize: {
-					initialWidth: 20,
+					initialWidth: 30,
 					minWidth: 20,
-					maxWidth: 20
+					maxWidth: 30
 				},
 				sort: { disable: false }
 			}
@@ -271,9 +271,9 @@
 									<Render of={cell.render()} />
 								{/if}
 								{#if props.sort.order === 'asc'}
-									<i class="bi bi-caret-up-fill" />
+									<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
 								{:else if props.sort.order === 'desc'}
-									<i class="bi bi-caret-down-fill" />
+									<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
 								{/if}
 								{#if !props.resize.disabled}
 									<button

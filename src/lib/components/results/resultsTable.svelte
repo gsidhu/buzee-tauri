@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import SvelteTable from '$lib/components/results/svelteTable.svelte';
-	import { documentsShown } from '$lib/stores';
+	import IconsGrid from './iconsGrid.svelte';
+	import { documentsShown, showIconGrid } from '$lib/stores';
 
 	onMount(async () => {
 		if (document) {
@@ -18,7 +19,11 @@
 
 {#key $documentsShown}
 	<div class={`results-container mb-4 min-vh-100`}>
-		<SvelteTable />
+		{#if $showIconGrid}
+			<IconsGrid />
+		{:else}
+			<SvelteTable />
+		{/if}
 	</div>
 {/key}
 

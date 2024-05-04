@@ -50,6 +50,7 @@ let storedAllowedExtensions: FileTypesDropdown = {
 
 let storedSearchSuggestions: string[] = [];
 let storedIgnoredPaths: IgnoreListType[] = [];
+let storedBase64Images: StringStringObject = {};
 
 // 2. Set the stored value or a sane default.
 export const userPreferences = writable({
@@ -65,6 +66,7 @@ export const userPreferences = writable({
 })
 export const isMac = writable(false)
 export const pinMode = writable(false)
+export const showIconGrid = writable(false)
 export const cronJobSet = writable(false)
 export const onSearchPage = writable(false)
 export const onboardingDone = writable(false)
@@ -81,15 +83,6 @@ export const statusMessage = writable("")
 export const compactViewMode = writable(storedCompactViewMode || false)
 export const selectedResult = writable(storedSelectedResult || {})
 export const ignoredPaths = writable(storedIgnoredPaths || [])
-// export const searchTrigger = writable(storedSearchTrigger || false)
-// export const searchResults = writable(storedSearchResults || '')
-// export const searchHistory = writable(storedSearchHistory || '')
-// export const timeTaken = writable(storedTimeTaken || 0)
-// export const numResultsReceived = writable(storedNumResultsReceived || 0)
-// export const dbStats = writable(storedDBStats || '')
-// export const deleteFile = writable('')
-// export const currentCollection = writable(storedCurrentCollection || '')
-// export const user = writable(currentUser || null);
 export const shiftKeyPressed = writable(false);
 export const metaKeyPressed = writable(false);
 export const mouseDown = writable(false);
@@ -97,6 +90,7 @@ export const searchInProgress = writable(false);
 export const dbCreationInProgress = writable(false);
 export const windowBlurred = writable(false);
 export const scratchPadText = writable("")
+export const base64Images = writable(storedBase64Images || {})
 
 // 3. Anytime the store changes, update the local storage value.
 if(typeof window !== "undefined") {

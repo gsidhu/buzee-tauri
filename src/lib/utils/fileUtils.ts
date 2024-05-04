@@ -22,7 +22,8 @@ export function selectOneRow(row: HTMLDivElement) {
 export function clickRow(
 	e:
 		| (MouseEvent & { currentTarget: EventTarget & HTMLDivElement })
-		| (FocusEvent & { currentTarget: EventTarget & HTMLDivElement }),
+		| (FocusEvent & { currentTarget: EventTarget & HTMLDivElement })
+		| (FocusEvent & { currentTarget: EventTarget & HTMLButtonElement }),
 	shiftKeyPressed: boolean
 ) {
 	const row = e.currentTarget;

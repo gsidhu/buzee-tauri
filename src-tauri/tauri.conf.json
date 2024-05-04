@@ -1,6 +1,6 @@
 {
   "productName": "Buzee",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "inc.buzilla.buzee",
   "build": {
     "beforeDevCommand": "npm run dev",

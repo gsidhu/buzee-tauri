@@ -10,6 +10,7 @@
 		compactViewMode,
 		allowedExtensions,
 		searchSuggestions,
+		base64Images,
 		userPreferences
 	} from '$lib/stores';
 	import { searchDocuments } from '$lib/utils/dbUtils';
@@ -41,6 +42,7 @@
 	async function triggerSearch() {
 		$resultsPageShown = 0; // reset the page number on each new search
 		$searchInProgress = true;
+		$base64Images = {};
 		trackEvent('search-triggered', {
 			filetypeShown: $filetypeShown,
 			resultsPageShown: $resultsPageShown

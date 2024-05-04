@@ -79,6 +79,10 @@ declare global {
     [key: string]: boolean;
   }
 
+  interface StringStringObject {
+    [key: string]: string;
+  }
+
   // type ElectronStore = import('electron-store');
   // Not sure how to export the types from the ElectronStore schema without rewriting
   // So going with `any`

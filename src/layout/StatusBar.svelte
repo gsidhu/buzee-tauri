@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { isMac, compactViewMode, statusMessage, onSearchPage, userPreferences, syncStatus } from '$lib/stores';
+	import { isMac, compactViewMode, statusMessage, onSearchPage, userPreferences, syncStatus, showIconGrid } from '$lib/stores';
 	import {
 		documentsShown,
 		searchInProgress,
@@ -266,6 +266,27 @@
 			>
 				<i class="bi bi-stars" />
 			</button>
+			{#if $showIconGrid}
+			<button
+				type="button"
+				id="status-bar-extras"
+				class="px-2 status-item"
+				title="Switch to List View"
+				on:click={() => $showIconGrid = !$showIconGrid}
+			>
+				<i class="bi bi-list-ul" />
+			</button>
+			{:else}
+				<button
+					type="button"
+					id="status-bar-extras"
+					class="px-2 status-item"
+					title="Switch to Icon Grid"
+					on:click={() => $showIconGrid = !$showIconGrid}
+				>
+					<i class="bi bi-grid" />
+				</button>
+			{/if}
 			{#if $compactViewMode}
 				<button
 					type="button"

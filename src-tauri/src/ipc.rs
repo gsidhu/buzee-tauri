@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
 use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
-use crate::utils::{extract_text_from_pdf, graceful_restart, save_text_to_file};
+use crate::utils::{extract_text_from_pdf, graceful_restart, read_image_to_base64, save_text_to_file};
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
@@ -293,6 +293,11 @@ fn open_context_menu(window: tauri::Window, option: String) {
     }
 }
 
+#[tauri::command]
+async fn get_image_base64(file_path: String) -> Result<String, Error> {
+  read_image_to_base64(file_path).await
+}
+
 // Get UserPreferencesState
 #[tauri::command]
 async fn get_user_preferences_state(app_handle: tauri::AppHandle) -> UserPreferencesState {
@@ -404,7 +409,8 @@ pub fn initialize() {
       reset_user_preferences,
       ignore_file_or_folder,
       show_ignored_paths,
-      remove_from_ignore_list
+      remove_from_ignore_list,
+      get_image_base64
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_updater::Builder::new().build())

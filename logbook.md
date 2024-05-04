@@ -2,10 +2,27 @@
 
 Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr on Windows.
 
-## - Use GitHub action to build. Figure out how to package sidecars for specific OS.
-## - Figure out how to make AltGr work same as Alt on Windows.
-## - Check why app updater does not restart the app.
-## - Check if app updater works on Windows.
+## v0.1.1 updates
+- Package sqlite3.dll with the Windows build in resources.
+- Add icon view as an alternative to svelteTable in search results. This will show a thumbnail of the file and the filename. Works for images so far.
+- Add Buy Me a Coffee button in Settings.
+- Make "launch at startup" work
+- Check that `poppler` gets downloaded on Windows (it does when you run the magic function but on sync it kinda fails)
+- Log all warnings to log file; and filename for file extraction errors
+- Let user know that file content scan happens only on the first sync (click here to start); and that PDF files are scanned last as they take more time
+- Remove "Deep Breathing" from the onboarding; make everyone go through the game because it shows the competence of the app
+- Check if a PDF is text-based, if so, get the text out of it without OCR
+- Automatically add "Documents/buzee-tauri" to the ignore list
+- Replace all db load functions that end in `?` with `.unwrap_or(Vec::new())`
+
+# Good to do
+- New app icon with higher contrast, more solid colour
+- Use GitHub action to build. Figure out how to package sidecars for specific OS.
+- Figure out how to make AltGr work same as Alt on Windows.
+- Check why app updater does not restart the app.
+- Check if app updater works on Windows.
+
+# v0.1.0 Logbook
 
 - Removed all code and packages for Firebase and Sentry.
 - Replaced Firebase Analytics with Aptabase.
@@ -233,3 +250,23 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Update Document Stats to reflect categories and # files indexed.
 - Add infinite scroll to search results. (Need Punnu's help for this.)
 - Fix window overflow issue.
+
+
+# Chat with Ritwik
+"It serves an important everyday function" - Ritwik
+
+- Chrome History/Bookmarks?
+- Zotero?
+
+## Feature Idea
+- Download all files from a URL (PAB Minutes; Budget Files)
+
+## Second Order Contacts
+* Ritwik: Kartik Sundar; Aishita; IDEAS colleagues and professors; Shomu (KMC), Mandy (KMC), Vincy, Akshay (SRFTI); Manas; Avni
+* Snigdha:
+* Malavika:
+* Karan: Sukhman
+* Mallika Arora: Siddharth Santosh; Tanya
+* Shobhna: Aprajita
+* Poonam: Wrik, Padmaja
+* Ask Manisha/Ishani for editor contacts

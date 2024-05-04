@@ -8,7 +8,8 @@
 		resultsPageShown,
 		resultsPerPage,
 		searchInProgress,
-		allowedExtensions
+		allowedExtensions,
+		base64Images
 	} from '$lib/stores';
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
 	import { categoriseExtensions, setExtensionCategory } from '$lib/utils/miscUtils';
@@ -19,6 +20,7 @@
 	async function showDocsForFiletype() {
 		trackEvent('click:showDocsForFileType');
 		$searchInProgress = true;
+		$base64Images = {};
 		let filetypeToGet = $filetypeShown;
 		if (filetypeToGet !== 'any') {
 			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);

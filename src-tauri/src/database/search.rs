@@ -151,10 +151,12 @@ pub fn search_fts_index(
 
         let body_fts_query = create_body_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
         let body_search_results: Vec<DocumentSearchResult> =
-            diesel::sql_query(body_fts_query).load::<DocumentSearchResult>(&mut conn)?;
+            diesel::sql_query(body_fts_query).load::<DocumentSearchResult>(&mut conn).unwrap_or(Vec::new());
+        println!("got {} results from body_fts", body_search_results.len());
         let metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
         let metadata_search_results: Vec<DocumentSearchResult> =
-            diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn)?;
+            diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn).unwrap_or(Vec::new());
+        println!("got {} results from metadata_fts", metadata_search_results.len());
         // combine the results from body_fts and metadata_fts
         for result in metadata_search_results.iter().chain(body_search_results.iter()) {
             search_results.push(result.clone());
@@ -220,7 +222,7 @@ fn create_body_fts_query(
         offset = page * limit*2
     );
 
-    println!("inner_query: {}", inner_query);
+    println!("body_inner_query: {}", inner_query);
     inner_query
 }
 
@@ -271,7 +273,7 @@ fn create_metadata_fts_query(
         offset = page * limit*2
     );
 
-    println!("inner_query: {}", inner_query);
+    println!("metadata_inner_query: {}", inner_query);
     inner_query
 }
 
