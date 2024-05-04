@@ -1,21 +1,22 @@
 # Logbook
-
-Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr on Windows.
+Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr and sqlite3.dll on Windows.
 
 ## v0.1.1 updates
-- Package sqlite3.dll with the Windows build in resources.
+- Package sqlite3.dll with the Windows build in resources
 - Add icon view as an alternative to svelteTable in search results. This will show a thumbnail of the file and the filename. Works for images so far.
-- Add Buy Me a Coffee button in Settings.
-- Make "launch at startup" work
-- Check that `poppler` gets downloaded on Windows (it does when you run the magic function but on sync it kinda fails)
-- Log all warnings to log file; and filename for file extraction errors
-- Let user know that file content scan happens only on the first sync (click here to start); and that PDF files are scanned last as they take more time
-- Remove "Deep Breathing" from the onboarding; make everyone go through the game because it shows the competence of the app
-- Check if a PDF is text-based, if so, get the text out of it without OCR
-- Automatically add "Documents/buzee-tauri" to the ignore list
-- Replace all db load functions that end in `?` with `.unwrap_or(Vec::new())`
+- Add Buy Me a Coffee button in Magic page
+- Let user know that file content scan happens only on the first sync (click here to start)
+- Change text of Settings options so user knows that PDF files are scanned last and that automatic scan runs twice an hour
+- Add app version in the Settings page
 
 # Good to do
+- Replace all db load functions that end in `?` with `.unwrap_or(Vec::new())`
+- Remove "Deep Breathing" from the onboarding; make everyone go through the game because it shows the competence of the app
+- Check that `poppler` gets downloaded on Windows (it does when you run the magic function but on sync it kinda fails)
+- Log all warnings to log file; and filename for file extraction errors
+- Check if a PDF is text-based, if so, get the text out of it without OCR
+- Automatically add "Documents/buzee-tauri" to the ignore list
+- Make "launch at startup" work
 - New app icon with higher contrast, more solid colour
 - Use GitHub action to build. Figure out how to package sidecars for specific OS.
 - Figure out how to make AltGr work same as Alt on Windows.
@@ -23,7 +24,6 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Check if app updater works on Windows.
 
 # v0.1.0 Logbook
-
 - Removed all code and packages for Firebase and Sentry.
 - Replaced Firebase Analytics with Aptabase.
 - Removed all link- buttons. Using a standardised button look.

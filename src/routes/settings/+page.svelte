@@ -157,14 +157,22 @@
 		// const update = { version: "v1.0.0", body: "buzee"};
 		const update = await check();
 		if (update === null) {
-			await message('Failed to check for updates.\nPlease try again later.', { 
-				title: 'Error',
-				kind: 'error',
-				okLabel: 'OK'
-			});
-			return;
+			if ($isMac) {
+				await message('Failed to check for updates.\nPlease try again later.', {
+					title: 'Error',
+					kind: 'error',
+					okLabel: 'OK'
+				});
+				return;
+			} else {
+				await message('You are on the latest version. Stay awesome!', {
+					title: 'No Update Available',
+					kind: 'info',
+					okLabel: 'OK'
+				});
+			}
 		} else if (update.available) {
-			const yes = await ask(`Update to v${update.version} is available!\n\nRelease notes: ${update.body}`, { 
+			const yes = await ask(`Update to v${update.version} is available!\n\nRelease notes: ${update.body}`, {
 				title: 'Update Available',
 				kind: 'info',
 				okLabel: 'Update',
@@ -175,7 +183,7 @@
 				await invoke("polite_restart");
 			}
 		} else {
-			await message('You are on the latest version. Stay awesome!', { 
+			await message('You are on the latest version. Stay awesome!', {
 				title: 'No Update Available',
 				kind: 'info',
 				okLabel: 'OK'
@@ -303,7 +311,7 @@
 				<td class="py-2" role="button" on:click={() => goto('/settings/filetype')}>
 					File Type List
 					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>List of file types that Buzee should scan</div>
+						<div>List of file types that Buzee can scan</div>
 					</div>
 				</td>
 			</tr>
@@ -324,7 +332,7 @@
 					</div>
 				</td>
 			</tr>
-			<tr>
+			<!-- <tr>
 				<td class="text-center px-2"
 					><input
 						type="checkbox"
@@ -338,7 +346,7 @@
 						Launch the app automatically when your computer starts
 					</div>
 				</td>
-			</tr>
+			</tr> -->
 			<tr>
 				<td class="text-center px-2"
 					><input
@@ -384,7 +392,7 @@
 				<td class="py-2 skip-hover">
 					Allow Automatic Background Scan
 					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>Buzee will automatically scan your system in the background</div>
+						<div>This allows Buzee to scan your files automatically (twice an hour)</div>
 						<PopoverIcon title="We recommend keeping this setting enabled" />
 					</div>
 				</td>
@@ -400,7 +408,7 @@
 				<td class="py-2 skip-hover">
 					Scan File Text
 					<div class="d-flex align-items-center small-explanation gap-1">
-						<div>Buzee will scan file text so you can search inside files</div>
+						<div>Keep this on so you can search inside files (PDFs are scanned last)</div>
 						<PopoverIcon
 							title="Disabling this setting may improve speed but reduce quality of search results"
 						/>
@@ -427,11 +435,14 @@
 				<PopoverIcon title="Delete all data and uninstall the app" />
 			</div> -->
 		</div>
-		<div class="col-sm-10 mx-auto text-center my-4">
+		<div class="col-sm-10 mx-auto text-center mt-4">
 			<p class="mb-0 small-explanation fw-medium">Buzee Promise</p>
 			<small class="small-explanation">
 				Your personal data <span class="fw-medium">never, ever</span> leaves your computer. We sometimes collect anonymous usage data to make Buzee even better. Read more on our website.
 			</small>
+		</div>
+		<div class="text-center my-2">
+			<p class="mb-1 small-explanation">Buzee v0.1.1</p>
 		</div>
 	</div>
 </div>

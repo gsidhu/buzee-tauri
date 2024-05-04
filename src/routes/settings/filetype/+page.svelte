@@ -22,7 +22,7 @@
 			<i class="bi bi-file-earmark" />
 		</div>
 		<h3>Filetype List</h3>
-    <!-- <p class="text-center">Below is a list of support filetypes and categories</p> -->
+    <p class="text-center">You will be able to modify this list in an upcoming update!</p>
 
     {#key $allowedExtensions.items }
       <FileTypeList />

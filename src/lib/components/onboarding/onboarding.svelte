@@ -50,10 +50,11 @@
     <Permissions />
   {/if}
   <div id="processing-complete" class={`mt-5 text-center small ${processingDone ? 'faded' : 'hidden'} `} in:fade={{ delay: 200, duration: 1000 }}>
-    <p>Buzee is ready.</p>
-    <button type="button" class="btn btn-sm text-dark border-2 border-dark rounded border-hover-purple" on:click={() => gotoSearch()}>
+    <p class="mb-1">Buzee is ready</p>
+    <button type="button" class="btn btn-sm my-2 text-dark border-2 border-dark rounded border-hover-purple" on:click={() => gotoSearch()}>
       Start searching!
     </button>
+    <p class="small-explanation my-2">Note: Once the first full background scan <i class="fw-bold bi bi-arrow-repeat"/> finishes, you will be able to search keywords <em>inside</em> documents!<br/>The background scan runs automatically twice an hour. You can manually start/stop it using the button in the Status Bar below.</p>
   </div>
 </div>
 
@@ -64,4 +65,11 @@
   .faded {
     opacity: 0.5;
   }
+
+  .small-explanation {
+		font-size: 0.7rem;
+		font-weight: 300;
+		padding: 0;
+		background-color: inherit;
+	}
 </style>

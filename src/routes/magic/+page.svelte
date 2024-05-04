@@ -6,9 +6,14 @@
 	import { trackEvent } from '@aptabase/web';
   import TopBar from "../../layout/TopBar.svelte";
 
-	async function openDeadlineInBrowser() {
-		trackEvent("magic:deadline");
-		await invoke("open_file_or_folder", { filePath: "https://buzo.tools/deadline/" });
+	async function openInBrowser(what: string) {
+		if (what === "deadline") {
+			trackEvent("magic:deadline");
+			await invoke("open_file_or_folder", { filePath: "https://buzo.tools/deadline/" });
+		} else if (what === "bmac") {
+			trackEvent("magic:bmac");
+			await invoke("open_file_or_folder", { filePath: "https://www.buymeacoffee.com/thatgurjot" });
+		}
 	}
 
 	function gotoMagicPage(page: string) {
@@ -26,9 +31,7 @@
   <div id="topbar-bg" class="w-100">
     <TopBar />
   </div>
-  <div
-		class="d-flex flex-column gap-3 justify-content-center align-items-center col-10 col-sm-8 mx-auto mb-5"
-	>
+  <div class="d-flex flex-column gap-3 justify-content-center align-items-center col-10 col-sm-8 mx-auto">
     <div class="page-icon">
       <i class="bi bi-stars"></i>
     </div>
@@ -36,11 +39,11 @@
     <table class="table table-bordered w-90 mb-0">
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => openDeadlineInBrowser()}>
+					<button class="btn" on:click={() => openInBrowser("deadline")}>
             <i class="bi bi-trophy" />
 					</button>
 				</td>
-				<td class="py-2" role="button" on:click={() => openDeadlineInBrowser()}>
+				<td class="py-2" role="button" on:click={() => openInBrowser("deadline")}>
 					Deadline<i class="bi bi-box-arrow-up-right skip-icon"></i>
 					<div class="d-flex align-items-center small-explanation gap-1">
 						<div>A gentle progress tracker made with kindness</div>
@@ -114,6 +117,13 @@
 			</tr>
 		</table>
   </div>
+	<div class="text-center my-5">
+		<p class="mb-1 small-explanation fw-medium">Show Your Appreciation</p>
+		<button type="button" class="bmc-button" on:click={() => openInBrowser("bmac")}>
+			<img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+			<span class="ms-2 fs-6">Buy me a coffee</span>
+		</button>
+	</div>
 </div>
 
 <style lang="scss">
@@ -137,4 +147,6 @@
 	i.skip-icon {
 		font-size: 0.8rem;
 	}
+
+	.bmc-button img{height: 2rem !important;width: 2rem !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{padding: 7px 15px 7px 10px !important;line-height: 35px !important;height:51px !important;text-decoration: none !important;display:inline-flex !important;color:#ffffff !important;background-color:#FF813F;border-radius: 5px !important;border: 1px solid transparent !important;padding: 7px 15px 7px 10px !important;font-size: 28px !important;letter-spacing:0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#ffffff !important;}
 </style>
