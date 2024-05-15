@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { invoke, transformCallback } from "@tauri-apps/api/core";
+	import { listen } from '@tauri-apps/api/event';
+	import type { UnlistenFn } from '@tauri-apps/api/event';
 	import moment from 'moment';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { readable } from 'svelte/store';
-	import { documentsShown, shiftKeyPressed, compactViewMode, selectedResult, resultsPageShown, searchInProgress, filetypeShown, allowedExtensions, searchQuery, resultsPerPage } from '$lib/stores';
+	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, resultsPageShown, searchInProgress, filetypeShown, allowedExtensions, searchQuery, resultsPerPage } from '$lib/stores';
 	import { searchDocuments } from '$lib/utils/dbUtils';
 	import { setExtensionCategory } from '$lib/utils/miscUtils';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
@@ -114,7 +116,7 @@
 		clickRow(e, $shiftKeyPressed);
 		// window.menuAPI?.showResultsContextMenu(result);
 		$selectedResult = result;
-		await invoke("open_context_menu", {option:"searchresult"});
+		await invoke("open_context_menu", {option:"searchresult", filetype: result.file_type});
 	}
 
 	const table = createTable(readable($documentsShown), {
@@ -148,7 +150,7 @@
 			}
 		}),
 		table.column({
-			header: 'Last Modifed',
+			header: 'Last Modified',
 			accessor: 'last_modified',
 			id: 'lastModified',
 			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
@@ -160,19 +162,19 @@
 				}
 			}
 		}),
-		// table.column({
-		// 	header: 'Last Opened',
-		// 	accessor: 'frecency_last_accessed',
-		// 	id: 'lastOpened',
-		// 	cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
-		// 	plugins: {
-		// 		resize: {
-		// 			initialWidth: 100,
-		// 			minWidth: 100,
-		// 			maxWidth: 100
-		// 		}
-		// 	}
-		// }),
+		table.column({
+			header: 'Last Opened',
+			accessor: 'last_opened',
+			id: 'lastOpened',
+			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
+			plugins: {
+				resize: {
+					initialWidth: 100,
+					minWidth: 100,
+					maxWidth: 100
+				}
+			}
+		}),
 		table.column({
 			header: 'Size',
 			accessor: 'size',
@@ -199,8 +201,16 @@
 		})
 	]);
 
-	function showTableHeaderContextMenu(option: string) {
-		window.menuAPI?.showTableHeaderMenu(option, ids, labels, hideForId);
+	// function showTableHeaderContextMenu(option: string) {
+	// 	window.menuAPI?.showTableHeaderMenu(option, ids, labels, hideForId);
+	// }
+
+	async function showTableHeaderContextMenu(cellID: string) {
+		resetColumnSize();
+		trackEvent('right_click:resultTableHeaderContextMenu', {cellID});
+		if (cellID === "lastModified" || cellID === "lastOpened") {
+			await invoke("open_context_menu", {option:"tableheader", filetype: ""});
+		}
 	}
 
 	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
@@ -213,11 +223,17 @@
 		.filter(([, hide]) => hide)
 		.map(([id]) => id);
 
-	// HACK: hide size column by default
+	// HACK: hide columns by default
 	// hideForId['size'] = true;
-	// hideForId['lastOpened'] = true;
+	if ($preferLastOpened) {
+		hideForId['lastModified'] = true;
+	} else {
+		hideForId['lastOpened'] = true;
+	}
 
-	onMount(() => {
+	let unlistenLastModified: UnlistenFn;
+
+	onMount(async () => {
 		// select the first result when loading new search results
 		$selectedResult = $documentsShown[0];
 		let firstResult = document.querySelector('.result-0') as HTMLElement | null;
@@ -229,22 +245,20 @@
 		// window.electronAPI?.resetTableColWidths(() => {
 		// 	resetColumnSize();
 		// });
-		// window.electronAPI?.showHideColumn((id: string, hide: boolean) => {
-		// 	let falseCount = Object.values(hideForId).filter((value) => value === false).length;
-		// 	if (falseCount <= 2 && hide) {
-		// 		return;
-		// 	}
-		// 	console.log(id, hide);
-
-		// 	hideForId[id] = hide;
-		// 	// HACK: if no columns are hidden after this, reset the column size
-		// 	falseCount = Object.values(hideForId).filter((value) => value === false).length;
-		// 	if (falseCount === ids.length) {
-		// 		// window.location.reload();
-		// 		resetColumnSize();
-		// 	}
-		// });
-	});
+		unlistenLastModified = await listen<Payload>('toggle-last-modified', (event: any) => {
+      $preferLastOpened = !$preferLastOpened;
+			if ($preferLastOpened) {
+				hideForId['lastModified'] = false;
+				hideForId['lastOpened'] = true;
+			} else {
+				hideForId['lastModified'] = true;
+				hideForId['lastOpened'] = false;
+			}
+		});
+  })
+  onDestroy(() => {
+    unlistenLastModified();
+  })
 </script>
 
 <table {...$tableAttrs}>

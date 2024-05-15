@@ -1,31 +1,23 @@
 use crate::custom_types::Payload;
 use crate::housekeeping::get_app_directory;
-
-// Import the Error type
 use tauri::{
-  menu::{Menu, MenuEvent, MenuId, MenuItem, Submenu}, Manager, Window
+  menu::{Menu, MenuEvent, MenuId, MenuItem, Submenu}, Manager, WebviewWindow, Wry
 };
 
-pub fn searchresult_context_menu(window: &Window) {
-  let manager = window.app_handle();
-  let ignore_submenu = Submenu::with_items(manager, "Ignore", true, &[
-    &MenuItem::with_id(manager, "ignore_item", "Ignore This", true, None::<&str>).unwrap(),
-    &MenuItem::with_id(manager, "ignore_folder", "Ignore Parent Folder", true, None::<&str>).unwrap(),
-    &MenuItem::with_id(manager, "ignore_text", "Ignore File Text", true, None::<&str>).unwrap(),
-  ]).unwrap();
-  let context_menu = Menu::with_items(manager, &[
-    #[cfg(target_os = "macos")]
-    &MenuItem::with_id(manager, "preview", "Show Preview", true, None::<&str>).unwrap(),
+pub fn tableheader_context_menu(window: &WebviewWindow) -> Menu<Wry> {
+    let manager = window.app_handle();
+    let context_menu = Menu::with_items(
+        manager,
+        &[
+          &MenuItem::with_id(manager, "last_modified_toggle", "Toggle Last Modifed/Opened", true, None::<&str>).unwrap(),
+        ],
+    )
+    .unwrap();
 
-    &MenuItem::with_id(manager, "open", "Open File", true, None::<&str>).unwrap(),
-    &MenuItem::with_id(manager, "open_folder", "Open Folder", true, None::<&str>).unwrap(),
-    &ignore_submenu,
-  ]).unwrap();
-
-  window.popup_menu(&context_menu).unwrap();
+    context_menu
 }
 
-pub fn statusbar_context_menu(window: &Window) {
+pub fn statusbar_context_menu(window: &WebviewWindow) -> Menu<Wry> {
     let manager = window.app_handle();
     let context_menu = Menu::with_items(
         manager,
@@ -38,7 +30,7 @@ pub fn statusbar_context_menu(window: &Window) {
     )
     .unwrap();
 
-    window.popup_menu(&context_menu).unwrap();
+    context_menu
 }
 
 // Use the MenuEvent::receiver to listen to click events on the menu items
@@ -88,6 +80,63 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
     "preview" => {
       app.emit("show-preview", Payload { message: "Show Preview".into(), data: "".into() }).unwrap();
     }
+    "show_text" => {
+      app.emit("show-text", Payload { message: "Show Text".into(), data: "".into() }).unwrap();
+    }
+    "last_modified_toggle" => {
+      app.emit("toggle-last-modified", Payload { message: "Toggle Last Modified/Opened".into(), data: "".into() }).unwrap();
+    }
     _ => println!("Invalid context menu option"),
   }
+}
+
+pub fn searchresult_context_menu_folder(window: &WebviewWindow) -> Menu<Wry> {
+  let manager = window.app_handle();
+  let ignore_submenu = Submenu::with_items(manager, "Ignore", true, &[
+    &MenuItem::with_id(manager, "ignore_item", "Ignore This", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_folder", "Ignore Parent Folder", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_text", "Ignore File Text", true, None::<&str>).unwrap(),
+  ]).unwrap();
+  let context_menu = Menu::with_items(manager, &[
+    &MenuItem::with_id(manager, "open_folder", "Open Folder", true, None::<&str>).unwrap(),
+    &ignore_submenu,
+  ]).unwrap();
+
+  context_menu
+}
+
+pub fn searchresult_context_menu_docs(window: &WebviewWindow) -> Menu<Wry> {
+  let manager = window.app_handle();
+  let ignore_submenu = Submenu::with_items(manager, "Ignore", true, &[
+    &MenuItem::with_id(manager, "ignore_item", "Ignore This", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_folder", "Ignore Parent Folder", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_text", "Ignore File Text", true, None::<&str>).unwrap(),
+  ]).unwrap();
+  let context_menu = Menu::with_items(manager, &[
+    // #[cfg(target_os = "macos")]
+    // &MenuItem::with_id(manager, "preview", "Show Preview", true, None::<&str>).unwrap(),
+
+    &MenuItem::with_id(manager, "show_text", "Show Preview", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "open", "Open File", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "open_folder", "Open Folder", true, None::<&str>).unwrap(),
+    &ignore_submenu,
+  ]).unwrap();
+
+  context_menu
+  } 
+
+pub fn searchresult_context_menu_other(window: &WebviewWindow) -> Menu<Wry> {
+  let manager = window.app_handle();
+  let ignore_submenu = Submenu::with_items(manager, "Ignore", true, &[
+    &MenuItem::with_id(manager, "ignore_item", "Ignore This", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_folder", "Ignore Parent Folder", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "ignore_text", "Ignore File Text", true, None::<&str>).unwrap(),
+  ]).unwrap();
+  let context_menu = Menu::with_items(manager, &[
+    &MenuItem::with_id(manager, "open", "Open File", true, None::<&str>).unwrap(),
+    &MenuItem::with_id(manager, "open_folder", "Open Folder", true, None::<&str>).unwrap(),
+    &ignore_submenu,
+  ]).unwrap();
+
+  context_menu
 }

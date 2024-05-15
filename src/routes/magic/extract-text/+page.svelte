@@ -104,12 +104,6 @@
 </div>
 
 <style lang="scss">
-  .text-interaction {
-    cursor: text;
-    user-select: text;
-    -webkit-user-select: text;
-  }
-
   #toolbar > button:hover {
     color: var(--purple);
   }

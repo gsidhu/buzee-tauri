@@ -4,7 +4,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { trackEvent } from '@aptabase/web';
-  import { isMac, selectedResult, documentsShown, statusMessage, disableInteraction, syncStatus } from '$lib/stores';
+  import { isMac, selectedResult, documentsShown, statusMessage, disableInteraction, syncStatus, selectedResultText } from '$lib/stores';
   import { confirm } from '@tauri-apps/plugin-dialog';
 
   async function startSerialEventListener() {
@@ -134,6 +134,21 @@
     await listen<Payload>('show-preview', (event: any) => {
       trackEvent('showPreview');
       invoke('open_quicklook', { filePath: $selectedResult.path });
+    });
+    await listen<Payload>('show-text', (event: any) => {
+      trackEvent('showText');
+      if ($selectedResult !== undefined) {
+        // @ts-ignore
+        let textModal = new bootstrap.Modal(document.getElementById('file-text-modal'), {});
+        invoke('get_text_for_file', { filePath: $selectedResult.path }).then((res) => {
+          $selectedResultText = [];
+          // @ts-ignore
+          res.forEach(element => {
+            $selectedResultText.push(element);
+          });
+        })
+        textModal.show();
+      }
     });
     // Status Bar - Fun Stuff
     await listen<Payload>('document-stats', (event: any) => {

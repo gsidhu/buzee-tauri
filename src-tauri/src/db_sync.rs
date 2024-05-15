@@ -1,6 +1,6 @@
 // use diesel::{QueryDsl, RunQueryDsl};
 use tauri::{AppHandle, Manager};
-use crate::database::establish_connection;
+use crate::database::{establish_connection, establish_direct_connection_to_db};
 // use crate::database::schema::app_data;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
@@ -43,17 +43,18 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, sw
       if file_paths.len() == 0 {
         file_paths.push(home_directory.clone());
       }
-      let _files_added = walk_directory(&mut conn, &window, file_paths);
+      let mut new_conn = establish_connection(&app);
+      let _files_added = walk_directory(&mut new_conn, &window, file_paths);
 
       if detailed_scan_allowed {
         // Then start parsing the content of all files and add it to the body table
         println!("Parsing content from files");
-        let files_parsed = parse_content_from_files(&mut conn, app.clone()).await;
+        let files_parsed = parse_content_from_files(&mut new_conn, app.clone()).await;
         println!("Files parsed: {}", files_parsed);
       }
       // Emit closing sync status to the frontend
       println!("Sending message to frontend: Sync operation completed");
-      set_scan_running_status(&mut conn, false, true, &app);
+      set_scan_running_status(&mut new_conn, false, true, &app);
       send_message_to_frontend(&window, "sync-status".to_string(), "sync-status".to_string(), "false".to_string());
       info!("FILE SYNC FINISHED AT {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64);
       send_message_to_frontend(&window, "file-sync-finished".to_string(), "sync-finished".to_string(), "true".to_string());
@@ -74,14 +75,13 @@ pub fn sync_status(app: &AppHandle) -> (String, i64) {
   }
 }
 
-
 pub async fn add_specific_folders(window: &tauri::WebviewWindow, app: &AppHandle, file_paths: Vec<String>, is_folder: bool) {
   println!("file paths: {:?}", file_paths);
   println!("Adding specific folders...");
-  let mut conn = establish_connection(&app);
   let window = window.clone();
   // Spawn the new task
   tokio::spawn(async move {
+    let mut conn = establish_direct_connection_to_db();
     if file_paths.len() > 0 {
       // This is when user manually adds folder/file(s)
       let file_paths_clone = file_paths.clone();

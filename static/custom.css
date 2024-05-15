@@ -143,3 +143,9 @@ body {
     opacity: 0.7;
   }
 }
+
+.text-interaction {
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}

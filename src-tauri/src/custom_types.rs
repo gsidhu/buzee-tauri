@@ -160,3 +160,28 @@ impl Default for UserPreferencesState {
         }
     }
 }
+
+use tauri::Wry;
+use tauri::menu::Menu;
+
+// Struct for Context Menu
+pub(crate) struct ContextMenuState {
+  pub folder: Menu<Wry>,
+  pub docs: Menu<Wry>,
+  pub other: Menu<Wry>,
+  pub table_header: Menu<Wry>,
+  pub status_bar: Menu<Wry>
+}
+
+impl ContextMenuState {
+  pub fn new(folder_context_menu:Menu<Wry>, docs_context_menu:Menu<Wry>,
+    other_context_menu:Menu<Wry>, table_header_menu:Menu<Wry>, status_bar_menu:Menu<Wry>) -> Self {
+    Self {
+      folder: folder_context_menu,
+      docs: docs_context_menu,
+      other: other_context_menu,
+      table_header: table_header_menu,
+      status_bar: status_bar_menu
+    }
+  }
+}

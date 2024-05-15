@@ -1,7 +1,7 @@
 // Inter-Process Communication between Rust and SvelteKit
 // The idea is to eventually keep only callers here and move the actual logic to other files. This way, for creating a web app, we just have to convert this file into an API and call the same functions from the frontend.
 
-use crate::custom_types::{DBStat, DateLimit, Error, Payload, DBConnPoolState, UserPreferencesState, SyncRunningState};
+use crate::custom_types::{DBStat, DateLimit, Error, Payload, DBConnPoolState, UserPreferencesState, SyncRunningState, ContextMenuState};
 use crate::database::{establish_connection, get_connection_pool};
 use crate::database::models::{DocumentSearchResult, IgnoreList};
 use crate::database::search::{
@@ -17,7 +17,7 @@ use tauri::Manager;
 use tauri_plugin_shell;
 use tokio::time::{interval, Duration};
 use tauri::menu::Menu;
-use crate::context_menu::{contextmenu_receiver, searchresult_context_menu, statusbar_context_menu,};
+use crate::context_menu::{contextmenu_receiver, searchresult_context_menu_folder, searchresult_context_menu_docs, searchresult_context_menu_other, statusbar_context_menu, tableheader_context_menu};
 // use log::info;
 use std::sync::Mutex;
 use std::process::Command;
@@ -230,6 +230,7 @@ fn get_db_stats(app: tauri::AppHandle) -> Result<Vec<DBStat>, Error> {
 // Get parsed text for file
 #[tauri::command]
 async fn get_text_for_file(file_path: String, app: tauri::AppHandle) -> Result<Vec<String>, Error> {
+    println!("Getting text for file: {}", file_path);
     let mut conn = establish_connection(&app);
     let text = get_parsed_text_for_file(file_path, &mut conn).unwrap();
     Ok(text)
@@ -272,25 +273,35 @@ fn open_quicklook(file_path: String) -> Result<String, Error> {
     Ok("Opened QuickLook!".into())
 }
 
-// Context Menu on Windows has to be async
-#[cfg(target_os = "windows")]
+// Context Menu
 #[tauri::command]
-async fn open_context_menu(window: tauri::Window, option: String) {
-    match option.as_str() {
-        "searchresult" => searchresult_context_menu(&window),
-        "statusbar" => statusbar_context_menu(&window),
-        _ => println!("Invalid context menu option"),
-    }
-}
-// Context Menu on MacOS does not work if it is async
-#[cfg(target_os = "macos")]
-#[tauri::command]
-fn open_context_menu(window: tauri::Window, option: String) {
-    match option.as_str() {
-        "searchresult" => searchresult_context_menu(&window),
-        "statusbar" => statusbar_context_menu(&window),
-        _ => println!("Invalid context menu option"),
-    }
+fn open_context_menu(app_handle: tauri::AppHandle, window: tauri::Window, option: String, filetype: String) {
+  let state_mutex = app_handle.state::<Mutex<ContextMenuState>>();
+  let state = state_mutex.lock().unwrap();
+  match option.as_str() {
+      "searchresult" => {
+        let context_menu = match filetype.as_str() {
+          "folder" => &state.folder,
+          "docx" => &state.docs,
+          "md" => &state.docs,
+          "pptx" => &state.docs,
+          "txt" => &state.docs,
+          "epub" => &state.docs,
+          "pdf" => &state.docs,
+          _ => &state.other,
+        };
+        window.popup_menu(context_menu).unwrap();
+      },
+      "statusbar" => {
+        let context_menu = &state.status_bar;
+        window.popup_menu(context_menu).unwrap();
+      }
+      "tableheader" => {
+        let context_menu = &state.table_header;
+        window.popup_menu(context_menu).unwrap();
+      },
+      _ => println!("Invalid context menu option"),
+  }
 }
 
 #[tauri::command]
@@ -427,6 +438,14 @@ pub fn initialize() {
           set_user_preferences_state_from_db_value(app.handle());
           // sync running state
           handle.manage(Mutex::new(SyncRunningState::default()));
+          // context menu
+          let main_window = handle.get_webview_window("main").unwrap();
+          let folder_context_menu = searchresult_context_menu_folder(&main_window);
+          let docs_context_menu = searchresult_context_menu_docs(&main_window);
+          let other_context_menu = searchresult_context_menu_other(&main_window);
+          let table_header_context_menu = tableheader_context_menu(&main_window);
+          let status_bar_context_menu = statusbar_context_menu(&main_window);
+          handle.manage(Mutex::new(ContextMenuState::new(folder_context_menu, docs_context_menu, other_context_menu, table_header_context_menu, status_bar_context_menu)));
         }
         {
           if is_global_shortcut_enabled(app.handle()) {

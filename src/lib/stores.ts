@@ -48,6 +48,7 @@ let storedAllowedExtensions: FileTypesDropdown = {
   items: []
 };
 
+let storedFileText: string[] = [];
 let storedSearchSuggestions: string[] = [];
 let storedIgnoredPaths: IgnoreListType[] = [];
 let storedBase64Images: StringStringObject = {};
@@ -82,6 +83,7 @@ export const resultsPerPage = writable(25)
 export const statusMessage = writable("")
 export const compactViewMode = writable(storedCompactViewMode || false)
 export const selectedResult = writable(storedSelectedResult || {})
+export const selectedResultText = writable(storedFileText || [])
 export const ignoredPaths = writable(storedIgnoredPaths || [])
 export const shiftKeyPressed = writable(false);
 export const metaKeyPressed = writable(false);
@@ -91,6 +93,7 @@ export const dbCreationInProgress = writable(false);
 export const windowBlurred = writable(false);
 export const scratchPadText = writable("")
 export const base64Images = writable(storedBase64Images || {})
+export const preferLastOpened = writable(false);
 
 // 3. Anytime the store changes, update the local storage value.
 if(typeof window !== "undefined") {

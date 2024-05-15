@@ -1,5 +1,18 @@
 # Logbook
-Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr and sqlite3.dll on Windows.
+Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr, poppler and sqlite3.dll on Windows.
+
+## v0.1.2 updates
+- Fix typo in Last Modified column header.
+- Option to switch between Last Modified or Last Opened in search results. Right click on the column header to toggle.
+- TODO: Disable unnecessary right click menus. (in `+layout.svlete`)
+- Preview scanned file text. This feature replaces Quicklook on Mac in the context menu. Quicklook still functions as expected when the Spacebar is pressed.
+- Context menu changes for search results depending on file type.
+- TODO: Simplify search query to prevent `database disk image malformed` error.
+- TODO: In addition to body_fts and metadata_fts, add results from a LIKE search to get matches for queries that may not be tokenised appropriately. For e.g. phone numbers.
+- TODO: Move search suggestions out of SQLite db.
+- Store context menu in a managed state instead of recreating on each call.
+- Create db connection inside the Tokio runtime to prevent SQLite errors.
+- TODO: Package `poppler` with Windows build.
 
 ## v0.1.1 updates
 - Package sqlite3.dll with the Windows build in resources
