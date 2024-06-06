@@ -138,9 +138,9 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
 
 // Run file indexing ONLY
 #[tauri::command]
-async fn run_file_indexing(window: tauri::WebviewWindow, app: tauri::AppHandle, file_paths: Vec<String>, is_folder: bool) -> Result<String, Error> {
+async fn run_file_indexing(window: tauri::WebviewWindow, file_paths: Vec<String>, is_folder: bool) -> Result<String, Error> {
   println!("File watcher started");
-  add_specific_folders(&window, &app, file_paths, is_folder).await;
+  add_specific_folders(&window, file_paths, is_folder).await;
   Ok("File indexing complete".to_string())
 }
 

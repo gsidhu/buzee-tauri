@@ -4,15 +4,19 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.
 - Option to switch between Last Modified or Last Opened in search results. Right click on the column header to toggle.
-- TODO: Disable unnecessary right click menus. (in `+layout.svlete`)
 - Preview scanned file text. This feature replaces Quicklook on Mac in the context menu. Quicklook still functions as expected when the Spacebar is pressed.
 - Context menu changes for search results depending on file type.
-- TODO: Simplify search query to prevent `database disk image malformed` error.
-- TODO: In addition to body_fts and metadata_fts, add results from a LIKE search to get matches for queries that may not be tokenised appropriately. For e.g. phone numbers.
-- TODO: Move search suggestions out of SQLite db.
 - Store context menu in a managed state instead of recreating on each call.
 - Create db connection inside the Tokio runtime to prevent SQLite errors.
-- TODO: Package `poppler` with Windows build.
+- Run text-based PDF extraction first. If it fails, try OCR.
+- TODO: Add a context menu option for re-parsing a file. For PDFs, this will run OCR instead of text-based extraction.
+- TODO: Detect images inside PDFs and extract text from them using OCR. Append this to the file text.
+- TODO: Split database into two files. One for metadata and one for file contents. This should prevent the `database disk image malformed` error.
+- TODO: In addition to body_fts and metadata_fts, add results from a LIKE search to get matches for queries that may not be tokenised appropriately. For e.g. phone numbers.
+- TODO: Move search suggestions out of SQLite db.
+- TODO: Change UI to reduce text parsing dependence and use GUI filters instead.
+- TODO: Package `poppler` and `sqlite3.dll` with Windows build.
+- TODO: Disable unnecessary right click menus. (in `+layout.svlete`)
 
 ## v0.1.1 updates
 - Package sqlite3.dll with the Windows build in resources
@@ -27,14 +31,14 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Remove "Deep Breathing" from the onboarding; make everyone go through the game because it shows the competence of the app
 - Check that `poppler` gets downloaded on Windows (it does when you run the magic function but on sync it kinda fails)
 - Log all warnings to log file; and filename for file extraction errors
-- Check if a PDF is text-based, if so, get the text out of it without OCR
 - Automatically add "Documents/buzee-tauri" to the ignore list
 - Make "launch at startup" work
 - New app icon with higher contrast, more solid colour
 - Use GitHub action to build. Figure out how to package sidecars for specific OS.
 - Figure out how to make AltGr work same as Alt on Windows.
 - Check why app updater does not restart the app.
-- Check if app updater works on Windows.
+- Check if [`chrono`](https://github.com/wanasit/chrono) works better than `compromise`
+- [x] Check if app updater works on Windows.
 
 # v0.1.0 Logbook
 - Removed all code and packages for Firebase and Sentry.

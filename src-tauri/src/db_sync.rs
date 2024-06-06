@@ -75,7 +75,7 @@ pub fn sync_status(app: &AppHandle) -> (String, i64) {
   }
 }
 
-pub async fn add_specific_folders(window: &tauri::WebviewWindow, app: &AppHandle, file_paths: Vec<String>, is_folder: bool) {
+pub async fn add_specific_folders(window: &tauri::WebviewWindow, file_paths: Vec<String>, is_folder: bool) {
   println!("file paths: {:?}", file_paths);
   println!("Adding specific folders...");
   let window = window.clone();

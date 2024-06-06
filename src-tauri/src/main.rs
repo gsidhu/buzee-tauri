@@ -9,6 +9,7 @@ extern crate lazy_static;
 extern crate log;
 extern crate mobi;
 extern crate epub;
+extern crate pdf_extract;
 extern crate regex;
 extern crate serde_json;
 extern crate reqwest;
