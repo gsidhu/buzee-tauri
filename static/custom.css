@@ -29,6 +29,18 @@ body {
   background: linear-gradient(to right, #E9E4F030, #D3CCE330);
 } */
 
+.min-vh-100 {
+  min-height: 100vh !important;
+}
+
+max-vh-100 {
+  max-height: 100vh !important;
+}
+
+html, body {
+  height: 100vh !important;
+}
+
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);

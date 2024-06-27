@@ -14,9 +14,7 @@
 </script>
 
 <div in:fade={{ delay: 500, duration: 1000 }}>
-  <div id="topbar-bg" class="w-full">
-    <TopBar />
-  </div>
+  
   <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
     <div class="text-center gap-2">
       <div class="page-icon">

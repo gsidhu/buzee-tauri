@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
-  import TopBar from "../../../layout/TopBar.svelte";
   import { save } from '@tauri-apps/plugin-dialog';
   import { invoke } from "@tauri-apps/api/core";
   import { scratchPadText } from '$lib/stores';
+
+  import { Textarea } from "$lib/components/ui/textarea/index.js";
+  import {Copy, Download, Eraser } from "lucide-svelte";
 
   async function copyTextToClipboard() {
     await navigator.clipboard.writeText($scratchPadText);
@@ -30,43 +32,30 @@
   });
 </script>
 
-<div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-full">
-    <TopBar />
-  </div>
-  <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
-    <div class="text-center gap-2">
-      <div class="page-icon">
-        <i class="bi bi-journal-text"></i>
+<div class="flex flex-col" in:fade={{ delay: 0, duration: 500 }}>
+  <h3 class="text-lg font-semibold leading-none tracking-tight">Scratch Pad</h3>
+  <p class="text-sm text-muted-foreground">Anything you write or paste here stays till you restart the app</p>
+</div>
+<div class="flex flex-1 w-full items-center justify-center rounded-lg border border-dashed shadow-sm">
+  <div class="w-full h-full !p-2">
+    <div class="flex justify-content-end">
+      <div id="toolbar" class="gap-1 flex justify-content-center">
+        <button class="!py-1 !px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
+          <Copy class="h-4 w-4" />
+        </button>
+        <button class="!py-1 !px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
+          <Download class="h-4 w-4" />
+        </button>
+        <button class="!py-1 !px-2 leading-tight text-xs" title="Clear all text" on:click={() => $scratchPadText = ""}>
+          <Eraser class="h-4 w-4" />
+        </button>
       </div>
-      <h3>Scratch Pad</h3>
-      <p>Anything you write or paste here stays till you restart the app</p>
     </div>
-
-    <div class="my-4">
-      <div class="flex justify-content-end">
-        <div id="toolbar" class="gap-1 flex justify-content-center">
-          <button class="btn py-1 px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
-            <i class="bi bi-copy"></i>
-          </button>
-          <button class="btn py-1 px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
-            <i class="bi bi-download"></i>
-          </button>
-          <button class="btn py-1 px-2 leading-tight text-xs" title="Clear all text" on:click={() => $scratchPadText = ""}>
-            <i class="bi bi-eraser"></i>
-          </button>
-        </div>
-      </div>
-      <textarea bind:value={$scratchPadText} class="w-full border border-2 border-gray-100 p-2"></textarea>
-    </div>
+    <Textarea bind:value={$scratchPadText} class="!mt-2 min-h-[50vh]" placeholder="Type your message here." />
   </div>
 </div>
 
 <style lang="scss">
-  textarea {
-    height: 30vh;
-  }
-
   #toolbar > button:hover {
     color: var(--purple);
   }

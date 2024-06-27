@@ -4,7 +4,7 @@
 	export let icon = '';
 	export let id = '';
 	export let label = 'Click here';
-	export let marginClass = 'mx-2';
+	export let marginClass = '!mx-2';
 	export let showIcon = false;
 	export let showText = true;
 	export let showSpinner = false;
@@ -42,7 +42,7 @@
 	disabled={isDisabled}
 >
 	{#if showSpinner}
-		<div class="spinner-border mx-2" style="height: 1rem; width: 1rem;" role="status">
+		<div class="spinner-border !mx-2" style="height: 1rem; width: 1rem;" role="status">
 			<span class="visually-hidden">Loading...</span>
 		</div>
 	{/if}

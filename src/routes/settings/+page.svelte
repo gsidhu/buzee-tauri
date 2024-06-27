@@ -259,17 +259,14 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-	<div id="topbar-bg" class="w-full">
-		<TopBar />
-	</div>
 	<div
-		class="flex flex-col gap-3 justify-center items-center w-4/5 sm:w-2/3 pr-4 pl-4 mx-auto mb-5"
+		class="flex flex-col gap-3 justify-center items-center pr-4 pl-4 mx-auto mb-5"
 	>
 		<div class="page-icon">
 			<i class="bi bi-gear" />
 		</div>
 		<h3>Settings</h3>
-		<table class="table table-bordered w-90 mb-0">
+		<table class="table table-bordered w-full mb-0">
 			<!-- Buttons / Links -->
 			<tr>
 				<td class="text-center px-2">
@@ -451,15 +448,6 @@
 					Check for Updates
 				</button>
 			</div>
-		</div>
-		<div class="sm:w-4/5 pr-4 pl-4 mx-auto text-center mt-4">
-			<p class="mb-0 small-explanation fw-medium">Buzee Promise</p>
-			<small class="small-explanation">
-				Your personal data <span class="fw-medium">never, ever</span> leaves your computer. We sometimes collect anonymous usage data to make Buzee even better. Read more on our website.
-			</small>
-		</div>
-		<div class="text-center my-2">
-			<p class="mb-1 small-explanation">Buzee v0.1.1</p>
 		</div>
 	</div>
 </div>

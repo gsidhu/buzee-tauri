@@ -28,9 +28,7 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-full">
-    <TopBar />
-  </div>
+  
   <div class="flex flex-col gap-3 justify-content-center items-center w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto">
     <div class="page-icon">
       <i class="bi bi-stars"></i>

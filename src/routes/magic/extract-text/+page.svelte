@@ -1,9 +1,10 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import TopBar from "../../../layout/TopBar.svelte";
 	import ConfettiButton from "$lib/components/ui/confettiButton.svelte";
   import { open, save } from '@tauri-apps/plugin-dialog';
   import { invoke } from "@tauri-apps/api/core";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import {Copy, Download, LoaderCircle } from "lucide-svelte";
 
   let filePath = "";
   let fileName = "";
@@ -59,37 +60,31 @@
   }
 </script>
 
-<div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-full">
-    <TopBar />
+<div class="flex flex-col" in:fade={{ delay: 0, duration: 500 }}>
+  <h3 class="text-lg font-semibold leading-none tracking-tight">Extract Text from PDF or Image</h3>
+  <p class="text-sm text-muted-foreground">Select a PDF or image file to begin extraction</p>
+</div>
+<div class="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
+  <div class="flex flex-col items-center gap-1 text-center">
+    <Button class="mt-4" on:click={() => fileSelectorDialog()} disabled={extractingOngoing ? true : false}>
+      {#if extractingOngoing}
+        <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+      {:else}
+        Select File
+      {/if}
+    </Button>
   </div>
-  <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
-    <div class="text-center gap-2">
-      <div class="page-icon">
-        <i class="bi bi-body-text"></i>
-      </div>
-      <h3>Extract Text from PDF or Image</h3>
-      <p>Select a PDF or image file</p>
-      <ConfettiButton 
-        label="Select File" 
-        icon="bi-file-earmark-arrow-up" 
-        marginClass="mx-2 my-2"
-        showIcon={!extractingOngoing}
-        showText={!extractingOngoing}
-        showSpinner={extractingOngoing}
-        handleClick={() => fileSelectorDialog() } />
-    </div>
 
-    {#if extractedText.length > 0}
+  {#if extractedText.length > 0}
     <div class="my-4">
       <div class="flex justify-between">
         <h6>{fileName}</h6>
         <div id="toolbar" class="gap-1 flex justify-content-center">
-          <button class="btn py-1 px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
-            <i class="bi bi-copy"></i>
+          <button class="!py-1 !px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
+            <Copy />
           </button>
-          <button class="btn py-1 px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
-            <i class="bi bi-download"></i>
+          <button class="!py-1 !px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
+            <Download />
           </button>
         </div>
       </div>
@@ -99,8 +94,7 @@
         {/each}
       </div>
     </div>
-    {/if}
-  </div>
+  {/if}
 </div>
 
 <style lang="scss">

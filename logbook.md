@@ -1,6 +1,9 @@
 # Logbook
 Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr, poppler and sqlite3.dll on Windows.
 
+## UI Redesign
+- Using shadcn-svelte components and Tailwind CSS. Keeping a few essential classes from Bootstrap.
+
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.
 - Option to switch between Last Modified or Last Opened in search results. Right click on the column header to toggle.

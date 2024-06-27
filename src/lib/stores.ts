@@ -65,6 +65,7 @@ export const userPreferences = writable({
   "onboarding_done": false,
   "show_in_dock": true
 })
+export const pagePath = writable("")
 export const isMac = writable(false)
 export const pinMode = writable(false)
 export const showIconGrid = writable(false)

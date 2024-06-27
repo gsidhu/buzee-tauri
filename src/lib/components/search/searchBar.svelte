@@ -19,6 +19,7 @@
 	import SearchSuggestions from './searchSuggestions.svelte';
 	import { trackEvent } from '@aptabase/web';
 	import { invoke } from '@tauri-apps/api/core';
+	import { Search } from "lucide-svelte";
 
 	let isInputFocused = false;
 	let searchInputRef: HTMLInputElement; // a reference to the input element that allows updating the DOM without running a querySelector
@@ -105,10 +106,20 @@
 	});
 </script>
 
-<div id="search-bar-outer-wrapper">
+<form class="grid">
+	<div class="relative items-center">
+		<Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+		<Input
+			type="search"
+			placeholder="Search your files, browser history, bookmarks..."
+			class="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-2/3"
+		/>
+	</div>
+</form>
+
+<!-- <div id="search-bar-outer-wrapper">
 	<div id="search-bar-wrapper" class={`rounded-3 flex no-drag ${$compactViewMode ? 'compact-view' : ''}`}>
 		<i class="bi bi-search px-1" aria-label="Search" aria-hidden="true" />
-		<!-- actual search box -->
 		<div id="actual-search-box" class="flex flex-grow-1">
 			<Input 
 					type="search"
@@ -130,7 +141,7 @@
 			/>
 		</div>
 	</div>
-	<!-- Search Suggestions -->
+
 	{#if $userPreferences.show_search_suggestions}
 		<SearchSuggestions
 			isSearchSuggestionsVisible={isInputFocused && $searchSuggestions.length > 0}
@@ -138,7 +149,7 @@
 			{triggerSearch}
 		/>
 	{/if}
-</div>
+</div> -->
 
 <style lang="scss">
 	// .btn:disabled {

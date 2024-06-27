@@ -1,28 +1,32 @@
 <script lang="ts">
   import "../app.css";
   import { onMount, onDestroy } from "svelte";
-  import StatusBar from "../layout/StatusBar.svelte";
+  import { page } from '$app/stores';
   import * as Dialog from "$lib/components/ui/dialog";
-
-  // import { goto } from '$app/navigation';
+  import * as Sheet from "$lib/components/ui/sheet/index.js";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import Menu from "lucide-svelte/icons/menu";
   import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
 
   import EventListeners from "$lib/utils/eventListeners.svelte";
   import { trackEvent } from "@aptabase/web";
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
-
-  // import { Command } from '@tauri-apps/plugin-shell';
-  import { isMac, windowBlurred, cronJobSet, userPreferences, disableInteraction } from "$lib/stores";
+  import { isMac, windowBlurred, cronJobSet, userPreferences, disableInteraction, pagePath } from "$lib/stores";
 
   import { check } from "@tauri-apps/plugin-updater";
   import { ask } from "@tauri-apps/plugin-dialog";
+
+	import SearchBar from "$lib/components/search/searchBar.svelte";
+	import SidebarMenu from "$lib/components/sidebar/sidebarMenu.svelte";
+	import UserDropdown from "$lib/components/header/userDropdown.svelte";
+  
   var appMode: string = "menubar";
 
   async function maximiseWindow() {
     console.log("double click");
     await window.electronAPI.maximiseWindow();
-}
+  }
 
   async function startSerialEventListener() {
     await listen<Payload>("event-name", (event: any) => {
@@ -75,6 +79,13 @@
         }
     });
 
+    page.subscribe((value) => {
+			const route = value.url.pathname;
+			if (route) {
+				$pagePath = route;
+			}
+		});
+
     appMode = "window";
 
     // get user preferences
@@ -112,14 +123,41 @@
 <KeyboardListeners />
 <EventListeners />
 <main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
-	<!-- <button on:click={() => testFn()}>Test</button> -->
-	<slot />
-	<StatusBar />
+	<div class="grid min-h-screen w-full md:grid-cols-[220px_1fr]">
+    <div class="hidden border-r bg-muted/40 md:block">
+      <SidebarMenu />
+    </div>
+    <div class="flex flex-col">
+      <header class="flex items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+        <Sheet.Root>
+          <Sheet.Trigger asChild let:builder>
+            <Button
+              variant="outline"
+              size="icon"
+              class="shrink-0 md:hidden"
+              builders={[builder]}
+            >
+              <Menu class="h-5 w-5" />
+              <span class="sr-only">Toggle navigation menu</span>
+            </Button>
+          </Sheet.Trigger>
+          <Sheet.Content side="left" class="flex flex-col">
+            <SidebarMenu />
+          </Sheet.Content>
+        </Sheet.Root>
+        <div class="w-full flex-1">
+          <SearchBar />
+        </div>
+        <UserDropdown />
+      </header>
+      <section class="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <slot />
+      </section>
+    </div>
+  </div>
 </main>
-
-<!-- <button type="button" id="message-modal-trigger" class="d-none" data-bs-toggle="modal" data-bs-target="#message-modal"></button> -->
  
-<Dialog.Root>
+<!-- <Dialog.Root>
   <Dialog.Trigger></Dialog.Trigger>
   <Dialog.Content>
     <Dialog.Header>
@@ -134,7 +172,7 @@
       {/if}
     </p>
   </Dialog.Content>
-</Dialog.Root>
+</Dialog.Root> -->
 
 <style>
 	.main-container {

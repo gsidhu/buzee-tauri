@@ -1,22 +1,14 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import TopBar from "../../../layout/TopBar.svelte";
+  
 </script>
 
-<div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-full">
-    <TopBar />
-  </div>
-  <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
-    <div class="text-center gap-2">
-      <div class="page-icon">
-        <i class="bi bi-yin-yang"></i>
-      </div>
-      <h3>Take A Deep Breath</h3>
-      <p>Just follow the animation</p>
-      <div id="breathing" class="mx-auto mt-5"></div>
-    </div>
-  </div>
+<div class="flex flex-col" in:fade={{ delay: 0, duration: 500 }}>
+  <h3 class="text-lg font-semibold leading-none tracking-tight">Take a Deep Breath</h3>
+  <p class="text-sm text-muted-foreground">Just follow the animation</p>
+</div>
+<div class="flex flex-1 w-full items-center justify-center rounded-lg border border-dashed shadow-sm">
+  <div id="breathing" class="mx-auto mt-5"></div>
 </div>
 
 <style>
