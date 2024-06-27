@@ -101,9 +101,14 @@ Wherever possible, Buzee will leverage native APIs and system features to provid
 * **Emails**: Gmail, Outlook, etc.
 * **Research**: Google Scholar, JSTOR, Zotero, Mendeley, etc.
 * **Code**: GitHub, GitLab, Bitbucket, etc.
-* **Health**: Apple Health, Google Fit, Nike Run Club, Strava, etc.
+* **Health**: Apple Health, Google Fit, Fitbit, Nike Run Club, Strava, Garmin, Coros, Endomondo etc.
 * **Calendar**: Google Calendar, Apple Calendar, etc.
 * **To-Do**: Todoist, Things, Trello, Asana, etc.
 * **Shopping**: Amazon, eBay, Etsy, etc.
 * **Books**: Kindle, Audible, Goodreads, Apple Books, etc.
 * **Sites and Feeds**: RSS Feeds, Newsletters, Blogs, Wikipedia, etc.
+
+### Pitch
+Buzee – the ultimate local-first, privacy-first personal data search engine. Buzee seamlessly integrates with all your data sources – from local files to cloud storage, messaging apps, forums, emails, and beyond. Using advanced natural language processing, Buzee allows you to search your entire digital footprint effortlessly. Find your documents, track your health stats, recall your messages, and much more with a simple, secure search.
+
+Imagine having all your digital life at your fingertips, without compromising your privacy. That's what Buzee does for you. It's a powerful search engine that connects to everything – your local files, cloud storage, emails, chats, social media, music, and even your fitness apps. Want to know your average running pace from July 2019? Or find that tech article you saved in 2020? Buzee makes it possible. With its natural language search, you can effortlessly sift through your entire digital history. It's like having a super-organized, private assistant for all your online and offline data.

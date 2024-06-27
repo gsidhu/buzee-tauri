@@ -40,7 +40,7 @@
     </div>
   {/if}
   <div class="text-center my-3">
-    <!-- <button class="btn btn-sm" on:click={() => sendUpdate()}>Make Guess</button> -->
+    <!-- <button class="btn py-1 px-2 leading-tight text-xs" on:click={() => sendUpdate()}>Make Guess</button> -->
     <ConfettiButton label="Make Guess" animate={false} handleClick={() => sendUpdate()} />
   </div>
 </div>

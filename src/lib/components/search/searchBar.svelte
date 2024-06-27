@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Input } from "$lib/components/ui/input/index.js";
 	import {
 		searchQuery,
 		filetypeShown,
@@ -15,7 +16,6 @@
 	} from '$lib/stores';
 	import { searchDocuments } from '$lib/utils/dbUtils';
 	import { setExtensionCategory } from '$lib/utils/miscUtils';
-	import FiletypeDropdown from './FiletypeDropdown.svelte';
 	import SearchSuggestions from './searchSuggestions.svelte';
 	import { trackEvent } from '@aptabase/web';
 	import { invoke } from '@tauri-apps/api/core';
@@ -106,19 +106,17 @@
 </script>
 
 <div id="search-bar-outer-wrapper">
-	<div id="search-bar-wrapper" class={`rounded-3 no-drag ${$compactViewMode ? 'compact-view' : ''}`}>
+	<div id="search-bar-wrapper" class={`rounded-3 flex no-drag ${$compactViewMode ? 'compact-view' : ''}`}>
 		<i class="bi bi-search px-1" aria-label="Search" aria-hidden="true" />
 		<!-- actual search box -->
-		<div id="actual-search-box" class="d-flex flex-grow-1">
-			<form class="d-flex flex-fill" role="search" on:submit|preventDefault={() => triggerSearch()}>
-				<input
-					id="search-input"
+		<div id="actual-search-box" class="flex flex-grow-1">
+			<Input 
 					type="search"
-					class="d-flex"
+					id="search-input"
+					class="flex max-w-l"
 					placeholder="Search"
 					aria-label="Search"
 					spellcheck="false"
-					bind:this={searchInputRef}
 					bind:value={$searchQuery}
 					on:focus={() => {
 						isInputFocused = true;
@@ -129,27 +127,10 @@
 							isInputFocused = false;
 						}, 200);
 					}}
-				/>
-				<FiletypeDropdown searchBar={true} />
-			</form>
-			<div class="d-flex align-items-center justify-content-center clear-search-div">
-				{#if $searchQuery !== ''}
-					<button class="btn clear-search" on:click={() => clearSearchQuery()}>
-						<i class="bi bi-x-circle-fill px-1" aria-label="Clear Search" />
-					</button>
-				{:else}
-					<button class="btn" tabindex="-1" aria-hidden="true" disabled>
-						<i
-							id="placeholder-clear-btn"
-							class="bi bi-x-circle-fill px-1"
-							aria-label="Invisible Placeholder"
-							aria-hidden="true"
-						/>
-					</button>
-				{/if}
-			</div>
+			/>
 		</div>
 	</div>
+	<!-- Search Suggestions -->
 	{#if $userPreferences.show_search_suggestions}
 		<SearchSuggestions
 			isSearchSuggestionsVisible={isInputFocused && $searchSuggestions.length > 0}
@@ -160,94 +141,94 @@
 </div>
 
 <style lang="scss">
-	.btn:disabled {
-		border: none !important;
-	}
-	input[type='search'] {
-		border: 0;
-		background-color: var(--search-bg);
-	}
-	input[type='search']:focus-visible {
-		border: 0;
-		outline: 0;
-	}
-	/* clears the ‘X’ from Internet Explorer */
-	input[type='search']::-ms-clear {
-		display: none;
-		width: 0;
-		height: 0;
-	}
-	input[type='search']::-ms-reveal {
-		display: none;
-		width: 0;
-		height: 0;
-	} /* clears the ‘X’ from Chrome */
-	input[type='search']::-webkit-search-decoration,
-	input[type='search']::-webkit-search-cancel-button,
-	input[type='search']::-webkit-search-results-button,
-	input[type='search']::-webkit-search-results-decoration {
-		display: none;
-	}
+	// .btn:disabled {
+	// 	border: none !important;
+	// }
+	// input[type='search'] {
+	// 	border: 0;
+	// 	background-color: var(--search-bg);
+	// }
+	// input[type='search']:focus-visible {
+	// 	border: 0;
+	// 	outline: 0;
+	// }
+	// /* clears the ‘X’ from Internet Explorer */
+	// input[type='search']::-ms-clear {
+	// 	display: none;
+	// 	width: 0;
+	// 	height: 0;
+	// }
+	// input[type='search']::-ms-reveal {
+	// 	display: none;
+	// 	width: 0;
+	// 	height: 0;
+	// } /* clears the ‘X’ from Chrome */
+	// input[type='search']::-webkit-search-decoration,
+	// input[type='search']::-webkit-search-cancel-button,
+	// input[type='search']::-webkit-search-results-button,
+	// input[type='search']::-webkit-search-results-decoration {
+	// 	display: none;
+	// }
 
-	#search-input {
-		flex: 11;
-	}
+	// #search-input {
+	// 	flex: 11;
+	// }
 
-	#search-bar-wrapper.compact-view {
-		font-size: 0.9rem;
-	}
+	// #search-bar-wrapper.compact-view {
+	// 	font-size: 0.9rem;
+	// }
 
-	#search-bar-wrapper {
-		display: flex;
-		width: 100%;
-		font-size: 1rem;
-		background-color: var(--search-bg);
-		background-clip: padding-box;
-		appearance: none;
-		border: 2px solid #dee2e6;
-		border-radius: 8px;
-		transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+	// #search-bar-wrapper {
+	// 	display: flex;
+	// 	width: 100%;
+	// 	font-size: 1rem;
+	// 	background-color: var(--search-bg);
+	// 	background-clip: padding-box;
+	// 	appearance: none;
+	// 	border: 2px solid #dee2e6;
+	// 	border-radius: 8px;
+	// 	transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 
-		&:focus-within {
-			border-color: var(--light-purple);
-			color: var(--purple);
-		}
-	}
+	// 	&:focus-within {
+	// 		border-color: var(--light-purple);
+	// 		color: var(--purple);
+	// 	}
+	// }
 
-	#search-bar-outer-wrapper {
-		width: 100%;
-		position: relative;
-	}
+	// #search-bar-outer-wrapper {
+	// 	width: 100%;
+	// 	position: relative;
+	// }
 
-	.btn {
-		padding: 0;
-		margin: 0;
-		font-size: small;
-		cursor: default;
-		animation: fade-in-animation 0.25s ease-in-out;
-	}
+	// .btn {
+	// 	padding: 0;
+	// 	margin: 0;
+	// 	font-size: small;
+	// 	cursor: default;
+	// 	animation: fade-in-animation 0.25s ease-in-out;
+	// }
 
-	.clear-search:focus {
-		color: var(--hot-pink);
-	}
+	// .clear-search:focus {
+	// 	color: var(--hot-pink);
+	// }
 
-	.clear-search-div {
-		width: 24px;
-	}
+	// .clear-search-div {
+	// 	width: 24px;
+	// }
 
-	#placeholder-clear-btn {
-		color: transparent;
-	}
+	// #placeholder-clear-btn {
+	// 	color: transparent;
+	// }
 
-	@keyframes fade-in-animation {
-		0% {
-			opacity: 0;
-			scale: 0.8;
-		}
+	// @keyframes fade-in-animation {
+	// 	0% {
+	// 		opacity: 0;
+	// 		scale: 0.8;
+	// 	}
 
-		100% {
-			opacity: 1;
-			scale: 1;
-		}
-	}
+	// 	100% {
+	// 		opacity: 1;
+	// 		scale: 1;
+	// 	}
+	// }
 </style>

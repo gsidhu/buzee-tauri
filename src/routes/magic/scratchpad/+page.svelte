@@ -31,10 +31,10 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-100">
+  <div id="topbar-bg" class="w-full">
     <TopBar />
   </div>
-  <div class="d-flex flex-column col-10 col-sm-8 mx-auto mb-5">
+  <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
     <div class="text-center gap-2">
       <div class="page-icon">
         <i class="bi bi-journal-text"></i>
@@ -44,20 +44,20 @@
     </div>
 
     <div class="my-4">
-      <div class="d-flex justify-content-end">
-        <div id="toolbar" class="gap-1 d-flex justify-content-center">
-          <button class="btn btn-sm" title="Copy text" on:click={() => copyTextToClipboard()}>
+      <div class="flex justify-content-end">
+        <div id="toolbar" class="gap-1 flex justify-content-center">
+          <button class="btn py-1 px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
             <i class="bi bi-copy"></i>
           </button>
-          <button class="btn btn-sm" title="Save text as a file" on:click={() => downloadTextFile()}>
+          <button class="btn py-1 px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
             <i class="bi bi-download"></i>
           </button>
-          <button class="btn btn-sm" title="Clear all text" on:click={() => $scratchPadText = ""}>
+          <button class="btn py-1 px-2 leading-tight text-xs" title="Clear all text" on:click={() => $scratchPadText = ""}>
             <i class="bi bi-eraser"></i>
           </button>
         </div>
       </div>
-      <textarea bind:value={$scratchPadText} class="w-100 border border-2 border-light p-2"></textarea>
+      <textarea bind:value={$scratchPadText} class="w-full border border-2 border-gray-100 p-2"></textarea>
     </div>
   </div>
 </div>

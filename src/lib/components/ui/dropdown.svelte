@@ -7,7 +7,7 @@
 <div class="dropdown">
   <button
     type="button"
-    class="btn btn-sm search-options-menu-btn px-1"
+    class="btn py-1 px-2 leading-tight text-xs search-options-menu-btn px-1"
     data-bs-toggle="dropdown"
     aria-expanded="false"
   >

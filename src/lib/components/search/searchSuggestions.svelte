@@ -14,12 +14,12 @@
 </script>
 
 <div id="search-suggestions" class:d-none={!isSearchSuggestionsVisible}>
-	<ul class="d-flex list-group">
+	<ul class="flex list-group">
 		{#each $searchSuggestions as searchItem, index}
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<li
-				class={`btn list-group-item border-0 d-flex py-0 ${
+				class={`btn list-group-item border-0 flex py-0 ${
 					index === selectedSuggestionItem
 						? 'selected-history-item'
 						: 'unselected-history-item'

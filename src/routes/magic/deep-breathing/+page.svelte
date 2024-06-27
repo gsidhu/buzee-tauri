@@ -4,10 +4,10 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-100">
+  <div id="topbar-bg" class="w-full">
     <TopBar />
   </div>
-  <div class="d-flex flex-column col-10 col-sm-8 mx-auto mb-5">
+  <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
     <div class="text-center gap-2">
       <div class="page-icon">
         <i class="bi bi-yin-yang"></i>

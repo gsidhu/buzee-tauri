@@ -42,7 +42,7 @@
       <h1>Welcome to Buzee!</h1>
       <p>Buzee helps you find your documents, effortlessly</p>
 
-      <div class="col-4 mx-auto d-flex flex-column gap-3 my-5">
+      <div class="col-4 mx-auto flex flex-col gap-3 my-5">
         <ConfettiButton label="Get started!" handleClick={() => showPermissions = true} />
       </div>
     </div>
@@ -51,7 +51,7 @@
   {/if}
   <div id="processing-complete" class={`mt-5 text-center small ${processingDone ? 'faded' : 'hidden'} `} in:fade={{ delay: 200, duration: 1000 }}>
     <p class="mb-1">Buzee is ready</p>
-    <button type="button" class="btn btn-sm my-2 text-dark border-2 border-dark rounded border-hover-purple" on:click={() => gotoSearch()}>
+    <button type="button" class="btn py-1 px-2 leading-tight text-xs my-2 text-dark border-2 border-dark rounded border-hover-purple" on:click={() => gotoSearch()}>
       Start searching!
     </button>
     <p class="small-explanation my-2">Note: Once the first full background scan <i class="fw-bold bi bi-arrow-repeat"/> finishes, you will be able to search keywords <em>inside</em> documents!<br/>The background scan runs automatically twice an hour. You can manually start/stop it using the button in the Status Bar below.</p>

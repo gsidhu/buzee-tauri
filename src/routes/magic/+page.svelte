@@ -28,10 +28,10 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-100">
+  <div id="topbar-bg" class="w-full">
     <TopBar />
   </div>
-  <div class="d-flex flex-column gap-3 justify-content-center align-items-center col-10 col-sm-8 mx-auto">
+  <div class="flex flex-col gap-3 justify-content-center items-center w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto">
     <div class="page-icon">
       <i class="bi bi-stars"></i>
     </div>
@@ -45,7 +45,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => openInBrowser("deadline")}>
 					Deadline<i class="bi bi-box-arrow-up-right skip-icon"></i>
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>A gentle progress tracker made with kindness</div>
 					</div>
 				</td>
@@ -58,7 +58,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => gotoMagicPage('deep-breathing')}>
 					Deep Breathing
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>Take a few moments to yourself</div>
 					</div>
 				</td>
@@ -71,7 +71,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => gotoMagicPage('stats')}>
 					Document Stats
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>See what your Unique Document Profile looks like</div>
 					</div>
 				</td>
@@ -84,7 +84,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => gotoMagicPage('extract-text')}>
 					Extract Text from PDF or Image
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>Extract text from any kind of PDF or image file</div>
 					</div>
 				</td>
@@ -97,7 +97,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => gotoMagicPage('scratchpad')}>
 					Scratch Pad
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>A place to keep copied text, notes, and thoughts</div>
 					</div>
 				</td>
@@ -110,7 +110,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => gotoMagicPage('tips')}>
 					Tips & Shortcuts
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>Read some hints to get the best out of Buzee</div>
 					</div>
 				</td>

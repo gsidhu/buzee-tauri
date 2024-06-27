@@ -161,14 +161,14 @@
 
 <div
 	id="status-bar-footer"
-	class={`row row-cols-3 mx-0 d-flex flex-row justify-content-between px-2 
+	class={`mx-0 flex flex-row justify-between px-2 
       ${showingResults ? 'sticky-bottom' : 'fixed-bottom'}
 			${$compactViewMode ? 'compact-view' : ''}
 			${$windowBlurred ? 'grayscale' : ''}
   `}
 >
 	<!-- Left end -->
-	<div class="col px-0 d-flex flex-row justify-content-start disable-select cursor-default" id="status-bar-left">
+	<div class="relative flex-grow max-w-full flex-1 px-0 flex justify-start disable-select cursor-default" id="status-bar-left">
 		{#if $userPreferences.onboarding_done}
 			{#if $onSearchPage}
 				<!-- <button
@@ -197,7 +197,7 @@
 	</div>
 
 	<!-- Center -->
-	<div class="col px-0 d-flex flex-row justify-content-center disable-select cursor-default" id="status-bar-center">
+	<div class="relative flex-grow max-w-full flex-1 px-0 flex justify-center disable-select cursor-default" id="status-bar-center">
 		{#if $userPreferences.onboarding_done}
 			{$statusMessage}
 		{:else if dbReady}
@@ -210,7 +210,7 @@
 				<i class="bi bi-check-circle" />
 			</button>
 		{:else if $searchInProgress || $dbCreationInProgress}
-			<div class="d-flex justify-content-center align-items-center">
+			<div class="flex justify-content-center items-center">
 				<div class="spinner-border spinner-border-sm" role="status">
 					<span class="visually-hidden">Loading...</span>
 				</div>
@@ -219,7 +219,7 @@
 	</div>
 
 	<!-- Right end -->
-	<div class="col px-0 d-flex flex-row justify-content-end disable-select" id="status-bar-right">
+	<div class="relative flex-grow max-w-full flex-1 px-0 flex justify-end disable-select" id="status-bar-right">
 		{#if $userPreferences.onboarding_done}
 			<!-- Notifications -->
 			<!-- <div class="dropup dropup-center px-0 mx-0 status-item">

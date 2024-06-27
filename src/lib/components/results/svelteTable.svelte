@@ -333,7 +333,7 @@
 											<FileTypeIcon filetype={String(cell.render())} />
 										{:else if cell.id === 'name'}
 											{#if $documentsShown[Number(row.id)].last_parsed > 0}
-												<span class="d-flex align-items-center gap-1">
+												<span class="flex items-center gap-1">
 													<i class="bi bi-check-circle fs-small" title="Item contents scanned" style="font-size: 8px; color: var(--bs-success);"></i>
 													<Render of={cell.render()} />
 												</span>
@@ -354,7 +354,7 @@
 						<td>
 							<ConfettiButton 
 								label="Load more"
-								type="confetti-button btn-sm"
+								type="confetti-button py-1 px-2 leading-tight text-xs"
 								showText={!$searchInProgress}
 								showSpinner={$searchInProgress}
 								handleClick={() => loadMoreResults()} />
@@ -367,14 +367,14 @@
 </table>
 
 {#if $documentsShown.length <= 0}
-	<div class="d-flex flex-column px-4 py-2 mx-auto align-items-center justify-content-center min-vh-80">
+	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-center min-vh-80">
 		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
-		<h3>No Results</h3>
-		<div class="d-flex flex-column text-light-emphasis text-center small gap-2">
+		<h3 class="text-lg">No Results</h3>
+		<div class="flex flex-col text-light-emphasis text-center small gap-2">
 			<span>Try modifying your query? You can be more specific like –</span>
 			<span><code>last year "annual report" -pdf</code></span>
 		</div>
-		<button type="button" class="my-2 btn btn-sm purple border-hover-purple border-2 border-light rounded" on:click={() => goto('/magic/tips')}>View all tips and shortcuts</button>
+		<button type="button" class="my-2 btn py-1 px-2 leading-tight text-xs purple border-hover-purple border-2 border-gray-100 rounded" on:click={() => goto('/magic/tips')}>View all tips and shortcuts</button>
 	</div>
 {/if}
 

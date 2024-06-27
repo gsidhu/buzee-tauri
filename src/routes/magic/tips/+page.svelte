@@ -10,10 +10,10 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-100">
+  <div id="topbar-bg" class="w-full">
     <TopBar />
   </div>
-  <div class="d-flex flex-column col-10 col-sm-8 mx-auto mb-5">
+  <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
     <div class="text-center gap-2">
       <div class="page-icon">
         <i class="bi bi-lightbulb"></i>
@@ -24,7 +24,7 @@
     <p>Buzee automatically scans data from your computer. You can always click the <code><i class="bi bi-arrow-repeat"></i> Scan</code> button in the status bar at the bottom to run it manually.</p>
     <p>By default, Buzee scans files in your Documents, Downloads and Desktop folders. You can add more documents to search in Buzee using the <code>Add Documents</code> option in the <a href="/settings" class="purple">Settings</a>.</p>
     <h5>Keyboard Shortcuts</h5>
-    <ul>
+    <ul class="list-disc">
       <li>Press <code>{$isMac ? "⌘" : "Ctrl"} + Space</code> anywhere to show/hide the app</li>
       <li>In the app, press <code>{$isMac ? "⌘" : "Ctrl"} + F</code> to go the search bar</li>
       <li>Press <code>Enter</code> on a selected row to open the document</li>
@@ -41,13 +41,13 @@
       <p>You can show/hide the File menu on top of the screen by pressing the <code>Alt</code> button (only in window mode).</p>
     {/if}
     <h5>Include/Exclude from Search</h5>
-    <ul>
+    <ul class="list-disc">
       <li>Put quotes around keyword(s) to search for the exact phrase (like <code>"annual report"</code>)</li>
       <li>Put a hyphen in front of the keyword to exclude it from search (like <code>"annual report" -2022 -pdf</code>)</li>
     </ul>
     <h5>Search using Time</h5>
     <p>Simply mention the date/time period that you are looking for in your search. For example:</p>
-    <ul>
+    <ul class="list-disc">
       <li><code><strong>last month</strong> pdf invoice</code></li>
       <li><code>annual report ppt <strong>this year</strong></code></li>
       <li><code><strong>q2 2023 to q3 2023</strong> retail report xlsx</code></li>

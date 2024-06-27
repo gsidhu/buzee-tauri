@@ -50,7 +50,7 @@
 
 {#if searchBar}
 	<select
-		class="d-flex filetype-select"
+		class="flex filetype-select"
 		aria-label="Filetype"
 		bind:value={$filetypeShown}
 		on:change={() => showDocsForFiletype()}

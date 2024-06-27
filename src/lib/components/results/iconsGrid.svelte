@@ -137,23 +137,23 @@
 </script>
 
 {#if $documentsShown.length <= 0}
-	<div class="d-flex flex-column px-4 py-2 mx-auto align-items-center justify-content-center min-vh-80">
+	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-content-center min-vh-80">
 		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
 		<h3>No Results</h3>
-		<div class="d-flex flex-column text-light-emphasis text-center small gap-2">
+		<div class="flex flex-col text-light-emphasis text-center small gap-2">
 			<span>Try modifying your query? You can be more specific like –</span>
 			<span><code>last year "annual report" -pdf</code></span>
 		</div>
-		<button type="button" class="my-2 btn btn-sm purple border-hover-purple border-2 border-light rounded" on:click={() => goto('/magic/tips')}>View all tips and shortcuts</button>
+		<button type="button" class="my-2 btn py-1 px-2 leading-tight text-xs purple border-hover-purple border-2 border-gray-100 rounded" on:click={() => goto('/magic/tips')}>View all tips and shortcuts</button>
 	</div>
 {:else}
-<div id="parent-grid" class="d-flex flex-column">
+<div id="parent-grid" class="flex flex-col">
   <div class="file-grid gap-2 p-2">
     {#each $documentsShown as result, i}
       <button
         id={stringToHash($documentsShown[Number(i)].path)}
         style="all: unset;"
-        class={`icon-item p-1 d-flex flex-column align-items-center justify-content-between table-row result-${Number(i)} ${$compactViewMode ? 'compact-view' : ''}`}
+        class={`icon-item p-1 flex flex-col items-center justify-between table-row result-${Number(i)} ${$compactViewMode ? 'compact-view' : ''}`}
         tabindex="0"
         on:focus={(e) => clickRow(e, $shiftKeyPressed)}
         on:click={(e) => clickRow(e, $shiftKeyPressed)}
@@ -163,24 +163,24 @@
         on:dragstart={(event) => startDragging($documentsShown[Number(i)].path)}
         title={result.name}
       >
-        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+        <div class="w-full h-100 flex items-center justify-content-center">
           {#if ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(result.file_type)}
             <img src={"data:image/png;base64, " + $base64Images[result.path]} alt={result.name} class={`img-thumbnail ${$compactViewMode ? 'compact-view' : ''}`} />
           {:else}
             <FileTypeIcon filetype={result.file_type} extraClasses={`${$compactViewMode ? 'fs-4' : 'fs-1'}`}/>
           {/if}
         </div>
-        <div class="filename text-center p-1 w-100">
+        <div class="filename text-center p-1 w-full">
           {result.name}
         </div>
       </button>
     {/each}
   </div>
   {#if !noMoreResults}
-    <div id="load-more-btn" class="py-2 d-flex justify-content-center align-items-center" draggable="false">
+    <div id="load-more-btn" class="py-2 flex justify-content-center items-center" draggable="false">
       <ConfettiButton 
         label="Load more"
-        type="confetti-button btn-sm"
+        type="confetti-button py-1 px-2 leading-tight text-xs"
         showText={!$searchInProgress}
         showSpinner={$searchInProgress}
         handleClick={() => loadMoreResults()} />

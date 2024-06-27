@@ -5,7 +5,7 @@
 </script>
 
 <div class="page" in:fade>
-	<div id="topbar-bg" class="sticky-top w-100">
+	<div id="topbar-bg" class="sticky-top w-full">
 		<TopBar />
 	</div>
 	<ResultsTable />

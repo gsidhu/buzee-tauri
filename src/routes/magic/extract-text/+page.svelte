@@ -60,10 +60,10 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-  <div id="topbar-bg" class="w-100">
+  <div id="topbar-bg" class="w-full">
     <TopBar />
   </div>
-  <div class="d-flex flex-column col-10 col-sm-8 mx-auto mb-5">
+  <div class="flex flex-col w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5">
     <div class="text-center gap-2">
       <div class="page-icon">
         <i class="bi bi-body-text"></i>
@@ -82,18 +82,18 @@
 
     {#if extractedText.length > 0}
     <div class="my-4">
-      <div class="d-flex justify-content-between">
+      <div class="flex justify-between">
         <h6>{fileName}</h6>
-        <div id="toolbar" class="gap-1 d-flex justify-content-center">
-          <button class="btn btn-sm" title="Copy text" on:click={() => copyTextToClipboard()}>
+        <div id="toolbar" class="gap-1 flex justify-content-center">
+          <button class="btn py-1 px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
             <i class="bi bi-copy"></i>
           </button>
-          <button class="btn btn-sm" title="Save text as a file" on:click={() => downloadTextFile()}>
+          <button class="btn py-1 px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
             <i class="bi bi-download"></i>
           </button>
         </div>
       </div>
-      <div id="parent-textbox" class="border border-2 border-light p-2 text-interaction">
+      <div id="parent-textbox" class="border border-2 border-gray-100 p-2 text-interaction">
         {#each extractedText as paragraph }
           <p>{paragraph}</p>
         {/each}

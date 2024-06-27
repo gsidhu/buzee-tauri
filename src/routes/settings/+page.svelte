@@ -9,6 +9,9 @@
 	import { isMac, statusMessage, userPreferences, dbCreationInProgress } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, open, message } from '@tauri-apps/plugin-dialog';
+	import * as Dialog from "$lib/components/ui/dialog";
+  import Button from "$lib/components/ui/button/button.svelte";
+	import { Switch } from "$lib/components/ui/switch";
 
 	let showSearchSuggestions: boolean;
 	let launchAtStartup: boolean;
@@ -256,11 +259,11 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-	<div id="topbar-bg" class="w-100">
+	<div id="topbar-bg" class="w-full">
 		<TopBar />
 	</div>
 	<div
-		class="d-flex flex-column gap-3 justify-content-center align-items-center col-10 col-sm-8 mx-auto mb-5"
+		class="flex flex-col gap-3 justify-center items-center w-4/5 sm:w-2/3 pr-4 pl-4 mx-auto mb-5"
 	>
 		<div class="page-icon">
 			<i class="bi bi-gear" />
@@ -276,7 +279,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => addDocsToDB()}>
 					Add Documents
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						Add more documents to search in Buzee
 						<PopoverIcon
 							title="By default, Buzee scans your entire system. You can add files from external drives or network drives here."
@@ -287,7 +290,7 @@
 			<tr>
 				<td class="text-center px-2">
 					<button class="btn" on:click={() => goto('/settings/ignore')}>
-						<div class="d-flex">
+						<div class="flex">
 							<i class="bi bi-file-earmark-x" />
 							<i class="bi bi-folder-x" />
 						</div>
@@ -295,7 +298,7 @@
 				</td>
 				<td class="py-2" role="button" on:click={() => goto('/settings/ignore')}>
 					Ignore List
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>List of files and folders that you want Buzee to ignore</div>
 					</div>
 				</td>
@@ -303,14 +306,14 @@
 			<tr>
 				<td class="text-center px-2">
 					<button class="btn" on:click={() => goto('/settings/filetype')}>
-						<div class="d-flex">
+						<div class="flex">
 							<i class="bi bi-file-earmark" />
 						</div>
 					</button>
 				</td>
 				<td class="py-2" role="button" on:click={() => goto('/settings/filetype')}>
 					File Type List
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>List of file types that Buzee can scan</div>
 					</div>
 				</td>
@@ -318,96 +321,116 @@
 
 			<!-- On/Off Toggles -->
 			<tr>
-				<td class="text-center px-2"
-					><input
-						type="checkbox"
-						bind:checked={showSearchSuggestions}
-						on:click={() => toggleShowSearchSuggestions()}
-					/></td
-				>
+				<td class="text-center px-2">
+					<Switch bind:checked={showSearchSuggestions} on:click={() => toggleShowSearchSuggestions()} />
+				</td>
 				<td class="py-2 skip-hover">
 					Show Search Suggestions
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						Buzee will suggest search terms from your documents
 					</div>
 				</td>
 			</tr>
-			<!-- <tr>
-				<td class="text-center px-2"
-					><input
-						type="checkbox"
-						bind:checked={launchAtStartup}
-						on:click={() => toggleLaunchAtStartup()}
-					/></td
-				>
-				<td class="py-2 skip-hover">
-					Launch at Startup
-					<div class="d-flex align-items-center small-explanation gap-1">
-						Launch the app automatically when your computer starts
-					</div>
-				</td>
-			</tr> -->
 			<tr>
-				<td class="text-center px-2"
-					><input
-						type="checkbox"
-						bind:checked={globalShortcutEnabled}
-						on:click={() => toggleGlobalShortcut()}
-					/>
+				<td class="text-center px-2">
+					<Switch bind:checked={globalShortcutEnabled} on:click={() => toggleGlobalShortcut()} />
 				</td>
 				<td class="py-2 skip-hover">
 					Allow Global Shortcut
-					<div class="d-flex align-items-center small-explanation gap-1">
-						{#if $isMac}
+					<div class="flex items-center small-explanation gap-1">
 							<div>
-								Pressing <button
-									type="button"
-									class="btn btn-sm py-0 border-2 border-light rounded border-hover-purple"
-									data-bs-toggle="modal"
-									data-bs-target="#global-shortcut-modal"><code class="small-explanation">{globalShortcut}</code></button> will show the app from anywhere
+								Pressing 
+								<Dialog.Root>
+									<Dialog.Trigger><code class="small-explanation">{globalShortcut}</code></Dialog.Trigger>
+									<Dialog.Content>
+										<Dialog.Header>
+											<Dialog.Title>Change Global Shortcut</Dialog.Title>
+											<Dialog.Description>Changes will take effect on app restart</Dialog.Description>
+										</Dialog.Header>
+										<div>
+											<p>Pressing the global shortcut shows the app from anywhere.</p>
+											<p>Current shortcut: <code>{globalShortcut}</code></p>
+											<p>Set new shortcut below:</p>
+											<div class="flex gap-1">
+												<div class="col-4 flex items-center">
+													<select bind:value={globalShortcutModifiers[0]}>
+														{#if $isMac}
+															<option value="Super">Command (⌘)</option>
+															<option value="Alt">Option (⌥)</option>
+															<option value="Control">Control (^)</option>
+														{:else}
+															<option value="Control">Control</option>
+															<option value="Alt">Alt</option>
+														{/if}
+														<option value="Shift">Shift</option>
+													</select>
+												</div>
+												<div class="col-4 flex items-center">
+													<select bind:value={globalShortcutModifiers[1]}>
+														<option value=""></option>
+														{#if $isMac}
+															<option value="Super">Command (⌘)</option>
+															<option value="Alt">Option (⌥)</option>
+															<option value="Control">Control (^)</option>
+														{:else}
+															<option value="Control">Control</option>
+															<option value="Alt">Alt</option>
+														{/if}
+														<option value="Shift">Shift</option>
+													</select>
+												</div>
+												<div class="col-4">
+													<input
+														type="text"
+														id="shortcut-input"
+														class={`form-control ${globalShortcutCode === '' ? 'border-danger' : ''}`}
+														placeholder="Key"
+														bind:value={globalShortcutCode}
+													/>
+												</div>
+											</div>
+											{#if globalShortcutCode === ""}
+												<small class="text-danger small-explanation">Shortcut value cannot be empty</small>
+												{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}<br/>{/if}
+											{/if}
+											{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}
+												<small class="text-danger small-explanation">Both modifier keys cannot be the same</small>
+											{/if}
+										</div>
+										<Dialog.Footer>
+											<Button
+														type="button"
+														class="btn btn-success"
+														disabled={globalShortcutCode === "" || globalShortcutModifiers[1] === globalShortcutModifiers[0]}
+														on:click={() => setNewGlobalShortcut()}>Save</Button>
+										</Dialog.Footer>
+									</Dialog.Content>
+								</Dialog.Root>
+								will show the app from anywhere
 							</div>
 							<PopoverIcon title="Changes will take effect after the app restarts" />
-						{:else}
-							<div>
-								Pressing <button
-									type="button"
-									class="btn btn-sm py-0 border-2 border-light rounded border-hover-purple"
-									data-bs-toggle="modal"
-									data-bs-target="#global-shortcut-modal"><code class="small-explanation">{globalShortcut}</code></button
-								> will show the app from anywhere
-							</div>
-							<PopoverIcon title="Changes will take effect after the app restarts" />
-						{/if}
 					</div>
 				</td>
 			</tr>
 			<tr>
-				<td class="text-center px-2"
-					><input
-						type="checkbox"
-						bind:checked={automaticBackgroundSyncEnabled}
-						on:click={() => toggleAutomaticBackgroundSync()}
-					/>
+				<td class="text-center px-2">
+					<Switch bind:checked={automaticBackgroundSyncEnabled} on:click={() => toggleAutomaticBackgroundSync()} />
 				</td>
 				<td class="py-2 skip-hover">
 					Allow Automatic Background Scan
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>This allows Buzee to scan your files automatically (twice an hour)</div>
 						<PopoverIcon title="We recommend keeping this setting enabled" />
 					</div>
 				</td>
 			</tr>
 			<tr>
-				<td class="text-center px-2"
-					><input
-						type="checkbox"
-						bind:checked={detailedScanEnabled}
-						on:click={() => toggleDetailedScan()}
-					/>
+				<td class="text-center px-2">
+					<Switch bind:checked={detailedScanEnabled} on:click={() => toggleDetailedScan()} />
 				</td>
 				<td class="py-2 skip-hover">
 					Scan File Text
-					<div class="d-flex align-items-center small-explanation gap-1">
+					<div class="flex items-center small-explanation gap-1">
 						<div>Keep this on so you can search inside files (PDFs are scanned last)</div>
 						<PopoverIcon
 							title="Disabling this setting may improve speed but reduce quality of search results"
@@ -416,26 +439,20 @@
 				</td>
 			</tr>
 		</table>
-		<div class="row row-cols-1 row-cols-sm-2 w-90 justify-content-between settings-links">
-			<div class="col text-start mobile-text-center my-1">
-				<button type="button" class="btn btn-sm text-danger border-2 border-light rounded border-hover-purple" on:click={() => resetDefault()}>
+		<div class="flex flex-wrap row-cols-1 row-cols-sm-2 w-90 justify-between settings-links">
+			<div class="relative flex-grow max-w-full flex-1 px-4 text-start mobile-text-center my-1">
+				<button type="button" class="btn py-1 px-2 leading-tight text-xs text-danger border-2 border-gray-100 rounded border-hover-purple" on:click={() => resetDefault()}>
 					Reset Default
 				</button>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
 			</div>
-			<div class="col text-end mobile-text-center my-1">
-				<button type="button" class="btn btn-sm text-primary border-2 border-light rounded border-hover-purple" on:click={() => checkForAppUpdates()}>
+			<div class="relative flex-grow max-w-full flex-1 px-4 text-end mobile-text-center my-1">
+				<button type="button" class="btn py-1 px-2 leading-tight text-xs text-primary border-2 border-gray-100 rounded border-hover-purple" on:click={() => checkForAppUpdates()}>
 					Check for Updates
 				</button>
 			</div>
-			<!-- <div class="col text-end mobile-text-center">
-				<button type="button" class="btn btn-sm link-danger px-0" on:click={() => uninstallApp()}
-					>Uninstall App</button
-				>
-				<PopoverIcon title="Delete all data and uninstall the app" />
-			</div> -->
 		</div>
-		<div class="col-sm-10 mx-auto text-center mt-4">
+		<div class="sm:w-4/5 pr-4 pl-4 mx-auto text-center mt-4">
 			<p class="mb-0 small-explanation fw-medium">Buzee Promise</p>
 			<small class="small-explanation">
 				Your personal data <span class="fw-medium">never, ever</span> leaves your computer. We sometimes collect anonymous usage data to make Buzee even better. Read more on our website.
@@ -443,85 +460,6 @@
 		</div>
 		<div class="text-center my-2">
 			<p class="mb-1 small-explanation">Buzee v0.1.1</p>
-		</div>
-	</div>
-</div>
-
-<!-- Global Shortcut Modal -->
-<div
-	class="modal fade"
-	id="global-shortcut-modal"
-	tabindex="-1"
-	aria-labelledby="globalShortcutModal"
-	aria-hidden="true"
->
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h1 class="modal-title fs-6" id="globalShortcutModal">Change Global Shortcut</h1>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-			<div class="modal-body">
-				<p>Pressing the global shortcut shows the app from anywhere.</p>
-				<p>Current shortcut: <code>{globalShortcut}</code></p>
-				<p>Set new shortcut below:</p>
-				<div class="row row-cols-3">
-					<div class="col-4 d-flex align-items-center">
-						<select bind:value={globalShortcutModifiers[0]}>
-							{#if $isMac}
-								<option value="Super">Command (⌘)</option>
-								<option value="Alt">Option (⌥)</option>
-								<option value="Control">Control (^)</option>
-							{:else}
-								<option value="Control">Control</option>
-								<option value="Alt">Alt</option>
-							{/if}
-							<option value="Shift">Shift</option>
-						</select>
-					</div>
-					<div class="col-4 d-flex align-items-center">
-						<select bind:value={globalShortcutModifiers[1]}>
-							<option value=""></option>
-							{#if $isMac}
-								<option value="Super">Command (⌘)</option>
-								<option value="Alt">Option (⌥)</option>
-								<option value="Control">Control (^)</option>
-							{:else}
-								<option value="Control">Control</option>
-								<option value="Alt">Alt</option>
-							{/if}
-							<option value="Shift">Shift</option>
-						</select>
-					</div>
-					<div class="col-4">
-						<input
-							type="text"
-							id="shortcut-input"
-							class={`form-control ${globalShortcutCode === '' ? 'border-danger' : ''}`}
-							placeholder="Key"
-							bind:value={globalShortcutCode}
-						/>
-					</div>
-				</div>
-				{#if globalShortcutCode === ""}
-					<small class="text-danger small-explanation">Shortcut value cannot be empty</small>
-					{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}<br/>{/if}
-				{/if}
-				{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}
-					<small class="text-danger small-explanation">Both modifier keys cannot be the same</small>
-				{/if}
-			</div>
-			<div class="modal-footer d-flex justify-content-between">
-				<small class="small-explanation">Changes will take effect on app restart</small>
-				<button
-					type="button"
-					class="btn btn-success"
-					data-bs-dismiss="modal"
-					aria-label="Save"
-					disabled={globalShortcutCode === "" || globalShortcutModifiers[1] === globalShortcutModifiers[0]}
-					on:click={() => setNewGlobalShortcut()}>Save</button
-				>
-			</div>
 		</div>
 	</div>
 </div>

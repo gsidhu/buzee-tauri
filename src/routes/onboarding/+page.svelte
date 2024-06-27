@@ -9,7 +9,7 @@
 <div class={`page`}>
 	<div id="gradient"></div>
 	<div id="breathing" class="d-none"></div>
-	<div class="d-flex flex-column min-vh-100 justify-content-center align-items-center gap-3">
+	<div class="flex flex-col min-vh-100 justify-content-center items-center gap-3">
 		<Onboarding />
 	</div>
 </div>

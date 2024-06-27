@@ -54,11 +54,11 @@
 </script>
 
 <div in:fade={{ delay: 0, duration: 500 }}>
-	<div id="topbar-bg" class="w-100">
+	<div id="topbar-bg" class="w-full">
 		<TopBar />
 	</div>
   <div
-		class="d-flex flex-column gap-3 justify-content-center align-items-center col-10 col-sm-8 mx-auto mb-5"
+		class="flex flex-col gap-3 justify-content-center items-center w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5"
 	>
 		<div class="page-icon">
 			<i class="bi bi-file-earmark-x" /> <i class="bi bi-folder-x" />
@@ -103,7 +103,7 @@
 			</div>
 			<div class="modal-body">
 				<p>Add the full path to the folder</p>
-				<div class="d-flex justify-content-between gap-2 mt-3">
+				<div class="flex justify-between gap-2 mt-3">
 					<input
 						type="text"
 						id="shortcut-input"
@@ -111,11 +111,11 @@
 						placeholder="/path/to/folder"
 						bind:value={pathToIgnore}
 					/>
-					<button class="btn btn-sm btn-warning" on:click={() => showFolderDialog()}>
+					<button class="btn py-1 px-2 leading-tight text-xs btn-warning" on:click={() => showFolderDialog()}>
 						<i class="bi bi-folder" />
 					</button>
 				</div>
-				<div class="d-flex justify-content-between mt-3">
+				<div class="flex justify-between mt-3">
 					<div class="form-check">
 						<input
 							class="form-check-input"
@@ -142,7 +142,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="modal-footer d-flex justify-content-between">
+			<div class="modal-footer flex justify-between">
 				<small class="small-explanation"></small>
 				<button
 					type="button"

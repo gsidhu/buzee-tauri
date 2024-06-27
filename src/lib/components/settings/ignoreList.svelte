@@ -89,7 +89,7 @@
 									title={String(cell.render())}
 								>
 									{#if cell.id === 'path' }
-										<span class="d-flex align-items-center gap-2">
+										<span class="flex items-center gap-2">
 											<input id={`select-row-${row.id}`} type="checkbox" bind:checked={isSelected[row.id]} />
 											<label class="form-check-label" for={`select-row-${row.id}`}>
 												<Render of={cell.render()} />
@@ -119,8 +119,8 @@
 	</table>
 	{#if $ignoredPaths.length > 0 }
 		<div class="text-center">
-			<!-- <button type="button" class="btn-sm" on:click={() => removeFromList()}>Remove selected items from list</button> -->
-			<button class="btn btn-sm link-danger px-0" on:click={() => removeFromList()}>
+			<!-- <button type="button" class="py-1 px-2 leading-tight text-xs" on:click={() => removeFromList()}>Remove selected items from list</button> -->
+			<button class="btn py-1 px-2 leading-tight text-xs link-danger px-0" on:click={() => removeFromList()}>
 				Remove selected items from list
 			</button>
 		</div>

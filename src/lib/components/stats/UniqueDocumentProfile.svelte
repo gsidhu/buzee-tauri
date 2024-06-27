@@ -104,7 +104,7 @@
   {/each}
 </div>
 
-<div class="col-10 mx-auto my-4 cursor-default">
+<div class="w-4/5 pr-4 pl-4 mx-auto my-4 cursor-default">
   <div class="row row-cols-sm-2 row-cols-1">
     {#each docStats as stat}
       {#if stat.count > 0}
