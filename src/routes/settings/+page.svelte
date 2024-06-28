@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import TopBar from '../../layout/TopBar.svelte';
 	import PopoverIcon from '$lib/components/ui/popoverIcon.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
@@ -11,7 +10,10 @@
 	import { ask, open, message } from '@tauri-apps/plugin-dialog';
 	import * as Dialog from "$lib/components/ui/dialog";
   import Button from "$lib/components/ui/button/button.svelte";
+	import * as Card from "$lib/components/ui/card/index.js";
 	import { Switch } from "$lib/components/ui/switch";
+	import {FilePlus2, ListX, ListChecks} from "lucide-svelte";
+	import Separator from '$lib/components/ui/separator/separator.svelte';
 
 	let showSearchSuggestions: boolean;
 	let launchAtStartup: boolean;
@@ -258,196 +260,196 @@
 	});
 </script>
 
-<div in:fade={{ delay: 0, duration: 500 }}>
-	<div
-		class="flex flex-col gap-3 justify-center items-center pr-4 pl-4 mx-auto mb-5"
-	>
-		<div class="page-icon">
-			<i class="bi bi-gear" />
-		</div>
-		<h3>Settings</h3>
-		<table class="table table-bordered w-full mb-0">
-			<!-- Buttons / Links -->
-			<tr>
-				<td class="text-center px-2">
-					<button class="btn" on:click={() => addDocsToDB()}>
-						<i class="bi bi-plus-circle" />
-					</button>
-				</td>
-				<td class="py-2" role="button" on:click={() => addDocsToDB()}>
-					Add Documents
-					<div class="flex items-center small-explanation gap-1">
-						Add more documents to search in Buzee
-						<PopoverIcon
-							title="By default, Buzee scans your entire system. You can add files from external drives or network drives here."
-						/>
+<div class="flex flex-col" in:fade={{ delay: 0, duration: 500 }}>
+  <h3 class="text-lg font-semibold leading-none tracking-tight">Settings</h3>
+  <p class="text-sm text-muted-foreground">Tune the knobs to make Buzee yours</p>
+</div>
+<div class="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed shadow-sm p-4">
+	<table class="w-3/5 table table-bordered mb-4">
+		<!-- Buttons / Links -->
+		<tr>
+			<td class="text-center px-2">
+				<button class="btn" on:click={() => addDocsToDB()}>
+					<i class="bi bi-plus-circle" />
+				</button>
+			</td>
+			<td class="py-2" role="button" on:click={() => addDocsToDB()}>
+				Add Documents
+				<div class="flex items-center small-explanation gap-1">
+					Add more documents to search in Buzee
+					<PopoverIcon
+						title="By default, Buzee scans your entire system. You can add files from external drives or network drives here."
+					/>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<button class="btn" on:click={() => goto('/settings/ignore')}>
+					<div class="flex">
+						<i class="bi bi-file-earmark-x" />
+						<i class="bi bi-folder-x" />
 					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/settings/ignore')}>
-						<div class="flex">
-							<i class="bi bi-file-earmark-x" />
-							<i class="bi bi-folder-x" />
-						</div>
-					</button>
-				</td>
-				<td class="py-2" role="button" on:click={() => goto('/settings/ignore')}>
-					Ignore List
-					<div class="flex items-center small-explanation gap-1">
-						<div>List of files and folders that you want Buzee to ignore</div>
+				</button>
+			</td>
+			<td class="py-2" role="button" on:click={() => goto('/settings/ignore')}>
+				Ignore List
+				<div class="flex items-center small-explanation gap-1">
+					<div>List of files and folders that you want Buzee to ignore</div>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<button class="btn" on:click={() => goto('/settings/filetype')}>
+					<div class="flex">
+						<i class="bi bi-file-earmark" />
 					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
-					<button class="btn" on:click={() => goto('/settings/filetype')}>
-						<div class="flex">
-							<i class="bi bi-file-earmark" />
-						</div>
-					</button>
-				</td>
-				<td class="py-2" role="button" on:click={() => goto('/settings/filetype')}>
-					File Type List
-					<div class="flex items-center small-explanation gap-1">
-						<div>List of file types that Buzee can scan</div>
-					</div>
-				</td>
-			</tr>
+				</button>
+			</td>
+			<td class="py-2" role="button" on:click={() => goto('/settings/filetype')}>
+				File Type List
+				<div class="flex items-center small-explanation gap-1">
+					<div>List of file types that Buzee can scan</div>
+				</div>
+			</td>
+		</tr>
 
-			<!-- On/Off Toggles -->
-			<tr>
-				<td class="text-center px-2">
-					<Switch bind:checked={showSearchSuggestions} on:click={() => toggleShowSearchSuggestions()} />
-				</td>
-				<td class="py-2 skip-hover">
-					Show Search Suggestions
-					<div class="flex items-center small-explanation gap-1">
-						Buzee will suggest search terms from your documents
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
-					<Switch bind:checked={globalShortcutEnabled} on:click={() => toggleGlobalShortcut()} />
-				</td>
-				<td class="py-2 skip-hover">
-					Allow Global Shortcut
-					<div class="flex items-center small-explanation gap-1">
-							<div>
-								Pressing 
-								<Dialog.Root>
-									<Dialog.Trigger><code class="small-explanation">{globalShortcut}</code></Dialog.Trigger>
-									<Dialog.Content>
-										<Dialog.Header>
-											<Dialog.Title>Change Global Shortcut</Dialog.Title>
-											<Dialog.Description>Changes will take effect on app restart</Dialog.Description>
-										</Dialog.Header>
-										<div>
-											<p>Pressing the global shortcut shows the app from anywhere.</p>
-											<p>Current shortcut: <code>{globalShortcut}</code></p>
-											<p>Set new shortcut below:</p>
-											<div class="flex gap-1">
-												<div class="col-4 flex items-center">
-													<select bind:value={globalShortcutModifiers[0]}>
-														{#if $isMac}
-															<option value="Super">Command (⌘)</option>
-															<option value="Alt">Option (⌥)</option>
-															<option value="Control">Control (^)</option>
-														{:else}
-															<option value="Control">Control</option>
-															<option value="Alt">Alt</option>
-														{/if}
-														<option value="Shift">Shift</option>
-													</select>
-												</div>
-												<div class="col-4 flex items-center">
-													<select bind:value={globalShortcutModifiers[1]}>
-														<option value=""></option>
-														{#if $isMac}
-															<option value="Super">Command (⌘)</option>
-															<option value="Alt">Option (⌥)</option>
-															<option value="Control">Control (^)</option>
-														{:else}
-															<option value="Control">Control</option>
-															<option value="Alt">Alt</option>
-														{/if}
-														<option value="Shift">Shift</option>
-													</select>
-												</div>
-												<div class="col-4">
-													<input
-														type="text"
-														id="shortcut-input"
-														class={`form-control ${globalShortcutCode === '' ? 'border-danger' : ''}`}
-														placeholder="Key"
-														bind:value={globalShortcutCode}
-													/>
-												</div>
+		<tr>
+			<td colspan="2"><Separator /></td>
+		</tr>
+
+		<!-- On/Off Toggles -->
+		<tr>
+			<td class="text-center px-2">
+				<Switch bind:checked={showSearchSuggestions} on:click={() => toggleShowSearchSuggestions()} />
+			</td>
+			<td class="py-2 skip-hover">
+				Show Search Suggestions
+				<div class="flex items-center small-explanation gap-1">
+					Buzee will suggest search terms from your documents
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<Switch bind:checked={globalShortcutEnabled} on:click={() => toggleGlobalShortcut()} />
+			</td>
+			<td class="py-2 skip-hover">
+				Allow Global Shortcut
+				<div class="flex items-center small-explanation gap-1">
+						<div>
+							Pressing 
+							<Dialog.Root>
+								<Dialog.Trigger><code class="small-explanation">{globalShortcut}</code></Dialog.Trigger>
+								<Dialog.Content>
+									<Dialog.Header>
+										<Dialog.Title>Change Global Shortcut</Dialog.Title>
+										<Dialog.Description>Changes will take effect on app restart</Dialog.Description>
+									</Dialog.Header>
+									<div>
+										<p>Pressing the global shortcut shows the app from anywhere.</p>
+										<p>Current shortcut: <code>{globalShortcut}</code></p>
+										<p>Set new shortcut below:</p>
+										<div class="flex gap-1">
+											<div class="col-4 flex items-center">
+												<select bind:value={globalShortcutModifiers[0]}>
+													{#if $isMac}
+														<option value="Super">Command (⌘)</option>
+														<option value="Alt">Option (⌥)</option>
+														<option value="Control">Control (^)</option>
+													{:else}
+														<option value="Control">Control</option>
+														<option value="Alt">Alt</option>
+													{/if}
+													<option value="Shift">Shift</option>
+												</select>
 											</div>
-											{#if globalShortcutCode === ""}
-												<small class="text-danger small-explanation">Shortcut value cannot be empty</small>
-												{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}<br/>{/if}
-											{/if}
-											{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}
-												<small class="text-danger small-explanation">Both modifier keys cannot be the same</small>
-											{/if}
+											<div class="col-4 flex items-center">
+												<select bind:value={globalShortcutModifiers[1]}>
+													<option value=""></option>
+													{#if $isMac}
+														<option value="Super">Command (⌘)</option>
+														<option value="Alt">Option (⌥)</option>
+														<option value="Control">Control (^)</option>
+													{:else}
+														<option value="Control">Control</option>
+														<option value="Alt">Alt</option>
+													{/if}
+													<option value="Shift">Shift</option>
+												</select>
+											</div>
+											<div class="col-4">
+												<input
+													type="text"
+													id="shortcut-input"
+													class={`form-control ${globalShortcutCode === '' ? 'border-danger' : ''}`}
+													placeholder="Key"
+													bind:value={globalShortcutCode}
+												/>
+											</div>
 										</div>
-										<Dialog.Footer>
-											<Button
-														type="button"
-														class="btn btn-success"
-														disabled={globalShortcutCode === "" || globalShortcutModifiers[1] === globalShortcutModifiers[0]}
-														on:click={() => setNewGlobalShortcut()}>Save</Button>
-										</Dialog.Footer>
-									</Dialog.Content>
-								</Dialog.Root>
-								will show the app from anywhere
-							</div>
-							<PopoverIcon title="Changes will take effect after the app restarts" />
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
-					<Switch bind:checked={automaticBackgroundSyncEnabled} on:click={() => toggleAutomaticBackgroundSync()} />
-				</td>
-				<td class="py-2 skip-hover">
-					Allow Automatic Background Scan
-					<div class="flex items-center small-explanation gap-1">
-						<div>This allows Buzee to scan your files automatically (twice an hour)</div>
-						<PopoverIcon title="We recommend keeping this setting enabled" />
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
-					<Switch bind:checked={detailedScanEnabled} on:click={() => toggleDetailedScan()} />
-				</td>
-				<td class="py-2 skip-hover">
-					Scan File Text
-					<div class="flex items-center small-explanation gap-1">
-						<div>Keep this on so you can search inside files (PDFs are scanned last)</div>
-						<PopoverIcon
-							title="Disabling this setting may improve speed but reduce quality of search results"
-						/>
-					</div>
-				</td>
-			</tr>
-		</table>
-		<div class="flex flex-wrap row-cols-1 row-cols-sm-2 w-90 justify-between settings-links">
-			<div class="relative flex-grow max-w-full flex-1 px-4 text-start mobile-text-center my-1">
-				<button type="button" class="btn py-1 px-2 leading-tight text-xs text-danger border-2 border-gray-100 rounded border-hover-purple" on:click={() => resetDefault()}>
-					Reset Default
-				</button>
+										{#if globalShortcutCode === ""}
+											<small class="text-danger small-explanation">Shortcut value cannot be empty</small>
+											{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}<br/>{/if}
+										{/if}
+										{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}
+											<small class="text-danger small-explanation">Both modifier keys cannot be the same</small>
+										{/if}
+									</div>
+									<Dialog.Footer>
+										<Button
+													type="button"
+													class="btn btn-success"
+													disabled={globalShortcutCode === "" || globalShortcutModifiers[1] === globalShortcutModifiers[0]}
+													on:click={() => setNewGlobalShortcut()}>Save</Button>
+									</Dialog.Footer>
+								</Dialog.Content>
+							</Dialog.Root>
+							will show the app from anywhere
+						</div>
+						<PopoverIcon title="Changes will take effect after the app restarts" />
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<Switch bind:checked={automaticBackgroundSyncEnabled} on:click={() => toggleAutomaticBackgroundSync()} />
+			</td>
+			<td class="py-2 skip-hover">
+				Allow Automatic Background Scan
+				<div class="flex items-center small-explanation gap-1">
+					<div>This allows Buzee to scan your files automatically (twice an hour)</div>
+					<PopoverIcon title="We recommend keeping this setting enabled" />
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<Switch bind:checked={detailedScanEnabled} on:click={() => toggleDetailedScan()} />
+			</td>
+			<td class="py-2 skip-hover">
+				Scan File Text
+				<div class="flex items-center small-explanation gap-1">
+					<div>Keep this on so you can search inside files (PDFs are scanned last)</div>
+					<PopoverIcon
+						title="Disabling this setting may improve speed but reduce quality of search results"
+					/>
+				</div>
+			</td>
+		</tr>
+	</table>
+	<div class="w-3/5 flex justify-between settings-links">
+		<div class="relative flex-grow max-w-full flex-1 px-4 text-start mobile-text-center my-1">
+			<Button variant="link" class="gap-2 text-xs !px-2" on:click={() => resetDefault()}>
+				<span class="font-normal text-xs">Reset Default</span>
 				<PopoverIcon title="Reset all settings to default and restart the app" />
-			</div>
-			<div class="relative flex-grow max-w-full flex-1 px-4 text-end mobile-text-center my-1">
-				<button type="button" class="btn py-1 px-2 leading-tight text-xs text-primary border-2 border-gray-100 rounded border-hover-purple" on:click={() => checkForAppUpdates()}>
-					Check for Updates
-				</button>
-			</div>
+			</Button>
+		</div>
+		<div class="relative flex-grow max-w-full flex-1 px-4 text-end mobile-text-center my-1">
+			<Button variant="link" class="gap-2 text-xs !px-2" on:click={() => checkForAppUpdates()}>
+				<span class="font-normal text-xs">Check for Updates</span>
+			</Button>
 		</div>
 	</div>
 </div>
@@ -463,10 +465,6 @@
 			color: var(--bs-gray);
 		}
 	}
-
-	// .settings-links > div > button:hover {
-	// 	text-decoration: underline;
-	// }
 
 	.settings-links > div {
 		@media (min-width: 576px) {
@@ -491,49 +489,6 @@
 
 	i {
 		font-size: 1.5rem;
-	}
-
-	input[type='checkbox'] {
-		cursor: pointer;
-		appearance: none;
-		position: relative;
-		display: inline-block;
-		background: lightgrey;
-		height: 1.65rem;
-		width: 2.75rem;
-		vertical-align: middle;
-		border-radius: 2rem;
-		box-shadow: 0px 1px 3px #0003 inset;
-		transition: 0.25s linear background;
-	}
-
-	input[type='checkbox']::before {
-		content: '';
-		display: block;
-		width: 1.25rem;
-		height: 1.25rem;
-		background: #fff;
-		border-radius: 1.2rem;
-		position: absolute;
-		top: 0.2rem;
-		left: 0.2rem;
-		box-shadow: 0px 1px 3px #0003;
-		transition: 0.25s linear transform;
-		transform: translateX(0rem);
-	}
-
-	:checked {
-		background: green !important;
-	}
-	:checked::before {
-		transform: translateX(1rem) !important;
-	}
-	:focus {
-		outline: none;
-	}
-	:focus-visible {
-		outline: 2px solid dodgerblue;
-		outline-offset: 2px;
 	}
 
 	.mobile-text-center {

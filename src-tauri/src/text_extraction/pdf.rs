@@ -8,7 +8,13 @@ use pdf_extract::extract_text;
 use crate::utils::install_poppler_from_github;
 
 pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
-  let text_based_content = text_based_extraction(file)?;
+  println!("Extracting text from: {}", file);
+  // check if the file contains pdf in its name
+  let mut text_based_content = String::new();
+  if file.to_lowercase().contains(".pdf") {
+    text_based_content = text_based_extraction(file)?;
+  }
+
   if text_based_content.len() > 0 {
     return Ok(text_based_content)
   } else {

@@ -20,6 +20,7 @@
 	import SearchBar from "$lib/components/search/searchBar.svelte";
 	import SidebarMenu from "$lib/components/sidebar/sidebarMenu.svelte";
 	import UserDropdown from "$lib/components/header/userDropdown.svelte";
+	import SyncStatusButton from "$lib/components/settings/syncStatusButton.svelte";
   
   var appMode: string = "menubar";
 
@@ -122,13 +123,13 @@
 
 <KeyboardListeners />
 <EventListeners />
-<main class={`min-vh-100 main-container ${$windowBlurred ? "grayscale" : ""}`}>
-	<div class="grid min-h-screen w-full md:grid-cols-[220px_1fr]">
-    <div class="hidden border-r bg-muted/40 md:block">
+<main class={`min-h-screen max-h-screen overflow-auto ${$windowBlurred ? "grayscale" : ""}`}>
+	<div class="grid min-h-screen max-h-screen w-full md:grid-cols-[25vw_1fr] lg:grid-cols-[20vw_1fr]">
+    <div class="hidden max-h-screen overflow-y-auto border-r bg-muted/40 md:block">
       <SidebarMenu />
     </div>
     <div class="flex flex-col">
-      <header class="flex items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+      <header class="flex items-center gap-4 border-b bg-muted/40 px-4 h-[60px] lg:px-6">
         <Sheet.Root>
           <Sheet.Trigger asChild let:builder>
             <Button
@@ -148,9 +149,10 @@
         <div class="w-full flex-1">
           <SearchBar />
         </div>
-        <UserDropdown />
+        <!-- <UserDropdown /> -->
+        <SyncStatusButton />
       </header>
-      <section class="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+      <section class="flex overflow-auto flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
         <slot />
       </section>
     </div>
@@ -175,7 +177,7 @@
 </Dialog.Root> -->
 
 <style>
-	.main-container {
-		overflow: hidden !important;
-	}
+  section {
+    max-height: calc(100vh - 60px);
+  }
 </style>

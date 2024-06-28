@@ -48,6 +48,8 @@ let storedAllowedExtensions: FileTypesDropdown = {
   items: []
 };
 
+let storedAllowedLocations = ["computer", "browser", "cloud", "bookmarks"];
+
 let storedFileText: string[] = [];
 let storedSearchSuggestions: string[] = [];
 let storedIgnoredPaths: IgnoreListType[] = [];
@@ -78,7 +80,9 @@ export const searchQuery = writable(storedSearchQuery || '')
 export const searchSuggestions = writable(storedSearchSuggestions || [])
 export const documentsShown = writable(storedDocumentsShown || [])
 export const filetypeShown = writable('any')
+export const locationShown = writable('any')
 export const allowedExtensions = writable(storedAllowedExtensions);
+export const allowedLocations = writable(storedAllowedLocations);
 export const resultsPageShown = writable(0)
 export const resultsPerPage = writable(25)
 export const statusMessage = writable("")

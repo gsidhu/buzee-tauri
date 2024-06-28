@@ -270,7 +270,7 @@
 						<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 							<th
 								{...attrs}
-								class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
+								class={`${cell.id}-col px-4 text-left align-middle font-medium text-muted-foreground ${$compactViewMode ? 'compact-view' : ''}`}
 								role="button"
 								tabindex="0"
 								use:props.resize
@@ -433,7 +433,8 @@
 	}
 	// banded rows
 	tr:not(.selected):nth-of-type(2n + 1) > td {
-		background-color: #d3d3d340;
+		// background-color: #d3d3d340;
+		background-color: hsl(var(--muted) / var(--tw-bg-opacity));
 	}
 	// selected row
 	.selected {
@@ -463,30 +464,40 @@
 		position: relative; // need this to position the resizer
 	}
 	th .resizer {
+		width: 1px;
 		position: absolute;
 		top: 0%;
 		bottom: 0;
 		right: -4px;
-		width: 4px;
 		height: 100%;
 		background: black;
-		// background: transparent;
-		cursor: col-resize;
-		z-index: 1;
 		opacity: 0.05;
+	}
+	// th .resizer {
+	// 	position: absolute;
+	// 	top: 0%;
+	// 	bottom: 0;
+	// 	right: -4px;
+	// 	width: 4px;
+	// 	height: 100%;
+	// 	background: black;
+	// 	// background: transparent;
+	// 	cursor: col-resize;
+	// 	z-index: 1;
+	// 	opacity: 0.05;
 
-		&:hover {
-			top: 0;
-			height: 100%;
-			width: 8px;
-			background: var(--purple);
-			opacity: 1;
-		}
-	}
-	button.resizer {
-		border: none;
-		padding: 0;
-	}
+	// 	&:hover {
+	// 		top: 0;
+	// 		height: 100%;
+	// 		width: 8px;
+	// 		background: var(--purple);
+	// 		opacity: 1;
+	// 	}
+	// }
+	// button.resizer {
+	// 	border: none;
+	// 	padding: 0;
+	// }
 
 	// table head fixed
 	thead,

@@ -15,7 +15,10 @@
 		Lightbulb,
 		Wind,
 		Settings,
-		Rocket
+		Rocket,
+
+		ExternalLink
+
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
@@ -35,8 +38,8 @@
 	}
 </script>
 
-<div class="flex h-full max-h-screen flex-col gap-2">
-	<div class="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+<div class="flex flex-col h-full gap-2">
+	<div class="flex items-center border-b px-4 h-[60px] min-h-[60px] lg:px-6">
 		<a href="/" class="flex items-center gap-2 font-semibold">
 			<!-- <Rocket class="h-6 w-6" /> -->
 			<img id="buzee-logo-img" class="h-6 w-6" src="/Buzee Logo.png" alt="No Results" />
@@ -118,7 +121,10 @@
 				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/deadline' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
 			>
 				<Trophy class="h-4 w-4" />
-				Deadline
+				<span>
+					Deadline
+					<ExternalLink class="h-3 w-3 inline-block" />
+				</span>
 			</a>
 			<a
 				href="/magic/deep-breathing"
@@ -144,13 +150,17 @@
 		</nav>
 	</div>
 
-  <Separator />
+	<Separator />
   
-	<div class="mt-auto flex flex-col p-4 text-center space-y-2">
+	<div class="mt-auto flex flex-col p-4 text-center space-y-1">
     <p class="text-sm" id="app-version">Buzee v0.1.1</p>
-    <Button on:click={() => openInBrowser('bmac')}>
-      <Coffee class="mr-2 h-4 w-4" />
+    <Button id="bmac-btn" class="animate__headShake" variant="outlinePurple" on:click={() => openInBrowser('bmac')}>
+      <Coffee id="bmac-btn-coffee-icon" class="mr-2 h-4 w-4" />
       Buy me a coffee
     </Button>
 	</div>
 </div>
+
+<style>
+	
+</style>

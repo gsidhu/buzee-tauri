@@ -115,6 +115,17 @@
 					/>
 						<Command.List>
 							<Command.Empty>No results found.</Command.Empty>
+							{#if $searchQuery.length === 0}
+								<Command.Item onSelect={() => {triggerSearch("");}}>
+									Show Recent Files
+								</Command.Item>
+								<Command.Item value="last week" onSelect={(value) => {triggerSearch(value);}}>
+									Show Files from Last Week
+								</Command.Item>
+								<Command.Item value="last month" onSelect={(value) => {triggerSearch(value);}}>
+									Show Files from Last Month
+								</Command.Item>
+							{/if}
 							{#if $searchQuery.length > 0}
 								<Command.Group heading="Search Everywhere">
 									<Command.Item value={$searchQuery} onSelect={(value) => {triggerSearch(value);}}>

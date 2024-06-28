@@ -41,12 +41,12 @@
   }
 
   async function copyTextToClipboard() {
-    const text = extractedText.join("\n\n");
+    const text = extractedText.join("\n");
     await navigator.clipboard.writeText(text);
   }
 
   async function downloadTextFile() {
-    const text = extractedText.join("\n\n");
+    const text = extractedText.join("\n");
     const saveFilePath = await save({
       filters: [{
         name: 'Text Files',
@@ -58,13 +58,17 @@
       await invoke("open_folder_containing_file", { filePath: saveFilePath });
     }
   }
+
+  async function openFileFolder() {
+    await invoke("open_folder_containing_file", { filePath });
+  }
 </script>
 
 <div class="flex flex-col" in:fade={{ delay: 0, duration: 500 }}>
   <h3 class="text-lg font-semibold leading-none tracking-tight">Extract Text from PDF or Image</h3>
   <p class="text-sm text-muted-foreground">Select a PDF or image file to begin extraction</p>
 </div>
-<div class="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
+<div class="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed shadow-sm">
   <div class="flex flex-col items-center gap-1 text-center">
     <Button class="mt-4" on:click={() => fileSelectorDialog()} disabled={extractingOngoing ? true : false}>
       {#if extractingOngoing}
@@ -76,16 +80,16 @@
   </div>
 
   {#if extractedText.length > 0}
-    <div class="my-4">
+    <div class="my-4 px-4 w-full">
       <div class="flex justify-between">
-        <h6>{fileName}</h6>
-        <div id="toolbar" class="gap-1 flex justify-content-center">
-          <button class="!py-1 !px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
-            <Copy />
-          </button>
-          <button class="!py-1 !px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
-            <Download />
-          </button>
+        <Button variant="link" on:click={() => openFileFolder()}>{fileName}</Button>
+        <div id="toolbar" class="gap-1 flex !p-2 justify-content-center">
+          <Button variant="outline" title="Copy text" on:click={() => copyTextToClipboard()}>
+            <Copy class="h-4 w-4" />
+          </Button>
+          <Button variant="outline" title="Save text as a file" on:click={() => downloadTextFile()}>
+            <Download class="h-4 w-4" />
+          </Button>
         </div>
       </div>
       <div id="parent-textbox" class="border border-2 border-gray-100 p-2 text-interaction">

@@ -3,6 +3,8 @@
 	import SvelteTable from '$lib/components/results/svelteTable.svelte';
 	import IconsGrid from './iconsGrid.svelte';
 	import { documentsShown, showIconGrid, preferLastOpened, selectedResult, selectedResultText } from '$lib/stores';
+	import SearchFilters from '../search/SearchFilters.svelte';
+	import Separator from '../ui/separator/separator.svelte';
 
 	onMount(async () => {
 		if (document) {
@@ -17,6 +19,8 @@
 	});
 </script>
 
+<SearchFilters />
+<Separator class="my-2 "/>
 {#key $documentsShown || $preferLastOpened}
 	<div class={`results-container mb-4 min-vh-100`}>
 		{#if $showIconGrid}
@@ -27,7 +31,7 @@
 	</div>
 
 	<!-- File Text Modal -->
-	{#if $selectedResult}
+	<!-- {#if $selectedResult}
 		<div
 		class="modal fade"
 		id="file-text-modal"
@@ -58,7 +62,7 @@
 			</div>
 		</div>
 		</div>
-	{/if}
+	{/if} -->
 {/key}
 
 <style>

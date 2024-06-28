@@ -6,6 +6,7 @@
   import { scratchPadText } from '$lib/stores';
 
   import { Textarea } from "$lib/components/ui/textarea/index.js";
+  import Button from "$lib/components/ui/button/button.svelte";
   import {Copy, Download, Eraser } from "lucide-svelte";
 
   async function copyTextToClipboard() {
@@ -38,17 +39,17 @@
 </div>
 <div class="flex flex-1 w-full items-center justify-center rounded-lg border border-dashed shadow-sm">
   <div class="w-full h-full !p-2">
-    <div class="flex justify-content-end">
+    <div class="flex justify-end">
       <div id="toolbar" class="gap-1 flex justify-content-center">
-        <button class="!py-1 !px-2 leading-tight text-xs" title="Copy text" on:click={() => copyTextToClipboard()}>
+        <Button variant="outline" title="Copy text" on:click={() => copyTextToClipboard()}>
           <Copy class="h-4 w-4" />
-        </button>
-        <button class="!py-1 !px-2 leading-tight text-xs" title="Save text as a file" on:click={() => downloadTextFile()}>
+        </Button>
+        <Button variant="outline" title="Save text as a file" on:click={() => downloadTextFile()}>
           <Download class="h-4 w-4" />
-        </button>
-        <button class="!py-1 !px-2 leading-tight text-xs" title="Clear all text" on:click={() => $scratchPadText = ""}>
+        </Button>
+        <Button variant="outline" title="Clear all text" on:click={() => $scratchPadText = ""}>
           <Eraser class="h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </div>
     <Textarea bind:value={$scratchPadText} class="!mt-2 min-h-[50vh]" placeholder="Type your message here." />

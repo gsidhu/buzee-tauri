@@ -17,6 +17,7 @@
   --txt-icon: #5368e0;
   --key-icon: #1e88f5;
   --bs-success: #198754;
+  --bs-code-color: #d63384;
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
@@ -28,13 +29,9 @@ body {
   background: -webkit-linear-gradient(to right, #E9E4F030, #D3CCE330);
   background: linear-gradient(to right, #E9E4F030, #D3CCE330);
 } */
-
-.min-vh-100 {
-  min-height: 100vh !important;
-}
-
-max-vh-100 {
-  max-height: 100vh !important;
+ 
+.max-w-screen {
+  max-width: 100vw !important;
 }
 
 html, body {
@@ -193,7 +190,7 @@ ol ol, ul ul, ol ul, ul ol {
   border-radius: 0 !important;
 }
 
-.spin-right::before {
+.spin-right {
   transform-origin: 50% 50%;
   animation: spin-right-animation 3s linear 0s infinite normal both running;
 }
@@ -260,3 +257,24 @@ ol ol, ul ul, ol ul, ul ol {
   user-select: text;
   -webkit-user-select: text;
 }
+
+.bg-code-pink {
+  background: var(--bs-code-color) !important;
+}
+
+.code-pink {
+  color: var(--bs-code-color) !important;
+}
+
+.disabled-gray {
+  background: var(--bs-gray) !important;
+  color: white;
+  &:hover {
+    cursor: not-allowed !important;
+  }
+}
+
+/* #bmac-btn-coffee-icon:hover {
+  animation: headShake;
+  animation-duration: 2s;
+} */
