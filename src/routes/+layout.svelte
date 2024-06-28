@@ -129,7 +129,7 @@
       <SidebarMenu />
     </div>
     <div class="flex flex-col">
-      <header class="flex items-center gap-4 border-b bg-muted/40 px-4 h-[60px] lg:px-6">
+      <header class="flex max-w-screen items-center gap-4 border-b bg-muted/40 px-4 h-[60px] lg:px-6">
         <Sheet.Root>
           <Sheet.Trigger asChild let:builder>
             <Button
@@ -146,13 +146,13 @@
             <SidebarMenu />
           </Sheet.Content>
         </Sheet.Root>
-        <div class="w-full flex-1">
+        <div class="w-full">
           <SearchBar />
         </div>
         <!-- <UserDropdown /> -->
         <SyncStatusButton />
       </header>
-      <section class="flex overflow-auto flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+      <section class="flex max-w-screen overflow-auto flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
         <slot />
       </section>
     </div>
