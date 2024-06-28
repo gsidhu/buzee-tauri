@@ -12,6 +12,7 @@
 		'KeyO',
 		'KeyA',
 		'KeyF',
+		'KeyK',
 		'KeyS',
 		'ShiftLeft',
 		'ShiftRight',
@@ -54,7 +55,7 @@
 			return;
 		}
 
-		if ($metaKeyPressed && e.code === 'KeyF') {
+		if ($metaKeyPressed && (e.code === 'KeyF' || e.code === 'KeyK')) {
 			e.preventDefault();
 			if ($shiftKeyPressed) {
 				console.log('Cmd + Shift + F');
@@ -67,7 +68,7 @@
 				if (window.location.pathname !== '/search') {
 					goto('/search?highlight-search-bar=true');
 				}
-				(document.querySelector('#search-input') as HTMLElement)?.focus();
+				(document.querySelector('#search-input') as HTMLElement)?.click();
 			}
 			return;
 		}

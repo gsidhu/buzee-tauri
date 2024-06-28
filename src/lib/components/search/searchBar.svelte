@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Input } from "$lib/components/ui/input/index.js";
+	import * as Command from "$lib/components/ui/command";
+	import * as Dialog from "$lib/components/ui/dialog";
 	import {
 		searchQuery,
 		filetypeShown,
@@ -12,11 +14,10 @@
 		allowedExtensions,
 		searchSuggestions,
 		base64Images,
-		userPreferences
+		userPreferences,
 	} from '$lib/stores';
 	import { searchDocuments } from '$lib/utils/dbUtils';
 	import { setExtensionCategory } from '$lib/utils/miscUtils';
-	import SearchSuggestions from './searchSuggestions.svelte';
 	import { trackEvent } from '@aptabase/web';
 	import { invoke } from '@tauri-apps/api/core';
 	import { Search } from "lucide-svelte";
@@ -24,9 +25,10 @@
 	let isInputFocused = false;
 	let searchInputRef: HTMLInputElement; // a reference to the input element that allows updating the DOM without running a querySelector
 
-	// Limiting searchSuggestions to five items so don't have to implement a scroll
-  let selectedSuggestionItem = -1;
 	let getSuggestions = true;
+	let search = '';
+
+	$: search = $searchQuery;
 
 	$: if ($searchQuery.length >= 3 && getSuggestions && $userPreferences.show_search_suggestions) {
 		getSearchSuggestions();
@@ -38,9 +40,12 @@
 		let removeSpecialChars = $searchQuery.replace(/[^a-zA-Z0-9 ]/g, '');
 		$searchSuggestions = await invoke('get_search_suggestions', { query: removeSpecialChars });
 		$searchSuggestions = [...new Set($searchSuggestions)]; // remove duplicates
+		// $searchSuggestions = [$searchQuery, ...$searchSuggestions]; // add the query itself to the suggestions
 	}
 
-	async function triggerSearch() {
+	async function triggerSearch(query: string) {
+		$searchQuery = query;
+		(document.querySelector('button[data-dialog-close]') as HTMLElement)?.click();
 		$resultsPageShown = 0; // reset the page number on each new search
 		$searchInProgress = true;
 		$base64Images = {};
@@ -63,11 +68,6 @@
 		searchInputRef.blur();
 	}
 
-	function clearSearchQuery() {
-		$searchQuery = '';
-		$searchSuggestions = [];
-	}
-
 	onMount(() => {
 		// get the query from the url
 		const urlParams = new URLSearchParams(window.location.search);
@@ -75,171 +75,75 @@
 		const highlightSearchBar = urlParams.get('highlight-search-bar');
 		if (query) {
 			$searchQuery = query;
-			triggerSearch();
+			triggerSearch(query);
 		}
 		if (highlightSearchBar) {
 			searchInputRef.focus();
 		}
-		// add event listener to #search-input to handle arrowdown and arrowup
-		searchInputRef.addEventListener('keydown', (e) => {
-			if (e.key === 'ArrowDown') {
-				if (selectedSuggestionItem < $searchSuggestions.length - 1) {
-					selectedSuggestionItem += 1;
-					getSuggestions = false;
-					$searchQuery = $searchSuggestions[selectedSuggestionItem];
-				}
-			} else if (e.key === 'ArrowUp') {
-				if (selectedSuggestionItem > 0) {
-					selectedSuggestionItem -= 1;
-					getSuggestions = false;
-					$searchQuery = $searchSuggestions[selectedSuggestionItem];
-					setTimeout(function() {
-						// set the cursor to the end of the input because browsers set it to the beginning when you press ArrowUp
-						searchInputRef.setSelectionRange($searchQuery.length, $searchQuery.length);
-					}, 1);
-				}
-			} else {
-				selectedSuggestionItem = -1; // on any other key press, reset the suggestion selection
-				getSuggestions = true;
-			}
-		});
 	});
 </script>
 
 <form class="grid">
 	<div class="relative items-center">
-		<Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-		<Input
-			type="search"
-			placeholder="Search your files, browser history, bookmarks..."
-			class="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-2/3"
-		/>
-	</div>
-</form>
-
-<!-- <div id="search-bar-outer-wrapper">
-	<div id="search-bar-wrapper" class={`rounded-3 flex no-drag ${$compactViewMode ? 'compact-view' : ''}`}>
-		<i class="bi bi-search px-1" aria-label="Search" aria-hidden="true" />
-		<div id="actual-search-box" class="flex flex-grow-1">
-			<Input 
-					type="search"
-					id="search-input"
-					class="flex max-w-l"
-					placeholder="Search"
+		<Dialog.Root>
+			<Dialog.Trigger id="search-input" class="w-full">
+				<Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+				<Input
+					placeholder="Search your files, browser history, bookmarks..."
+					class="w-full appearance-none bg-background pl-8 shadow-none max-w-l"
 					aria-label="Search"
-					spellcheck="false"
 					bind:value={$searchQuery}
-					on:focus={() => {
+					on:input={() => {
 						isInputFocused = true;
 					}}
 					on:blur={() => {
-						// blur after timeout so that clicks on suggested items get registered
-						setTimeout(() => {
-							isInputFocused = false;
-						}, 200);
 					}}
-			/>
-		</div>
+				/>
+			</Dialog.Trigger>
+			<Dialog.Content>
+				<Command.Root
+					filter={(value, search) => {
+						if (value.includes(search) || search === $searchQuery) return 1;
+						return 0;
+					}}
+				>
+					<Command.Input
+						placeholder="Search your files, browser history, bookmarks..."
+						class="w-full appearance-none bg-background pl-8 shadow-none max-w-l"
+						aria-label="Search"
+						bind:value={$searchQuery}
+					/>
+						<Command.List>
+							<Command.Empty>No results found.</Command.Empty>
+							{#if $searchQuery.length > 0}
+								<Command.Group heading="Search Everywhere">
+									<Command.Item value={$searchQuery} onSelect={(value) => {triggerSearch(value);}}>
+										{$searchQuery}
+									</Command.Item>
+								</Command.Group>
+							{/if}
+							{#if $searchSuggestions.length > 0}
+								<Command.Group heading="Suggestions">
+									{#each $searchSuggestions as searchItem}
+										<Command.Item value={searchItem}
+											onSelect={(value) => {triggerSearch(value);}}
+										>
+											{#if searchItem.length > 50}
+												{searchItem.slice(0, 30) + ' ... ' + searchItem.slice(-30)}
+											{:else}
+												{searchItem}
+											{/if}
+										</Command.Item>
+									{/each}
+								</Command.Group>
+							{/if}
+						</Command.List>
+				</Command.Root>
+			</Dialog.Content>
+		</Dialog.Root>
 	</div>
-
-	{#if $userPreferences.show_search_suggestions}
-		<SearchSuggestions
-			isSearchSuggestionsVisible={isInputFocused && $searchSuggestions.length > 0}
-			{selectedSuggestionItem}
-			{triggerSearch}
-		/>
-	{/if}
-</div> -->
+</form>
 
 <style lang="scss">
-	// .btn:disabled {
-	// 	border: none !important;
-	// }
-	// input[type='search'] {
-	// 	border: 0;
-	// 	background-color: var(--search-bg);
-	// }
-	// input[type='search']:focus-visible {
-	// 	border: 0;
-	// 	outline: 0;
-	// }
-	// /* clears the ‘X’ from Internet Explorer */
-	// input[type='search']::-ms-clear {
-	// 	display: none;
-	// 	width: 0;
-	// 	height: 0;
-	// }
-	// input[type='search']::-ms-reveal {
-	// 	display: none;
-	// 	width: 0;
-	// 	height: 0;
-	// } /* clears the ‘X’ from Chrome */
-	// input[type='search']::-webkit-search-decoration,
-	// input[type='search']::-webkit-search-cancel-button,
-	// input[type='search']::-webkit-search-results-button,
-	// input[type='search']::-webkit-search-results-decoration {
-	// 	display: none;
-	// }
 
-	// #search-input {
-	// 	flex: 11;
-	// }
-
-	// #search-bar-wrapper.compact-view {
-	// 	font-size: 0.9rem;
-	// }
-
-	// #search-bar-wrapper {
-	// 	display: flex;
-	// 	width: 100%;
-	// 	font-size: 1rem;
-	// 	background-color: var(--search-bg);
-	// 	background-clip: padding-box;
-	// 	appearance: none;
-	// 	border: 2px solid #dee2e6;
-	// 	border-radius: 8px;
-	// 	transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-
-	// 	&:focus-within {
-	// 		border-color: var(--light-purple);
-	// 		color: var(--purple);
-	// 	}
-	// }
-
-	// #search-bar-outer-wrapper {
-	// 	width: 100%;
-	// 	position: relative;
-	// }
-
-	// .btn {
-	// 	padding: 0;
-	// 	margin: 0;
-	// 	font-size: small;
-	// 	cursor: default;
-	// 	animation: fade-in-animation 0.25s ease-in-out;
-	// }
-
-	// .clear-search:focus {
-	// 	color: var(--hot-pink);
-	// }
-
-	// .clear-search-div {
-	// 	width: 24px;
-	// }
-
-	// #placeholder-clear-btn {
-	// 	color: transparent;
-	// }
-
-	// @keyframes fade-in-animation {
-	// 	0% {
-	// 		opacity: 0;
-	// 		scale: 0.8;
-	// 	}
-
-	// 	100% {
-	// 		opacity: 1;
-	// 		scale: 1;
-	// 	}
-	// }
 </style>
