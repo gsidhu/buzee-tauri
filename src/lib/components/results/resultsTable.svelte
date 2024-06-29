@@ -2,9 +2,10 @@
 	import { onDestroy, onMount } from 'svelte';
 	import SvelteTable from '$lib/components/results/svelteTable.svelte';
 	import IconsGrid from './iconsGrid.svelte';
-	import { documentsShown, showIconGrid, preferLastOpened, selectedResult, selectedResultText } from '$lib/stores';
+	import { documentsShown, showIconGrid, preferLastOpened, noMoreResults } from '$lib/stores';
 	import SearchFilters from '../search/SearchFilters.svelte';
 	import Separator from '../ui/separator/separator.svelte';
+	import LoadMoreButton from './LoadMoreButton.svelte';
 
 	// onMount(async () => {
 	// 	if (document) {
@@ -22,53 +23,25 @@
 <SearchFilters />
 <Separator class="my-2 "/>
 {#key $documentsShown || $preferLastOpened}
-	<div class={`results-container mb-4 overflow-auto`}>
-		{#if $showIconGrid}
-			<IconsGrid />
-		{:else}
-			<SvelteTable />
+	<div class="flex flex-col items-center">
+		<div class={`results-container mb-4 overflow-hidden`}>
+			{#if $showIconGrid}
+				<IconsGrid />
+			{:else}
+				<SvelteTable />
+			{/if}
+		</div>
+		{#if $documentsShown.length > 0 || $noMoreResults === true}
+			<LoadMoreButton />
 		{/if}
 	</div>
-
-	<!-- File Text Modal -->
-	<!-- {#if $selectedResult}
-		<div
-		class="modal fade"
-		id="file-text-modal"
-		tabindex="-1"
-		aria-labelledby="fileTextModal"
-		aria-hidden="true"
-		>
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h1 class="modal-title fs-6" id="fileTextModal">
-						{$selectedResult.name}
-					</h1>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body text-interaction">
-					{#if $selectedResultText.length > 0}
-						<p>
-							{#each $selectedResultText as para}
-								{para}
-							{/each}
-						</p>
-					{:else}
-						<h6>Nothing to display here.</h6>
-						<p>Either the file does not contain any text or it has not been scanned yet.</p>
-					{/if}
-				</div>
-			</div>
-		</div>
-		</div>
-	{/if} -->
 {/key}
 
 <style>
 	.results-container {
 		overflow-x: auto;
 		width: 100%;
+		max-height: 60svh;
 	}
 
 	.modal-dialog-centered {

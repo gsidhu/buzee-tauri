@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { FoldVertical, LayoutGrid, List, UnfoldVertical } from "lucide-svelte";
   import Button from "../ui/button/button.svelte";
+  import { Toggle } from "$lib/components/ui/toggle";
   import { Label } from "$lib/components/ui/label/index.js";
   import { compactViewMode, showIconGrid } from '$lib/stores';
   import { trackEvent } from '@aptabase/web';
@@ -45,46 +46,22 @@
   <div class="flex flex-col">
     <Label class="mb-2">Switch View</Label>
     <div class="flex items-center gap-2">
-      {#if $showIconGrid}
-        <Button
+        <Toggle
           variant="outline"
-          id="status-bar-extras"
           class="gap-2 text-muted-foreground font-normal"
-          title="Switch to List View"
+          title="Switch to Icon Grid"
           on:click={() => $showIconGrid = !$showIconGrid}
         >
-          <List class="h-4 w-4" />List
-        </Button>
-      {:else}
-          <Button
-            variant="outline"
-            id="status-bar-extras"
-            class="gap-2 text-muted-foreground font-normal"
-            title="Switch to Icon Grid"
-            on:click={() => $showIconGrid = !$showIconGrid}
-          >
-            <LayoutGrid class="h-4 w-4" />Icons
-          </Button>
-      {/if}
-      {#if $compactViewMode}
-          <Button
-            variant="outline"
-            class="gap-2 text-muted-foreground font-normal"
-            title="Show results in normal view"
-            on:click={() => toggleCompactViewMode()}
-          >
-            <UnfoldVertical class="h-4 w-4" />Normal
-          </Button>
-      {:else}
-          <Button
-            variant="outline"
-            class="gap-2 text-muted-foreground font-normal"
-            title="Show results in compact view"
-            on:click={() => toggleCompactViewMode()}
-          >
-            <FoldVertical class="h-4 w-4" />Tight
-          </Button>
-      {/if}
+          <LayoutGrid class="h-4 w-4" />Icons
+      </Toggle>
+      <Toggle
+        variant="outline"
+        class="gap-2 text-muted-foreground font-normal"
+        title="Show results in compact view"
+        on:click={() => toggleCompactViewMode()}
+      >
+        <FoldVertical class="h-4 w-4" />Tight
+      </Toggle>
     </div>
   </div>
 </div>

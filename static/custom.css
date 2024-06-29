@@ -278,3 +278,9 @@ ol ol, ul ul, ol ul, ul ol {
   animation: headShake;
   animation-duration: 2s;
 } */
+
+/* banded table rows */
+tbody > div:nth-of-type(2n + 1) > tr:not(.selected) > td {
+  /* background-color: #d3d3d340; */
+  background-color: hsl(var(--muted) / var(--tw-bg-opacity));
+}

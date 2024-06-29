@@ -99,6 +99,8 @@ export const windowBlurred = writable(false);
 export const scratchPadText = writable("")
 export const base64Images = writable(storedBase64Images || {})
 export const preferLastOpened = writable(false);
+export const showResultTextPreview = writable(false);
+export const noMoreResults = writable(false);
 
 // 3. Anytime the store changes, update the local storage value.
 if(typeof window !== "undefined") {

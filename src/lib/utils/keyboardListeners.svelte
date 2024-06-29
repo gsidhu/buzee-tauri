@@ -2,7 +2,7 @@
 	import { invoke } from "@tauri-apps/api/core";
 	import { onMount } from 'svelte';
 	import { clickRow, selectOneRow, selectAllRows } from './fileUtils';
-	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed } from '$lib/stores';
+	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed, showResultTextPreview, selectedResult } from '$lib/stores';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from '$app/navigation';
 
@@ -13,6 +13,7 @@
 		'KeyA',
 		'KeyF',
 		'KeyK',
+		'KeyP',
 		'KeyS',
 		'ShiftLeft',
 		'ShiftRight',
@@ -112,6 +113,10 @@
 				e.preventDefault();
 				// window.electronAPI?.openFileFolder(result.path);
 				invoke("open_folder_containing_file", { filePath: result.path })
+			} else if (e.code === 'KeyP') {
+				e.preventDefault();
+				$showResultTextPreview = true; 
+				$selectedResult = result;
 			} else if (e.code === 'Tab' && $shiftKeyPressed) {
 				$shiftKeyPressed = false;
 			} else if (e.code === 'KeyP') {

@@ -1,15 +1,10 @@
 <script lang="ts">
-	import { invoke, transformCallback } from "@tauri-apps/api/core";
-	import { listen } from '@tauri-apps/api/event';
-	import type { UnlistenFn } from '@tauri-apps/api/event';
-	import moment from 'moment';
 	import { onMount, onDestroy } from 'svelte';
 	import { readable } from 'svelte/store';
-	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, resultsPageShown, searchInProgress, filetypeShown, allowedExtensions, searchQuery, resultsPerPage } from '$lib/stores';
+	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, resultsPageShown, searchInProgress, filetypeShown, allowedExtensions, searchQuery, resultsPerPage, showResultTextPreview, noMoreResults } from '$lib/stores';
 	import { searchDocuments } from '$lib/utils/dbUtils';
 	import { setExtensionCategory } from '$lib/utils/miscUtils';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
-	import FiletypeDropdown from '$lib/components/search/FiletypeDropdown.svelte';
 	// @ts-ignore
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
 	// @ts-ignore
@@ -17,17 +12,15 @@
 	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { trackEvent } from '@aptabase/web';
-	import ConfettiButton from '../ui/confettiButton.svelte';
 	import { goto } from "$app/navigation";
 	
 	import * as ContextMenu from "$lib/components/ui/context-menu";
-	import { Button } from "../ui/button";
+	import ResultTextPreview from "./ResultTextPreview.svelte";
+	import { openFileFolder, openFile, formatUpdatedTime, formatPath, startDragging } from '$lib/utils/searchItemUtils';
 
-	let noMoreResults = false;
-
-	$: if ($documentsShown.length < 50) {
-		noMoreResults = true;
-	}
+	// $: if ($documentsShown.length < 50) {
+	// 	$noMoreResults = true;
+	// }
 
 	async function loadMoreResults() {
 		// Same function as triggerSearch, but with a different page number and appending results
@@ -49,82 +42,11 @@
 			filetypeToGet
 		);
 		if (results.length === 0) {
-			noMoreResults = true;
+			$noMoreResults = true;
 		} else {
 			$documentsShown = [...$documentsShown, ...results];
 		}
 		$searchInProgress = false;
-	}
-  
-  function startDragging(filepath: string) {
-		const image64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADySURBVFiF7dcxSgNRFIXhT4Wx1NrCFCK4iEiCWxBcgjsQscteLMQlKCksLCLYWbkE3cEEJBaTgL5MzGReAhb3h9cc3tz7w0wxh3k6GKLEpOV5R7dmdiOGuEHR8vkBHvGBfpsBZcbymcBgunypxHZNVmCcITDjCee4x9kqAuvkeSpx95dEyiRz6SVuk6yPT5yml7cWCNTlTdnHK0Z4+5F3cYyTTQvAHi5wlOTXTWbnvoKVZm/6I1xKCIRACIRACIRACIRACPxLgbG8araIXVXt+8VOzcUeDvCCrzUtL3Cl+iVPS8scHVW7zann6SnxgMN02Ter0UNOfhP2XAAAAABJRU5ErkJggg==";
-    startDrag({ item: [filepath], icon: image64 })
-  }
-
-  async function startDrag(
-    options: Options,
-    onEvent?: (result: CallbackPayload) => void
-  ): Promise<void> {
-    await invoke("start_drag", {
-      item: options.item,
-      image: options.icon,
-      onEventFn: onEvent ? transformCallback(onEvent) : null,
-    });
-  }
-
-	function openFile(url: string) {
-		trackEvent('click:openFile');
-		invoke('open_file_or_folder', { filePath: url });
-	}
-
-	function openFileFolder(url: string) {
-		trackEvent('click:openFile');
-		invoke('open_folder_containing_file', { filePath: url });
-	}
-	
-	function formatUpdatedTime(unixTime: number): string {
-		if (unixTime === 0) {
-			return 'Never';
-		}
-		let unixToJs = new Date(unixTime*1000);
-		const updatedMoment = moment(unixToJs);
-		const today = moment();
-		const yesterday = moment().subtract(1, 'days');
-
-		if (updatedMoment.isSame(today, 'day')) {
-			// If the update was today, return the time
-			return updatedMoment.format('h:mm A');
-		} else if (updatedMoment.isSame(yesterday, 'day')) {
-			// If the update was yesterday, return 'Yesterday'
-			return 'Yesterday';
-		} else {
-			// Otherwise, return the date
-			return updatedMoment.format('YYYY-MM-DD');
-		}
-	}
-
-	function formatPath(url: string): string {
-		const parts = url.split('/'); // Split the url into components
-		const length = parts.length;
-
-		if (length > 3) {
-			// Take the two directories just before the file name and prepend '...'
-			return '.../' + parts.slice(length - 3, length - 1).join('/') + '/';
-		} else {
-			// If the url is already short, return it as is
-			return url;
-		}
-	}
-
-	async function showContextMenu(
-		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
-		result: DocumentSearchResult
-	) {
-		trackEvent('right_click:resultContextMenu');
-		clickRow(e, $shiftKeyPressed);
-		// window.menuAPI?.showResultsContextMenu(result);
-		$selectedResult = result;
-		await invoke("open_context_menu", {option:"searchresult", filetype: result.file_type});
 	}
 
 	const table = createTable(readable($documentsShown), {
@@ -372,7 +294,9 @@
 												{/if}
 											{:else if cell.id === 'path'}
 												<!-- <span on:click={() => openFileFolder(cell.render().toString())}><Render of={cell.render()} /></span> -->
-												<button class="w-full text-left truncate hover:underline hover:cursor-pointer" on:click={() => openFileFolder(cell.render().toString())}><Render of={cell.render()} /></button>
+												<button class="w-full text-left truncate hover:underline hover:cursor-pointer" on:click={() => openFileFolder(cell.render().toString())}>
+													<Render of={formatPath(cell.render().toString())} />
+												</button>
 											{:else}
 												<span><Render of={cell.render()} /></span>
 											{/if}
@@ -382,26 +306,22 @@
 							</tr>
 						</ContextMenu.Trigger>
 						<ContextMenu.Content>
-							<ContextMenu.Item>Profile</ContextMenu.Item>
-							<ContextMenu.Item>Billing</ContextMenu.Item>
-							<ContextMenu.Item>Team</ContextMenu.Item>
-							<ContextMenu.Item>Subscription</ContextMenu.Item>
+							<ContextMenu.Item on:click={() => {$showResultTextPreview = true; $selectedResult = $documentsShown[Number(row.id)];}}>Show Preview</ContextMenu.Item>
+							<ContextMenu.Item>Open File</ContextMenu.Item>
+							<ContextMenu.Sub>
+								<ContextMenu.SubTrigger>Ignore</ContextMenu.SubTrigger>
+								<ContextMenu.SubContent class="w-48">
+									<ContextMenu.Item>Ignore this {row.cells[0].render().toString() === 'folder' ? 'folder' : 'file'}</ContextMenu.Item>
+									<ContextMenu.Item>Ignore parent folder</ContextMenu.Item>
+									{#if row.cells[0].render().toString() !== 'folder'}
+										<ContextMenu.Item>Ignore this file's text</ContextMenu.Item>
+									{/if}
+								</ContextMenu.SubContent>
+							</ContextMenu.Sub>
 						</ContextMenu.Content>
 					</ContextMenu.Root>
 				</Subscribe>
 			{/each}
-			{#if !noMoreResults}
-				<tr class="table-row text-center" draggable="false">
-					<td>
-						<ConfettiButton 
-							label="Load more"
-							type="confetti-button py-1 px-2 leading-tight text-xs"
-							showText={!$searchInProgress}
-							showSpinner={$searchInProgress}
-							handleClick={() => loadMoreResults()} />
-					</td>
-				</tr>
-			{/if}
 		</tbody>
 	{/if}
 </table>
@@ -418,6 +338,10 @@
 	</div>
 {/if}
 
+{#key $selectedResult}
+	<ResultTextPreview open={$showResultTextPreview} />
+{/key}
+
 <style lang="scss">
 	.min-vh-80 {
 		min-height: 80vh !important;
@@ -432,6 +356,7 @@
 	}
 	tr {
 		cursor: default;
+		outline: none;
 	}
 	td {
 		position: relative;
@@ -470,11 +395,6 @@
 	.lastModified-col,
 	.lastOpened-col {
 		text-align: center;
-	}
-	// banded rows
-	tr:not(.selected):nth-of-type(2n + 1) > td {
-		// background-color: #d3d3d340;
-		background-color: hsl(var(--muted) / var(--tw-bg-opacity));
 	}
 	// selected row
 	.selected {
@@ -535,8 +455,7 @@
 		display: block;
 		overflow-y: scroll;
 		overflow-x: auto !important;
-		max-height: calc(
-			100vh - 110px
-		); /* set maximum height so rows don't hide outside the viewport; 110px is roughly the height of the topbar + thead + statusbar + loadMore button */
+		max-height: 60svh;
+		// max-height: calc(100vh - 170px);
 	}
 </style>

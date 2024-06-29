@@ -1,105 +1,17 @@
 <script lang="ts">
-	import { invoke, transformCallback } from "@tauri-apps/api/core";
-	import moment from 'moment';
+	import { invoke } from "@tauri-apps/api/core";
 	import { onMount } from 'svelte';
-	import { documentsShown, base64Images, shiftKeyPressed, compactViewMode, selectedResult, resultsPageShown, searchInProgress, filetypeShown, allowedExtensions, searchQuery, resultsPerPage } from '$lib/stores';
-	import { searchDocuments } from '$lib/utils/dbUtils';
-	import { setExtensionCategory } from '$lib/utils/miscUtils';
+	import { documentsShown, base64Images, shiftKeyPressed, compactViewMode, selectedResult, noMoreResults } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
-	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
+	import { stringToHash } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { trackEvent } from '@aptabase/web';
-	import ConfettiButton from '../ui/confettiButton.svelte';
 	import { goto } from "$app/navigation";
-	import { AspectRatio } from "$lib/components/ui/aspect-ratio";
+	import { startDragging, openFile } from "$lib/utils/searchItemUtils";
 
-	let noMoreResults = false;
-
-	$: if ($documentsShown.length < 50) {
-		noMoreResults = true;
-	}
-
-	async function loadMoreResults() {
-		// Same function as triggerSearch, but with a different page number and appending results
-		console.log("Loading more results...");
-		$resultsPageShown += 1; // increment the page number on each new search
-		$searchInProgress = true;
-		trackEvent('loadMoreResults', {
-			filetypeShown: $filetypeShown,
-			resultsPageShown: $resultsPageShown
-		});
-		let filetypeToGet = $filetypeShown;
-		if (filetypeToGet !== 'any') {
-			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
-		}
-		let results = await searchDocuments(
-			$searchQuery,
-			$resultsPageShown,
-			$resultsPerPage,
-			filetypeToGet
-		);
-		if (results.length === 0) {
-			noMoreResults = true;
-		} else {
-			$documentsShown = [...$documentsShown, ...results];
-		}
-		$searchInProgress = false;
-	}
-  
-  function startDragging(filepath: string) {
-		const image64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADySURBVFiF7dcxSgNRFIXhT4Wx1NrCFCK4iEiCWxBcgjsQscteLMQlKCksLCLYWbkE3cEEJBaTgL5MzGReAhb3h9cc3tz7w0wxh3k6GKLEpOV5R7dmdiOGuEHR8vkBHvGBfpsBZcbymcBgunypxHZNVmCcITDjCee4x9kqAuvkeSpx95dEyiRz6SVuk6yPT5yml7cWCNTlTdnHK0Z4+5F3cYyTTQvAHi5wlOTXTWbnvoKVZm/6I1xKCIRACIRACIRACIRACPxLgbG8araIXVXt+8VOzcUeDvCCrzUtL3Cl+iVPS8scHVW7zann6SnxgMN02Ter0UNOfhP2XAAAAABJRU5ErkJggg==";
-    startDrag({ item: [filepath], icon: image64 })
-  }
-
-  async function startDrag(
-    options: Options,
-    onEvent?: (result: CallbackPayload) => void
-  ): Promise<void> {
-    await invoke("start_drag", {
-      item: options.item,
-      image: options.icon,
-      onEventFn: onEvent ? transformCallback(onEvent) : null,
-    });
-  }
-
-	function openFile(url: string) {
-		trackEvent('click:openFile');
-		invoke('open_file_or_folder', { filePath: url });
-	}
-	
-	function formatUpdatedTime(unixTime: number): string {
-		if (unixTime === 0) {
-			return 'Never';
-		}
-		let unixToJs = new Date(unixTime*1000);
-		const updatedMoment = moment(unixToJs);
-		const today = moment();
-		const yesterday = moment().subtract(1, 'days');
-
-		if (updatedMoment.isSame(today, 'day')) {
-			// If the update was today, return the time
-			return updatedMoment.format('h:mm A');
-		} else if (updatedMoment.isSame(yesterday, 'day')) {
-			// If the update was yesterday, return 'Yesterday'
-			return 'Yesterday';
-		} else {
-			// Otherwise, return the date
-			return updatedMoment.format('YYYY-MM-DD');
-		}
-	}
-
-	function formatPath(url: string): string {
-		const parts = url.split('/'); // Split the url into components
-		const length = parts.length;
-
-		if (length > 3) {
-			// Take the two directories just before the file name and prepend '...'
-			return '.../' + parts.slice(length - 3, length - 1).join('/') + '/';
-		} else {
-			// If the url is already short, return it as is
-			return url;
-		}
-	}
+	// $: if ($documentsShown.length < 50) {
+	// 	$noMoreResults = true;
+	// }
 
 	async function showContextMenu(
 		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }
@@ -137,6 +49,8 @@
   });
 </script>
 
+{$noMoreResults}
+
 {#if $documentsShown.length <= 0}
 	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-center min-vh-80">
 		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
@@ -149,7 +63,7 @@
 	</div>
 {:else}
 <div id="parent-grid" class="flex flex-col">
-  <div class="file-grid gap-2 p-2">
+  <div class={`file-grid p-2 ${$compactViewMode ? 'gap-2' : 'gap-4'}`}>
     {#each $documentsShown as result, i}
       <button
         id={stringToHash($documentsShown[Number(i)].path)}
@@ -177,16 +91,6 @@
       </button>
     {/each}
   </div>
-  {#if !noMoreResults}
-    <div id="load-more-btn" class="py-2 flex justify-center items-center" draggable="false">
-      <ConfettiButton 
-        label="Load more"
-        type="confetti-button py-1 px-2 leading-tight text-xs"
-        showText={!$searchInProgress}
-        showSpinner={$searchInProgress}
-        handleClick={() => loadMoreResults()} />
-    </div>
-  {/if}
 </div>
 {/if}
 
@@ -194,7 +98,7 @@
   #parent-grid {
     overflow-x: hidden; /* Hide horizontal scrollbar */
     overflow-y: auto; /* Enable vertical scrolling */
-    max-height: calc(100vh - 80px); /* set maximum height so rows don't hide outside the viewport; 110px is roughly the height of the topbar + statusbar + loadMore button */
+    max-height: 60svh;
   }
   .img-thumbnail {
     max-height: 72px;
