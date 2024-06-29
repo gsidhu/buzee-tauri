@@ -69,7 +69,7 @@
 
 <Button
   id="bg-sync-btn"
-  variant="secondary"
+  variant={`${$syncStatus ? (syncCoolingPeriod ? 'secondary' : 'purple') : 'secondary'}`}
   size="icon"
   class={`px-2 rounded-full ${($syncStatus && syncCoolingPeriod) ? 'disabled-gray' : ''}`}
   on:click={() => toggleBackgroundTextProcessing()}

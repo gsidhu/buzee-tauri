@@ -53,7 +53,7 @@
 </script>
 
 <div class="flex flex-col w-full">
-	<Label class="mb-2">Location</Label>
+	<Label class="mb-2 font-medium">Location</Label>
 	<Select.Root onSelectedChange={(v) => v?.value ? showDocsForLocation(v.value) : showDocsForLocation("any")}>
 		<Select.Trigger class="" bind:value={$locationShown}>
 			<Select.Value placeholder="All"/>

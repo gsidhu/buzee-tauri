@@ -13,6 +13,7 @@ const buttonVariants = tv({
 			outlinePurple:
 				"border border-input bg-background hover:bg-[#5368e0] hover:text-white",
 			secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+			purple: "bg-[#5368e0] text-white hover:bg-[#3f4d9e]",
 			ghost: "hover:bg-accent hover:text-accent-foreground",
 			link: "text-primary underline-offset-4 hover:underline",
 		},

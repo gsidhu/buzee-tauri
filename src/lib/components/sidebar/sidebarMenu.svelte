@@ -26,6 +26,7 @@
 
 	import { invoke } from '@tauri-apps/api/core';
 	import { trackEvent } from '@aptabase/web';
+	import Label from '../ui/label/label.svelte';
 
 	async function openInBrowser(what: string) {
 		if (what === 'deadline') {
@@ -51,7 +52,8 @@
 		</Button>
 	</div>
 	<div class="flex-1">
-		<nav class="grid items-start px-2 text-sm font-medium lg:px-4">
+		<nav class="grid items-start px-2 text-sm font-normal lg:px-4">
+			<Label class="px-3 py-2 text-muted-foreground font-semibold">Locations</Label>
 			<a
 				href="/search"
 				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/search' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
@@ -101,6 +103,7 @@
 
 	<div class="flex-1">
 		<nav class="grid items-start px-2 text-sm font-medium lg:px-4">
+			<Label class="px-3 py-2 text-muted-foreground font-semibold">Magic Services</Label>
 			<a
 				href="/magic/extract-text"
 				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/extract-text' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}

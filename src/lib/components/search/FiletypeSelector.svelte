@@ -42,7 +42,7 @@
 	}
 
 	onMount(async () => {
-		$filetypeShown = "any";
+		if ($filetypeShown === undefined) $filetypeShown = "any";
 		// Get list of available extensions from main process
 		invoke('get_allowed_filetypes').then((res) => {
 			// @ts-ignore

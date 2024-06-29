@@ -11,6 +11,7 @@
 	import { trackEvent } from '@aptabase/web';
 	import ConfettiButton from '../ui/confettiButton.svelte';
 	import { goto } from "$app/navigation";
+	import { AspectRatio } from "$lib/components/ui/aspect-ratio";
 
 	let noMoreResults = false;
 
@@ -137,7 +138,7 @@
 </script>
 
 {#if $documentsShown.length <= 0}
-	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-content-center min-vh-80">
+	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-center min-vh-80">
 		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
 		<h3>No Results</h3>
 		<div class="flex flex-col text-light-emphasis text-center small gap-2">
@@ -153,7 +154,7 @@
       <button
         id={stringToHash($documentsShown[Number(i)].path)}
         style="all: unset;"
-        class={`icon-item p-1 flex flex-col items-center justify-between table-row result-${Number(i)} ${$compactViewMode ? 'compact-view' : ''}`}
+        class={`icon-item w-full h-full p-1 grid items-center justify-between table-row result-${Number(i)} ${$compactViewMode ? 'compact-view' : ''}`}
         tabindex="0"
         on:focus={(e) => clickRow(e, $shiftKeyPressed)}
         on:click={(e) => clickRow(e, $shiftKeyPressed)}
@@ -163,12 +164,12 @@
         on:dragstart={(event) => startDragging($documentsShown[Number(i)].path)}
         title={result.name}
       >
-        <div class="w-full h-100 flex items-center justify-content-center">
-          {#if ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(result.file_type)}
-            <img src={"data:image/png;base64, " + $base64Images[result.path]} alt={result.name} class={`img-thumbnail ${$compactViewMode ? 'compact-view' : ''}`} />
-          {:else}
-            <FileTypeIcon filetype={result.file_type} extraClasses={`${$compactViewMode ? 'fs-4' : 'fs-1'}`}/>
-          {/if}
+        <div class="flex justify-center">
+					{#if ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(result.file_type)}
+						<img src={"data:image/png;base64, " + $base64Images[result.path]} alt={result.name} class={`img-thumbnail ${$compactViewMode ? 'compact-view' : ''}`} />
+					{:else}
+						<FileTypeIcon filetype={result.file_type} extraClasses={`${$compactViewMode ? 'text-lg' : 'text-2xl'}`}/>
+					{/if}
         </div>
         <div class="filename text-center p-1 w-full">
           {result.name}
@@ -177,7 +178,7 @@
     {/each}
   </div>
   {#if !noMoreResults}
-    <div id="load-more-btn" class="py-2 flex justify-content-center items-center" draggable="false">
+    <div id="load-more-btn" class="py-2 flex justify-center items-center" draggable="false">
       <ConfettiButton 
         label="Load more"
         type="confetti-button py-1 px-2 leading-tight text-xs"
@@ -213,14 +214,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .icon-item {
-    width: 100px !important;
-    height: 100px !important;
-  }
-  .icon-item.compact-view {
-    width: 70px !important;
-    height: 70px !important;
   }
   .min-vh-80 {
 		min-height: 80vh !important;

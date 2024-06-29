@@ -19,6 +19,9 @@
 	import { trackEvent } from '@aptabase/web';
 	import ConfettiButton from '../ui/confettiButton.svelte';
 	import { goto } from "$app/navigation";
+	
+	import * as ContextMenu from "$lib/components/ui/context-menu";
+	import { Button } from "../ui/button";
 
 	let noMoreResults = false;
 
@@ -72,6 +75,11 @@
 	function openFile(url: string) {
 		trackEvent('click:openFile');
 		invoke('open_file_or_folder', { filePath: url });
+	}
+
+	function openFileFolder(url: string) {
+		trackEvent('click:openFile');
+		invoke('open_folder_containing_file', { filePath: url });
 	}
 	
 	function formatUpdatedTime(unixTime: number): string {
@@ -132,7 +140,7 @@
 			plugins: {
 				resize: {
 					initialWidth: 30,
-					minWidth: 20,
+					minWidth: 30,
 					maxWidth: 30
 				},
 				sort: { disable: false }
@@ -144,8 +152,8 @@
 			plugins: {
 				resize: {
 					initialWidth: 250,
-					minWidth: 150,
-					maxWidth: 500
+					minWidth: 250,
+					maxWidth: 250
 				}
 			}
 		}),
@@ -194,22 +202,23 @@
 			plugins: {
 				resize: {
 					initialWidth: 200,
-					minWidth: 50,
-					maxWidth: 500
+					minWidth: 200,
+					maxWidth: 200
 				}
 			}
 		})
 	]);
 
-	// function showTableHeaderContextMenu(option: string) {
-	// 	window.menuAPI?.showTableHeaderMenu(option, ids, labels, hideForId);
-	// }
-
-	async function showTableHeaderContextMenu(cellID: string) {
+	function toggleLastModifiedOrOpened(cellID: string) {
 		resetColumnSize();
 		trackEvent('right_click:resultTableHeaderContextMenu', {cellID});
-		if (cellID === "lastModified" || cellID === "lastOpened") {
-			await invoke("open_context_menu", {option:"tableheader", filetype: ""});
+		$preferLastOpened = !$preferLastOpened;
+		if ($preferLastOpened) {
+			hideForId['lastModified'] = false;
+			hideForId['lastOpened'] = true;
+		} else {
+			hideForId['lastModified'] = true;
+			hideForId['lastOpened'] = false;
 		}
 	}
 
@@ -231,8 +240,6 @@
 		hideForId['lastOpened'] = true;
 	}
 
-	let unlistenLastModified: UnlistenFn;
-
 	onMount(async () => {
 		// select the first result when loading new search results
 		$selectedResult = $documentsShown[0];
@@ -242,22 +249,6 @@
 		}
 
 		resetColumnSize();
-		// window.electronAPI?.resetTableColWidths(() => {
-		// 	resetColumnSize();
-		// });
-		unlistenLastModified = await listen<Payload>('toggle-last-modified', (event: any) => {
-      $preferLastOpened = !$preferLastOpened;
-			if ($preferLastOpened) {
-				hideForId['lastModified'] = false;
-				hideForId['lastOpened'] = true;
-			} else {
-				hideForId['lastModified'] = true;
-				hideForId['lastOpened'] = false;
-			}
-		});
-  })
-  onDestroy(() => {
-    unlistenLastModified();
   })
 </script>
 
@@ -276,18 +267,57 @@
 								use:props.resize
 								on:click={props.sort.toggle}
 								class:sorted={props.sort.order !== undefined}
-								on:contextmenu={() => showTableHeaderContextMenu(cell.id)}
 							>
 								{#if cell.id === 'file_type'}
-									<!-- <FiletypeDropdown searchBar={false} /> -->
-									<FileTypeIcon filetype="other" />
+									<div class="header-grid justify-items-stretch items-center px-2">
+										<div class="flex justify-items-start">
+											<FileTypeIcon filetype="other" />
+										</div>
+										<div class="flex justify-end">
+											{#if props.sort.order === 'asc'}
+												<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
+											{:else if props.sort.order === 'desc'}
+												<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
+											{/if}
+										</div>
+									</div>
 								{:else}
-									<Render of={cell.render()} />
-								{/if}
-								{#if props.sort.order === 'asc'}
-									<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
-								{:else if props.sort.order === 'desc'}
-									<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
+									{#if cell.id === 'lastModified' || cell.id === 'lastOpened'}
+										<ContextMenu.Root>
+											<ContextMenu.Trigger>
+												<div class="header-grid justify-items-stretch items-center px-2">
+													<div class="flex justify-items-start">
+														<Render of={cell.render()} />
+													</div>
+													<div class="flex justify-end">
+														{#if props.sort.order === 'asc'}
+															<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
+														{:else if props.sort.order === 'desc'}
+															<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
+														{/if}
+													</div>
+												</div>
+											</ContextMenu.Trigger>
+											<ContextMenu.Content>
+												<ContextMenu.Item on:click={() => toggleLastModifiedOrOpened(cell.id)}>
+													Show Last {cell.id === 'lastModified' ? 'Opened' : 'Modified'}
+												</ContextMenu.Item>
+											</ContextMenu.Content>
+										</ContextMenu.Root>
+									{:else}
+										<div class="header-grid justify-items-stretch items-center px-2">
+											<div class="flex justify-items-start">
+												<Render of={cell.render()} />
+											</div>
+											<div class="flex justify-end">
+												{#if props.sort.order === 'asc'}
+													<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
+												{:else if props.sort.order === 'desc'}
+													<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
+												{/if}
+											</div>
+										</div>
+									{/if}
 								{/if}
 								{#if !props.resize.disabled}
 									<button
@@ -306,64 +336,74 @@
 			</Subscribe>
 		{/each}
 	</thead>
-	<!-- {#key $documentsShown.length} -->
-		{#if $documentsShown.length > 0}
-			<tbody {...$tableBodyAttrs}>
-				{#each $rows as row (row.id)}
-					<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-						<tr
-							{...rowAttrs}
-							id={stringToHash($documentsShown[Number(row.id)].path)}
-							class={`table-row result-${Number(row.id)}`}
-							role="button"
-							tabindex="0"
-							on:focus={(e) => clickRow(e, $shiftKeyPressed)}
-							on:click={(e) => clickRow(e, $shiftKeyPressed)}
-							on:contextmenu={(e) => showContextMenu(e, $documentsShown[Number(row.id)])}
-							on:dblclick={() => openFile($documentsShown[Number(row.id)].path)}
-							draggable="true"
-							on:dragstart={(event) => startDragging($documentsShown[Number(row.id)].path)}
-						>
-							{#each row.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs>
-									<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
-										title={cell.id === 'name' || cell.id === 'path' ? String(cell.render()) : ''}
-									>
-										{#if cell.id === 'file_type'}
-											<FileTypeIcon filetype={String(cell.render())} />
-										{:else if cell.id === 'name'}
-											{#if $documentsShown[Number(row.id)].last_parsed > 0}
-												<span class="flex items-center gap-1">
-													<i class="bi bi-check-circle fs-small" title="Item contents scanned" style="font-size: 8px; color: var(--bs-success);"></i>
-													<Render of={cell.render()} />
-												</span>
+	{#if $documentsShown.length > 0}
+		<tbody {...$tableBodyAttrs}>
+			{#each $rows as row (row.id)}
+				<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+					<ContextMenu.Root>
+						<ContextMenu.Trigger>
+							<tr
+								{...rowAttrs}
+								id={stringToHash($documentsShown[Number(row.id)].path)}
+								class={`table-row result-${Number(row.id)}`}
+								role="button"
+								tabindex="0"
+								on:focus={(e) => clickRow(e, $shiftKeyPressed)}
+								on:click={(e) => clickRow(e, $shiftKeyPressed)}
+								on:dblclick={() => openFile($documentsShown[Number(row.id)].path)}
+								draggable="true"
+								on:dragstart={(event) => startDragging($documentsShown[Number(row.id)].path)}
+							>
+								{#each row.cells as cell (cell.id)}
+									<Subscribe attrs={cell.attrs()} let:attrs>
+										<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
+											title={cell.id === 'name' || cell.id === 'path' ? String(cell.render()) : ''}
+										>
+											{#if cell.id === 'file_type'}
+												<FileTypeIcon filetype={String(cell.render())} />
+											{:else if cell.id === 'name'}
+												{#if $documentsShown[Number(row.id)].last_parsed > 0}
+													<span class="flex items-center gap-1">
+														<i class="bi bi-check-circle fs-small" title="Item contents scanned" style="font-size: 8px; color: var(--bs-success);"></i>
+														<Render of={cell.render()} />
+													</span>
+												{:else}
+													<span><Render of={cell.render()} /></span>
+												{/if}
+											{:else if cell.id === 'path'}
+												<!-- <span on:click={() => openFileFolder(cell.render().toString())}><Render of={cell.render()} /></span> -->
+												<button class="w-full text-left truncate hover:underline hover:cursor-pointer" on:click={() => openFileFolder(cell.render().toString())}><Render of={cell.render()} /></button>
 											{:else}
 												<span><Render of={cell.render()} /></span>
 											{/if}
-										{:else}
-											<span><Render of={cell.render()} /></span>
-										{/if}
-									</td>
-								</Subscribe>
-							{/each}
-						</tr>
-					</Subscribe>
-				{/each}
-				{#if !noMoreResults}
-					<tr class="table-row text-center" draggable="false">
-						<td>
-							<ConfettiButton 
-								label="Load more"
-								type="confetti-button py-1 px-2 leading-tight text-xs"
-								showText={!$searchInProgress}
-								showSpinner={$searchInProgress}
-								handleClick={() => loadMoreResults()} />
-						</td>
-					</tr>
-				{/if}
-			</tbody>
-		{/if}
-	<!-- {/key} -->
+										</td>
+									</Subscribe>
+								{/each}
+							</tr>
+						</ContextMenu.Trigger>
+						<ContextMenu.Content>
+							<ContextMenu.Item>Profile</ContextMenu.Item>
+							<ContextMenu.Item>Billing</ContextMenu.Item>
+							<ContextMenu.Item>Team</ContextMenu.Item>
+							<ContextMenu.Item>Subscription</ContextMenu.Item>
+						</ContextMenu.Content>
+					</ContextMenu.Root>
+				</Subscribe>
+			{/each}
+			{#if !noMoreResults}
+				<tr class="table-row text-center" draggable="false">
+					<td>
+						<ConfettiButton 
+							label="Load more"
+							type="confetti-button py-1 px-2 leading-tight text-xs"
+							showText={!$searchInProgress}
+							showSpinner={$searchInProgress}
+							handleClick={() => loadMoreResults()} />
+					</td>
+				</tr>
+			{/if}
+		</tbody>
+	{/if}
 </table>
 
 {#if $documentsShown.length <= 0}
@@ -473,31 +513,15 @@
 		background: black;
 		opacity: 0.05;
 	}
-	// th .resizer {
-	// 	position: absolute;
-	// 	top: 0%;
-	// 	bottom: 0;
-	// 	right: -4px;
-	// 	width: 4px;
-	// 	height: 100%;
-	// 	background: black;
-	// 	// background: transparent;
-	// 	cursor: col-resize;
-	// 	z-index: 1;
-	// 	opacity: 0.05;
 
-	// 	&:hover {
-	// 		top: 0;
-	// 		height: 100%;
-	// 		width: 8px;
-	// 		background: var(--purple);
-	// 		opacity: 1;
-	// 	}
-	// }
-	// button.resizer {
-	// 	border: none;
-	// 	padding: 0;
-	// }
+	.header-grid {
+		display: grid; 
+		grid-template-columns: 1.5fr 0.5fr; 
+		grid-template-rows: 1fr; 
+		gap: 0px 0px; 
+		grid-template-areas: 
+			". ."; 
+	}
 
 	// table head fixed
 	thead,

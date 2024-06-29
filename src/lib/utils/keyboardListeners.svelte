@@ -133,7 +133,7 @@
 					//   selectOneRow(prevElement as HTMLDivElement);
 					// }
 				} else {
-					let prevElement = selectedElement.previousElementSibling as HTMLDivElement;
+					let prevElement = selectedElement.parentElement?.previousElementSibling?.children[0] as HTMLDivElement;
 					clickRow(
 						{ currentTarget: prevElement } as MouseEvent & {
 							currentTarget: EventTarget & HTMLDivElement;
@@ -158,7 +158,7 @@
 					//   selectOneRow(nextElement as HTMLDivElement);
 					// }
 				} else {
-					let nextElement = selectedElement.nextElementSibling as HTMLDivElement;
+					let nextElement = selectedElement.parentElement?.nextElementSibling?.children[0] as HTMLDivElement;
 					clickRow(
 						{ currentTarget: nextElement } as MouseEvent & {
 							currentTarget: EventTarget & HTMLDivElement;

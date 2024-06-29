@@ -6,23 +6,23 @@
 	import SearchFilters from '../search/SearchFilters.svelte';
 	import Separator from '../ui/separator/separator.svelte';
 
-	onMount(async () => {
-		if (document) {
-			document.body.style.overflow = 'hidden';
-		}
-	});
+	// onMount(async () => {
+	// 	if (document) {
+	// 		document.body.style.overflow = 'hidden';
+	// 	}
+	// });
 
-	onDestroy(async () => {
-		if (document) {
-			document.body.style.overflow = 'auto';
-		}
-	});
+	// onDestroy(async () => {
+	// 	if (document) {
+	// 		document.body.style.overflow = 'auto';
+	// 	}
+	// });
 </script>
 
 <SearchFilters />
 <Separator class="my-2 "/>
 {#key $documentsShown || $preferLastOpened}
-	<div class={`results-container mb-4 min-vh-100`}>
+	<div class={`results-container mb-4 overflow-auto`}>
 		{#if $showIconGrid}
 			<IconsGrid />
 		{:else}

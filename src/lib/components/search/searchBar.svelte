@@ -23,7 +23,6 @@
 	import { Search } from "lucide-svelte";
 
 	let isInputFocused = false;
-	let searchInputRef: HTMLInputElement; // a reference to the input element that allows updating the DOM without running a querySelector
 
 	let getSuggestions = true;
 	let search = '';
@@ -65,7 +64,6 @@
 		);
 		$documentsShown = results;
 		$searchInProgress = false;
-		searchInputRef.blur();
 	}
 
 	onMount(() => {
@@ -78,7 +76,6 @@
 			triggerSearch(query);
 		}
 		if (highlightSearchBar) {
-			searchInputRef.focus();
 		}
 	});
 </script>
