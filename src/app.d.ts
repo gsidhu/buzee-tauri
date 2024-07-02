@@ -83,6 +83,12 @@ declare global {
     [key: string]: string;
   }
 
+  interface ParsedDatesUNIX {
+    "start": string,
+    "end": string,
+    "text": string
+  }
+
   // type ElectronStore = import('electron-store');
   // Not sure how to export the types from the ElectronStore schema without rewriting
   // So going with `any`

@@ -8,9 +8,14 @@ export async function getDocumentsFromDB(page:number, limit:number, type?:string
   return results;
 }
 
-export async function searchDocuments(query:string, page:number, limit:number, type?:string) {
-  console.log("searching documents with query", query, "page", page, "limit", limit, "type", type);
-  const dateLimit = extractDate(query);
+export async function searchDocuments(query:string, page:number, limit:number, type?:string, dateLimitUNIX?: ParsedDatesUNIX | null) {
+  console.log("searching documents with query", query, "page", page, "limit", limit, "type", type, "dateLimitUNIX", dateLimitUNIX);
+  let dateLimit: ParsedDatesUNIX | null;
+  if (dateLimitUNIX) {
+    dateLimit = dateLimitUNIX;
+  } else {
+    dateLimit = extractDate(query);
+  }
   if (dateLimit) {
     query = dateLimit.text;
   }

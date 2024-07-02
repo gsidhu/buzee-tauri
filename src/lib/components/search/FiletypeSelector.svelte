@@ -11,7 +11,8 @@
 		resultsPerPage,
 		searchInProgress,
 		allowedExtensions,
-		base64Images
+		base64Images,
+		dateLimitUNIX,
 	} from '$lib/stores';
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
 	import { setExtensionCategory } from '$lib/utils/miscUtils';
@@ -30,14 +31,15 @@
 		if (filetypeToGet !== 'any') {
 			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
 		}
-		if ($searchQuery === '') {
+		if ($searchQuery === '' || $dateLimitUNIX === null) {
 			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, filetypeToGet);
 		} else {
 			$documentsShown = await searchDocuments(
 				$searchQuery,
 				$resultsPageShown,
 				$resultsPerPage,
-				filetypeToGet
+				filetypeToGet,
+				$dateLimitUNIX
 			);
 		}
 		$searchInProgress = false;

@@ -3,6 +3,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 
 ## UI Redesign
 - Using shadcn-svelte components and Tailwind CSS. Keeping a few essential classes from Bootstrap.
+- Date picker kinda works. Need to have singular triggerSearch function to synchronise it across filters.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.

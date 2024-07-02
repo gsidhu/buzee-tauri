@@ -20,7 +20,7 @@ export function extractDate(value: string) {
       // remove dates from text
       text = text.replace(regex, '')
 
-      let dateLimitTrimmed = {
+      let dateLimitTrimmed: ParsedDatesUNIX = {
         "start": parsedDates.start.slice(0,10),
         "end": parsedDates.end.slice(0,10),
         "text": text.trim().replace(/\s{2,}/g, ' ')
@@ -29,14 +29,14 @@ export function extractDate(value: string) {
       dateLimitTrimmed = checkDateMonth(dateLimitTrimmed, value);
 
       // convert to UNIX timestamp
-      dateLimitTrimmed.start = new Date(dateLimitTrimmed.start + 'T00:00:00').getTime() / 1000;
-      dateLimitTrimmed.end = new Date(dateLimitTrimmed.end + 'T23:59:59').getTime() / 1000;
-      if (dateLimitTrimmed.start === dateLimitTrimmed.end) {
-        dateLimitTrimmed.end = dateLimitTrimmed.start + 86400;
+      let dateLimitTrimmedStart = new Date(dateLimitTrimmed.start + 'T00:00:00').getTime() / 1000;
+      let dateLimitTrimmedEnd = new Date(dateLimitTrimmed.end + 'T23:59:59').getTime() / 1000;
+      if (dateLimitTrimmedStart === dateLimitTrimmedEnd) {
+        dateLimitTrimmedEnd = dateLimitTrimmedStart + 86400;
       }
       // save as string
-      dateLimitTrimmed.start = dateLimitTrimmed.start.toString();
-      dateLimitTrimmed.end = dateLimitTrimmed.end.toString();
+      dateLimitTrimmed.start = dateLimitTrimmedStart.toString();
+      dateLimitTrimmed.end = dateLimitTrimmedEnd.toString();
       return dateLimitTrimmed;
     }
   }

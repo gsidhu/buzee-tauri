@@ -50,6 +50,12 @@ let storedAllowedExtensions: FileTypesDropdown = {
 
 let storedAllowedLocations = ["computer", "browser"];
 
+let storedDateLimitUNIX: ParsedDatesUNIX = {
+  start: '',
+  end: '',
+  text: ''
+};
+
 let storedFileText: string[] = [];
 let storedSearchSuggestions: string[] = [];
 let storedIgnoredPaths: IgnoreListType[] = [];
@@ -101,6 +107,7 @@ export const base64Images = writable(storedBase64Images || {})
 export const preferLastOpened = writable(false);
 export const showResultTextPreview = writable(false);
 export const noMoreResults = writable(false);
+export const dateLimitUNIX = writable(storedDateLimitUNIX || null)
 
 // 3. Anytime the store changes, update the local storage value.
 if(typeof window !== "undefined") {

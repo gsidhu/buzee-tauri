@@ -10,7 +10,7 @@
 	export let value: string = "";
 </script>
 
-<div class={`flex items-center px-2 ${className?.indexOf("calendar") === -1 ? "border-b" : ""}`} data-cmdk-input-wrapper="">
+<div class="flex items-center px-2 border-b" data-cmdk-input-wrapper="">
 	{#if className?.indexOf("calendar") === -1}
 		<Search class="mr-2 h-4 w-4 shrink-0 opacity-50" />
 	{:else}
