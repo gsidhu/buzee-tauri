@@ -48,7 +48,7 @@ let storedAllowedExtensions: FileTypesDropdown = {
   items: []
 };
 
-let storedAllowedLocations = ["computer", "browser", "cloud", "bookmarks"];
+let storedAllowedLocations = ["computer", "browser"];
 
 let storedFileText: string[] = [];
 let storedSearchSuggestions: string[] = [];

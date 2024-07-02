@@ -1,135 +1,24 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { readable } from 'svelte/store';
-	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, resultsPageShown, searchInProgress, filetypeShown, allowedExtensions, searchQuery, resultsPerPage, showResultTextPreview, noMoreResults } from '$lib/stores';
-	import { searchDocuments } from '$lib/utils/dbUtils';
-	import { setExtensionCategory } from '$lib/utils/miscUtils';
+	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
-	// @ts-ignore
-	import { createTable, Subscribe, Render } from 'svelte-headless-table';
-	// @ts-ignore
-	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from "$app/navigation";
-	
 	import * as ContextMenu from "$lib/components/ui/context-menu";
 	import ResultTextPreview from "./ResultTextPreview.svelte";
 	import { openFileFolder, openFile, formatUpdatedTime, formatPath, startDragging } from '$lib/utils/searchItemUtils';
 
+	import { readable } from 'svelte/store';
+	// @ts-ignore
+	import { createTable, Subscribe, Render } from 'svelte-headless-table';
+	// @ts-ignore
+	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
+
 	// $: if ($documentsShown.length < 50) {
 	// 	$noMoreResults = true;
 	// }
-
-	async function loadMoreResults() {
-		// Same function as triggerSearch, but with a different page number and appending results
-		console.log("Loading more results...");
-		$resultsPageShown += 1; // increment the page number on each new search
-		$searchInProgress = true;
-		trackEvent('loadMoreResults', {
-			filetypeShown: $filetypeShown,
-			resultsPageShown: $resultsPageShown
-		});
-		let filetypeToGet = $filetypeShown;
-		if (filetypeToGet !== 'any') {
-			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
-		}
-		let results = await searchDocuments(
-			$searchQuery,
-			$resultsPageShown,
-			$resultsPerPage,
-			filetypeToGet
-		);
-		if (results.length === 0) {
-			$noMoreResults = true;
-		} else {
-			$documentsShown = [...$documentsShown, ...results];
-		}
-		$searchInProgress = false;
-	}
-
-	const table = createTable(readable($documentsShown), {
-		resize: addResizedColumns(),
-		sort: addSortBy({ disableMultiSort: true }),
-		hideCols: addHiddenColumns()
-	});
-
-	const columns = table.createColumns([
-		table.column({
-			header: 'Type',
-			accessor: 'file_type',
-			plugins: {
-				resize: {
-					initialWidth: 30,
-					minWidth: 30,
-					maxWidth: 30
-				},
-				sort: { disable: false }
-			}
-		}),
-		table.column({
-			header: 'Name',
-			accessor: 'name',
-			plugins: {
-				resize: {
-					initialWidth: 250,
-					minWidth: 250,
-					maxWidth: 250
-				}
-			}
-		}),
-		table.column({
-			header: 'Last Modified',
-			accessor: 'last_modified',
-			id: 'lastModified',
-			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
-			plugins: {
-				resize: {
-					initialWidth: 100,
-					minWidth: 100,
-					maxWidth: 100
-				}
-			}
-		}),
-		table.column({
-			header: 'Last Opened',
-			accessor: 'last_opened',
-			id: 'lastOpened',
-			cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
-			plugins: {
-				resize: {
-					initialWidth: 100,
-					minWidth: 100,
-					maxWidth: 100
-				}
-			}
-		}),
-		table.column({
-			header: 'Size',
-			accessor: 'size',
-			id: 'size',
-			cell: ({ value }: { value: number }) => readableFileSize(value) ?? "",
-			plugins: {
-				resize: {
-					initialWidth: 75,
-					minWidth: 75,
-					maxWidth: 75
-				}
-			}
-		}),
-		table.column({
-			header: 'Location',
-			accessor: 'path',
-			plugins: {
-				resize: {
-					initialWidth: 200,
-					minWidth: 200,
-					maxWidth: 200
-				}
-			}
-		})
-	]);
 
 	function toggleLastModifiedOrOpened(cellID: string) {
 		resetColumnSize();
@@ -143,6 +32,88 @@
 			hideForId['lastOpened'] = false;
 		}
 	}
+
+	const table = createTable(readable($documentsShown), {
+  resize: addResizedColumns(),
+  sort: addSortBy({ disableMultiSort: true }),
+  hideCols: addHiddenColumns()
+});
+
+const columns = table.createColumns([
+  table.column({
+    header: 'Type',
+    accessor: 'file_type',
+    plugins: {
+      resize: {
+        initialWidth: 30,
+        minWidth: 30,
+        maxWidth: 30
+      },
+      sort: { disable: false }
+    }
+  }),
+  table.column({
+    header: 'Name',
+    accessor: 'name',
+    plugins: {
+      resize: {
+        initialWidth: 250,
+        minWidth: 250,
+        maxWidth: 250
+      }
+    }
+  }),
+  table.column({
+    header: 'Last Modified',
+    accessor: 'last_modified',
+    id: 'lastModified',
+    cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
+    plugins: {
+      resize: {
+        initialWidth: 100,
+        minWidth: 100,
+        maxWidth: 100
+      }
+    }
+  }),
+  table.column({
+    header: 'Last Opened',
+    accessor: 'last_opened',
+    id: 'lastOpened',
+    cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
+    plugins: {
+      resize: {
+        initialWidth: 100,
+        minWidth: 100,
+        maxWidth: 100
+      }
+    }
+  }),
+  table.column({
+    header: 'Size',
+    accessor: 'size',
+    id: 'size',
+    cell: ({ value }: { value: number }) => readableFileSize(value) ?? "",
+    plugins: {
+      resize: {
+        initialWidth: 75,
+        minWidth: 75,
+        maxWidth: 75
+      }
+    }
+  }),
+  table.column({
+    header: 'Location',
+    accessor: 'path',
+    plugins: {
+      resize: {
+        initialWidth: 200,
+        minWidth: 200,
+        maxWidth: 200
+      }
+    }
+  })
+]);
 
 	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
 		table.createViewModel(columns);
@@ -306,8 +277,14 @@
 							</tr>
 						</ContextMenu.Trigger>
 						<ContextMenu.Content>
-							<ContextMenu.Item on:click={() => {$showResultTextPreview = true; $selectedResult = $documentsShown[Number(row.id)];}}>Show Preview</ContextMenu.Item>
-							<ContextMenu.Item>Open File</ContextMenu.Item>
+							{#if $documentsShown[Number(row.id)].file_type !== 'folder' && $documentsShown[Number(row.id)].last_parsed !== 0}
+								<ContextMenu.Item on:click={() => {$showResultTextPreview = true; $selectedResult = $documentsShown[Number(row.id)];}}>
+									Show Preview
+								</ContextMenu.Item>
+							{/if}
+							<ContextMenu.Item>
+								Open {$documentsShown[Number(row.id)].file_type === 'folder' ? 'Folder' : 'File'}
+							</ContextMenu.Item>
 							<ContextMenu.Sub>
 								<ContextMenu.SubTrigger>Ignore</ContextMenu.SubTrigger>
 								<ContextMenu.SubContent class="w-48">

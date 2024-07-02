@@ -4,6 +4,8 @@
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
 	import { readable } from 'svelte/store';
 	import { invoke } from '@tauri-apps/api/core';
+	import Button from '../ui/button/button.svelte';
+	import { openFileFolder } from '$lib/utils/searchItemUtils';
 
 	const table = createTable(readable($ignoredPaths));
 	const columns = table.createColumns([
@@ -52,91 +54,89 @@
 
 </script>
 
-	<table {...$tableAttrs}>
-		<thead id="real-thead">
-			{#each $headerRows as headerRow (headerRow.id)}
-				<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
-					<tr {...rowAttrs}>
-						{#each headerRow.cells as cell (cell.id)}
-							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-								<th
-									{...attrs}
-									class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
-									tabindex="0"
-								>
-									<Render of={cell.render()} />
-								</th>
-							</Subscribe>
-						{/each}
-					</tr>
-				</Subscribe>
-			{/each}
-		</thead>
-		{#if $ignoredPaths.length > 0 }
-		<tbody {...$tableBodyAttrs}>
-			{#each $rows as row (row.id)}
-				<Subscribe rowAttrs={row.attrs()} let:rowAttrs rowProps={row.props()} let:rowProps>
-					<tr
-						{...rowAttrs}
-						class="table-row"
-						role="button"
-						tabindex="0"
-					>
-						{#each row.cells as cell (cell.id)}
-							<Subscribe attrs={cell.attrs()} let:attrs>
-								<td {...attrs} 
-									class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''} ${cell.id === 'path' ? '' : 'text-center' }`}
-									title={String(cell.render())}
-								>
-									{#if cell.id === 'path' }
-										<span class="flex items-center gap-2">
-											<input id={`select-row-${row.id}`} type="checkbox" bind:checked={isSelected[row.id]} />
-											<label class="form-check-label" for={`select-row-${row.id}`}>
-												<Render of={cell.render()} />
-											</label>
-											<!-- <span><Render of={cell.render()} /></span> -->
-										</span>
-									{:else}
-										<span><Render of={cell.render()} /></span>
-									{/if}
-								</td>
-							</Subscribe>
-						{/each}
-					</tr>
-				</Subscribe>
-			{/each}
-		</tbody>
-		{:else}
-		<tbody>
-			<tr>
-				<td colspan="3" class="text-center">No items added yet!</td>
-			</tr>
-			<tr>
-				<td colspan="3" class="text-center">You can add items to the Ignore List by right-clicking on a search result</td>
-			</tr>
-		</tbody>
-		{/if}
-	</table>
+<table class="lg:w-[70%]" {...$tableAttrs}>
+	<thead id="real-thead">
+		{#each $headerRows as headerRow (headerRow.id)}
+			<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
+				<tr {...rowAttrs}>
+					{#each headerRow.cells as cell (cell.id)}
+						<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
+							<th
+								{...attrs}
+								class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
+								tabindex="0"
+							>
+								<Render of={cell.render()} />
+							</th>
+						</Subscribe>
+					{/each}
+				</tr>
+			</Subscribe>
+		{/each}
+	</thead>
 	{#if $ignoredPaths.length > 0 }
-		<div class="text-center">
-			<!-- <button type="button" class="py-1 px-2 leading-tight text-xs" on:click={() => removeFromList()}>Remove selected items from list</button> -->
-			<button class="btn py-1 px-2 leading-tight text-xs link-danger px-0" on:click={() => removeFromList()}>
-				Remove selected items from list
-			</button>
-		</div>
+	<tbody {...$tableBodyAttrs} class="border border-1 border-dashed">
+		{#each $rows as row (row.id)}
+			<Subscribe rowAttrs={row.attrs()} let:rowAttrs rowProps={row.props()} let:rowProps>
+				<tr
+					{...rowAttrs}
+					class="table-row"
+					role="button"
+					tabindex="0"
+				>
+					{#each row.cells as cell (cell.id)}
+						<Subscribe attrs={cell.attrs()} let:attrs>
+							<td {...attrs} 
+								class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''} ${cell.id === 'path' ? '' : 'text-center' }`}
+								title={String(cell.render())}
+							>
+								{#if cell.id === 'path' }
+									<span class="flex items-center gap-2">
+										<input id={`select-row-${row.id}`} type="checkbox" bind:checked={isSelected[row.id]} />
+										<label class="form-check-label" for={`select-row-${row.id}`}>
+											<Button variant="link" class="font-normal" on:click={() => openFileFolder(cell.render().toString())}>
+												<Render of={cell.render()} />
+											</Button>
+										</label>
+										<!-- <span><Render of={cell.render()} /></span> -->
+									</span>
+								{:else}
+									<span><Render of={cell.render()} /></span>
+								{/if}
+							</td>
+						</Subscribe>
+					{/each}
+				</tr>
+			</Subscribe>
+		{/each}
+	</tbody>
+	{:else}
+	<tbody>
+		<tr>
+			<td colspan="3" class="text-center">No items added yet!</td>
+		</tr>
+		<tr>
+			<td colspan="3" class="text-center">You can add items to the Ignore List by right-clicking on a search result</td>
+		</tr>
+	</tbody>
 	{/if}
+</table>
+{#if $ignoredPaths.length > 0 }
+	<div class="text-center">
+		<Button variant="outline" disabled={Object.values(isSelected).indexOf(true) === -1} on:click={() => removeFromList()}>Remove selected items from list</Button>
+	</div>
+{/if}
 
 <style lang="scss">
 	.btn.link-danger:hover {
 		text-decoration: underline;
 	}
 	.path-col {
-		width: 50vw;
+		// width: 50vw;
 		max-width: 50vw;
 	}
 	table {
 		border-spacing: 0;
-		width: 100%;
 		position: relative;
 	}
 	tr {

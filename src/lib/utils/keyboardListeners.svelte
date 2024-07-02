@@ -2,7 +2,7 @@
 	import { invoke } from "@tauri-apps/api/core";
 	import { onMount } from 'svelte';
 	import { clickRow, selectOneRow, selectAllRows } from './fileUtils';
-	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed, showResultTextPreview, selectedResult } from '$lib/stores';
+	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed, showResultTextPreview, selectedResult, showIconGrid } from '$lib/stores';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from '$app/navigation';
 
@@ -23,6 +23,8 @@
 		'MetaRight',
 		'ArrowDown',
 		'ArrowUp',
+		'ArrowLeft',
+		'ArrowRight',
 		'Escape',
 		'CommandOrControl+A'
 	];
@@ -122,7 +124,7 @@
 			} else if (e.code === 'KeyP') {
 				e.preventDefault();
 				// togglePinState();
-			} else if (e.code === 'ArrowUp') {
+			} else if ((!$showIconGrid && e.code === 'ArrowUp') || ($showIconGrid && e.code === 'ArrowLeft')) {
 				e.preventDefault();
 				if (document.getElementsByClassName('selected').length > 2) {
 					trackEvent(eventPrefix + 'deselectAllRows');
@@ -147,7 +149,7 @@
 					);
 				}
 				return;
-			} else if (e.code === 'ArrowDown') {
+			} else if ((!$showIconGrid && e.code === 'ArrowDown') || ($showIconGrid && e.code === 'ArrowRight')) {
 				e.preventDefault();
 				if (document.getElementsByClassName('selected').length > 2) {
 					trackEvent(eventPrefix + 'deselectAllRows');

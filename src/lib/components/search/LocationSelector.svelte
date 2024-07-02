@@ -18,10 +18,13 @@
 	import { trackEvent } from '@aptabase/web';
 	import FileCategoryIcon from "../ui/FileCategoryIcon.svelte";
 
+	let selectedLocationOption = { value: $locationShown, label: ($locationShown === 'any' ? "All" : $locationShown.slice(0,1).toUpperCase() + $locationShown.slice(1)) };
+
 	async function showDocsForLocation(value: {}) {
-    return;
-    // console.log(value);
-    // $locationShown = value.toString();
+    console.log(value);
+    $locationShown = value.toString();
+		selectedLocationOption = { value: $locationShown, label: $locationShown };
+		return;
 		// trackEvent('click:showDocsForLocation');
 		// $searchInProgress = true;
 		// $base64Images = {};
@@ -54,17 +57,17 @@
 
 <div class="flex flex-col w-full">
 	<Label class="mb-2 font-medium">Location</Label>
-	<Select.Root onSelectedChange={(v) => v?.value ? showDocsForLocation(v.value) : showDocsForLocation("any")}>
-		<Select.Trigger class="" bind:value={$locationShown}>
-			<Select.Value placeholder="All"/>
+	<Select.Root bind:selected={selectedLocationOption} onSelectedChange={(v) => v?.value ? showDocsForLocation(v.value) : showDocsForLocation("any")}>
+		<Select.Trigger class="">
+			<Select.Value placeholder="All" />
 		</Select.Trigger>
 		<Select.Content>
-			<Select.Item value="any">
+			<Select.Item value={"any"}>
 				<FileCategoryIcon category="any" className="mr-2 h-4 w-4" />
 				All
 			</Select.Item>
 			{#each $allowedLocations as category}
-				<Select.Item value="{category}">
+				<Select.Item value={category}>
 					<FileCategoryIcon category={category} className="mr-2 h-4 w-4" />
           {category.slice(0,1).toUpperCase() + category.slice(1)}
 				</Select.Item>

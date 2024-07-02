@@ -29,7 +29,6 @@
 	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
 
 </script>
-
 	<table {...$tableAttrs}>
 		<thead id="real-thead">
 			{#each $headerRows as headerRow (headerRow.id)}
@@ -78,9 +77,6 @@
 		<tbody>
 			<tr>
 				<td colspan="3" class="text-center">No items added yet!</td>
-			</tr>
-			<tr>
-				<td colspan="3" class="text-center">You can add items to the Ignore List by right-clicking on a search result</td>
 			</tr>
 		</tbody>
 		{/if}

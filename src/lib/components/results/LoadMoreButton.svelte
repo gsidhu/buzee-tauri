@@ -7,6 +7,7 @@
 	import LoaderCircle from "lucide-svelte/icons/loader-circle";
 
 	let loading = false; 
+	
   async function loadMoreResults() {
 		loading = true;
 		// Same function as triggerSearch, but with a different page number and appending results
@@ -38,7 +39,7 @@
 
 </script>
 
-<div id="load-more-btn" class="py-2 flex justify-center items-center" draggable="false">
+<div id="load-more-btn" class="py-2 flex justify-center items-center flex-[0_0_10%]" draggable="false">
   <Button
     variant="secondary"
     class="py-1 px-2 leading-tight text-xs min-w-[120px]"

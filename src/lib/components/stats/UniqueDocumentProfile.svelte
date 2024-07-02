@@ -74,19 +74,11 @@
 </script>
 
 <h6 class="text-center cursor-default">Your Unique Document Profile</h6>
-<div class="progress-stacked w-90 mx-auto">
+<div class="flex overflow-hidden w-90 mx-auto rounded my-8">
   {#each docStats as stat, index}
-    <div
-      class="progress"
-      role="progressbar"
-      aria-label="One"
-      aria-valuenow="10"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      style={`width: ${statPercentage[index].count}%`}
-    >
+    <div style={`width: ${statPercentage[index].count}%`} class="">
       <div
-        class="progress-bar"
+        class="text-white text-center"
         style={stat.file_type === "other"
           ? `background-color: #E15554;`
           : `background-color: var(--${stat.file_type}-icon);`}
@@ -105,39 +97,33 @@
 </div>
 
 <div class="w-4/5 pr-4 pl-4 mx-auto my-4 cursor-default">
-  <div class="row row-cols-sm-2 row-cols-1">
+  <div class="columns-1 sm:columns-2">
     {#each docStats as stat}
       {#if stat.count > 0}
-        <div class="col">
-          <div class="row row-cols-2">
-            <div class="col-8">
-              <FileTypeIcon filetype={
-                stat.file_type === "other"
-                    ? 'folder'
-                    : stat.file_type
-              }/>
-              <small>{stat.file_type}</small>
-            </div>
-            <div class="col-4 text-end"><small>{stat.count}</small></div>
+        <div class="columns-2">
+          <div class="">
+            <FileTypeIcon filetype={
+              stat.file_type === "other"
+                  ? 'folder'
+                  : stat.file_type
+            }/>
+            <small>{stat.file_type}</small>
           </div>
+          <div class="text-end"><small>{stat.count}</small></div>
         </div>
       {/if}
     {/each}
-    <div class="col">
-      <div class="row row-cols-2">
-        <div class="col-8">
-          <i class="bi bi-circle-fill pe-2" style={`color: var(--purple)`}/><small>Total Docs</small>
-        </div>
-        <div class="col-4 text-end"><small>{totalDocs}</small></div>
+    <div class="columns-2">
+      <div class="">
+        <i class="bi bi-circle-fill pe-2" style={`color: var(--purple)`}/><small>Total Docs</small>
       </div>
+      <div class="text-end"><small>{totalDocs}</small></div>
     </div>
-    <div class="col">
-      <div class="row row-cols-2">
-        <div class="col-8">
-          <i class="bi bi-circle-fill pe-2" style={`color: var(--hot-pink)`}/><small>Total Files</small>
-        </div>
-        <div class="col-4 text-end"><small>{totalItems}</small></div>
+    <div class="columns-2">
+      <div class="">
+        <i class="bi bi-circle-fill pe-2" style={`color: var(--hot-pink)`}/><small>Total Files</small>
       </div>
+      <div class="text-end"><small>{totalItems}</small></div>
     </div>
   </div>
 </div>

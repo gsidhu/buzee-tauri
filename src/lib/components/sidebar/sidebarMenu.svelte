@@ -8,6 +8,7 @@
 		Laptop,
 		HardDrive,
 		Cloud,
+		Pin,
 		PieChart,
 		ScanText,
 		Trophy,
@@ -15,18 +16,17 @@
 		Lightbulb,
 		Wind,
 		Settings,
-		Rocket,
-
 		ExternalLink
-
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Accordion from "$lib/components/ui/accordion";
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import { pagePath } from '$lib/stores';
 
 	import { invoke } from '@tauri-apps/api/core';
 	import { trackEvent } from '@aptabase/web';
 	import Label from '../ui/label/label.svelte';
+	import Badge from '../ui/badge/badge.svelte';
 
 	async function openInBrowser(what: string) {
 		if (what === 'deadline') {
@@ -46,74 +46,84 @@
 			<img id="buzee-logo-img" class="h-6 w-6" src="/Buzee Logo.png" alt="No Results" />
 			<span class="">Buzee</span>
 		</a>
-		<Button href="/settings" variant="outline" size="icon" class="ml-auto h-8 w-8">
+		<Button href="/settings" variant="outline" size="icon" 
+			class={`ml-auto h-8 w-8 ${$pagePath === '/settings' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+		>
 			<Settings class="h-4 w-4" />
 			<span class="sr-only">Settings</span>
 		</Button>
 	</div>
 	<div class="flex-1">
 		<nav class="grid items-start px-2 text-sm font-normal lg:px-4">
-			<Label class="px-3 py-2 text-muted-foreground font-semibold">Locations</Label>
+			<!-- <Label class="px-3 py-2 text-muted-foreground font-semibold">Locations</Label> -->
 			<a
-				href="/search"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/search' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				href="/"
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<House class="h-4 w-4" />
 				Dashboard
 			</a>
 			<a
-				href="##"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/computer' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				href="/search"
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/search' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
-				<Laptop class="h-4 w-4" />
-				My Computer
+				<Search class="h-4 w-4" />
+				Search
 			</a>
 			<a
 				href="##"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/external' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:cursor-not-allowed ${$pagePath === '/pinboard' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
-				<HardDrive class="h-4 w-4" />
-				External Storage
+				<Pin class="h-4 w-4" />
+				Pinned Items
+				<!-- <Badge variant="outline" class="font-medium">Soon</Badge> -->
 			</a>
-			<a
+			<!-- <a
 				href="##"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/cloud' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
-			>
-				<Cloud class="h-4 w-4" />
-				Cloud Storage
-			</a>
-			<a
-				href="##"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/browser-history' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/browser-history' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<Compass class="h-4 w-4" />
 				Browser History
 			</a>
-			<a
-				href="##"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/bookmarks' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
-			>
-				<Bookmark class="h-4 w-4" />
-				Bookmarks
-			</a>
+			<Accordion.Root class="px-3">
+				<Accordion.Item class="border-0" value="item-1">
+					<Accordion.Trigger class="hover:no-underline py-2">Coming Soon</Accordion.Trigger>
+					<Accordion.Content>
+						<a
+							href="##"
+							class={`flex items-center gap-3 rounded-lg py-2 transition-all hover:text-primary ${$pagePath === '/bookmarks' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+						>
+							<Bookmark class="h-4 w-4" />
+							Bookmarks
+						</a>
+						<a
+							href="##"
+							class={`flex items-center gap-3 rounded-lg py-2 transition-all hover:text-primary ${$pagePath === '/cloud' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+						>
+							<Cloud class="h-4 w-4" />
+							Cloud Storage
+						</a>
+					</Accordion.Content>
+				</Accordion.Item>
+			</Accordion.Root> -->
 		</nav>
 	</div>
 
 	<Separator />
 
 	<div class="flex-1">
-		<nav class="grid items-start px-2 text-sm font-medium lg:px-4">
-			<Label class="px-3 py-2 text-muted-foreground font-semibold">Magic Services</Label>
+		<nav class="grid items-start px-2 text-sm font-normal lg:px-4">
+			<!-- <Label class="px-3 py-2 text-muted-foreground font-semibold">Magic Services</Label> -->
 			<a
 				href="/magic/extract-text"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/extract-text' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/extract-text' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<ScanText class="h-4 w-4" />
 				Extract Text
 			</a>
 			<a
 				href="/magic/scratchpad"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/scratchpad' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/scratchpad' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<NotepadText class="h-4 w-4" />
 				Scratchpad
@@ -121,7 +131,7 @@
 			<a
 				href="##"
 				on:click={() => openInBrowser('deadline')}
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/deadline' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/deadline' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<Trophy class="h-4 w-4" />
 				<span>
@@ -131,24 +141,31 @@
 			</a>
 			<a
 				href="/magic/deep-breathing"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/deep-breathing' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/deep-breathing' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<Wind class="h-4 w-4" />
 				Deep Breathing
 			</a>
-			<a
-				href="/magic/tips"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/tips' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
-			>
-				<Lightbulb class="h-4 w-4" />
-				Tips & Shortcuts
-			</a>
+		</nav>
+	</div>
+
+	<Separator />
+
+	<div class="flex-1">
+		<nav class="grid items-start px-2 text-sm font-normal lg:px-4">
 			<a
 				href="/magic/stats"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/stats' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/stats' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<PieChart class="h-4 w-4" />
 				Stats
+			</a>
+			<a
+				href="/magic/tips"
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/tips' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+			>
+				<Lightbulb class="h-4 w-4" />
+				Tips & Shortcuts
 			</a>
 		</nav>
 	</div>
@@ -156,7 +173,7 @@
 	<Separator />
   
 	<div class="mt-auto flex flex-col p-4 text-center space-y-1">
-    <p class="text-sm" id="app-version">Buzee v0.1.1</p>
+    <p class="text-sm" id="app-version">Buzee v0.2.0</p>
     <Button id="bmac-btn" class="animate__headShake" variant="outlinePurple" on:click={() => openInBrowser('bmac')}>
       <Coffee id="bmac-btn-coffee-icon" class="mr-2 h-4 w-4" />
       Buy me a coffee

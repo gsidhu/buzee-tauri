@@ -3,8 +3,6 @@
 	import SvelteTable from '$lib/components/results/svelteTable.svelte';
 	import IconsGrid from './iconsGrid.svelte';
 	import { documentsShown, showIconGrid, preferLastOpened, noMoreResults } from '$lib/stores';
-	import SearchFilters from '../search/SearchFilters.svelte';
-	import Separator from '../ui/separator/separator.svelte';
 	import LoadMoreButton from './LoadMoreButton.svelte';
 
 	// onMount(async () => {
@@ -20,11 +18,9 @@
 	// });
 </script>
 
-<SearchFilters />
-<Separator class="my-2 "/>
 {#key $documentsShown || $preferLastOpened}
-	<div class="flex flex-col items-center">
-		<div class={`results-container mb-4 overflow-hidden`}>
+	<div class="flex flex-col items-center overflow-y-auto">
+		<div class={`results-container flex-[0_0_90%]`}>
 			{#if $showIconGrid}
 				<IconsGrid />
 			{:else}
@@ -41,7 +37,7 @@
 	.results-container {
 		overflow-x: auto;
 		width: 100%;
-		max-height: 60svh;
+		max-height: 70svh;
 	}
 
 	.modal-dialog-centered {

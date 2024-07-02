@@ -12,7 +12,8 @@
   import { trackEvent } from "@aptabase/web";
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
-  import { isMac, windowBlurred, cronJobSet, userPreferences, disableInteraction, pagePath } from "$lib/stores";
+  import { isMac, windowBlurred, cronJobSet, userPreferences, disableInteraction, pagePath, allowedExtensions } from "$lib/stores";
+  import { categoriseExtensions } from '$lib/utils/miscUtils';
 
   import { check } from "@tauri-apps/plugin-updater";
   import { ask } from "@tauri-apps/plugin-dialog";
@@ -92,6 +93,13 @@
     // get user preferences
     $userPreferences = await invoke("get_user_preferences_state");
 
+    // Get list of available extensions from main process
+		invoke('get_allowed_filetypes').then((res) => {
+			// @ts-ignore
+			$allowedExtensions = categoriseExtensions(JSON.parse(res));
+			console.log("ext:", $allowedExtensions);
+		});
+
     // Grayscale contents when window blurs
     if (window) {
         window.addEventListener("focus", () => {
@@ -128,7 +136,7 @@
     <div class="hidden max-h-screen overflow-y-auto border-r bg-muted/40 md:block">
       <SidebarMenu />
     </div>
-    <div class="flex flex-col">
+    <div class="flex flex-col md:max-w-[75vw] lg:max-w-[80vw]">
       <header class="flex max-w-screen items-center gap-4 border-b bg-muted/40 px-4 h-[60px] lg:px-6">
         <Sheet.Root>
           <Sheet.Trigger asChild let:builder>

@@ -301,13 +301,13 @@
 		</tr>
 		<tr>
 			<td class="text-center px-2">
-				<button class="btn" on:click={() => goto('/settings/filetype')}>
+				<button class="btn" on:click={() => goto('/settings/filetype-list')}>
 					<div class="flex">
 						<i class="bi bi-file-earmark" />
 					</div>
 				</button>
 			</td>
-			<td class="py-2" role="button" on:click={() => goto('/settings/filetype')}>
+			<td class="py-2" role="button" on:click={() => goto('/settings/filetype-list')}>
 				File Type List
 				<div class="flex items-center small-explanation gap-1">
 					<div>List of file types that Buzee can scan</div>

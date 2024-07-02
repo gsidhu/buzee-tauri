@@ -1,12 +1,16 @@
 <script lang="ts">
   import { fade } from 'svelte/transition';
-  import TopBar from '../../../layout/TopBar.svelte';
 	import { invoke } from '@tauri-apps/api/core';
 	import { onMount } from 'svelte';
 	import IgnoreList from '$lib/components/settings/ignoreList.svelte';
 	import ConfettiButton from '$lib/components/ui/confettiButton.svelte';
   import { disableInteraction, ignoredPaths, syncStatus, statusMessage } from '$lib/stores';
 	import { open } from '@tauri-apps/plugin-dialog';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { Folder, FolderPlus } from 'lucide-svelte';
+	import * as Dialog from "$lib/components/ui/dialog";
+	import { Checkbox } from "$lib/components/ui/checkbox/index.js";
+  import { Label } from "$lib/components/ui/label/index.js";
 
 	let pathToIgnore = "";
 	let ignoreIndex = true;
@@ -15,6 +19,7 @@
 	$: if (ignoreIndex) { ignoreContent = true }
 
 	function addToIgnoreList() {
+		if (pathToIgnore === '') return;
 		$statusMessage = `Adding to Ignore List... Please wait.`;
         $syncStatus = true;
         $disableInteraction = true;
@@ -53,24 +58,69 @@
 
 </script>
 
-<div in:fade={{ delay: 0, duration: 500 }}>
-	<div id="topbar-bg" class="w-full">
-		<TopBar />
-	</div>
-  <div
-		class="flex flex-col gap-3 justify-content-center items-center w-4/5 pr-4 pl-4 sm:w-2/3 mx-auto mb-5"
-	>
-		<div class="page-icon">
-			<i class="bi bi-file-earmark-x" /> <i class="bi bi-folder-x" />
-		</div>
-		<h3>Ignore List</h3>
-    <p class="text-center">Any files or folders that you manually add from the Settings will be automatically removed from this list</p>
+<div class="flex flex-col" in:fade={{ delay: 0, duration: 500 }}>
+  <h3 class="text-lg font-semibold leading-none tracking-tight">Ignore List</h3>
+  <p class="text-sm text-muted-foreground">Any files or folders that you manually add from the Settings will be automatically removed from this list</p>
+</div>
+<div class="flex flex-1 flex-col gap-2 items-center justify-between rounded-lg border border-dashed shadow-sm p-4">
+	<Dialog.Root>
+		<Dialog.Trigger>
+			<Button>
+				<FolderPlus class="mr-2 h-6 w-6" />
+				Add Folder to Ignore List
+			</Button>
+		</Dialog.Trigger>
+		<Dialog.Content>
+			<Dialog.Header>
+				<Dialog.Title>Add Folder to Ignore List</Dialog.Title>
+				<Dialog.Description>Add the full path to the folder</Dialog.Description>
+			</Dialog.Header>
+			<div class="flex justify-between gap-2">
+				<input
+					type="text"
+					id="shortcut-input"
+					class="form-control w-full border border-1 rounded p-1"
+					placeholder="/path/to/folder"
+					bind:value={pathToIgnore}
+				/>
+				<Button variant="secondary" on:click={() => showFolderDialog()}>
+					<Folder class="h-4 w-4" />
+				</Button>
+			</div>
+			<div class="flex justify-between mt-3">
+				<div class="flex items-center space-x-2">
+					<Checkbox bind:checked={ignoreIndex} aria-labelledby="terms-label" id="ignore-index" />
+					<Label
+						id="ignore-index-label"
+						for="ignore-index"
+						class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+					>
+						Ignore Scanning
+					</Label>
+				</div>
+				<div class="flex items-center space-x-2">
+					<Checkbox bind:checked={ignoreContent} aria-labelledby="terms-label" id="ignore-content" />
+					<Label
+						id="ignore-content-label"
+						for="ignore-content"
+						class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+					>
+						Ignore Content
+					</Label>
+				</div>
+			</div>
+			<Dialog.Footer>
+				<Dialog.Close asChild let:builder>
+					<Button variant="secondary" aria-label="Close" builders={[builder]}>Close</Button>
+					<Button aria-label="Save" builders={[builder]} disabled={pathToIgnore === ''} on:click={() => addToIgnoreList()}>Save</Button>
+				</Dialog.Close>
+			</Dialog.Footer>
+		</Dialog.Content>
+	</Dialog.Root>
 
-		<ConfettiButton label="Add Folder to Ignore List" icon="bi-plus-lg" showIcon={true} animate={false} dataBSToggle="modal" dataBSTarget="#add-folder-to-ignore-list-modal" />
-
-    {#key $ignoredPaths.length }
-      <IgnoreList />
-    {/key}
+	{#key $ignoredPaths.length }
+		<IgnoreList />
+	{/key}
 
 		<!-- <button>Remove Item</button>
 		<h6>SvelteTable: Ignore Completely</h6>
@@ -84,74 +134,4 @@
 		<button>Import List (from a previous Buzee installation)</button>
 		
 		<small>On each save/import, run a formatting check + assign isFolder attribute before passing to the database</small> -->
-  </div>
-</div>
-
-<!-- Add Folder to Ignore List Modal -->
-<div
-	class="modal fade"
-	id="add-folder-to-ignore-list-modal"
-	tabindex="-1"
-	aria-labelledby="addFolderToIgnoreListModal"
-	aria-hidden="true"
->
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h1 class="modal-title fs-6" id="addFolderToIgnoreListModal">Add Folder to Ignore List</h1>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-			<div class="modal-body">
-				<p>Add the full path to the folder</p>
-				<div class="flex justify-between gap-2 mt-3">
-					<input
-						type="text"
-						id="shortcut-input"
-						class="form-control"
-						placeholder="/path/to/folder"
-						bind:value={pathToIgnore}
-					/>
-					<button class="btn py-1 px-2 leading-tight text-xs btn-warning" on:click={() => showFolderDialog()}>
-						<i class="bi bi-folder" />
-					</button>
-				</div>
-				<div class="flex justify-between mt-3">
-					<div class="form-check">
-						<input
-							class="form-check-input"
-							type="checkbox"
-							value=""
-							id="ignore-index"
-							bind:checked={ignoreIndex}
-						/>
-						<label class="form-check-label" for="ignore-index">
-							Ignore Scanning
-						</label>
-					</div>
-					<div class="form-check">
-						<input
-							class="form-check-input"
-							type="checkbox"
-							value=""
-							id="ignore-content"
-							bind:checked={ignoreContent}
-						/>
-						<label class="form-check-label" for="ignore-content">
-							Ignore Content
-						</label>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer flex justify-between">
-				<small class="small-explanation"></small>
-				<button
-					type="button"
-					class="btn btn-success"
-					data-bs-dismiss="modal"
-					aria-label="Save"
-					on:click={() => addToIgnoreList()}>Save</button
-				>
-			</div>
-		</div>
-	</div>
 </div>

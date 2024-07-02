@@ -14,9 +14,11 @@
 		base64Images
 	} from '$lib/stores';
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
-	import { categoriseExtensions, setExtensionCategory } from '$lib/utils/miscUtils';
+	import { setExtensionCategory } from '$lib/utils/miscUtils';
 	import { trackEvent } from '@aptabase/web';
 	import FileCategoryIcon from "../ui/FileCategoryIcon.svelte";
+
+	let selectedFiletypeOption = { value: $filetypeShown, label: ($filetypeShown === 'any' ? "All" : $filetypeShown.slice(0,1).toUpperCase() + $filetypeShown.slice(1)) };
 
 	async function showDocsForFiletype(value: {}) {
     console.log(value);
@@ -43,19 +45,13 @@
 
 	onMount(async () => {
 		if ($filetypeShown === undefined) $filetypeShown = "any";
-		// Get list of available extensions from main process
-		invoke('get_allowed_filetypes').then((res) => {
-			// @ts-ignore
-			$allowedExtensions = categoriseExtensions(JSON.parse(res));
-			console.log("ext:", $allowedExtensions);
-		});
 	});
 </script>
 
 <div class="flex flex-col w-full">
 	<Label class="mb-2">Filetype</Label>
-	<Select.Root onSelectedChange={(v) => v?.value ? showDocsForFiletype(v.value) : showDocsForFiletype("any")}>
-		<Select.Trigger class="" bind:value={$filetypeShown}>
+	<Select.Root bind:selected={selectedFiletypeOption} onSelectedChange={(v) => v?.value ? showDocsForFiletype(v.value) : showDocsForFiletype("any")}>
+		<Select.Trigger class="">
 			<Select.Value placeholder="All"/>
 		</Select.Trigger>
 		<Select.Content>

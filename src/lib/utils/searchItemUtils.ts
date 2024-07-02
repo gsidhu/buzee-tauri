@@ -1,5 +1,4 @@
 import { invoke, transformCallback } from "@tauri-apps/api/core";
-import { selectedResult, selectedResultText } from '$lib/stores';
 import { trackEvent } from '@aptabase/web';
 import moment from 'moment';
 

@@ -1,29 +1,18 @@
 <script lang="ts">
 	import { invoke } from "@tauri-apps/api/core";
 	import { onMount } from 'svelte';
-	import { documentsShown, base64Images, shiftKeyPressed, compactViewMode, selectedResult, noMoreResults } from '$lib/stores';
+	import { documentsShown, base64Images, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview, noMoreResults } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
 	import { stringToHash } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from "$app/navigation";
 	import { startDragging, openFile } from "$lib/utils/searchItemUtils";
+	import * as ContextMenu from "$lib/components/ui/context-menu";
 
 	// $: if ($documentsShown.length < 50) {
 	// 	$noMoreResults = true;
 	// }
-
-	async function showContextMenu(
-		e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }
-    | (FocusEvent & { currentTarget: EventTarget & HTMLButtonElement }),
-		result: DocumentSearchResult
-	) {
-		trackEvent('right_click:resultContextMenu');
-		clickRow(e, $shiftKeyPressed);
-		// window.menuAPI?.showResultsContextMenu(result);
-		$selectedResult = result;
-		await invoke("open_context_menu", {option:"searchresult"});
-	}
 
   async function getBase64Image(filePath: string) {
     return await invoke('get_image_base64', { filePath });
@@ -49,8 +38,6 @@
   });
 </script>
 
-{$noMoreResults}
-
 {#if $documentsShown.length <= 0}
 	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-center min-vh-80">
 		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
@@ -65,30 +52,53 @@
 <div id="parent-grid" class="flex flex-col">
   <div class={`file-grid p-2 ${$compactViewMode ? 'gap-2' : 'gap-4'}`}>
     {#each $documentsShown as result, i}
-      <button
-        id={stringToHash($documentsShown[Number(i)].path)}
-        style="all: unset;"
-        class={`icon-item w-full h-full p-1 grid items-center justify-between table-row result-${Number(i)} ${$compactViewMode ? 'compact-view' : ''}`}
-        tabindex="0"
-        on:focus={(e) => clickRow(e, $shiftKeyPressed)}
-        on:click={(e) => clickRow(e, $shiftKeyPressed)}
-        on:contextmenu={(e) => showContextMenu(e, $documentsShown[Number(i)])}
-        on:dblclick={() => openFile($documentsShown[Number(i)].path)}
-        draggable="true"
-        on:dragstart={(event) => startDragging($documentsShown[Number(i)].path)}
-        title={result.name}
-      >
-        <div class="flex justify-center">
-					{#if ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(result.file_type)}
-						<img src={"data:image/png;base64, " + $base64Images[result.path]} alt={result.name} class={`img-thumbnail ${$compactViewMode ? 'compact-view' : ''}`} />
-					{:else}
-						<FileTypeIcon filetype={result.file_type} extraClasses={`${$compactViewMode ? 'text-lg' : 'text-2xl'}`}/>
-					{/if}
-        </div>
-        <div class="filename text-center p-1 w-full">
-          {result.name}
-        </div>
-      </button>
+			<ContextMenu.Root>
+				<ContextMenu.Trigger>
+				<button
+					id={stringToHash($documentsShown[Number(i)].path)}
+					style="all: unset;"
+					class={`icon-item w-full h-full p-1 grid items-center justify-between table-row result-${Number(i)} ${$compactViewMode ? 'compact-view' : ''}`}
+					tabindex="0"
+					on:focus={(e) => clickRow(e, $shiftKeyPressed)}
+					on:click={(e) => clickRow(e, $shiftKeyPressed)}
+					on:dblclick={() => openFile($documentsShown[Number(i)].path)}
+					draggable="true"
+					on:dragstart={(event) => startDragging($documentsShown[Number(i)].path)}
+					title={result.name}
+				>
+					<div class="flex justify-center">
+						{#if ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(result.file_type)}
+							<img src={"data:image/png;base64, " + $base64Images[result.path]} alt={result.name} class={`img-thumbnail ${$compactViewMode ? 'compact-view' : ''}`} />
+						{:else}
+							<FileTypeIcon filetype={result.file_type} extraClasses={`${$compactViewMode ? 'text-lg' : 'text-2xl'}`}/>
+						{/if}
+					</div>
+					<div class="filename text-center p-1 w-full">
+						{result.name}
+					</div>
+				</button>
+			</ContextMenu.Trigger>
+			<ContextMenu.Content>
+				{#if result.file_type !== 'folder' && result.last_parsed !== 0}
+					<ContextMenu.Item on:click={() => {$showResultTextPreview = true; $selectedResult = result;}}>
+						Show Preview
+					</ContextMenu.Item>
+				{/if}
+				<ContextMenu.Item>
+					Open {result.file_type === 'folder' ? 'Folder' : 'File'}
+				</ContextMenu.Item>
+				<ContextMenu.Sub>
+					<ContextMenu.SubTrigger>Ignore</ContextMenu.SubTrigger>
+					<ContextMenu.SubContent class="w-48">
+						<ContextMenu.Item>Ignore this {result.file_type === 'folder' ? 'folder' : 'file'}</ContextMenu.Item>
+						<ContextMenu.Item>Ignore parent folder</ContextMenu.Item>
+						{#if result.file_type !== 'folder'}
+							<ContextMenu.Item>Ignore this file's text</ContextMenu.Item>
+						{/if}
+					</ContextMenu.SubContent>
+				</ContextMenu.Sub>
+			</ContextMenu.Content>
+		</ContextMenu.Root>
     {/each}
   </div>
 </div>
