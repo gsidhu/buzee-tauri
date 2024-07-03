@@ -5,20 +5,10 @@
 	import * as Dialog from "$lib/components/ui/dialog";
 	import {
 		searchQuery,
-		filetypeShown,
-		documentsShown,
-		resultsPageShown,
-		resultsPerPage,
-		searchInProgress,
-		compactViewMode,
-		allowedExtensions,
 		searchSuggestions,
-		base64Images,
 		userPreferences,
 	} from '$lib/stores';
-	import { searchDocuments } from '$lib/utils/dbUtils';
-	import { setExtensionCategory } from '$lib/utils/miscUtils';
-	import { trackEvent } from '@aptabase/web';
+	import { triggerSearch } from '$lib/utils/dbUtils';
 	import { invoke } from '@tauri-apps/api/core';
 	import { Search } from "lucide-svelte";
 
@@ -42,28 +32,10 @@
 		// $searchSuggestions = [$searchQuery, ...$searchSuggestions]; // add the query itself to the suggestions
 	}
 
-	async function triggerSearch(query: string) {
+	async function triggerSearchLocal(query: string) {
 		$searchQuery = query;
 		(document.querySelector('button[data-dialog-close]') as HTMLElement)?.click();
-		$resultsPageShown = 0; // reset the page number on each new search
-		$searchInProgress = true;
-		$base64Images = {};
-		trackEvent('search-triggered', {
-			filetypeShown: $filetypeShown,
-			resultsPageShown: $resultsPageShown
-		});
-		let filetypeToGet = $filetypeShown;
-		if (filetypeToGet !== 'any') {
-			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
-		}
-		let results = await searchDocuments(
-			$searchQuery,
-			$resultsPageShown,
-			$resultsPerPage,
-			filetypeToGet
-		);
-		$documentsShown = results;
-		$searchInProgress = false;
+		triggerSearch();
 	}
 
 	onMount(() => {
@@ -73,7 +45,7 @@
 		const highlightSearchBar = urlParams.get('highlight-search-bar');
 		if (query) {
 			$searchQuery = query;
-			triggerSearch(query);
+			triggerSearchLocal(query);
 		}
 		if (highlightSearchBar) {
 		}
@@ -113,19 +85,19 @@
 						<Command.List>
 							<Command.Empty>No results found.</Command.Empty>
 							{#if $searchQuery.length === 0}
-								<Command.Item onSelect={() => {triggerSearch("");}}>
+								<Command.Item onSelect={() => {triggerSearchLocal("");}}>
 									Show Recent Files
 								</Command.Item>
-								<Command.Item value="last week" onSelect={(value) => {triggerSearch(value);}}>
+								<Command.Item value="last week" onSelect={(value) => {triggerSearchLocal(value);}}>
 									Show Files from Last Week
 								</Command.Item>
-								<Command.Item value="last month" onSelect={(value) => {triggerSearch(value);}}>
+								<Command.Item value="last month" onSelect={(value) => {triggerSearchLocal(value);}}>
 									Show Files from Last Month
 								</Command.Item>
 							{/if}
 							{#if $searchQuery.length > 0}
 								<Command.Group heading="Search Everywhere">
-									<Command.Item value={$searchQuery} onSelect={(value) => {triggerSearch(value);}}>
+									<Command.Item value={$searchQuery} onSelect={(value) => {triggerSearchLocal(value);}}>
 										{$searchQuery}
 									</Command.Item>
 								</Command.Group>
@@ -134,7 +106,7 @@
 								<Command.Group heading="Suggestions">
 									{#each $searchSuggestions as searchItem}
 										<Command.Item value={searchItem}
-											onSelect={(value) => {triggerSearch(value);}}
+											onSelect={(value) => {triggerSearchLocal(value);}}
 										>
 											{#if searchItem.length > 50}
 												{searchItem.slice(0, 30) + ' ... ' + searchItem.slice(-30)}

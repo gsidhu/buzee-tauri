@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { getDocumentsFromDB } from '$lib/utils/dbUtils';
-	import { documentsShown, resultsPerPage, userPreferences, base64Images } from '$lib/stores';
+	import { documentsShown, resultsPerPage, userPreferences, base64Images, filetypeShown } from '$lib/stores';
 	import { invoke } from '@tauri-apps/api/core';
 
 	function reroute(flag: boolean) {
@@ -18,7 +18,8 @@
 	onMount(async () => {
 		// Load the first page of documents whenever the app loads
 		// TODO: Replace this with pinned documents later
-		$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, 'any');
+		$filetypeShown = "any";
+		$documentsShown = await getDocumentsFromDB(0, $resultsPerPage);
 		$base64Images = {};
 		console.log("page:", $userPreferences);
 		// get user preferences here because this somehow loads before layout finishes its onMount

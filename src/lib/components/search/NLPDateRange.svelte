@@ -4,10 +4,8 @@
   import * as Popover from "$lib/components/ui/popover/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import Label from "$lib/components/ui/label/label.svelte";
-  import { searchQuery, resultsPageShown, searchInProgress, filetypeShown, resultsPerPage, documentsShown, allowedExtensions, base64Images, dateLimitUNIX } from "$lib/stores";
-  import { trackEvent } from "@aptabase/web";
-  import { searchDocuments, getDocumentsFromDB } from "$lib/utils/dbUtils";
-  import { setExtensionCategory } from "$lib/utils/miscUtils";
+  import { searchQuery, dateLimitUNIX } from "$lib/stores";
+  import { triggerSearch } from "$lib/utils/dbUtils";
 
   let inputValue = "";
   let localDateLimitUNIX:ParsedDatesUNIX | null;
@@ -31,6 +29,7 @@
   function parseInput(value: string) {
     inputValue = value;
     localDateLimitUNIX = extractDate(value);
+    
     if (localDateLimitUNIX !== null) {
       $dateLimitUNIX = localDateLimitUNIX;
       dateLimitHuman = {
@@ -39,37 +38,20 @@
         text: value
       };
     } else {
+      $dateLimitUNIX.start = '';
+      $dateLimitUNIX.end = '';
+      $dateLimitUNIX.text = '';
       dateLimitHuman = null;
     }
   }
 
-  async function triggerSearch() {
+  async function triggerSearchLocal() {
     if (localDateLimitUNIX) {
       localDateLimitUNIX.text = $searchQuery;
       $dateLimitUNIX = localDateLimitUNIX;
     }
 		(document.querySelector('button[data-dialog-close]') as HTMLElement)?.click();
-		$resultsPageShown = 0; // reset the page number on each new search
-		$searchInProgress = true;
-		$base64Images = {};
-		trackEvent('search-triggered', {
-			filetypeShown: $filetypeShown,
-			resultsPageShown: $resultsPageShown
-		});
-		let filetypeToGet = $filetypeShown;
-		if (filetypeToGet !== 'any') {
-			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
-		}
-    console.log($searchQuery);
-    
-    $documentsShown = await searchDocuments(
-      $searchQuery,
-      $resultsPageShown,
-      $resultsPerPage,
-      filetypeToGet,
-      localDateLimitUNIX
-    );
-		$searchInProgress = false;
+		triggerSearch();
 	}
 </script>
  
@@ -105,19 +87,19 @@
           <Command.List>
             {#if inputValue.length > 0}
               <Command.Group heading="" class="h-[0px] p-0">
-                <Command.Item class="text-[0px]" value={inputValue} onSelect={() => {parseInput(inputValue); open = false; triggerSearch()}}>
+                <Command.Item class="text-[0px]" value={inputValue} onSelect={() => {parseInput(inputValue); open = false; triggerSearchLocal()}}>
                   {inputValue}
                 </Command.Item>
               </Command.Group>
             {/if}
             <Command.Group heading="Suggestions">
-              <Command.Item onSelect={(v) => {parseInput(""); open = false; triggerSearch()}}>Anytime</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearch()}}>Last Week</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearch()}}>Last Year</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearch()}}>This Month</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearch()}}>This Year</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearch()}}>From Jan to Aug 2023</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearch()}}>Q1 2024</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(""); open = false; triggerSearchLocal()}}>Anytime</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>Last Week</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>Last Year</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>This Month</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>This Year</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>From Jan to Aug 2023</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>Q1 2024</Command.Item>
             </Command.Group>
           </Command.List>
         </Command.Root>

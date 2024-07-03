@@ -2,20 +2,15 @@
   import * as Select from "$lib/components/ui/select";
 	import { Label } from "$lib/components/ui/label/index.js";
   import { onMount } from 'svelte';
-	import { invoke } from '@tauri-apps/api/core';
 	import {
 		documentsShown,
 		searchQuery,
 		filetypeShown,
-		resultsPageShown,
 		resultsPerPage,
-		searchInProgress,
 		allowedExtensions,
-		base64Images,
 		dateLimitUNIX,
 	} from '$lib/stores';
-	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
-	import { setExtensionCategory } from '$lib/utils/miscUtils';
+	import { getDocumentsFromDB, triggerSearch } from '$lib/utils/dbUtils';
 	import { trackEvent } from '@aptabase/web';
 	import FileCategoryIcon from "../ui/FileCategoryIcon.svelte";
 
@@ -23,26 +18,14 @@
 
 	async function showDocsForFiletype(value: {}) {
     console.log(value);
+    console.log($dateLimitUNIX);
     $filetypeShown = value.toString();
 		trackEvent('click:showDocsForFileType');
-		$searchInProgress = true;
-		$base64Images = {};
-		let filetypeToGet = $filetypeShown;
-		if (filetypeToGet !== 'any') {
-			filetypeToGet = setExtensionCategory($filetypeShown, $allowedExtensions);
-		}
-		if ($searchQuery === '' || $dateLimitUNIX === null) {
-			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, filetypeToGet);
+		if ($searchQuery === '' && $dateLimitUNIX.start === '' && $dateLimitUNIX.end === '') {
+			$documentsShown = await getDocumentsFromDB(0, $resultsPerPage);
 		} else {
-			$documentsShown = await searchDocuments(
-				$searchQuery,
-				$resultsPageShown,
-				$resultsPerPage,
-				filetypeToGet,
-				$dateLimitUNIX
-			);
+			triggerSearch();
 		}
-		$searchInProgress = false;
 	}
 
 	onMount(async () => {

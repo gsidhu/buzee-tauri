@@ -34,7 +34,6 @@
     if (window.innerWidth < 1024) {
       isDesktop = false;
     }
-    console.log($selectedResult);
     showTextPreview();
   });
 </script>
