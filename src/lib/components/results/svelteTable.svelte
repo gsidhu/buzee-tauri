@@ -61,8 +61,8 @@
   })
 </script>
 
-<table {...$tableAttrs}>
-	<thead id="real-thead">
+<table {...$tableAttrs} class="block max-h-full w-full relative border-spacing-0">
+	<thead id="real-thead" class="sticky top-0 z-10 bg-white">
 		{#each $headerRows as headerRow (headerRow.id)}
 			<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
 				<tr {...rowAttrs}>
@@ -220,7 +220,7 @@
 </table>
 
 {#if $documentsShown.length <= 0}
-	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-center min-vh-80">
+	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-between max-h-[75vh]">
 		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
 		<h3 class="text-lg">No Results</h3>
 		<div class="flex flex-col text-light-emphasis text-center small gap-2">
@@ -236,16 +236,8 @@
 {/key}
 
 <style lang="scss">
-	.min-vh-80 {
-		min-height: 80vh !important;
-	}
 	#buzee-logo-img {
 		max-width: 200px;
-	}
-	table {
-		border-spacing: 0;
-		width: 100%;
-		position: relative;
 	}
 	tr {
 		cursor: default;
@@ -348,7 +340,12 @@
 		display: block;
 		overflow-y: scroll;
 		overflow-x: auto !important;
-		max-height: 60svh;
 		// max-height: calc(100vh - 170px);
+	}
+
+
+	:global::-webkit-scrollbar {
+		width: 0px;
+		background: transparent; /* make scrollbar transparent */
 	}
 </style>

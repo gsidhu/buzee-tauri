@@ -2,9 +2,6 @@
   import { onMount } from "svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import * as Drawer from "$lib/components/ui/drawer/index.js";
-  import { Input } from "$lib/components/ui/input/index.js";
-  import { Label } from "$lib/components/ui/label/index.js";
-  import { Button } from "$lib/components/ui/button/index.js";
   import { selectedResult, selectedResultText, showResultTextPreview } from '$lib/stores';
   import { openFileFolder } from '$lib/utils/searchItemUtils';
  
@@ -43,7 +40,7 @@
     <Dialog.Content class="">
       <Dialog.Header>
         <Dialog.Title>
-          <button class="hover:underline hover:cursor-pointer" on:click={() => openFileFolder($selectedResult.path)}>
+          <button class="text-lg hover:underline hover:cursor-pointer" on:click={() => openFileFolder($selectedResult.path)}>
             {$selectedResult.name}
           </button>
         </Dialog.Title>
@@ -63,7 +60,7 @@
     <Drawer.Content>
       <Drawer.Header class="text-left">
         <Drawer.Title>
-          <button class="hover:underline hover:cursor-pointer" on:click={() => openFileFolder($selectedResult.path)}>
+          <button class="text-lg hover:underline hover:cursor-pointer" on:click={() => openFileFolder($selectedResult.path)}>
             {$selectedResult.name}
           </button>
         </Drawer.Title>

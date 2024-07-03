@@ -53,8 +53,17 @@
 		(document.querySelector('button[data-dialog-close]') as HTMLElement)?.click();
 		triggerSearch();
 	}
+
+  $: if ($dateLimitUNIX.start !== "") {
+    console.log("nlp date range");
+    dateLimitHuman = {
+      start: new Date(parseInt($dateLimitUNIX.start)*1000).toLocaleDateString(), 
+      end: new Date(parseInt($dateLimitUNIX.end)*1000).toLocaleDateString(),
+      text: $dateLimitUNIX.text
+    };
+  }
 </script>
- 
+
 <div class="flex flex-col w-full">
 	<Label class="mb-2">
     Date Range
@@ -67,7 +76,7 @@
           variant="outline"
           class="max-w-[250px] w-full justify-start flex flex-row items-start text-popover-foreground font-normal"
         >
-          {#if inputValue === ""} Anytime
+          {#if inputValue === "" && $dateLimitUNIX.start === "" && dateLimitHuman === null} Anytime
           {:else} {dateLimitHuman ? getDateLimitTextRange() : inputValue}
           {/if}
         </Button>

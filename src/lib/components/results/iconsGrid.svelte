@@ -108,7 +108,7 @@
   #parent-grid {
     overflow-x: hidden; /* Hide horizontal scrollbar */
     overflow-y: auto; /* Enable vertical scrolling */
-    max-height: 60svh;
+		max-height: 60svh;
   }
   .img-thumbnail {
     max-height: 72px;

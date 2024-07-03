@@ -19,28 +19,11 @@
 </script>
 
 {#key $documentsShown || $preferLastOpened}
-	<div class="flex flex-col items-center overflow-y-auto">
-		<div class={`results-container flex-[0_0_90%]`}>
-			{#if $showIconGrid}
-				<IconsGrid />
-			{:else}
-				<SvelteTable />
-			{/if}
-		</div>
-		{#if $documentsShown.length > 0 || $noMoreResults === true}
-			<LoadMoreButton />
+	<div class="overflow-x-auto w-full max-h-full block">
+		{#if $showIconGrid}
+			<IconsGrid />
+		{:else}
+			<SvelteTable />
 		{/if}
 	</div>
 {/key}
-
-<style>
-	.results-container {
-		overflow-x: auto;
-		width: 100%;
-		max-height: 70svh;
-	}
-
-	.modal-dialog-centered {
-		max-width: 80vw;
-	}
-</style>

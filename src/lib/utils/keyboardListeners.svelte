@@ -2,7 +2,7 @@
 	import { invoke } from "@tauri-apps/api/core";
 	import { onMount } from 'svelte';
 	import { clickRow, selectOneRow, selectAllRows } from './fileUtils';
-	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed, showResultTextPreview, selectedResult, showIconGrid } from '$lib/stores';
+	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed, showResultTextPreview, selectedResult, showIconGrid, searchSuggestionsDialogOpen } from '$lib/stores';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from '$app/navigation';
 
@@ -18,7 +18,6 @@
 		'ShiftLeft',
 		'ShiftRight',
 		'Tab',
-		'KeyP',
 		'MetaLeft',
 		'MetaRight',
 		'ArrowDown',
@@ -26,7 +25,16 @@
 		'ArrowLeft',
 		'ArrowRight',
 		'Escape',
-		'CommandOrControl+A'
+		'CommandOrControl+A',
+		'Digit1',
+		'Digit2',
+		'Digit3',
+		'Digit4',
+		'Digit5',
+		'Digit6',
+		'Digit7',
+		'Digit8',
+		'Digit9',
 	];
 
 	const eventPrefix = 'keyboardListener:';
@@ -63,7 +71,7 @@
 			if ($shiftKeyPressed) {
 				console.log('Cmd + Shift + F');
 				trackEvent(eventPrefix + 'toggleAppMode');
-				window.electronAPI?.toggleAppMode();
+				// window.electronAPI?.toggleAppMode();
 			} else {
 				console.log('Cmd + F');
 				trackEvent(eventPrefix + 'focusSearchBar');
@@ -71,7 +79,12 @@
 				if (window.location.pathname !== '/search') {
 					goto('/search?highlight-search-bar=true');
 				}
+				// focus the search bar
 				(document.querySelector('#search-input') as HTMLElement)?.click();
+				// focus the search bar in the cmdk dialog (input tag with [data-cmdk-input] attribute)
+				if ($searchSuggestionsDialogOpen) {
+					(document.querySelector('[data-cmdk-input]') as HTMLElement)?.focus();
+				}
 			}
 			return;
 		}
@@ -115,10 +128,14 @@
 				e.preventDefault();
 				// window.electronAPI?.openFileFolder(result.path);
 				invoke("open_folder_containing_file", { filePath: result.path })
-			} else if (e.code === 'KeyP') {
+			} else if (e.code === 'KeyP' && $shiftKeyPressed) {
 				e.preventDefault();
-				$showResultTextPreview = true; 
-				$selectedResult = result;
+				console.log(result);
+				
+				if (result.file_type !== 'folder' && result.last_parsed !== 0) {
+					$showResultTextPreview = true;
+					$selectedResult = result;
+				}
 			} else if (e.code === 'Tab' && $shiftKeyPressed) {
 				$shiftKeyPressed = false;
 			} else if (e.code === 'KeyP') {
@@ -188,7 +205,9 @@
 			$metaKeyPressed = false;
 		}
 		// HACK to prevent meta and shift key values from getting stuck
-		if (['MetaLeft','MetaRight','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].indexOf(e.code) < 0) {
+		if (['MetaLeft','MetaRight','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].indexOf(e.code) < 0 
+			&& ($searchSuggestionsDialogOpen && document.activeElement?.hasAttribute('data-cmdk-input'))) {
+			console.log("hacker");
 			$metaKeyPressed = false;
 			$shiftKeyPressed = false;
 		}

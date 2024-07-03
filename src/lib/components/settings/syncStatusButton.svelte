@@ -6,6 +6,7 @@
   import { trackEvent } from "@aptabase/web";
   import { listen, type UnlistenFn } from '@tauri-apps/api/event';
   import { invoke } from '@tauri-apps/api/core';
+  import * as ContextMenu from "$lib/components/ui/context-menu";
 
   let fileSyncFinished = false;
   let syncCoolingPeriod = false;
@@ -67,19 +68,26 @@
 	});
 </script>
 
-<Button
-  id="bg-sync-btn"
-  variant={`${$syncStatus ? (syncCoolingPeriod ? 'secondary' : 'purple') : 'secondary'}`}
-  size="icon"
-  class={`px-2 rounded-full ${($syncStatus && syncCoolingPeriod) ? 'disabled-gray' : ''}`}
-  on:click={() => toggleBackgroundTextProcessing()}
-  disabled={syncCoolingPeriod}
-  title={syncCoolingPeriod ? 
-    `${userAskedToDisable ? "Please wait... Shutting down background processes" : "Booting up... Please wait for a few seconds"}` 
-    : 
-    `Click to ${$syncStatus ? 'stop' : 'start'} background scan`
-  }
->
-  <RefreshCw class={`h-5 w-5 ${$syncStatus ? 'spin-right' : ''}`} />
-  <span class="sr-only">Toggle background sync</span>
-</Button>
+<ContextMenu.Root>
+  <ContextMenu.Trigger>
+    <Button
+      id="bg-sync-btn"
+      variant={`${$syncStatus ? (syncCoolingPeriod ? 'secondary' : 'purple') : 'secondary'}`}
+      size="icon"
+      class={`px-2 rounded-full ${($syncStatus && syncCoolingPeriod) ? 'disabled-gray' : ''}`}
+      on:click={() => toggleBackgroundTextProcessing()}
+      disabled={syncCoolingPeriod}
+      title={syncCoolingPeriod ? 
+        `${userAskedToDisable ? "Please wait... Shutting down background processes" : "Booting up... Please wait for a few seconds"}` 
+        : 
+        `Click to ${$syncStatus ? 'stop' : 'start'} background scan`
+      }
+    >
+      <RefreshCw class={`h-5 w-5 ${$syncStatus ? 'spin-right' : ''}`} />
+      <span class="sr-only">Toggle background sync</span>
+    </Button>
+  </ContextMenu.Trigger>
+  <ContextMenu.Content>
+    <ContextMenu.Item>View Sync Log</ContextMenu.Item>
+  </ContextMenu.Content>
+</ContextMenu.Root>

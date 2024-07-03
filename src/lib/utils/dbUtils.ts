@@ -21,11 +21,10 @@ export async function getDocumentsFromDB(page:number, limit:number) {
 
 export async function searchDocuments(query:string, page:number, limit:number, type?:string, dateLimitUNIX?: ParsedDatesUNIX | null) {
   console.log("searching documents with query", query, "page", page, "limit", limit, "type", type, "dateLimitUNIX", dateLimitUNIX);
-  let dateLimit: ParsedDatesUNIX | null;
+  let dateLimit: ParsedDatesUNIX | null = null;
   if (dateLimitUNIX && dateLimitUNIX.start !== "" && dateLimitUNIX.end !== "") {
     dateLimit = dateLimitUNIX;
-  } else {
-    dateLimit = extractDate(query);
+    query = dateLimit.text;
   }
   if (dateLimit && dateLimit.text.length > 0) {
     query = dateLimit.text;
