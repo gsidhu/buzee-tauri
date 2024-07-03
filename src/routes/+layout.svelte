@@ -132,18 +132,18 @@
 <KeyboardListeners />
 <EventListeners />
 <main class={`min-h-screen max-h-screen overflow-auto ${$windowBlurred ? "grayscale-no" : ""}`}>
-	<div class="grid min-h-screen max-h-screen w-full md:grid-cols-[25vw_1fr] lg:grid-cols-[20vw_1fr]">
-    <div class="hidden max-h-screen overflow-y-auto border-r bg-muted/40 md:block">
+	<div class="grid min-h-screen max-h-screen w-full lg:grid-cols-[20vw_1fr]">
+    <div class="hidden max-h-screen overflow-y-auto border-r bg-muted/40 lg:block">
       <SidebarMenu />
     </div>
-    <div class="flex flex-col md:max-w-[75vw] lg:max-w-[80vw]">
+    <div class="flex flex-col lg:max-w-[80vw]">
       <header class="flex max-w-screen items-center gap-4 border-b bg-muted/40 px-4 h-[60px] lg:px-6">
         <Sheet.Root>
           <Sheet.Trigger asChild let:builder>
             <Button
               variant="outline"
               size="icon"
-              class="shrink-0 md:hidden"
+              class="shrink-0 lg:hidden"
               builders={[builder]}
             >
               <Menu class="h-5 w-5" />
@@ -160,7 +160,7 @@
         <!-- <UserDropdown /> -->
         <SyncStatusButton />
       </header>
-      <section class="flex max-w-screen overflow-auto flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+      <section class="flex max-w-screen overflow-auto flex-1 flex-col gap-4 p-4">
         <slot />
       </section>
     </div>

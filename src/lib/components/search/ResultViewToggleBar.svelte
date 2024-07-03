@@ -51,6 +51,7 @@
           class="gap-2 text-muted-foreground font-normal"
           title="Switch to Icon Grid"
           on:click={() => $showIconGrid = !$showIconGrid}
+          pressed={$showIconGrid}
         >
           <LayoutGrid class="h-4 w-4" />Icons
       </Toggle>
@@ -59,6 +60,7 @@
         class="gap-2 text-muted-foreground font-normal"
         title="Show results in compact view"
         on:click={() => toggleCompactViewMode()}
+        pressed={$compactViewMode}
       >
         <FoldVertical class="h-4 w-4" />Tight
       </Toggle>

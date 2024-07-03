@@ -2,19 +2,16 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
-	import { stringToHash, readableFileSize, resetColumnSize } from '$lib/utils/miscUtils';
+	import { stringToHash, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from "$app/navigation";
 	import * as ContextMenu from "$lib/components/ui/context-menu";
 	import ResultTextPreview from "./ResultTextPreview.svelte";
-	import { openFileFolder, openFile, formatUpdatedTime, formatPath, startDragging } from '$lib/utils/searchItemUtils';
-
-	import { readable } from 'svelte/store';
+	import { openFileFolder, openFile, formatPath, startDragging } from '$lib/utils/searchItemUtils';
+	import { createTableFromResults } from '$lib/utils/fileTable';
 	// @ts-ignore
-	import { createTable, Subscribe, Render } from 'svelte-headless-table';
-	// @ts-ignore
-	import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
+	import { Subscribe, Render } from 'svelte-headless-table';
 
 	// $: if ($documentsShown.length < 50) {
 	// 	$noMoreResults = true;
@@ -33,90 +30,9 @@
 		}
 	}
 
-	const table = createTable(readable($documentsShown), {
-  resize: addResizedColumns(),
-  sort: addSortBy({ disableMultiSort: true }),
-  hideCols: addHiddenColumns()
-});
-
-const columns = table.createColumns([
-  table.column({
-    header: 'Type',
-    accessor: 'file_type',
-    plugins: {
-      resize: {
-        initialWidth: 30,
-        minWidth: 30,
-        maxWidth: 30
-      },
-      sort: { disable: false }
-    }
-  }),
-  table.column({
-    header: 'Name',
-    accessor: 'name',
-    plugins: {
-      resize: {
-        initialWidth: 250,
-        minWidth: 250,
-        maxWidth: 250
-      }
-    }
-  }),
-  table.column({
-    header: 'Last Modified',
-    accessor: 'last_modified',
-    id: 'lastModified',
-    cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
-    plugins: {
-      resize: {
-        initialWidth: 100,
-        minWidth: 100,
-        maxWidth: 100
-      }
-    }
-  }),
-  table.column({
-    header: 'Last Opened',
-    accessor: 'last_opened',
-    id: 'lastOpened',
-    cell: ({ value }: { value: number }) => formatUpdatedTime(value) ?? value,
-    plugins: {
-      resize: {
-        initialWidth: 100,
-        minWidth: 100,
-        maxWidth: 100
-      }
-    }
-  }),
-  table.column({
-    header: 'Size',
-    accessor: 'size',
-    id: 'size',
-    cell: ({ value }: { value: number }) => readableFileSize(value) ?? "",
-    plugins: {
-      resize: {
-        initialWidth: 75,
-        minWidth: 75,
-        maxWidth: 75
-      }
-    }
-  }),
-  table.column({
-    header: 'Location',
-    accessor: 'path',
-    plugins: {
-      resize: {
-        initialWidth: 200,
-        minWidth: 200,
-        maxWidth: 200
-      }
-    }
-  })
-]);
-
-	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
-		table.createViewModel(columns);
+	const [table, columns] = createTableFromResults($documentsShown);
+	// @ts-ignore
+	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
 	const { hiddenColumnIds } = pluginStates.hideCols;
 	const ids = flatColumns.map((c: any) => c.id);
 	const labels = flatColumns.map((c: any) => c.header);
