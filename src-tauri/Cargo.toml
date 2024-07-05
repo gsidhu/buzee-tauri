@@ -52,3 +52,4 @@ serialize-to-javascript = "0.1.1"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
 zip = "0.6"
 pdf-extract = "0.7.7"
+jfs = "0.9.0"

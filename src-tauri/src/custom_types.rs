@@ -132,7 +132,7 @@ impl Default for GlobalShortcutState {
 }
 
 // Struct for User Preference
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub(crate) struct UserPreferencesState {
   pub first_launch_done: bool,
   pub onboarding_done: bool,

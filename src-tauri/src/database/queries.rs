@@ -258,6 +258,11 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
   );
 "#;
 
+pub const USER_PREFS_TABLE_ALTER_STATEMENT_v_0_2_0 : &str = r#"
+  ALTER TABLE user_preferences
+  ADD COLUMN roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0;
+"#;
+
 // APP_DATA stores basic app data and file type data
 pub const APP_DATA_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE TABLE IF NOT EXISTS "app_data" 

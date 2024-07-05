@@ -1,13 +1,8 @@
 <script lang="ts">
 	import {
-		Compass,
     Coffee,
-		Bookmark,
 		House,
 		Search,
-		Laptop,
-		HardDrive,
-		Cloud,
 		Pin,
 		PieChart,
 		ScanText,
@@ -16,27 +11,13 @@
 		Lightbulb,
 		Wind,
 		Settings,
-		ExternalLink
+		ExternalLink,
+		BusFront
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Accordion from "$lib/components/ui/accordion";
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import { pagePath } from '$lib/stores';
-
-	import { invoke } from '@tauri-apps/api/core';
-	import { trackEvent } from '@aptabase/web';
-	import Label from '../ui/label/label.svelte';
-	import Badge from '../ui/badge/badge.svelte';
-
-	async function openInBrowser(what: string) {
-		if (what === 'deadline') {
-			trackEvent('magic:deadline');
-			await invoke('open_file_or_folder', { filePath: 'https://buzo.tools/deadline/' });
-		} else if (what === 'bmac') {
-			trackEvent('magic:bmac');
-			await invoke('open_file_or_folder', { filePath: 'https://www.buymeacoffee.com/thatgurjot' });
-		}
-	}
+	import { pagePath, isMac } from '$lib/stores';
+	import { openInBrowser } from '$lib/utils/miscUtils';
 </script>
 
 <div class="flex flex-col h-full gap-2">
@@ -166,6 +147,14 @@
 			>
 				<Lightbulb class="h-4 w-4" />
 				Tips & Shortcuts
+			</a>
+			<a
+				href={"/gandalf?device" + (isMac ? "=mac" : "windows")}
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${$pagePath === '/gandalf' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+			>
+				<BusFront class="h-4 w-4" />
+				Roadmap Survey
+				<!-- <Badge variant="outline" class="font-medium">Soon</Badge> -->
 			</a>
 		</nav>
 	</div>

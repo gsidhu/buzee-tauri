@@ -4,6 +4,8 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 ## UI Redesign
 - Using shadcn-svelte components and Tailwind CSS. Keeping a few essential classes from Bootstrap.
 - Extracted triggerSearch function to synchronise it across filters.
+- Added Roadmap Survey page.
+- Trying JSON file store for user preferences and app data.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.

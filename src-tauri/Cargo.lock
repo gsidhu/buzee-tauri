@@ -383,6 +383,7 @@ dependencies = [
  "drag",
  "epub",
  "futures",
+ "jfs",
  "jwalk",
  "lazy_static",
  "log",
@@ -1435,6 +1436,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "fs2"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213"
+dependencies = [
+ "libc",
+ "winapi 0.3.9",
+]
+
+[[package]]
 name = "fsevent"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2278,6 +2289,20 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
+]
+
+[[package]]
+name = "jfs"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f428b1cf5248265f8358cf96c602323ce4bea140827eaefd8901e3106fec5e44"
+dependencies = [
+ "fs2",
+ "log",
+ "parking_lot",
+ "serde",
+ "serde_json",
+ "uuid",
 ]
 
 [[package]]

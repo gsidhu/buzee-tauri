@@ -1,3 +1,6 @@
+import { trackEvent } from "@aptabase/web";
+import { invoke } from "@tauri-apps/api/core";
+
 export function stringToHash(input: string) {
   var hash = 0;
   if (input.length === 0) {
@@ -66,4 +69,17 @@ export function setExtensionCategory(extension: string | undefined, allowedExten
   // Remove trailing comma
   fileTypeString = fileTypeString.slice(0, -1);
   return fileTypeString;
+}
+
+export async function openInBrowser(what: string) {
+  if (what === 'deadline') {
+    trackEvent('magic:deadline');
+    await invoke('open_file_or_folder', { filePath: 'https://buzo.tools/deadline/' });
+  } else if (what === 'bmac') {
+    trackEvent('magic:bmac');
+    await invoke('open_file_or_folder', { filePath: 'https://www.buymeacoffee.com/thatgurjot' });
+  } else {
+    trackEvent('open:' + what);
+    await invoke('open_file_or_folder', { filePath: what });
+  }
 }
