@@ -4,7 +4,15 @@
 	import SearchFilters from '$lib/components/search/SearchFilters.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import LoadMoreButton from '$lib/components/results/LoadMoreButton.svelte';
-	import { documentsShown, noMoreResults } from '$lib/stores';
+	import { documentsShown, noMoreResults, searchQuery, dateLimitUNIX, filetypeShown } from '$lib/stores';
+	import { onMount } from 'svelte';
+	import { triggerSearch } from '$lib/utils/dbUtils';
+
+	onMount(() => {
+		if ($searchQuery === '' && $dateLimitUNIX && $dateLimitUNIX.start === '' && $filetypeShown === 'any') {
+			triggerSearch();
+		}
+	});
 </script>
 
 <div class="page" in:fade>

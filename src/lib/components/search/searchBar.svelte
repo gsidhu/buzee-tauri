@@ -70,6 +70,37 @@
 		},
 	]
 
+	function setResultShortcuts() {
+		let count = 2;
+		const selectedResult = document.querySelector('[data-selected="true"]');
+		const selectedResultText = (selectedResult?.children[1] as HTMLElement).innerText;
+		// set first option shortcut as Cmd+1
+		const firstResult = document.querySelector(`[data-value=${$searchQuery.replaceAll('"', '>')}]`);
+		if (firstResult && firstResult.children[1]) {
+			if ((firstResult.children[1] as HTMLElement).innerText === selectedResultText) {
+				(firstResult as HTMLElement).setAttribute('data-result-shortcut', 'Enter');
+				(firstResult.children[1] as HTMLElement).innerText = '⏎';
+				count = 1;
+			} else {
+				(firstResult as HTMLElement).setAttribute('data-result-shortcut', '1');
+				(firstResult.children[1] as HTMLElement).innerText = '⌘1';
+			}
+		}
+		// set rest of the shortcuts as 2-9 with the selected one being set as Enter
+		let suggestedResults = document.querySelectorAll('[data-cmdk-group][data-value="suggestions"] > div > [data-result-shortcut]');
+		suggestedResults.forEach((result, index) => {
+			let innerText = (result.children[1] as HTMLElement).innerText;
+			if (innerText !== selectedResultText) {
+				(result as HTMLElement).setAttribute('data-result-shortcut', count.toString());
+				(result.children[1] as HTMLElement).innerText = `⌘${count}`;
+				count++;
+			} else {
+				(result as HTMLElement).setAttribute('data-result-shortcut', 'Enter');
+				(result.children[1] as HTMLElement).innerText = '⏎';
+			}
+		});
+	}
+
 	onMount(() => {
 		// get the query from the url
 		const urlParams = new URLSearchParams(window.location.search);
@@ -84,6 +115,10 @@
 
 		// keyboard listeners for command shortcuts
 		document.addEventListener('keydown', (e) => {
+			if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+				e.preventDefault();
+				setResultShortcuts();
+			}
 			if (e.code.slice(0,-1) === 'Digit' && $metaKeyPressed) {
 				e.preventDefault();
 				const digit = e.code.slice(-1);
