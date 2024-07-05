@@ -61,7 +61,7 @@
   })
 </script>
 
-<table {...$tableAttrs} class="block max-h-full w-full relative border-spacing-0">
+<table {...$tableAttrs} class="block max-h-full h-full w-full relative border-spacing-0">
 	<thead id="real-thead" class="sticky top-0 z-10 bg-white">
 		{#each $headerRows as headerRow (headerRow.id)}
 			<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
@@ -219,26 +219,11 @@
 	{/if}
 </table>
 
-{#if $documentsShown.length <= 0}
-	<div class="flex flex-col px-4 py-2 mx-auto items-center justify-between max-h-[75vh]">
-		<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />
-		<h3 class="text-lg">No Results</h3>
-		<div class="flex flex-col text-light-emphasis text-center small gap-2">
-			<span>Try modifying your query? You can be more specific like –</span>
-			<span><code>last year "annual report" -pdf</code></span>
-		</div>
-		<button type="button" class="my-2 btn py-1 px-2 leading-tight text-xs purple border-hover-purple border-2 border-gray-100 rounded" on:click={() => goto('/magic/tips')}>View all tips and shortcuts</button>
-	</div>
-{/if}
-
 {#key $selectedResult}
 	<ResultTextPreview open={$showResultTextPreview} />
 {/key}
 
 <style lang="scss">
-	#buzee-logo-img {
-		max-width: 200px;
-	}
 	tr {
 		cursor: default;
 		outline: none;

@@ -77,7 +77,7 @@
           class="max-w-[250px] w-full justify-start flex flex-row items-start text-popover-foreground font-normal"
         >
           {#if inputValue === "" && $dateLimitUNIX.start === "" && dateLimitHuman === null} Anytime
-          {:else} {dateLimitHuman ? getDateLimitTextRange() : inputValue}
+          {:else} {dateLimitHuman ? getDateLimitTextRange() : (inputValue.length > 0 ? inputValue : "Anytime")}
           {/if}
         </Button>
       </Popover.Trigger>

@@ -10,7 +10,7 @@
 <div class="page" in:fade>
 	<SearchFilters />
 	<Separator class="my-2 "/>
-	<div class="flex flex-col justify-between max-h-[90%]">
+	<div class="flex flex-col justify-between max-h-[90%] h-full">
 		<ResultsTable />
 		{#if $documentsShown.length > 0 || $noMoreResults === true}
 			<LoadMoreButton />
