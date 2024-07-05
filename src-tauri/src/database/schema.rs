@@ -95,7 +95,8 @@ table! {
     global_shortcut_enabled -> Bool,
     global_shortcut -> Text,
     automatic_background_sync -> Bool,
-    detailed_scan -> Bool
+    detailed_scan -> Bool,
+    roadmap_survey_answered -> Bool
   }
 }
 

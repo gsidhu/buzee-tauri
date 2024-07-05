@@ -254,11 +254,12 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
     global_shortcut_enabled BOOLEAN NOT NULL DEFAULT 1,
     global_shortcut TEXT NOT NULL DEFAULT "Alt+Space",
     automatic_background_sync BOOLEAN NOT NULL DEFAULT 1,
-    detailed_scan BOOLEAN NOT NULL DEFAULT 1
+    detailed_scan BOOLEAN NOT NULL DEFAULT 1,
+    roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0
   );
 "#;
 
-pub const USER_PREFS_TABLE_ALTER_STATEMENT_v_0_2_0 : &str = r#"
+pub const USER_PREFS_TABLE_ALTER_STATEMENT_V_0_2_0 : &str = r#"
   ALTER TABLE user_preferences
   ADD COLUMN roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0;
 "#;

@@ -16,7 +16,7 @@
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import { pagePath, isMac } from '$lib/stores';
+	import { pagePath, isMac, userPreferences } from '$lib/stores';
 	import { openInBrowser } from '$lib/utils/miscUtils';
 </script>
 
@@ -148,14 +148,15 @@
 				<Lightbulb class="h-4 w-4" />
 				Tips & Shortcuts
 			</a>
-			<a
-				href={"/gandalf?device" + (isMac ? "=mac" : "windows")}
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${$pagePath === '/gandalf' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
-			>
-				<BusFront class="h-4 w-4" />
-				Roadmap Survey
-				<!-- <Badge variant="outline" class="font-medium">Soon</Badge> -->
-			</a>
+			{#if $userPreferences.roadmap_survey_answered === false}
+				<a
+					href={"/gandalf?device" + (isMac ? "=mac" : "windows")}
+					class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${$pagePath === '/gandalf' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+				>
+					<BusFront class="h-4 w-4" />
+					<span>Roadmap Survey</span>
+				</a>
+			{/if}
 		</nav>
 	</div>
 

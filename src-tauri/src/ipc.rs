@@ -9,7 +9,7 @@ use crate::database::search::{
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
-use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
+use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_roadmap_survey_answered_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::{extract_text_from_pdf, graceful_restart, read_image_to_base64, save_text_to_file};
 use crate::window::hide_or_show_window;
 use serde_json;
@@ -350,6 +350,10 @@ async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::Ap
     }
     "detailed_scan" => {
       set_detailed_scan_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
+    }
+    "roadmap_survey_answered" => {
+      set_roadmap_survey_answered_flag_in_db(value, &app_handle);
       set_user_preferences_state_from_db_value(&app_handle);
     }
     "global_shortcut_enabled" => {

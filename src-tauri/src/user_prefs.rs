@@ -26,6 +26,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
         user_preferences::global_shortcut.eq("Alt+Space"),
         user_preferences::automatic_background_sync.eq(true),
         user_preferences::detailed_scan.eq(true),
+        user_preferences::roadmap_survey_answered.eq(false)
       ))
       .execute(conn)
       .unwrap();
@@ -47,7 +48,8 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
       global_shortcut_enabled: true,
       global_shortcut: "Alt+Space".to_string(),
       automatic_background_sync: true,
-      detailed_scan: true
+      detailed_scan: true,
+      roadmap_survey_answered: false
     };
     // insert new_user_prefs into the user_prefs table
     diesel::insert_into(user_preferences::table)
@@ -214,7 +216,8 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
       user_preferences::global_shortcut_enabled,
       user_preferences::global_shortcut,
       user_preferences::automatic_background_sync,
-      user_preferences::detailed_scan
+      user_preferences::detailed_scan,
+      user_preferences::roadmap_survey_answered
     ))
     .first::<UserPrefs>(&mut conn)
     .expect("Error loading user_prefs");
@@ -229,6 +232,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
   state.global_shortcut = user_preferences_from_db.global_shortcut;
   state.automatic_background_sync = user_preferences_from_db.automatic_background_sync;
   state.detailed_scan = user_preferences_from_db.detailed_scan;
+  state.roadmap_survey_answered = user_preferences_from_db.roadmap_survey_answered;
 }
 
 pub fn fix_global_shortcut_string(new_shortcut_string: String) -> String {
@@ -290,6 +294,14 @@ pub fn set_detailed_scan_flag_in_db(flag: bool, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)
     .set(user_preferences::detailed_scan.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_roadmap_survey_answered_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::roadmap_survey_answered.eq(flag))
     .execute(&mut conn)
     .unwrap();
 }

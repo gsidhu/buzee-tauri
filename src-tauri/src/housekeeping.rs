@@ -6,7 +6,6 @@ use crate::utils::norm;
 use crate::user_prefs::{set_default_app_data, set_default_user_prefs, set_default_file_types};
 use crate::custom_types::UserPreferencesState;
 use log::{info, LevelFilter};
-use jfs::Store;
 
 pub const APP_DIRECTORY: &str = r#"buzee-tauri"#;
 
@@ -64,7 +63,7 @@ pub fn get_user_preferences_store_path() -> String {
   user_preferences_store_path
 }
 
-pub fn setup_user_preferences_store_path() {
+fn setup_user_preferences_store_path() {
   let user_preferences_store_path = get_user_preferences_store_path();
   println!("User preferences stored in file: {}", &user_preferences_store_path);
 
@@ -80,7 +79,8 @@ pub fn setup_user_preferences_store_path() {
     global_shortcut_enabled: true,
     global_shortcut: "Alt+Space".to_string(),
     automatic_background_sync: true,
-    detailed_scan: true
+    detailed_scan: true,
+    roadmap_survey_answered: false
   };
   let id = user_preferences_store.save(&default_user_preferences).unwrap();
   let obj = user_preferences_store.get::<UserPreferencesState>(&id).unwrap();
@@ -98,7 +98,7 @@ pub fn initialize() -> () {
   setup_logging_file_path();
 
   // Set up user preferences store
-  setup_user_preferences_store_path();
+  // setup_user_preferences_store_path();
 
   let mut conn = establish_direct_connection_to_db();
   println!("Initializing database");

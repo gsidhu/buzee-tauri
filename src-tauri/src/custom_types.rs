@@ -142,7 +142,8 @@ pub(crate) struct UserPreferencesState {
   pub global_shortcut_enabled: bool,
   pub global_shortcut: String,
   pub automatic_background_sync: bool,
-  pub detailed_scan: bool
+  pub detailed_scan: bool,
+  pub roadmap_survey_answered: bool
 }
 
 impl Default for UserPreferencesState {
@@ -156,7 +157,8 @@ impl Default for UserPreferencesState {
           global_shortcut_enabled: true,
           global_shortcut: "Alt+Space".to_string(),
           automatic_background_sync: true,
-          detailed_scan: true
+          detailed_scan: true,
+          roadmap_survey_answered: false
         }
     }
 }

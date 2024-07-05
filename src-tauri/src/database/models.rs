@@ -19,7 +19,8 @@ pub struct UserPrefs {
     pub global_shortcut_enabled: bool,
     pub global_shortcut: String,
     pub automatic_background_sync: bool,
-    pub detailed_scan: bool
+    pub detailed_scan: bool,
+    pub roadmap_survey_answered: bool,
 }
 
 // This struct is for CRUD on the app_data table

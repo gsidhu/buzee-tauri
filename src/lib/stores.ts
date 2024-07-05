@@ -71,7 +71,8 @@ export const userPreferences = writable({
   "show_search_suggestions": true,
   "launch_at_startup": true,
   "onboarding_done": false,
-  "show_in_dock": true
+  "show_in_dock": true,
+  "roadmap_survey_answered": false,
 })
 export const pagePath = writable("")
 export const isMac = writable(false)
