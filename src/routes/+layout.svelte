@@ -7,6 +7,7 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import Menu from "lucide-svelte/icons/menu";
   import KeyboardListeners from "$lib/utils/keyboardListeners.svelte";
+  import * as Resizable from "$lib/components/ui/resizable/index.js";
 
   import EventListeners from "$lib/utils/eventListeners.svelte";
   import { trackEvent } from "@aptabase/web";
@@ -157,7 +158,6 @@
         <div class="w-full">
           <SearchBar />
         </div>
-        <!-- <UserDropdown /> -->
         <SyncStatusButton />
       </header>
       <section class="flex max-w-screen overflow-auto flex-1 flex-col gap-4 p-4">
@@ -166,6 +166,7 @@
     </div>
   </div>
 </main>
+
  
 <!-- <Dialog.Root>
   <Dialog.Trigger></Dialog.Trigger>

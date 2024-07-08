@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview } from '$lib/stores';
+	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview, noMoreResults, searchInProgress } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
 	import { stringToHash, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from "$app/navigation";
+	import { Button } from "$lib/components/ui/button";
 	import * as ContextMenu from "$lib/components/ui/context-menu";
 	import ResultTextPreview from "./ResultTextPreview.svelte";
 	import { openFileFolder, openFile, formatPath, startDragging } from '$lib/utils/searchItemUtils';
 	import { createTableFromResults } from '$lib/utils/fileTable';
 	// @ts-ignore
 	import { Subscribe, Render } from 'svelte-headless-table';
+	import Label from '../ui/label/label.svelte';
+	import { loadMoreResults } from '$lib/utils/dbUtils';
+	import { LoaderCircle } from 'lucide-svelte';
 
 	// $: if ($documentsShown.length < 50) {
 	// 	$noMoreResults = true;
@@ -30,12 +34,25 @@
 		}
 	}
 
-	const [table, columns] = createTableFromResults($documentsShown);
-	// @ts-ignore
-	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
-	const { hiddenColumnIds } = pluginStates.hideCols;
-	const ids = flatColumns.map((c: any) => c.id);
-	const labels = flatColumns.map((c: any) => c.header);
+	function createTableVars(dataRows: DocumentSearchResult[]) {
+		const [table, columns] = createTableFromResults(dataRows);
+		// @ts-ignore
+		const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+		const { hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize } = pluginStates.page;
+		return { table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize };
+	}
+
+	let { table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize } = createTableVars($documentsShown);
+
+
+	$: if ($documentsShown) {
+		console.log(">>> reloading...");
+		({ table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize } = createTableVars($documentsShown));
+	}
+
+	let { hiddenColumnIds } = pluginStates.hideCols;
+	let ids = flatColumns.map((c: any) => c.id);
+	let labels = flatColumns.map((c: any) => c.header);
 	let hideForId: Record<string, boolean> = Object.fromEntries(ids.map((id: any) => [id, false]));
 	$: $hiddenColumnIds = Object.entries(hideForId)
 		.filter(([, hide]) => hide)
@@ -61,8 +78,34 @@
   })
 </script>
 
-<table {...$tableAttrs} class="block max-h-full h-full w-full relative border-spacing-0">
-	<thead id="real-thead" class="sticky top-0 z-10 bg-white">
+<table {...$tableAttrs} class="block w-full relative border-spacing-0">
+	<div class="sticky top-0 z-10 bg-white">
+	<div class="w-full flex items-center justify-center space-x-4 py-4">
+		<Button
+			variant="outline"
+			size="sm"
+			on:click={() => ($pageIndex = $pageIndex - 1)}
+			disabled={!$hasPreviousPage}>Previous</Button
+		>
+		<Label class="font-normal">Page {$pageIndex + 1}</Label>
+		<Button
+			variant="outline"
+			size="sm"
+			disabled={!$hasNextPage && $noMoreResults}
+			on:click={async () => {
+				let currentPage = $pageIndex;
+				if (!$hasNextPage && !$noMoreResults) { await loadMoreResults(); }
+				if ($hasNextPage) { $pageIndex = currentPage + 1; }
+			}}>
+				{#if $searchInProgress}
+					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+				{:else}
+					Next
+				{/if}
+			</Button
+		>
+	</div>
+	<thead id="real-thead" class="bg-white">
 		{#each $headerRows as headerRow (headerRow.id)}
 			<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
 				<tr {...rowAttrs}>
@@ -145,9 +188,10 @@
 			</Subscribe>
 		{/each}
 	</thead>
+	</div>
 	{#if $documentsShown.length > 0}
 		<tbody {...$tableBodyAttrs}>
-			{#each $rows as row (row.id)}
+			{#each $pageRows as row (row.id)}
 				<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
 					<ContextMenu.Root>
 						<ContextMenu.Trigger>
@@ -216,6 +260,31 @@
 				</Subscribe>
 			{/each}
 		</tbody>
+		<!-- <tfoot class="w-full flex items-center justify-center space-x-4 py-4">
+			<Button
+				variant="outline"
+				size="sm"
+				on:click={() => ($pageIndex = $pageIndex - 1)}
+				disabled={!$hasPreviousPage}>Previous</Button
+			>
+			<Label>{$pageIndex + 1}</Label>
+			<Button
+				variant="outline"
+				size="sm"
+				disabled={!$hasNextPage && $noMoreResults}
+				on:click={async () => {
+					let currentPage = $pageIndex;
+					if (!$hasNextPage && !$noMoreResults) { await loadMoreResults(); }
+					if ($hasNextPage) { $pageIndex = currentPage + 1; }
+				}}>
+					{#if $searchInProgress}
+						<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+					{:else}
+						Next
+					{/if}
+				</Button
+			>
+		</tfoot> -->
 	{/if}
 </table>
 

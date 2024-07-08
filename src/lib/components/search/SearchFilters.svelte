@@ -7,6 +7,7 @@
   import * as Collapsible from "$lib/components/ui/collapsible/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
+	import ResultsPerPageSelector from './ResultsPerPageSelector.svelte';
 </script>
 
 <Collapsible.Root class="space-y-2">
@@ -21,6 +22,7 @@
   </div>
   <Collapsible.Content class="">
     <div class="flex flex-row overflow-x-auto gap-4 px-4 pb-2 justify-items-center">
+      <!-- <ResultsPerPageSelector /> -->
       <LocationSelector />
       <FiletypeSelector />
       <NlpDateRange />

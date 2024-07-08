@@ -28,6 +28,7 @@
 		"formsnap": "^1.0.1",
 		"lucide-svelte": "^0.396.0",
 		"moment": "^2.30.0",
+		"paneforge": "^0.0.5",
 		"sveltekit-superforms": "^2.15.2",
 		"tailwind-merge": "^2.3.0",
 		"tailwind-variants": "^0.2.1",

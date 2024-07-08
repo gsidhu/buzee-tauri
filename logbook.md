@@ -6,6 +6,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Extracted triggerSearch function to synchronise it across filters.
 - Added Roadmap Survey page.
 - Trying JSON file store for user preferences and app data. Don't need it. SQLite works.
+- Table Pagination works.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.

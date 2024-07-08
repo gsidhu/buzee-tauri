@@ -3,6 +3,7 @@ import datePlugin from 'compromise-dates';
 nlp.plugin(datePlugin);
 
 export function extractDate(value: string) {
+  console.log("extracting date from", value);
   // @ts-ignore
   let compromised = nlp(value).dates({"timezone": "Asia/Calcutta", "today": new Date().toISOString().slice(0,10)});
   let parsedDates = compromised.get()[0];

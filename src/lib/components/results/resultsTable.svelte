@@ -19,7 +19,8 @@
 	// });
 </script>
 
-{#key $documentsShown || $preferLastOpened}
+<!-- {#key $documentsShown || $preferLastOpened} -->
+{#key $preferLastOpened}
 	<div class="overflow-x-auto w-full h-full max-h-full block">
 		{#if $documentsShown.length > 0}
 			{#if $showIconGrid}

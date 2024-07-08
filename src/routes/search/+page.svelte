@@ -20,9 +20,9 @@
 	<Separator class="my-2 "/>
 	<div class="flex flex-col justify-between max-h-[90%] h-full">
 		<ResultsTable />
-		{#if $documentsShown.length > 0 || $noMoreResults === true}
+		<!-- {#if $documentsShown.length > 0 || $noMoreResults === true}
 			<LoadMoreButton />
-		{/if}
+		{/if} -->
 	</div>
 </div>
 

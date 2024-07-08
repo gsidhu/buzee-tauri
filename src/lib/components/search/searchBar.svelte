@@ -12,6 +12,7 @@
 		userPreferences,
 		metaKeyPressed,
 		searchSuggestionsDialogOpen,
+		isMac
 	} from '$lib/stores';
 	import { triggerSearch } from '$lib/utils/dbUtils';
 	import { invoke } from '@tauri-apps/api/core';
@@ -75,7 +76,8 @@
 		const selectedResult = document.querySelector('[data-selected="true"]');
 		const selectedResultText = (selectedResult?.children[1] as HTMLElement).innerText;
 		// set first option shortcut as Cmd+1
-		const firstResult = document.querySelector(`[data-value=${$searchQuery.replaceAll('"', '>')}]`);
+		console.log(`[data-value=${$searchQuery.replaceAll('"', '>')}]`);
+		const firstResult = document.querySelector(`[data-value="${$searchQuery.replaceAll('"', '>')}"]`);
 		if (firstResult && firstResult.children[1]) {
 			if ((firstResult.children[1] as HTMLElement).innerText === selectedResultText) {
 				(firstResult as HTMLElement).setAttribute('data-result-shortcut', 'Enter');
@@ -83,7 +85,8 @@
 				count = 1;
 			} else {
 				(firstResult as HTMLElement).setAttribute('data-result-shortcut', '1');
-				(firstResult.children[1] as HTMLElement).innerText = '⌘1';
+				if ($isMac) (firstResult.children[1] as HTMLElement).innerText = '⌘1';
+				else (firstResult.children[1] as HTMLElement).innerText = 'Ctrl+1';
 			}
 		}
 		// set rest of the shortcuts as 2-9 with the selected one being set as Enter
@@ -92,7 +95,8 @@
 			let innerText = (result.children[1] as HTMLElement).innerText;
 			if (innerText !== selectedResultText) {
 				(result as HTMLElement).setAttribute('data-result-shortcut', count.toString());
-				(result.children[1] as HTMLElement).innerText = `⌘${count}`;
+				if ($isMac) (result.children[1] as HTMLElement).innerText = `⌘${count}`;
+				else (result.children[1] as HTMLElement).innerText = `Ctrl+${count}`;
 				count++;
 			} else {
 				(result as HTMLElement).setAttribute('data-result-shortcut', 'Enter');
@@ -146,10 +150,7 @@
 			</Dialog.Trigger>
 			<Dialog.Content class="h-[50vh] max-h-[50vh] flex flex-col justify-between">
 				<Command.Root
-					filter={(value, search) => {
-						if (value.includes(search) || search === $searchQuery) return 1;
-						return 0;
-					}}
+				shouldFilter={false}
 				>
 					<Command.Input
 						placeholder="Search your files, browser history, bookmarks..."
@@ -172,7 +173,7 @@
 									{#each suggestionsList as suggestion, id}
 										<Command.Item data-result-shortcut="{id+1}" value={suggestion.value} onSelect={() => {triggerSearchLocal(suggestion.value);}}>
 											<span>{suggestion.title}</span>
-											<Command.Shortcut>⌘{id+1}</Command.Shortcut>
+											<Command.Shortcut>{$isMac ? '⌘' : 'Ctrl+'}{id+1}</Command.Shortcut>
 										</Command.Item>
 									{/each}
 								</Command.Group>
@@ -189,7 +190,7 @@
 												<span>{searchItem}</span>
 											{/if}
 											{#if id < 9}
-												<Command.Shortcut>⌘{id + 1}</Command.Shortcut>
+												<Command.Shortcut>{$isMac ? '⌘' : 'Ctrl+'}{id + 1}</Command.Shortcut>
 											{/if}
 										</Command.Item>
 									{/each}

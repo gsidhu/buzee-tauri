@@ -1,7 +1,7 @@
-import { get, readable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 import { createTable } from 'svelte-headless-table';
-import { addResizedColumns, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
-import { documentsShown } from '$lib/stores';
+import { addResizedColumns, addSortBy, addHiddenColumns, addPagination } from 'svelte-headless-table/plugins';
+import { documentsShown, resultsPerPage } from '$lib/stores';
 import { formatUpdatedTime } from '$lib/utils/searchItemUtils';
 import { readableFileSize } from '$lib/utils/miscUtils';
 
@@ -9,7 +9,8 @@ export function createTableFromResults(resultsShown: DocumentSearchResult[]) {
   const table = createTable(readable(resultsShown), {
     resize: addResizedColumns(),
     sort: addSortBy({ disableMultiSort: true }),
-    hideCols: addHiddenColumns()
+    hideCols: addHiddenColumns(),
+    page: addPagination({ initialPageSize: get(resultsPerPage) }),
   });
 
   const columns = table.createColumns([
