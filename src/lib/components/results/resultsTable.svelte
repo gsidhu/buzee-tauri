@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
 	import SvelteTable from '$lib/components/results/svelteTable.svelte';
-	import IconsGrid from './iconsGrid.svelte';
-	import { documentsShown, showIconGrid, preferLastOpened, noMoreResults } from '$lib/stores';
-	import LoadMoreButton from './LoadMoreButton.svelte';
+	import { documentsShown, preferLastOpened } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
 	// onMount(async () => {
@@ -23,11 +20,7 @@
 {#key $preferLastOpened}
 	<div class="overflow-x-auto w-full h-full max-h-full block">
 		{#if $documentsShown.length > 0}
-			{#if $showIconGrid}
-				<IconsGrid />
-			{:else}
-				<SvelteTable />
-			{/if}
+			<SvelteTable />
 		{:else}
 			<div class="flex flex-col h-full px-4 py-2 mx-auto items-center justify-center max-h-[75vh]">
 				<img id="buzee-logo-img" class="w-25 my-2" src="/Buzee Logo.png" alt="No Results" />

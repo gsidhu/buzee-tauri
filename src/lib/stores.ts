@@ -59,7 +59,7 @@ let storedDateLimitUNIX: ParsedDatesUNIX = {
 let storedFileText: string[] = [];
 let storedSearchSuggestions: string[] = [];
 let storedIgnoredPaths: IgnoreListType[] = [];
-let storedBase64Images: StringStringObject = {};
+let storedBase64Images: Base64ImageObject[] = [];
 
 // 2. Set the stored value or a sane default.
 export const userPreferences = writable({
@@ -101,14 +101,16 @@ export const shiftKeyPressed = writable(false);
 export const metaKeyPressed = writable(false);
 export const mouseDown = writable(false);
 export const searchInProgress = writable(false);
+export const base64SearchInProgress = writable(false);
 export const dbCreationInProgress = writable(false);
 export const windowBlurred = writable(false);
 export const scratchPadText = writable("")
-export const base64Images = writable(storedBase64Images || {})
+export const base64Images = writable(storedBase64Images || [])
 export const preferLastOpened = writable(false);
 export const showResultTextPreview = writable(false);
 export const noMoreResults = writable(false);
 export const searchSuggestionsDialogOpen = writable(false);
+export const searchFiltersOpen = writable(false);
 export const dateLimitUNIX = writable(storedDateLimitUNIX || null)
 
 // 3. Anytime the store changes, update the local storage value.

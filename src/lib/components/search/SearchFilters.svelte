@@ -8,9 +8,10 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
 	import ResultsPerPageSelector from './ResultsPerPageSelector.svelte';
+  import { searchFiltersOpen } from "$lib/stores";
 </script>
 
-<Collapsible.Root class="space-y-2">
+<Collapsible.Root class="space-y-2" bind:open={$searchFiltersOpen}>
   <div class="flex items-center justify-start space-x-4 px-4">
     <Collapsible.Trigger asChild let:builder>
       <Button builders={[builder]} variant="link" class="gap-1 p-0">

@@ -7,6 +7,8 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Added Roadmap Survey page.
 - Trying JSON file store for user preferences and app data. Don't need it. SQLite works.
 - Table Pagination works.
+- Result table height changes on filter toggle open/close.
+- Icon grid doesn't load icons properly. Need to optimise it. Maybe store thumbnail in the database and load it from there.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.

@@ -79,8 +79,9 @@ declare global {
     [key: string]: boolean;
   }
 
-  interface StringStringObject {
-    [key: string]: string;
+  interface Base64ImageObject {
+    path: string;
+    base64: string;
   }
 
   interface ParsedDatesUNIX {

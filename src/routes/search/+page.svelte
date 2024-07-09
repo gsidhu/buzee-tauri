@@ -3,8 +3,7 @@
 	import ResultsTable from '$lib/components/results/resultsTable.svelte';
 	import SearchFilters from '$lib/components/search/SearchFilters.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import LoadMoreButton from '$lib/components/results/LoadMoreButton.svelte';
-	import { documentsShown, noMoreResults, searchQuery, dateLimitUNIX, filetypeShown } from '$lib/stores';
+	import { searchQuery, dateLimitUNIX, filetypeShown, searchFiltersOpen } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { triggerSearch } from '$lib/utils/dbUtils';
 
@@ -18,11 +17,8 @@
 <div class="page" in:fade>
 	<SearchFilters />
 	<Separator class="my-2 "/>
-	<div class="flex flex-col justify-between max-h-[90%] h-full">
+	<div class="flex flex-col justify-between h-full" style={`max-height: ${$searchFiltersOpen ? 'calc(100vh - 278px)' : 'calc(100vh - 200px)'}`}>
 		<ResultsTable />
-		<!-- {#if $documentsShown.length > 0 || $noMoreResults === true}
-			<LoadMoreButton />
-		{/if} -->
 	</div>
 </div>
 

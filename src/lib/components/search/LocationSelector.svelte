@@ -4,14 +4,8 @@
   import { onMount } from 'svelte';
 	import { invoke } from '@tauri-apps/api/core';
 	import {
-		documentsShown,
-		searchQuery,
 		locationShown,
-		resultsPageShown,
-		resultsPerPage,
-		searchInProgress,
 		allowedLocations,
-		base64Images
 	} from '$lib/stores';
 	import { getDocumentsFromDB, searchDocuments } from '$lib/utils/dbUtils';
 	import { categoriseExtensions, setExtensionCategory } from '$lib/utils/miscUtils';
@@ -25,33 +19,9 @@
     $locationShown = value.toString();
 		selectedLocationOption = { value: $locationShown, label: $locationShown };
 		return;
-		// trackEvent('click:showDocsForLocation');
-		// $searchInProgress = true;
-		// $base64Images = {};
-		// let filetypeToGet = $locationShown;
-		// if (filetypeToGet !== 'any') {
-		// 	filetypeToGet = setExtensionCategory($locationShown, $allowedLocations);
-		// }
-		// if ($searchQuery === '') {
-		// 	$documentsShown = await getDocumentsFromDB(0, $resultsPerPage, filetypeToGet);
-		// } else {
-		// 	$documentsShown = await searchDocuments(
-		// 		$searchQuery,
-		// 		$resultsPageShown,
-		// 		$resultsPerPage,
-		// 		filetypeToGet
-		// 	);
-		// }
-		// $searchInProgress = false;
 	}
 
 	onMount(async () => {
-		// Get list of available extensions from main process
-		// invoke('get_allowed_filetypes').then((res) => {
-		// 	// @ts-ignore
-		// 	$allowedLocations = categoriseExtensions(JSON.parse(res));
-		// 	console.log("ext:", $allowedLocations);
-		// });
 	});
 </script>
 

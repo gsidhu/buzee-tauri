@@ -5,6 +5,8 @@
 	import { isMac, documentsShown, shiftKeyPressed, metaKeyPressed, showResultTextPreview, selectedResult, showIconGrid, searchSuggestionsDialogOpen } from '$lib/stores';
 	import { trackEvent } from '@aptabase/web';
 	import { goto } from '$app/navigation';
+	import { page } from "$app/stores";
+	
 
 	const allowedKeys = [
 		'Space',
@@ -14,6 +16,7 @@
 		'KeyF',
 		'KeyK',
 		'KeyP',
+		'KeyN',
 		'KeyS',
 		'ShiftLeft',
 		'ShiftRight',
@@ -57,6 +60,18 @@
 			trackEvent(eventPrefix + 'goToScratchPad');
 			goto('/magic/scratchpad');
 			return;
+		}
+
+		// if on search page
+		if ($page.route.id === '/search' ) {
+			if (e.code === 'KeyN') {
+				e.preventDefault();
+				(document.querySelector('#next-page-results') as HTMLElement)?.click();
+			}
+			if (e.code === 'KeyP') {
+				e.preventDefault();
+				(document.querySelector('#previous-page-results') as HTMLElement)?.click();
+			}
 		}
 
 		if ($metaKeyPressed && e.code === 'KeyA') {

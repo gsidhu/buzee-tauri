@@ -1,8 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import { extractDate, cleanSearchQuery } from "./queryParsing";
-import { searchQuery, resultsPageShown, noMoreResults, searchInProgress, filetypeShown, resultsPerPage, documentsShown, allowedExtensions, base64Images, dateLimitUNIX } from "$lib/stores";
+import { searchQuery, resultsPageShown, noMoreResults, searchInProgress, filetypeShown, resultsPerPage, documentsShown, allowedExtensions, base64Images, showIconGrid,  dateLimitUNIX } from "$lib/stores";
 import { trackEvent } from "@aptabase/web";
 import { setExtensionCategory } from "$lib/utils/miscUtils";
+import { getResultThumbnails } from '$lib/utils/fileTable';
 import { get } from 'svelte/store';
 
 export async function getDocumentsFromDB(page:number, limit:number) {
@@ -51,7 +52,7 @@ export async function searchDocuments(query:string, page:number, limit:number, t
 export async function triggerSearch() {
   resultsPageShown.set(0); // reset the page number on each new search
   searchInProgress.set(true);
-  base64Images.set({});
+  base64Images.set([]);
   trackEvent('search-triggered', {
     filetypeShown: get(filetypeShown),
     resultsPageShown: get(resultsPageShown)
@@ -69,6 +70,10 @@ export async function triggerSearch() {
     get(dateLimitUNIX)
   );
   documentsShown.set(result); 
+  if (get(showIconGrid)) {
+    console.log(">> triggersearch");
+    await getResultThumbnails(get(documentsShown));
+  }
   searchInProgress.set(false);
 }
 
@@ -95,6 +100,10 @@ export async function loadMoreResults() {
     noMoreResults.set(true);
   } else {
     documentsShown.set([...get(documentsShown), ...results]);
+  }
+  if (get(showIconGrid)) {
+    console.log(">> loadmoreresults");
+    await getResultThumbnails(get(documentsShown));
   }
   searchInProgress.set(false);
 }
