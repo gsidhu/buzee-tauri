@@ -10,7 +10,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
 use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_roadmap_survey_answered_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
-use crate::utils::{extract_text_from_pdf, graceful_restart, read_image_to_base64, save_text_to_file};
+use crate::utils::{extract_text_from_pdf, graceful_restart, read_image_to_base64, read_text_from_file, save_text_to_file};
 use crate::window::hide_or_show_window;
 use serde_json;
 use tauri::Manager;
@@ -249,6 +249,13 @@ async fn extract_text_from_pdf_file(file_path: String, app: tauri::AppHandle) ->
 async fn write_text_to_file(file_path: String, text: String) {
   save_text_to_file(file_path, text).await;
 }
+
+// Read text from .txt file
+#[tauri::command]
+async fn read_text_from_txt_file(file_path: String) -> Result<String, Error>  {
+  read_text_from_file(file_path).await
+}
+
 // Open QuickLook (MacOS) or Peek (Windows)
 #[tauri::command]
 fn open_quicklook(file_path: String) -> Result<String, Error> {
@@ -415,6 +422,7 @@ pub fn initialize() {
       get_text_for_file,
       extract_text_from_pdf_file,
       write_text_to_file,
+      read_text_from_txt_file,
       open_quicklook,
       open_context_menu,
       set_user_preference,

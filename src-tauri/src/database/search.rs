@@ -253,7 +253,7 @@ fn create_metadata_fts_query(
         },
         match_clause = if !match_string.is_empty() {
             format!(
-                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,1,50)",
+                "WHERE metadata_fts MATCH '{}' ORDER BY bm25(metadata_fts, 1,1,1,1,100,2)",
                 match_string
             )
         } else {

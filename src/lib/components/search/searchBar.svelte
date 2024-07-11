@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { Input } from "$lib/components/ui/input/index.js";
 	import * as Command from "$lib/components/ui/command";
 	import * as Popover from "$lib/components/ui/popover";
@@ -19,6 +19,8 @@
 	import { Search } from "lucide-svelte";
 	import Button from '../ui/button/button.svelte';
 	import { extractDate } from '$lib/utils/queryParsing';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	let getSuggestions = true;
 	let search = '';
@@ -46,6 +48,10 @@
 			$dateLimitUNIX = localDateLimitUNIX;
 		}
 		triggerSearch();
+		// if not on /search page, go to /search page
+		if ($page.route.id !== '/search' ) {
+			goto('/search');
+		}
 	}
 
 	const suggestionsList = [
@@ -73,6 +79,8 @@
 
 	function setResultShortcuts() {
 		let count = 2;
+		// when only suggestions are shown, number from 1-9
+		if ($searchQuery === '') count = 1;
 		const selectedResult = document.querySelector('[data-selected="true"]');
 		const selectedResultText = (selectedResult?.children[1] as HTMLElement).innerText;
 		// set first option shortcut as Cmd+1
@@ -105,6 +113,22 @@
 		});
 	}
 
+	function handleKeydown(e: KeyboardEvent) {
+		if ($page.route.id !== '/search') return;
+
+		if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+			e.preventDefault();
+			setResultShortcuts();
+		}
+		if (e.code.slice(0,-1) === 'Digit' && $metaKeyPressed) {
+			e.preventDefault();
+			const digit = e.code.slice(-1);
+			if (parseInt(digit) < 9) {
+				(document.querySelector(`[data-result-shortcut="${digit}"]`) as HTMLElement)?.click();
+			}
+		}
+	}
+
 	onMount(() => {
 		// get the query from the url
 		const urlParams = new URLSearchParams(window.location.search);
@@ -118,19 +142,11 @@
 		}
 
 		// keyboard listeners for command shortcuts
-		document.addEventListener('keydown', (e) => {
-			if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
-				e.preventDefault();
-				setResultShortcuts();
-			}
-			if (e.code.slice(0,-1) === 'Digit' && $metaKeyPressed) {
-				e.preventDefault();
-				const digit = e.code.slice(-1);
-				if (parseInt(digit) < 9) {
-					(document.querySelector(`[data-result-shortcut="${digit}"]`) as HTMLElement)?.click();
-				}
-			}
-		});
+		document.addEventListener('keydown', handleKeydown);
+	});
+
+	onDestroy(() => {
+		document.removeEventListener('keydown', handleKeydown);
 	});
 </script>
 

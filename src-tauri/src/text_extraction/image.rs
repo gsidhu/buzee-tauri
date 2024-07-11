@@ -1,18 +1,18 @@
-use std::{error::Error, path::Path};
+use std::{error::Error, fs::File, io::BufReader};
 // use futures::TryFutureExt;
 use tauri_plugin_shell::{ShellExt, process::CommandEvent};
 use crate::housekeeping::get_app_directory;
 use crate::text_extraction::{self, txt};
-use pdf_extract::extract_text;
 #[cfg(target_os = "windows")]
 use crate::utils::install_poppler_from_github;
 
 pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
   println!("Extracting text from: {}", file);
-  // check if the file contains pdf in its name
+  // check if the file contains svg in its name
   let mut text_based_content = String::new();
-  if file.to_lowercase().contains(".pdf") {
-    text_based_content = text_based_extraction(file).unwrap_or_else(|_| "false".to_string());
+  
+  if file.to_lowercase().contains(".svg") {
+    text_based_content = extract_text_from_svg(file).unwrap_or_else(|_| "false".to_string());
   }
 
   if text_based_content != "false" && text_based_content.len() > 0 {
@@ -82,7 +82,46 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
   }
 }
 
-pub fn text_based_extraction(file: &String) -> Result<String, Box<dyn Error>> {
-  let content = extract_text(Path::new(file)).map_err(|e| Box::new(e) as Box<dyn Error>)?;
-  Ok(content)
+fn extract_text_from_svg(file_path: &String) -> Result<String, Box<dyn Error>> {
+  use xml::reader::{EventReader, XmlEvent};
+  // Open the SVG file
+  let file = File::open(file_path).expect("Unable to open file");
+  let file = BufReader::new(file);
+
+  // Create an XML parser
+  let parser = EventReader::new(file);
+
+  // Iterate through the XML events
+  let mut inside_text = false;
+  let mut extracted_text = String::new();
+
+  for event in parser {
+      match event {
+          Ok(XmlEvent::StartElement { name, .. }) => {
+              if name.local_name == "text" {
+                  inside_text = true;
+              }
+          }
+          Ok(XmlEvent::Characters(data)) => {
+              if inside_text {
+                  extracted_text.push_str(&data);
+              }
+          }
+          Ok(XmlEvent::EndElement { name }) => {
+              if name.local_name == "text" {
+                  inside_text = false;
+              }
+          }
+          Err(e) => {
+              println!("Error: {}", e);
+              break;
+          }
+          _ => {}
+      }
+  }
+
+  // Print the extracted text
+  println!("Extracted text: {}", extracted_text);
+
+  Ok(extracted_text)
 }

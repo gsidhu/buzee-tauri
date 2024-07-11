@@ -14,6 +14,7 @@ extern crate pdf_extract;
 extern crate regex;
 extern crate serde_json;
 extern crate reqwest;
+extern crate xml;
 extern crate zip;
 
 mod utils;

@@ -72,13 +72,117 @@
 				e.preventDefault();
 				(document.querySelector('#previous-page-results') as HTMLElement)?.click();
 			}
-		}
+			if (e.code === 'Escape') {
+				e.preventDefault();
+				trackEvent(eventPrefix + 'deselectAllRows');
+				selectAllRows(true);
+				document.body.focus();
+				return;
+			}
 
-		if ($metaKeyPressed && e.code === 'KeyA') {
-			e.preventDefault();
-			trackEvent(eventPrefix + 'selectAllRow');
-			selectAllRows(false);
-			return;
+			const selectedElement = document.activeElement as HTMLElement;
+			let thisResultIndex: string | undefined = '-1';
+
+			if ($metaKeyPressed && e.code === 'KeyA' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+				e.preventDefault();
+				trackEvent(eventPrefix + 'selectAllRow');
+				selectAllRows(false);
+				return;
+			}
+
+			// If a result is selected
+			if (selectedElement?.classList.contains('selected')) {
+				thisResultIndex = Array.from(selectedElement?.classList)
+					.find((className) => className.startsWith('result-'))
+					?.split('-')[1];
+				let result = $documentsShown[Number(thisResultIndex)];
+
+				console.log("thisResultIndex:", thisResultIndex);
+				console.log("meta key pressed:", $metaKeyPressed);
+
+				if (e.code === 'Space') {
+					e.preventDefault();
+					trackEvent(eventPrefix + 'openQuickLook');
+					// window.electronAPI?.openQuickLook(result.path);
+					invoke("open_quicklook", { filePath: result.path })
+				} else if (e.code === 'Enter') {
+					e.preventDefault();
+					trackEvent(eventPrefix + 'openFile');
+					// window.electronAPI?.openFile(result.path);
+					invoke("open_file_or_folder", { filePath: result.path })
+				} else if (e.code === 'ArrowDown' && $metaKeyPressed && $isMac) {
+					e.preventDefault();
+					// window.electronAPI?.openFile(result.path);
+					invoke("open_file_or_folder", { filePath: result.path })
+				} else if (e.code === 'KeyO') {
+					e.preventDefault();
+					// window.electronAPI?.openFileFolder(result.path);
+					invoke("open_folder_containing_file", { filePath: result.path })
+				} else if (e.code === 'KeyP' && $shiftKeyPressed) {
+					e.preventDefault();
+					console.log(result);
+					
+					if (result.file_type !== 'folder' && result.last_parsed !== 0) {
+						$showResultTextPreview = true;
+						$selectedResult = result;
+					}
+				} else if (e.code === 'Tab' && $shiftKeyPressed) {
+					$shiftKeyPressed = false;
+				} else if (e.code === 'KeyP') {
+					e.preventDefault();
+					// togglePinState();
+				} else if ((!$showIconGrid && e.code === 'ArrowUp') || ($showIconGrid && e.code === 'ArrowLeft')) {
+					e.preventDefault();
+					if (document.getElementsByClassName('selected').length > 2) {
+						trackEvent(eventPrefix + 'deselectAllRows');
+						selectAllRows(true);
+					}
+					if ($shiftKeyPressed) {
+						// Have to find which is the "highest" result selected
+						// const lastSelected = document.getElementsByClassName("selected")[0];
+						// const lastSelectedIndex = Array.from(lastSelected?.classList).find((className) => className.startsWith("result-"))?.split("-")[1];
+						// let prevIndex = (Number(lastSelectedIndex) ?? 0) - 1;
+						// let prevElement = document.getElementsByClassName("result-" + prevIndex.toString())[0];
+						// if (prevElement) {
+						//   selectOneRow(prevElement as HTMLDivElement);
+						// }
+					} else {
+						let prevElement = selectedElement.parentElement?.previousElementSibling?.children[0] as HTMLDivElement;
+						clickRow(
+							{ currentTarget: prevElement } as MouseEvent & {
+								currentTarget: EventTarget & HTMLDivElement;
+							},
+							$shiftKeyPressed
+						);
+					}
+					return;
+				} else if ((!$showIconGrid && e.code === 'ArrowDown') || ($showIconGrid && e.code === 'ArrowRight')) {
+					e.preventDefault();
+					if (document.getElementsByClassName('selected').length > 2) {
+						trackEvent(eventPrefix + 'deselectAllRows');
+						selectAllRows(true);
+					}
+					if ($shiftKeyPressed) {
+						// Have to find which is the "lowest" result selected
+						// const lastSelected = document.getElementsByClassName("selected")[document.getElementsByClassName("selected").length - 1];
+						// const lastSelectedIndex = Array.from(lastSelected?.classList).find((className) => className.startsWith("result-"))?.split("-")[1];
+						// let nextIndex = (Number(lastSelectedIndex) ?? 0) + 1;
+						// let nextElement = document.getElementsByClassName("result-" + nextIndex.toString())[0];
+						// if (nextElement) {
+						//   selectOneRow(nextElement as HTMLDivElement);
+						// }
+					} else {
+						let nextElement = selectedElement.parentElement?.nextElementSibling?.children[0] as HTMLDivElement;
+						clickRow(
+							{ currentTarget: nextElement } as MouseEvent & {
+								currentTarget: EventTarget & HTMLDivElement;
+							},
+							$shiftKeyPressed
+						);
+					}
+					return;
+				}
+			}
 		}
 
 		if ($metaKeyPressed && (e.code === 'KeyF' || e.code === 'KeyK')) {
@@ -104,110 +208,7 @@
 			return;
 		}
 
-		if (e.code === 'Escape') {
-			e.preventDefault();
-			trackEvent(eventPrefix + 'deselectAllRows');
-			selectAllRows(true);
-			document.body.focus();
-			return;
-		}
-
-		const selectedElement = document.activeElement as HTMLElement;
-		let thisResultIndex: string | undefined = '-1';
-
-		// If a result is selected
-		if (selectedElement?.classList.contains('selected')) {
-			thisResultIndex = Array.from(selectedElement?.classList)
-				.find((className) => className.startsWith('result-'))
-				?.split('-')[1];
-			let result = $documentsShown[Number(thisResultIndex)];
-
-			console.log("thisResultIndex:", thisResultIndex);
-			console.log("meta key pressed:", $metaKeyPressed);
-
-			if (e.code === 'Space') {
-				e.preventDefault();
-				trackEvent(eventPrefix + 'openQuickLook');
-				// window.electronAPI?.openQuickLook(result.path);
-				invoke("open_quicklook", { filePath: result.path })
-			} else if (e.code === 'Enter') {
-				e.preventDefault();
-				trackEvent(eventPrefix + 'openFile');
-				// window.electronAPI?.openFile(result.path);
-				invoke("open_file_or_folder", { filePath: result.path })
-			} else if (e.code === 'ArrowDown' && $metaKeyPressed && $isMac) {
-				e.preventDefault();
-				// window.electronAPI?.openFile(result.path);
-				invoke("open_file_or_folder", { filePath: result.path })
-			} else if (e.code === 'KeyO') {
-				e.preventDefault();
-				// window.electronAPI?.openFileFolder(result.path);
-				invoke("open_folder_containing_file", { filePath: result.path })
-			} else if (e.code === 'KeyP' && $shiftKeyPressed) {
-				e.preventDefault();
-				console.log(result);
-				
-				if (result.file_type !== 'folder' && result.last_parsed !== 0) {
-					$showResultTextPreview = true;
-					$selectedResult = result;
-				}
-			} else if (e.code === 'Tab' && $shiftKeyPressed) {
-				$shiftKeyPressed = false;
-			} else if (e.code === 'KeyP') {
-				e.preventDefault();
-				// togglePinState();
-			} else if ((!$showIconGrid && e.code === 'ArrowUp') || ($showIconGrid && e.code === 'ArrowLeft')) {
-				e.preventDefault();
-				if (document.getElementsByClassName('selected').length > 2) {
-					trackEvent(eventPrefix + 'deselectAllRows');
-					selectAllRows(true);
-				}
-				if ($shiftKeyPressed) {
-					// Have to find which is the "highest" result selected
-					// const lastSelected = document.getElementsByClassName("selected")[0];
-					// const lastSelectedIndex = Array.from(lastSelected?.classList).find((className) => className.startsWith("result-"))?.split("-")[1];
-					// let prevIndex = (Number(lastSelectedIndex) ?? 0) - 1;
-					// let prevElement = document.getElementsByClassName("result-" + prevIndex.toString())[0];
-					// if (prevElement) {
-					//   selectOneRow(prevElement as HTMLDivElement);
-					// }
-				} else {
-					let prevElement = selectedElement.parentElement?.previousElementSibling?.children[0] as HTMLDivElement;
-					clickRow(
-						{ currentTarget: prevElement } as MouseEvent & {
-							currentTarget: EventTarget & HTMLDivElement;
-						},
-						$shiftKeyPressed
-					);
-				}
-				return;
-			} else if ((!$showIconGrid && e.code === 'ArrowDown') || ($showIconGrid && e.code === 'ArrowRight')) {
-				e.preventDefault();
-				if (document.getElementsByClassName('selected').length > 2) {
-					trackEvent(eventPrefix + 'deselectAllRows');
-					selectAllRows(true);
-				}
-				if ($shiftKeyPressed) {
-					// Have to find which is the "lowest" result selected
-					// const lastSelected = document.getElementsByClassName("selected")[document.getElementsByClassName("selected").length - 1];
-					// const lastSelectedIndex = Array.from(lastSelected?.classList).find((className) => className.startsWith("result-"))?.split("-")[1];
-					// let nextIndex = (Number(lastSelectedIndex) ?? 0) + 1;
-					// let nextElement = document.getElementsByClassName("result-" + nextIndex.toString())[0];
-					// if (nextElement) {
-					//   selectOneRow(nextElement as HTMLDivElement);
-					// }
-				} else {
-					let nextElement = selectedElement.parentElement?.nextElementSibling?.children[0] as HTMLDivElement;
-					clickRow(
-						{ currentTarget: nextElement } as MouseEvent & {
-							currentTarget: EventTarget & HTMLDivElement;
-						},
-						$shiftKeyPressed
-					);
-				}
-				return;
-			}
-		}
+		
 	}
 
 	function keyupListener(e: KeyboardEvent) {

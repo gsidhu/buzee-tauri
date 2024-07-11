@@ -15,6 +15,7 @@
 	let pathToIgnore = "";
 	let ignoreIndex = true;
 	let ignoreContent = true;
+	let dialogOpen = false;
 
 	$: if (ignoreIndex) { ignoreContent = true }
 
@@ -29,9 +30,6 @@
           $syncStatus = false;
           $disableInteraction = false;
 					$ignoredPaths  = [...$ignoredPaths, { path: pathToIgnore, is_folder: true, ignore_indexing: ignoreIndex, ignore_content: ignoreContent }];
-          setTimeout(() => {
-            $statusMessage = '';
-          }, 2000);
         });
 	}
 
@@ -48,11 +46,15 @@
 		}
 	}
 
+	$: if (!dialogOpen) {
+		$disableInteraction = false;
+		$statusMessage = "";
+	}
+
 	onMount(() => {
 		invoke("show_ignored_paths").then((res) => {
 			// @ts-ignore
 			$ignoredPaths = res;
-			console.log(ignoredPaths);
 		})
 	});
 
@@ -63,7 +65,7 @@
   <p class="text-sm text-muted-foreground">Any files or folders that you manually add from the Settings will be automatically removed from this list</p>
 </div>
 <div class="flex flex-1 flex-col gap-2 items-center justify-between rounded-lg border border-dashed shadow-sm p-4">
-	<Dialog.Root>
+	<Dialog.Root bind:open={dialogOpen}>
 		<Dialog.Trigger>
 			<Button>
 				<FolderPlus class="mr-2 h-6 w-6" />
@@ -72,48 +74,71 @@
 		</Dialog.Trigger>
 		<Dialog.Content>
 			<Dialog.Header>
-				<Dialog.Title>Add Folder to Ignore List</Dialog.Title>
-				<Dialog.Description>Add the full path to the folder</Dialog.Description>
+				<Dialog.Title>
+					{#if $disableInteraction || $statusMessage === "Removed!"}Removing items from the database
+					{:else}Add Folder to Ignore List
+					{/if}
+				</Dialog.Title>
+				<Dialog.Description>
+					{#if $disableInteraction || $statusMessage === "Removed!"}Please wait while the process completes..
+					{:else}Add the full path to the folder
+					{/if}
+				</Dialog.Description>
 			</Dialog.Header>
-			<div class="flex justify-between gap-2">
-				<input
-					type="text"
-					id="shortcut-input"
-					class="form-control w-full border border-1 rounded p-1"
-					placeholder="/path/to/folder"
-					bind:value={pathToIgnore}
-				/>
-				<Button variant="secondary" on:click={() => showFolderDialog()}>
-					<Folder class="h-4 w-4" />
-				</Button>
-			</div>
-			<div class="flex justify-between mt-3">
-				<div class="flex items-center space-x-2">
-					<Checkbox bind:checked={ignoreIndex} aria-labelledby="terms-label" id="ignore-index" />
-					<Label
-						id="ignore-index-label"
-						for="ignore-index"
-						class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-					>
-						Ignore Scanning
-					</Label>
+			{#if $disableInteraction || $statusMessage === "Removed!"}
+				{#if $statusMessage === "Removed!"}
+					<p>Done!</p>
+					<div class="flex justify-center items-center">
+						<lottie-player src="/checkmark-done.json" background="transparent"  speed="1"  style="width: 200px; height: 200px;" autoplay></lottie-player>
+					</div>
+				{:else}
+					<p>Our agents are working really hard on this issue.</p>
+					<div class="flex justify-center items-center">
+						<lottie-player src="/cat-loop.json" background="transparent"  speed="1"  style="width: 200px; height: 200px;" loop autoplay></lottie-player>
+						<!-- <img alt="Cat bashing its arms on a laptop computer" src="/cat-agent.webp" width="200" height="200" /> -->
+					</div>
+				{/if}
+			{:else}
+				<div class="flex justify-between gap-2">
+					<input
+						type="text"
+						id="shortcut-input"
+						class="form-control w-full border border-1 rounded p-1"
+						placeholder="/path/to/folder"
+						bind:value={pathToIgnore}
+					/>
+					<Button variant="secondary" on:click={() => showFolderDialog()}>
+						<Folder class="h-4 w-4" />
+					</Button>
 				</div>
-				<div class="flex items-center space-x-2">
-					<Checkbox bind:checked={ignoreContent} aria-labelledby="terms-label" id="ignore-content" />
-					<Label
-						id="ignore-content-label"
-						for="ignore-content"
-						class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-					>
-						Ignore Content
-					</Label>
+				<div class="flex justify-between mt-3">
+					<div class="flex items-center space-x-2">
+						<Checkbox bind:checked={ignoreIndex} aria-labelledby="terms-label" id="ignore-index" />
+						<Label
+							id="ignore-index-label"
+							for="ignore-index"
+							class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+						>
+							Ignore Scanning
+						</Label>
+					</div>
+					<div class="flex items-center space-x-2">
+						<Checkbox bind:checked={ignoreContent} aria-labelledby="terms-label" id="ignore-content" />
+						<Label
+							id="ignore-content-label"
+							for="ignore-content"
+							class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+						>
+							Ignore Content
+						</Label>
+					</div>
 				</div>
-			</div>
+			{/if}
 			<Dialog.Footer>
 				<Dialog.Close asChild let:builder>
-					<Button variant="secondary" aria-label="Close" builders={[builder]}>Close</Button>
-					<Button aria-label="Save" builders={[builder]} disabled={pathToIgnore === ''} on:click={() => addToIgnoreList()}>Save</Button>
+					<Button variant="secondary" disabled={$disableInteraction} aria-label="Close" builders={[builder]}>Close</Button>
 				</Dialog.Close>
+				<Button aria-label="Save" disabled={pathToIgnore === '' || $disableInteraction || $statusMessage === "Removed!"} on:click={() => addToIgnoreList()}>Save</Button>
 			</Dialog.Footer>
 		</Dialog.Content>
 	</Dialog.Root>
@@ -121,17 +146,4 @@
 	{#key $ignoredPaths.length }
 		<IgnoreList />
 	{/key}
-
-		<!-- <button>Remove Item</button>
-		<h6>SvelteTable: Ignore Completely</h6>
-		<small>Dialog menu to add items</small>
-
-		<h6>SvelteTable: Ignore Text</h6>
-		<small>Dialog menu to add items</small>
-
-		<button>Clear List</button>
-		<button>Export List (to use in Buzee later)</button>
-		<button>Import List (from a previous Buzee installation)</button>
-		
-		<small>On each save/import, run a formatting check + assign isFolder attribute before passing to the database</small> -->
 </div>

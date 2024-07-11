@@ -407,6 +407,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-graceful-shutdown",
+ "xml-rs",
  "zip 0.6.6",
 ]
 

@@ -184,8 +184,22 @@ pub async fn extract_text_from_pdf(file_path: String, conn: &mut SqliteConnectio
 }
 
 pub async fn save_text_to_file(file_path: String, text: String) {
+  let mut file_path = file_path;
+  if file_path == "scratchpad".to_string() {
+    file_path = format!("{}/scratchpad.txt", get_app_directory());
+  }
   let mut file = fs::File::create(file_path).unwrap();
   file.write_all(text.as_bytes()).unwrap();
+}
+
+pub async fn read_text_from_file(file_path: String) -> Result<String, Error> {
+  // Reads text from a given .txt file path
+  let mut file_path = file_path;
+  if file_path == "scratchpad".to_string() {
+    file_path = format!("{}/scratchpad.txt", get_app_directory());
+  }
+  let text = fs::read_to_string(file_path).unwrap();
+  Ok(text)
 }
 
 pub async fn read_image_to_base64(file_path: String) -> Result<String, Error> {

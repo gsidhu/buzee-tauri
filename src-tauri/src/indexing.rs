@@ -330,16 +330,11 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   let mut files_parsed = 0;
 
   let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
-  // let document_filetypes: [&str; 1] = ["md"];
-  println!("Document filetypes: {:?}", document_filetypes);
-  
-  // let allowed_filetypes = all_allowed_filetypes(conn, true);
-  // let document_filetypes: Vec<String> = allowed_filetypes
-  //   .iter()
-  //   .filter(|filetype| filetype.file_type_category == "document")
-  //   .map(|filetype| filetype.file_type.to_string())
-  //   .collect();
+  let image_filetypes = ["png", "jpeg", "jpg"];
+  let image_cutoff_size: f64 = 50_000.0;
 
+  println!("Document filetypes: {:?}", document_filetypes);
+  println!("Image filetypes: {:?}", image_filetypes);
 
   let ignored_items = get_all_ignored_paths(conn);
   let ignored_files: Vec<IgnoreList> = ignored_items.iter().filter(|item| !item.is_folder).cloned().collect();
@@ -365,12 +360,23 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
     .load::<(i32, String, String, String, i64)>(conn)
     .unwrap();
+  // Get the same for all Image files (only files > 50KB)
+  let image_files_data = document::table
+    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
+    .filter(document::file_type.eq_any(image_filetypes))
+    .filter(document::size.gt(image_cutoff_size))
+    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
+    .load::<(i32, String, String, String, i64)>(conn)
+    .unwrap();
   
   println!("PDF files: {}", pdf_files_data.len());
+  println!("Image files: {}", image_files_data.len());
   println!("Not PDF files: {}", not_pdf_files_data.len());
   
-  // Append the pdf_files_data to not_pdf_files_data
   let all_files_data = not_pdf_files_data.clone();
+  // Append the image_files_data to all_files_data
+  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().chain(image_files_data.into_iter()).collect();
+  // Append the pdf_files_data to all_files_data
   let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
   
   let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().filter(|item| {

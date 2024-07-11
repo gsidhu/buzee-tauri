@@ -9,6 +9,8 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Table Pagination works.
 - Result table height changes on filter toggle open/close.
 - Icon grid doesn't load icons properly. Need to optimise it. Maybe store thumbnail in the database and load it from there.
+- Scratchpad autosaves to local file.
+- Text is also scanned out of images (PNG, JPG, JPEG, SVG). Only for files > 50KB.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.

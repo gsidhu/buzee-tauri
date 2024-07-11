@@ -9,6 +9,7 @@ pub mod pdf;
 pub mod pptx;
 pub mod txt;
 pub mod xlsx;
+pub mod image;
 
 pub struct Extractor;
 
@@ -34,6 +35,10 @@ impl Extractor {
       "pptx" => pptx::extract(&file_path, app),
       "txt" => txt::extract(&file_path, app),
       "xlsx" => xlsx::extract(&file_path, app),
+      "jpg" => image::extract(&file_path, app).await,
+      "jpeg" => image::extract(&file_path, app).await,
+      "png" => image::extract(&file_path, app).await,
+      "svg" => image::extract(&file_path, app).await,
       _ => Err("File type not supported".into()),
     }
   }
