@@ -2,7 +2,7 @@ use std::{error::Error, path::Path};
 // use futures::TryFutureExt;
 use tauri_plugin_shell::{ShellExt, process::CommandEvent};
 use crate::housekeeping::get_app_directory;
-use crate::text_extraction::{self, txt};
+use crate::text_extraction::txt;
 use pdf_extract::extract_text;
 #[cfg(target_os = "windows")]
 use crate::utils::install_poppler_from_github;

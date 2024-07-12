@@ -1,7 +1,7 @@
 // Inter-Process Communication between Rust and SvelteKit
 // The idea is to eventually keep only callers here and move the actual logic to other files. This way, for creating a web app, we just have to convert this file into an API and call the same functions from the frontend.
 
-use crate::custom_types::{DBStat, DateLimit, Error, Payload, DBConnPoolState, UserPreferencesState, SyncRunningState, ContextMenuState};
+use crate::custom_types::{ContextMenuState, DBConnPoolState, DBStat, DateLimit, Error, Payload, SyncRunningState, TantivyBookmarkSearchResult, TantivyDocumentSearchResult, TantivyReaderState, UserPreferencesState};
 use crate::database::{establish_connection, get_connection_pool};
 use crate::database::models::{DocumentSearchResult, IgnoreList};
 use crate::database::search::{
@@ -21,6 +21,8 @@ use crate::context_menu::{contextmenu_receiver, searchresult_context_menu_folder
 // use log::info;
 use std::sync::Mutex;
 use std::process::Command;
+use crate::tantivy_index::{acquire_searcher_from_reader, parse_query_and_get_top_docs, return_document_search_results, return_bookmark_search_results, create_tantivy_basic_example, create_tantivy_schema, get_reader_for_index, get_tantivy_index};
+
 #[cfg(target_os = "windows")]
 use dirs::home_dir;
 
@@ -403,6 +405,26 @@ async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_stri
 //   }
 // }
 
+#[tauri::command]
+fn search_tantivy_files_index(app_handle: tauri::AppHandle, user_query: String, limit: i32) -> Result<Vec<TantivyDocumentSearchResult>, Error> {
+  println!("Searching Tantivy index...");
+  let tantivy_index = get_tantivy_index(create_tantivy_schema()).unwrap();
+  let searcher = acquire_searcher_from_reader(&app_handle).unwrap();
+  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, user_query, limit).unwrap();
+  let search_results = return_document_search_results(&tantivy_index, &searcher, top_docs).unwrap_or(vec![]);
+  Ok(search_results)
+}
+
+#[tauri::command]
+fn search_tantivy_bookmarks_index(app_handle: tauri::AppHandle, user_query: String, limit: i32) -> Result<Vec<TantivyBookmarkSearchResult>, Error> {
+  println!("Searching Tantivy index...");
+  let tantivy_index = get_tantivy_index(create_tantivy_schema()).unwrap();
+  let searcher = acquire_searcher_from_reader(&app_handle).unwrap();
+  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, user_query, limit).unwrap();
+  let search_results = return_bookmark_search_results(&tantivy_index, &searcher, top_docs).unwrap_or(vec![]);
+  Ok(search_results)
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -433,18 +455,25 @@ pub fn initialize() {
       ignore_file_or_folder,
       show_ignored_paths,
       remove_from_ignore_list,
-      get_image_base64
+      get_image_base64,
+      search_tantivy_files_index,
+      search_tantivy_bookmarks_index,
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
         {
+          let _ = create_tantivy_basic_example();
           // manage state(s)
           let handle = app.handle();
           // db connection pool
           let pool = get_connection_pool();
           handle.manage(Mutex::new(DBConnPoolState::new(pool)));
+          // tantivy reader state
+          let tantivy_index = get_tantivy_index(create_tantivy_schema()).unwrap();
+          let given_reader = get_reader_for_index(&tantivy_index).unwrap();
+          handle.manage(Mutex::new(TantivyReaderState::new(given_reader)));
           // user preferences state
           handle.manage(Mutex::new(UserPreferencesState::default()));
           set_user_preferences_state_from_db_value(app.handle());

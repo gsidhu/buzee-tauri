@@ -23,6 +23,78 @@ impl serde::Serialize for Error {
   }
 }
 
+// Struct for TantivyDocumentSearchResult
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TantivyDocumentSearchResult {
+  pub id: i64,
+  pub source_table: String,
+  pub source_domain: String,
+  pub is_pinned: Option<bool>,
+  pub comment: Option<String>,
+  pub created_at: Option<i64>,
+  pub title: Option<String>,
+  pub body: Option<String>,
+  pub path: Option<String>,
+  pub size: Option<f64>,
+  pub file_type: Option<String>,
+  pub last_modified: Option<i64>,
+  pub last_opened: Option<i64>,
+  pub last_synced: Option<i64>,
+  pub last_parsed: Option<i64>,
+}
+
+// Struct for TantivyBrowserHistorySearchResult
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TantivyBrowserHistorySearchResult {
+  pub id: i64,
+  pub source_table: String,
+  pub source_domain: String,
+  pub is_pinned: Option<bool>,
+  pub comment: Option<String>,
+  pub title: Option<String>,
+  pub body: Option<String>,
+  pub url: Option<String>,
+  pub last_visited: Option<i64>,
+}
+
+// Struct for TantivyBookmarkSearchResult
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TantivyBookmarkSearchResult {
+  pub id: i64,
+  pub source_table: String,
+  pub source_domain: String,
+  pub is_pinned: Option<bool>,
+  pub comment: Option<String>,
+  pub title: Option<String>,
+  pub body: Option<String>,
+  pub url: Option<String>,
+  pub saved_at: Option<i64>,
+  pub last_opened: Option<i64>,
+  pub word_count: Option<i64>,
+  pub is_favorite: Option<bool>,
+  pub is_archived: Option<bool>,
+  pub is_read: Option<bool>,
+  pub tags: Option<String>,
+}
+
+// Struct for TantivyEmailSearchResult
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TantivyEmailSearchResult {
+  pub id: i64,
+  pub source_table: String,
+  pub source_domain: String,
+  pub is_pinned: Option<bool>,
+  pub comment: Option<String>,
+  pub subject: Option<String>,
+  pub body: Option<String>,
+  pub sender: Option<String>,
+  pub recipient: Option<String>,
+  pub cc: Option<String>,
+  pub bcc: Option<String>,
+  pub attachments: Option<String>,
+  pub tags: Option<String>,
+}
+
 // DateLimit struct
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DateLimit {
@@ -83,6 +155,21 @@ pub struct DBStat {
 //     }
 //   }
 // }
+
+
+use tantivy::IndexReader;
+// Struct for Tantivy Reader
+pub(crate) struct TantivyReaderState {
+  pub reader: IndexReader
+}
+
+impl TantivyReaderState {
+  pub fn new(given_reader: IndexReader) -> Self {
+    Self {
+      reader: given_reader
+    }
+  }
+}
 
 use diesel::r2d2::{Pool, ConnectionManager};
 use diesel::SqliteConnection;

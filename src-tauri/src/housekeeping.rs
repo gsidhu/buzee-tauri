@@ -4,7 +4,6 @@ use crate::database::create_tables_if_not_exists;
 use crate::database::establish_direct_connection_to_db;
 use crate::utils::norm;
 use crate::user_prefs::{set_default_app_data, set_default_user_prefs, set_default_file_types};
-use crate::custom_types::UserPreferencesState;
 use log::{info, LevelFilter};
 
 pub const APP_DIRECTORY: &str = r#"buzee-tauri"#;
@@ -44,6 +43,14 @@ pub fn get_app_directory() -> String {
   app_dir_path
 }
 
+pub fn create_tantivy_index_directory_if_not_exists() -> Result<(), std::io::Error> {
+  let app_dir_path = get_app_directory();
+  let index_dir_path = format!("{}/{}", app_dir_path, "tantivy_index");
+  let index_dir_path = norm(&index_dir_path);
+  println!("creating tantivy index dir at:{}", &index_dir_path);
+  std::fs::create_dir_all(index_dir_path)
+}
+
 pub fn setup_logging_file_path() {
   let documents_dir = get_documents_directory().unwrap();
   let app_dir_path = format!("{}/{}", documents_dir, APP_DIRECTORY);
@@ -58,6 +65,7 @@ pub fn setup_logging_file_path() {
 pub fn initialize() -> () {
   println!("Initializing app directory");
   create_app_directory_if_not_exists().unwrap();
+  create_tantivy_index_directory_if_not_exists().unwrap();
   
   // Set up logging
   setup_logging_file_path();

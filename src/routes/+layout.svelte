@@ -71,6 +71,11 @@
     document.body.classList.remove("disable-interaction");
   }
 
+  async function run_tantivy() {
+    let results = await invoke("search_tantivy_files_index", { userQuery: "romeo", limit: 10 });
+    console.log(results);
+  }
+
   onMount(async () => {
     // startSerialEventListener();
     invoke("get_os").then(res => {
@@ -132,6 +137,8 @@
 
 <KeyboardListeners />
 <EventListeners />
+
+<Button on:click={() => run_tantivy()}>Tantivy</Button>
 <main class={`min-h-screen max-h-screen overflow-auto ${$windowBlurred ? "grayscale-no" : ""}`}>
 	<div class="grid min-h-screen max-h-screen w-full lg:grid-cols-[20vw_1fr]">
     <div class="hidden max-h-screen overflow-y-auto border-r bg-muted/40 lg:block">

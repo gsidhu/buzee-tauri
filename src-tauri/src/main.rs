@@ -12,8 +12,9 @@ extern crate mobi;
 extern crate epub;
 extern crate pdf_extract;
 extern crate regex;
-extern crate serde_json;
 extern crate reqwest;
+extern crate serde_json;
+extern crate tantivy;
 extern crate xml;
 extern crate zip;
 
@@ -28,6 +29,7 @@ mod indexing;
 mod text_extraction;
 mod context_menu;
 mod user_prefs;
+mod tantivy_index;
 mod window;
 
 fn main() {

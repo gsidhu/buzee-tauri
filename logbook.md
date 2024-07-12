@@ -11,6 +11,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Icon grid doesn't load icons properly. Need to optimise it. Maybe store thumbnail in the database and load it from there.
 - Scratchpad autosaves to local file.
 - Text is also scanned out of images (PNG, JPG, JPEG, SVG). Only for files > 50KB.
+- Using Tantivy as a replacement for Body_FTS. Each source gets its own table in the SQLite database and is coordinated with the Metadata table. The SQLite tables serve as a backup once the Tantivy index is fully set up as it will contain all the file contents.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.
