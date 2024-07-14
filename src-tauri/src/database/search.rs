@@ -6,7 +6,6 @@ use crate::tantivy_index::{acquire_searcher_from_reader, create_tantivy_schema, 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_json;
-use super::models::BodyFTSSearchResult;
 use super::schema::document;
 use tantivy::{Searcher, Index};
 
@@ -582,16 +581,6 @@ pub fn get_metadata_title_matches(
     );
     let keyword_suggestions: Vec<MetadataFTSSearchResult> = diesel::sql_query(inner_query).load::<MetadataFTSSearchResult>(conn)?;
     let mut suggestions: Vec<String> = keyword_suggestions.iter().map(|suggestion| suggestion.title.clone()).collect();
-    let inner_query = format!(
-        r#"
-            SELECT snippet(body_fts, 1, '', '', '', 2) as text from body_fts WHERE body_fts MATCH '{}*' LIMIT 10;
-        "#,
-        query
-    );
-    let keyword_suggestions: Vec<BodyFTSSearchResult> = diesel::sql_query(inner_query).load::<BodyFTSSearchResult>(conn)?;
-    for suggestion in keyword_suggestions {
-        suggestions.push(suggestion.text);
-    }
     
     // convert keywords to lowercase
     suggestions = suggestions.iter().map(|s| s.trim().to_lowercase()).collect();
