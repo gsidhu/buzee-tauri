@@ -1,18 +1,19 @@
-use crate::custom_types::Error;
-use crate::database::schema::{document, metadata, body, metadata_fts, body_fts, ignore_list, allow_list, file_types};
-use crate::database::models::{BodyItem, DocumentItem, FileTypes, IgnoreList, AllowList};
+use crate::custom_types::{Error, TantivyDocumentItem};
+use crate::database::schema::{document, metadata, metadata_fts, ignore_list, allow_list, file_types};
+use crate::database::models::{DocumentItem, FileTypes, IgnoreList, AllowList};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::utils::{self, get_metadata};
 use crate::text_extraction::Extractor;
+use crate::tantivy_index;
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
+use tantivy::Searcher;
 // use log::{info, error};
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
-use std::collections::HashMap;
 
 pub fn all_allowed_filetypes(connection: &mut SqliteConnection, only_allowed: bool) -> Vec<FileTypes> {
   let filetypes = file_types::table
@@ -251,10 +252,7 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
     files_added
 }
 
-pub fn add_file_metadata_to_database(
-    files_array: &Vec<DocumentItem>,
-    connection: &mut SqliteConnection,
-) {
+pub fn add_file_metadata_to_database(files_array: &Vec<DocumentItem>, connection: &mut SqliteConnection) {
     let files_array_clone = files_array.clone();
     // collect all file paths from files_array
     let file_paths: Vec<_> = files_array.iter().map(|file| &file.path).collect();
@@ -296,10 +294,11 @@ pub fn add_file_metadata_to_database(
                 })
         })
         .collect();
-
+    
     // add the new files to the database
     if files_to_add.len() > 0 {
         // println!(">>> Adding {} new files", files_to_add.len());
+        // INSERT into Document, TRIGGER will auto-insert into Metadata
         connection
             .transaction::<_, diesel::result::Error, _>(|connection| {
                 diesel::insert_into(document::table)
@@ -326,7 +325,7 @@ pub fn add_file_metadata_to_database(
     }
 }
 
-pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle) -> usize {
+pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle, searcher: &Searcher) -> usize {
   let mut files_parsed = 0;
 
   let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
@@ -344,29 +343,28 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   let allowed_files: Vec<AllowList> = allowed_items.iter().filter(|item| !item.is_folder).cloned().collect();
   let allowed_folders: Vec<AllowList> = allowed_items.iter().filter(|item| item.is_folder).cloned().collect();
   
-  // Get metadata_id, source_id, path, file_type and last_modified
+  // Get all documents from the database
   // For all files that have the filetype in the array above
   let not_pdf_files_data = document::table
-    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
     .filter(document::file_type.eq_any(document_filetypes))
-    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
+    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment))
     .order_by(document::size.asc())
-    .load::<(i32, String, String, String, i64)>(conn)
+    .load::<(i32, String, String, String, String, i64, i64, Option<String>)>(conn)
     .unwrap();
   // Get the same for all PDF files
   let pdf_files_data = document::table
-    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
     .filter(document::file_type.eq_any(["pdf"]))
-    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
-    .load::<(i32, String, String, String, i64)>(conn)
+    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment))
+    .order_by(document::size.asc())
+    .load::<(i32, String, String, String, String, i64, i64, Option<String>)>(conn)
     .unwrap();
   // Get the same for all Image files (only files > 50KB)
   let image_files_data = document::table
-    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
     .filter(document::file_type.eq_any(image_filetypes))
     .filter(document::size.gt(image_cutoff_size))
-    .select((metadata::id, document::path, document::name, document::file_type, document::last_modified))
-    .load::<(i32, String, String, String, i64)>(conn)
+    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment))
+    .order_by(document::size.asc())
+    .load::<(i32, String, String, String, String, i64, i64, Option<String>)>(conn)
     .unwrap();
   
   println!("PDF files: {}", pdf_files_data.len());
@@ -374,12 +372,13 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   println!("Not PDF files: {}", not_pdf_files_data.len());
   
   let all_files_data = not_pdf_files_data.clone();
-  // Append the image_files_data to all_files_data
-  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().chain(image_files_data.into_iter()).collect();
   // Append the pdf_files_data to all_files_data
-  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
+  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
+  // Append the image_files_data to all_files_data
+  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().chain(image_files_data.into_iter()).collect();
   
-  let all_files_data: Vec<(i32, String, String, String, i64)> = all_files_data.into_iter().filter(|item| {
+  // Filter the files based on the ignore_list and allow_list
+  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().filter(|item| {
     let path = item.1.clone();
     // Check if the file is in the allowed_files list
     if allowed_files.iter().any(|allowed_file| path.contains(&allowed_file.path)) {
@@ -399,63 +398,72 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     }
     true
   }).collect();
-  
-  let metadata_ids_to_select: Vec<i32> = all_files_data.iter().map(|item| item.0).collect();
-  let all_last_parsed_values: HashMap<i32, i64> = body::table
-    .filter(body::metadata_id.eq_any(metadata_ids_to_select))
-    .select((body::metadata_id, body::last_parsed))
-    .load::<(i32, i64)>(conn)
-    .unwrap()
-    .into_iter()
-    .collect();
 
   // Get sync_running status
   let mut sync_running = sync_status(&app).0;
 
   // Iterate over all_files_data and extract text from each file
   for file_item in all_files_data {
-    let metadata_id = file_item.0;
-    let path = file_item.1;
+    let source_id = file_item.0;
+    let source_domain = file_item.1;
     let name = file_item.2;
-    let file_type = file_item.3;
-    let last_modified = file_item.4;
-    let last_parsed: Option<&i64>;
-    match all_last_parsed_values.get(&metadata_id) {
-      Some(value) => {
-        // Handle the case where metadata_id exists in the HashMap
-        last_parsed = Some(value);
-      }
-      None => {
-        // Handle the case where metadata_id does not exist in the HashMap
-        last_parsed = None;
-      }
-    }
+    let path = file_item.3;
+    let file_type = file_item.4;
+    let last_modified = file_item.5;
+    let last_parsed = file_item.6;
+    let comment = file_item.7;
+
     // 1. BEFORE EXTRACTING TEXT: Break the loop if sync_running is false
     if sync_running == "false" {
       break;
     }
-    // If last_parsed is None or file_item.last_modified > last_parsed, then parse the file
-    if last_parsed.is_none() || last_modified > *last_parsed.unwrap_or(&0) {
+
+    let last_parsed_from_index: i64 = tantivy_index::get_last_parsed_value_from_id(&searcher, i64::from(source_id));
+
+    // If last_parsed is 0 (default) OR last_modified > last_parsed OR last_parsed_from_index is 0
+    if last_parsed == 0 || last_modified > last_parsed || last_parsed_from_index == 0 {
       // Extract text from the file
       // info!("Extracting text from: {}", path.clone());
       let text = extract_text_from_path(path.clone(), file_type.clone(), &app).await;
       // If there is no text, still add this file so that next time its last_parsed is compared
       // Chunk the text into 2000 character chunks
       let chunks = chunk_text(text);
-      let body_items: Vec<BodyItem> = chunks
-        .iter()
-        .map(|chunk| {
-          BodyItem {
-            metadata_id: metadata_id, 
-            text: chunk.to_string(),
-            title: name.clone(),
+
+      let mut body_tantivy_items = Vec::new();
+      // For each chunk, create a TantivyDocumentItem, with the body key as the chunk
+      let mut chunk_id = 0;
+      for chunk in chunks {
+        chunk_id += 1;
+        body_tantivy_items.push(
+          TantivyDocumentItem {
+            source_id: i64::from(source_id),
+            source_table: "document".to_string(),
+            source_domain: source_domain.clone(),
+            name: name.clone(),
             url: path.clone(),
+            body: chunk,
+            chunk_id: i64::from(chunk_id),
+            file_type: file_type.clone(),
             last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+            comment: comment.clone().unwrap_or_else(|| {return "".to_string(); }),
           }
-        }).collect();
-      add_body_to_database(&body_items, conn);
+        );
+      }
+
+      // Delete this file from the Tantivy Index
+      let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&vec![source_id]);
+      if indexing_commit_response.is_err() {
+        println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+      }
+
+      // Add the body_tantivy_items to the Tantivy Index
+      let indexing_commit_response = tantivy_index::add_docs_to_index(&body_tantivy_items);
+      if indexing_commit_response.is_err() {
+        println!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
+      }
+      
       // update last_parsed in document table for this file
-      let _ = diesel::update(document::table.filter(document::id.eq(metadata_id)))
+      let _ = diesel::update(document::table.filter(document::id.eq(source_id)))
         .set(document::last_parsed.eq(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64))
         .execute(conn)
         .unwrap();
@@ -499,21 +507,6 @@ fn chunk_text(text: String) -> Vec<String> {
   }
   chunks.push(chunk);
   chunks
-}
-
-fn add_body_to_database(body_items: &Vec<BodyItem>, connection: &mut SqliteConnection) {
-  // using transaction
-  if body_items.len() > 0 {
-    // println!("{}", body_items[0].metadata_id.to_string());
-    // println!("{}", body_items[0].text);
-    connection
-      .transaction::<_, diesel::result::Error, _>(|connection| {
-        diesel::insert_into(body::table)
-          .values(body_items)
-          .execute(connection)
-      })
-      .unwrap();
-  }
 }
 
 pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
@@ -562,11 +555,11 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
 
   if files_to_remove.len() > 0 {
     println!("Removing {} files", files_to_remove.len());
-    // create transactions of 100 files each
+    // create transactions of 500 files each
     let mut chunked_files_to_remove: Vec<Vec<String>> = vec![];
     let mut chunk: Vec<String> = vec![];
     for file in files_to_remove {
-      if chunk.len() == 100 {
+      if chunk.len() == 500 {
         chunked_files_to_remove.push(chunk.clone());
         chunk.clear();
       }
@@ -576,13 +569,18 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
     // remove files from the database
     for chunks_of_files_to_remove in chunked_files_to_remove {
       println!("Removing {} files from chunk", chunks_of_files_to_remove.len());
-      remove_vector_of_file_paths_from_db(chunks_of_files_to_remove, conn);
+      remove_vector_of_file_paths_from_db(&chunks_of_files_to_remove, conn);
+      let indexing_commit_response = tantivy_index::delete_docs_from_index_with_paths(&chunks_of_files_to_remove);
+      if indexing_commit_response.is_err() {
+        println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+      }
     }
   }
 }
 
-fn remove_vector_of_file_paths_from_db(file_paths: Vec<String>, conn: &mut SqliteConnection) {
+fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut SqliteConnection) {
   let file_paths_clone = file_paths.clone();
+  let file_paths_clone_two = file_paths.clone();
   // get metadata_id for all file_paths
   let metadata_ids = document::table
     .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
@@ -593,15 +591,15 @@ fn remove_vector_of_file_paths_from_db(file_paths: Vec<String>, conn: &mut Sqlit
 
   // first delete from body_fts, then body, then metadata_fts, then metadata, then document
   // delete from body_fts
-  conn.transaction::<_, diesel::result::Error, _>(|connection| {
-    diesel::delete(body_fts::table.filter(body_fts::metadata_id.eq_any(metadata_ids.clone())))
-      .execute(connection)
-  }).unwrap();
+  // conn.transaction::<_, diesel::result::Error, _>(|connection| {
+  //   diesel::delete(body_fts::table.filter(body_fts::metadata_id.eq_any(metadata_ids.clone())))
+  //     .execute(connection)
+  // }).unwrap();
   // delete from body
-  conn.transaction::<_, diesel::result::Error, _>(|connection| {
-    diesel::delete(body::table.filter(body::metadata_id.eq_any(metadata_ids.clone())))
-      .execute(connection)
-  }).unwrap();
+  // conn.transaction::<_, diesel::result::Error, _>(|connection| {
+  //   diesel::delete(body::table.filter(body::metadata_id.eq_any(metadata_ids.clone())))
+  //     .execute(connection)
+  // }).unwrap();
   // delete from metadata_fts
   conn.transaction::<_, diesel::result::Error, _>(|connection| {
     diesel::delete(metadata_fts::table.filter(metadata_fts::id.eq_any(metadata_ids.clone())))
@@ -617,6 +615,12 @@ fn remove_vector_of_file_paths_from_db(file_paths: Vec<String>, conn: &mut Sqlit
     diesel::delete(document::table.filter(document::path.eq_any(file_paths)))
       .execute(connection)
   }).unwrap();
+
+  // delete these files from the Tantivy Index
+  let indexing_commit_response = tantivy_index::delete_docs_from_index_with_paths(&file_paths_clone_two);
+  if indexing_commit_response.is_err() {
+    println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+  }  
 }
 
 pub fn add_folders_to_db(conn: &mut SqliteConnection) {
@@ -676,6 +680,7 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
       }
     })
     .collect();
+
   let _ = diesel::insert_into(document::table)
     .values(folder_items)
     .execute(conn)

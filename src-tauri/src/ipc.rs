@@ -21,7 +21,9 @@ use crate::context_menu::{contextmenu_receiver, searchresult_context_menu_folder
 // use log::info;
 use std::sync::Mutex;
 use std::process::Command;
-use crate::tantivy_index::{acquire_searcher_from_reader, parse_query_and_get_top_docs, return_document_search_results, return_bookmark_search_results, create_tantivy_basic_example, create_tantivy_schema, get_reader_for_index, get_tantivy_index};
+use crate::tantivy_index::{delete_all_docs_from_index, acquire_searcher_from_reader, create_tantivy_schema, get_reader_for_index, get_tantivy_index, parse_query_and_get_top_docs, return_bookmark_search_results, return_document_search_results};
+use crate::tantivy_index::internal_test_create_csv_dump_from_index;
+use tauri::Emitter;
 
 #[cfg(target_os = "windows")]
 use dirs::home_dir;
@@ -191,20 +193,13 @@ fn get_search_suggestions(query: String, app: tauri::AppHandle) -> Result<Vec<St
 
 // Run search
 #[tauri::command]
-fn run_search(
-    query: String,
-    page: i32,
-    limit: i32,
-    file_type: Option<String>,
-    date_limit: Option<DateLimit>,
-    app: tauri::AppHandle
-) -> Result<Vec<DocumentSearchResult>, Error> {
+fn run_search(query: String, page: i32, limit: i32, file_type: Option<String>, date_limit: Option<DateLimit>, app: tauri::AppHandle) -> Result<Vec<DocumentSearchResult>, Error> {
     println!(
         "run_search: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
         query, page, limit, file_type, date_limit
     );
     let conn = establish_connection(&app);
-    let search_results = search_fts_index(query, page, limit, file_type, date_limit, conn).unwrap_or(vec![]);
+    let search_results = search_fts_index(query, page, limit, file_type, date_limit, conn, &app).unwrap_or(vec![]);
     Ok(search_results)
 }
 
@@ -231,10 +226,10 @@ fn get_db_stats(app: tauri::AppHandle) -> Result<Vec<DBStat>, Error> {
 
 // Get parsed text for file
 #[tauri::command]
-async fn get_text_for_file(file_path: String, app: tauri::AppHandle) -> Result<Vec<String>, Error> {
-    println!("Getting text for file: {}", file_path);
-    let mut conn = establish_connection(&app);
-    let text = get_parsed_text_for_file(file_path, &mut conn).unwrap();
+async fn get_text_for_file(document_id: i32, app: tauri::AppHandle) -> Result<Vec<String>, Error> {
+    println!("Getting text for file ID: {}", document_id);
+    let searcher = acquire_searcher_from_reader(&app).unwrap();
+    let text = get_parsed_text_for_file(document_id, &searcher).unwrap();
     Ok(text)
 }
 
@@ -406,23 +401,36 @@ async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_stri
 // }
 
 #[tauri::command]
-fn search_tantivy_files_index(app_handle: tauri::AppHandle, user_query: String, limit: i32) -> Result<Vec<TantivyDocumentSearchResult>, Error> {
+fn search_tantivy_files_index(app_handle: tauri::AppHandle, user_query: String, limit: i32, page: i32) -> Result<Vec<TantivyDocumentSearchResult>, Error> {
   println!("Searching Tantivy index...");
   let tantivy_index = get_tantivy_index(create_tantivy_schema()).unwrap();
   let searcher = acquire_searcher_from_reader(&app_handle).unwrap();
-  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, user_query, limit).unwrap();
+
+  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, user_query, limit, page*limit).unwrap();
   let search_results = return_document_search_results(&tantivy_index, &searcher, top_docs).unwrap_or(vec![]);
   Ok(search_results)
 }
 
 #[tauri::command]
-fn search_tantivy_bookmarks_index(app_handle: tauri::AppHandle, user_query: String, limit: i32) -> Result<Vec<TantivyBookmarkSearchResult>, Error> {
+fn search_tantivy_bookmarks_index(app_handle: tauri::AppHandle, user_query: String, limit: i32, page: i32) -> Result<Vec<TantivyBookmarkSearchResult>, Error> {
   println!("Searching Tantivy index...");
   let tantivy_index = get_tantivy_index(create_tantivy_schema()).unwrap();
   let searcher = acquire_searcher_from_reader(&app_handle).unwrap();
-  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, user_query, limit).unwrap();
+
+  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, user_query, limit, page*limit).unwrap();
   let search_results = return_bookmark_search_results(&tantivy_index, &searcher, top_docs).unwrap_or(vec![]);
   Ok(search_results)
+}
+
+#[tauri::command]
+fn create_csv_dump(app_handle: tauri::AppHandle) {
+  let searcher = acquire_searcher_from_reader(&app_handle).unwrap();
+  internal_test_create_csv_dump_from_index(&searcher);
+}
+
+#[tauri::command]
+fn clear_index() {
+  let _ = delete_all_docs_from_index();
 }
 
 pub fn initialize() {
@@ -458,13 +466,14 @@ pub fn initialize() {
       get_image_base64,
       search_tantivy_files_index,
       search_tantivy_bookmarks_index,
+      create_csv_dump,
+      clear_index
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
         {
-          let _ = create_tantivy_basic_example();
           // manage state(s)
           let handle = app.handle();
           // db connection pool
@@ -491,10 +500,12 @@ pub fn initialize() {
         {
           if is_global_shortcut_enabled(app.handle()) {
             println!("Global Shortcut is enabled");
+            use tauri_plugin_global_shortcut::ShortcutState;
             app.handle().plugin(
               tauri_plugin_global_shortcut::Builder::new()
                 .with_shortcut(get_global_shortcut(app.handle()))?
-                .with_handler(|app_handle, shortcut| {
+                .with_handler(|app_handle, shortcut, event| {
+                  if event.state == ShortcutState::Pressed {
                     let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut(app_handle);
                     println!("shortcut: {:?}", shortcut);
                     if shortcut.matches(global_shortcut_modifiers, global_shortcut_code) {
@@ -502,6 +513,7 @@ pub fn initialize() {
                       let main_window = app_handle.get_webview_window("main").unwrap();
                       hide_or_show_window(main_window);
                     }
+                  }
                 })
                 .build(),
             )?;
@@ -511,8 +523,7 @@ pub fn initialize() {
         }
         {
           app.on_menu_event(|app_handle: &tauri::AppHandle, event| {
-            println!("menu event: {:?}", event);
-            // let main_window = app_handle.get_webview_window("main").unwrap();
+            // println!("menu event: {:?}", event);
             contextmenu_receiver(app_handle, event);
           });
         }

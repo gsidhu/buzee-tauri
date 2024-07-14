@@ -72,8 +72,12 @@
   }
 
   async function run_tantivy() {
-    let results = await invoke("search_tantivy_files_index", { userQuery: "romeo", limit: 10 });
+    let results = await invoke("search_tantivy_files_index", { userQuery: "ignus* -rajasthan", limit: 25, page: 0 });
     console.log(results);
+  }
+
+  async function run_tantivy_index() {
+    await invoke("create_csv_dump");
   }
 
   onMount(async () => {
@@ -138,7 +142,8 @@
 <KeyboardListeners />
 <EventListeners />
 
-<Button on:click={() => run_tantivy()}>Tantivy</Button>
+<!-- <Button on:click={() => run_tantivy()}>Search</Button>
+<Button on:click={() => run_tantivy_index()}>Create</Button> -->
 <main class={`min-h-screen max-h-screen overflow-auto ${$windowBlurred ? "grayscale-no" : ""}`}>
 	<div class="grid min-h-screen max-h-screen w-full lg:grid-cols-[20vw_1fr]">
     <div class="hidden max-h-screen overflow-y-auto border-r bg-muted/40 lg:block">

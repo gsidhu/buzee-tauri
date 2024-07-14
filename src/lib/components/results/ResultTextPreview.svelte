@@ -16,7 +16,7 @@
   async function showTextPreview() {
     trackEvent('showText');
     if ($selectedResult !== undefined) {
-      invoke('get_text_for_file', { filePath: $selectedResult.path }).then((res) => {
+      invoke('get_text_for_file', { documentId: $selectedResult.id }).then((res) => {
         $selectedResultText = [];
         // @ts-ignore
         res.forEach(element => {

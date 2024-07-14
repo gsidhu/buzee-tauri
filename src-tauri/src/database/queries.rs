@@ -57,7 +57,7 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
   source_id = id from the source table (document, email, article, website etc.)
   text = body content of the document, email, article, website etc.
 */
-pub const BODY_TABLE_CREATE_STATEMENT : &str = r#"
+pub const _BODY_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE TABLE IF NOT EXISTS "body" 
   (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,7 +134,7 @@ pub const METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
   content is set to the `body` table
   tokenize is set to use the porter stemmer algorithm and unicode61 tokenizer (more suitable than ascii)
 */
-pub const BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
+pub const _BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE VIRTUAL TABLE IF NOT EXISTS body_fts 
   USING fts5(
     metadata_id UNINDEXED,
@@ -207,7 +207,7 @@ pub const TRIGGER_UPDATE_DOCUMENT_METADATA : &str = r#"
   Triggers to keep the Body FTS virtual table updated when the body table is updated
 */
 
-pub const TRIGGER_INSERT_BODY_FTS : &str = r#"
+pub const _TRIGGER_INSERT_BODY_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS body_fts_insert_trigger
   AFTER INSERT ON body
   BEGIN
@@ -216,7 +216,7 @@ pub const TRIGGER_INSERT_BODY_FTS : &str = r#"
   END;
 "#;
 
-pub const TRIGGER_UPDATE_BODY_FTS : &str = r#"
+pub const _TRIGGER_UPDATE_BODY_FTS : &str = r#"
   CREATE TRIGGER IF NOT EXISTS body_fts_update_trigger
   AFTER UPDATE ON body
   BEGIN
@@ -259,7 +259,7 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
   );
 "#;
 
-pub const USER_PREFS_TABLE_ALTER_STATEMENT_V_0_2_0 : &str = r#"
+pub const _USER_PREFS_TABLE_ALTER_STATEMENT_V_0_2_0 : &str = r#"
   ALTER TABLE user_preferences
   ADD COLUMN roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0;
 "#;

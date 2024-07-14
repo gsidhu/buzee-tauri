@@ -3,6 +3,7 @@ use crate::housekeeping::get_app_directory;
 use tauri::{
   menu::{Menu, MenuEvent, MenuId, MenuItem, Submenu}, Manager, WebviewWindow, Wry
 };
+use tauri::Emitter;
 
 pub fn tableheader_context_menu(window: &WebviewWindow) -> Menu<Wry> {
     let manager = window.app_handle();
@@ -44,9 +45,7 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
   trait MenuIdString {
     fn to_string(&self) -> String;
   }
-
   let event_id_string: &str = &event.id().to_string();
-
   match event_id_string {
     "open" => {
       app.emit("open", Payload { message: "Open File".into(), data: "".into() }).unwrap();

@@ -23,23 +23,33 @@ impl serde::Serialize for Error {
   }
 }
 
+// This struct is for INSERTING documents into the Tantivy Index
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TantivyDocumentItem {
+    pub source_id: i64,
+    pub source_table: String,
+    pub source_domain: String,
+    pub name: String,
+    pub url: String,
+    pub body: String,
+    pub chunk_id: i64,
+    pub file_type: String,
+    pub last_parsed: i64,
+    pub comment: String,
+}
+
 // Struct for TantivyDocumentSearchResult
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TantivyDocumentSearchResult {
   pub id: i64,
   pub source_table: String,
   pub source_domain: String,
-  pub is_pinned: Option<bool>,
   pub comment: Option<String>,
-  pub created_at: Option<i64>,
   pub title: Option<String>,
   pub body: Option<String>,
-  pub path: Option<String>,
-  pub size: Option<f64>,
+  pub chunk_id: i64,
+  pub url: Option<String>,
   pub file_type: Option<String>,
-  pub last_modified: Option<i64>,
-  pub last_opened: Option<i64>,
-  pub last_synced: Option<i64>,
   pub last_parsed: Option<i64>,
 }
 
@@ -55,6 +65,8 @@ pub struct TantivyBrowserHistorySearchResult {
   pub body: Option<String>,
   pub url: Option<String>,
   pub last_visited: Option<i64>,
+  pub frecency_rank: Option<f64>,
+  pub frecency_last_accessed: Option<i64>,
 }
 
 // Struct for TantivyBookmarkSearchResult
@@ -75,6 +87,8 @@ pub struct TantivyBookmarkSearchResult {
   pub is_archived: Option<bool>,
   pub is_read: Option<bool>,
   pub tags: Option<String>,
+  pub frecency_rank: Option<f64>,
+  pub frecency_last_accessed: Option<i64>,
 }
 
 // Struct for TantivyEmailSearchResult
@@ -87,12 +101,15 @@ pub struct TantivyEmailSearchResult {
   pub comment: Option<String>,
   pub subject: Option<String>,
   pub body: Option<String>,
+  pub url: Option<String>,
   pub sender: Option<String>,
   pub recipient: Option<String>,
   pub cc: Option<String>,
   pub bcc: Option<String>,
   pub attachments: Option<String>,
   pub tags: Option<String>,
+  pub frecency_rank: Option<f64>,
+  pub frecency_last_accessed: Option<i64>,
 }
 
 // DateLimit struct

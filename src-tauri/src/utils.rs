@@ -2,10 +2,11 @@ use std::{fs, io, io::Write};
 use std::path::Path;
 use diesel::SqliteConnection;
 use tauri_plugin_global_shortcut::Modifiers;
-use crate::database::search::get_parsed_text_for_file;
+use crate::database::search::{get_parsed_text_for_file, get_file_id_from_path};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_app_directory;
 use crate::indexing::extract_text_from_path;
+use crate::tantivy_index::acquire_searcher_from_reader;
 use crate::user_prefs::set_scan_running_status;
 use std::process::Command;
 use crate::custom_types::Error;
@@ -171,9 +172,15 @@ pub async fn install_poppler_from_github() -> Result<String, Error> {
 }
 
 pub async fn extract_text_from_pdf(file_path: String, conn: &mut SqliteConnection, app: &tauri::AppHandle) -> Result<Vec<String>, Error> {
-  // check if file_path's text already exists in body_fts
-  // by calling get_parsed_text_for_file
-  let mut text = get_parsed_text_for_file(file_path.clone(), conn).unwrap();
+  // check if file_path's text already exists in the tantivy index by calling get_parsed_text_for_file
+  let mut text = vec![];
+  // first, get the file's ID from the document table in the database
+  let file_id = get_file_id_from_path(&file_path, conn).unwrap();
+  if file_id > 0 {
+    let searcher = acquire_searcher_from_reader(&app).unwrap();
+    text = get_parsed_text_for_file(file_id, &searcher).unwrap();
+  } 
+  
   if text.is_empty() {
     // otherwise call extract_text_from_path
     let extracted_text = extract_text_from_path(file_path, "pdf".to_string(), app).await;

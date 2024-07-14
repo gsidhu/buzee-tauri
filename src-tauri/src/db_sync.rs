@@ -5,6 +5,7 @@ use crate::database::{establish_connection, establish_direct_connection_to_db};
 use crate::housekeeping::get_home_directory;
 use crate::ipc::send_message_to_frontend;
 use crate::indexing::{add_path_to_allow_list, parse_content_from_files, walk_directory};
+use crate::tantivy_index::acquire_searcher_from_reader;
 use crate::user_prefs::set_scan_running_status;
 use log::info;
 use std::sync::Mutex;
@@ -46,10 +47,13 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, sw
       let mut new_conn = establish_connection(&app);
       let _files_added = walk_directory(&mut new_conn, &window, file_paths);
 
+      // Add all missing docs to the index (if any)
+      let searcher = acquire_searcher_from_reader(&app).unwrap();
+
       if detailed_scan_allowed {
         // Then start parsing the content of all files and add it to the body table
         println!("Parsing content from files");
-        let files_parsed = parse_content_from_files(&mut new_conn, app.clone()).await;
+        let files_parsed = parse_content_from_files(&mut new_conn, app.clone(), &searcher).await;
         println!("Files parsed: {}", files_parsed);
       }
       // Emit closing sync status to the frontend
@@ -88,7 +92,7 @@ pub async fn add_specific_folders(window: &tauri::WebviewWindow, file_paths: Vec
       for path in file_paths {
         let _ = add_path_to_allow_list(path, is_folder, &mut conn);
       }
-      let _files_added = walk_directory(&mut conn, &window, file_paths_clone);
+      let _files_added = walk_directory(&mut conn, &window, file_paths_clone,);
     } else {
       // This is the onboarding run
       let mut file_paths = file_paths;

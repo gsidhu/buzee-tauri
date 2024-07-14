@@ -9,21 +9,17 @@ use crate::housekeeping::{get_documents_directory, APP_DIRECTORY};
 use crate::utils::norm;
 use queries::{
   DOCUMENT_TABLE_CREATE_STATEMENT, 
-  BODY_TABLE_CREATE_STATEMENT, 
   METADATA_TABLE_CREATE_STATEMENT, 
   METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT,
-  BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT,
   TRIGGER_INSERT_DOCUMENT_METADATA, TRIGGER_UPDATE_DOCUMENT_METADATA,
-  TRIGGER_INSERT_BODY_FTS, TRIGGER_UPDATE_BODY_FTS,
   USER_PREFS_TABLE_CREATE_STATEMENT,
-  USER_PREFS_TABLE_ALTER_STATEMENT_V_0_2_0,
   APP_DATA_TABLE_CREATE_STATEMENT,
   IGNORE_LIST_TABLE_CREATE_STATEMENT,
   ALLOW_LIST_TABLE_CREATE_STATEMENT,
   FILE_TYPES_TABLE_CREATE_STATEMENT
 };
 
-const DB_NAME: &str = r#"buzee.db"#;
+const DB_NAME: &str = r#"buzee_v0_2.db"#;
 
 // pub mod crud;
 pub mod schema;
@@ -97,11 +93,6 @@ pub fn establish_direct_connection_to_db() -> SqliteConnection {
 
 // Create all tables and triggers in the db if they don't exist
 pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
-  let user_prefs_columns = get_table_columns(conn, "user_preferences")?;
-  if !user_prefs_columns.contains(&"roadmap_survey_answered".to_string()) {
-    diesel::sql_query(USER_PREFS_TABLE_ALTER_STATEMENT_V_0_2_0.to_string()).execute(conn)?;
-  }
-
   // User Prefs and App Data Tables
   diesel::sql_query(USER_PREFS_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(APP_DATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
@@ -111,34 +102,33 @@ pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize,
   
   // Data Tables
   diesel::sql_query(DOCUMENT_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
-  diesel::sql_query(BODY_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  // diesel::sql_query(BODY_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(METADATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
-  diesel::sql_query(BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  // diesel::sql_query(BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
 
   // Triggers
   diesel::sql_query(TRIGGER_INSERT_DOCUMENT_METADATA.to_string()).execute(conn)?;
   diesel::sql_query(TRIGGER_UPDATE_DOCUMENT_METADATA.to_string()).execute(conn)?;
-  diesel::sql_query(TRIGGER_INSERT_BODY_FTS.to_string()).execute(conn)?;
-  diesel::sql_query(TRIGGER_UPDATE_BODY_FTS.to_string()).execute(conn)?;
+  // diesel::sql_query(TRIGGER_INSERT_BODY_FTS.to_string()).execute(conn)?;
+  // diesel::sql_query(TRIGGER_UPDATE_BODY_FTS.to_string()).execute(conn)?;
   Ok(1)
 }
 
-use diesel::sql_query;
+// use diesel::sql_query;
+// #[derive(QueryableByName, Debug)]
+// struct TableInfo {
+//     #[sql_type = "diesel::sql_types::Text"]
+//     name: String
+// }
 
-#[derive(QueryableByName, Debug)]
-struct TableInfo {
-    #[sql_type = "diesel::sql_types::Text"]
-    name: String
-}
+// fn get_table_columns(conn: &mut SqliteConnection, table_name: &str) -> Result<Vec<String>, diesel::result::Error> {
+//     let query = format!("SELECT name FROM pragma_table_info('{}')", table_name);
+//     let results = sql_query(query).load::<TableInfo>(conn)?;
 
-fn get_table_columns(conn: &mut SqliteConnection, table_name: &str) -> Result<Vec<String>, diesel::result::Error> {
-    let query = format!("SELECT name FROM pragma_table_info('{}')", table_name);
-    let results = sql_query(query).load::<TableInfo>(conn)?;
-
-    let mut columns = Vec::new();
-    for result in results {
-        columns.push(result.name);
-    }
-    Ok(columns)
-}
+//     let mut columns = Vec::new();
+//     for result in results {
+//         columns.push(result.name);
+//     }
+//     Ok(columns)
+// }

@@ -1,10 +1,14 @@
-use crate::custom_types::{DBStat, DateLimit, QuerySegments};
+use crate::custom_types::{Error, DBStat, DateLimit, QuerySegments};
+use crate::database::establish_connection;
 use crate::database::models::{DocumentSearchResult, MetadataFTSSearchResult};
 use crate::indexing::all_allowed_filetypes;
+use crate::tantivy_index::{acquire_searcher_from_reader, create_tantivy_schema, get_body_values_from_id, get_tantivy_index, parse_query_and_get_top_docs, return_document_search_results};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_json;
 use super::models::BodyFTSSearchResult;
+use super::schema::document;
+use tantivy::{Searcher, Index};
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
     let parsed_json = serde_json::from_str(json_string);
@@ -20,7 +24,7 @@ fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
     query_segments
 }
 
-fn create_match_statement(query_segments: QuerySegments) -> String {
+fn create_match_statement(query_segments: &QuerySegments) -> String {
     let mut match_string: String = String::new();
 
     // If there are quoted segments, join them with double quotes
@@ -57,32 +61,85 @@ fn create_match_statement(query_segments: QuerySegments) -> String {
         match_string = format!(
             "{} NOT ({})",
             match_string,
-            if query_segments.not_segments.len() == 1 {
-                format!("{}*", query_segments.not_segments[0])
-            } else {
-                // join with `* OR` and remove the trailing `OR`
-                let not_string = query_segments.not_segments
-                    .iter()
-                    .map(|segment| {
-                        // if segment starts with ^^, it contains a punctuation mark (using code from frontend because regex caused problems in rust)
-                        if segment.starts_with("^^") {
-                            // Remove ^^ from the segment and
-                            // Add double quotes around the segment
-                            format!("\"{}\"", segment.replace("^^", ""))
-                        } else {
-                            // Add * to the end of the segment
-                            format!("{}*", segment)
-                        }
-                    })
-                    .collect::<Vec<String>>()
-                    .join(" OR ");
-                not_string
-            }
+            // join with `* OR` and remove the trailing `OR`
+            query_segments.not_segments
+              .iter()
+              .map(|segment| {
+                  // if segment starts with ^^, it contains a punctuation mark
+                  // or if it has a space in it, it is a phrase
+                  if segment.starts_with("^^") || segment.contains(" ") {
+                      // Remove ^^ from the segment and
+                      // Add double quotes around the segment
+                      format!("\"{}\"", segment.replace("^^", ""))
+                  } else {
+                      // Add * to the end of the segment
+                      format!("{}*", segment)
+                  }
+              })
+              .collect::<Vec<String>>()
+              .join(" OR ")
         );
     }
     // remove the trailing `OR )`
     match_string = match_string.trim().to_string();
     match_string
+}
+
+fn create_tantivy_query_statement(query_segments: &QuerySegments) -> String {
+    let mut tantivy_query_string: String = String::new();
+
+    // If there are quoted segments, join them with double quotes
+    if query_segments.quoted_segments.len() > 0 {
+      tantivy_query_string = format!("{}",
+        query_segments.quoted_segments
+            .iter()
+            .map(|segment| {
+                // if segment contains ^^, it contains a punctuation mark (using code from frontend because regex caused problems in rust)
+                if segment.contains("^^") {
+                    // Remove ^^ from the segment and
+                    // Add double quotes around the segment
+                    format!("\"{}\"", segment.replace("^^", ""))
+                } else {
+                    // Add double quotes around the segment
+                    format!("\"{}\"", segment)
+                }
+            })
+            .collect::<Vec<String>>()
+            .join(" ")
+        );
+    }
+    // If there are greedy segments, join them with an asterisk space
+    if query_segments.greedy_segments.len() > 0 {
+      tantivy_query_string = format!(
+            "{} {}*",
+            tantivy_query_string,
+            query_segments.greedy_segments.join("* ")
+        );
+    }
+    // If there are NOT segments, place a - in front of each segment
+    if query_segments.not_segments.len() > 0 {
+      tantivy_query_string = format!(
+          "{} -{}",
+          tantivy_query_string,
+          query_segments.not_segments.iter().map(|segment| {
+            // if segment contains a space, wrap it in double quotes
+            if segment.contains(" ") {
+              format!("\"{}\"", segment)
+            } else if segment.contains("^^") {
+              // Remove ^^ from the segment and
+              // Add double quotes around the segment
+              format!("\"{}\"", segment.replace("^^", ""))
+            } else {
+              segment.to_string()
+            }
+          })
+          .collect::<Vec<String>>()
+          .join(" -")
+        );
+    }
+    // remove the trailing `OR )`
+    tantivy_query_string = tantivy_query_string.trim().to_string();
+    tantivy_query_string
 }
 
 // Return documents from the metadata_fts index that match the given search query (name and type)
@@ -94,6 +151,7 @@ pub fn search_fts_index(
     file_type: Option<String>,
     date_limit: Option<DateLimit>,
     mut conn: PooledConnection<ConnectionManager<SqliteConnection>>,
+    app: &tauri::AppHandle
 ) -> Result<Vec<DocumentSearchResult>, diesel::result::Error> {
     println!(
         "search_fts_index: query: {}, page: {}, limit: {}, file_type: {:?}, date_limit: {:?}",
@@ -106,61 +164,61 @@ pub fn search_fts_index(
     let file_type_clone = file_type.clone();
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
-        if !file_type.contains(",") {
-            format!(r#"file_type IN ('{}')"#, file_type)
-        } else {
-            format!(
-                r#"file_type IN ('{}')"#,
-                file_type.replace(",", "','").replace("' ", "'")
-            )
-        }
+      if !file_type.contains(",") {
+        format!(r#"file_type IN ('{}')"#, file_type)
+      } else {
+        format!(
+            r#"file_type IN ('{}')"#,
+            file_type.replace(",", "','").replace("' ", "'")
+        )
+      }
     } else {
-        "".to_string()
+      "".to_string()
     };
     // Add date limit(s)
     let where_date_limit: String = if let Some(date_limit) = date_limit {
-        format!(
-            r#"{} last_modified >= '{}' AND last_modified <= '{}'"#,
-            if !where_file_type.is_empty() {
-                "AND"
-            } else {
-                ""
-            },
-            date_limit.start,
-            date_limit.end
-        )
+      format!(
+        r#"{} last_modified >= '{}' AND last_modified <= '{}'"#,
+        if !where_file_type.is_empty() {
+          "AND"
+        } else {
+          ""
+        },
+        date_limit.start,
+        date_limit.end
+      )
     } else {
         "".to_string()
     };
 
     let mut search_results: Vec<DocumentSearchResult> = Vec::new();
     // if there is only a NOT query, pass it to `handle_special_case` function
-    if query_segments.quoted_segments.is_empty()
-        && query_segments.greedy_segments.is_empty()
-        && !query_segments.not_segments.is_empty()
-    {
-        // search_results =
-        //     handle_special_case_old(query, page, limit, where_date_limit, where_file_type, conn).unwrap();
-        search_results =
-            handle_special_case(query, page, limit, file_type_clone, conn).unwrap();
+    if query_segments.quoted_segments.is_empty() && query_segments.greedy_segments.is_empty() && !query_segments.not_segments.is_empty() {
+      search_results = handle_special_case(query, page, limit, file_type_clone, conn).unwrap();
     }
     // otherwise run the body and metadata fts queries as usual
     else {
-        let match_string = create_match_statement(query_segments);
-        println!("match_string: {}", match_string);
+      let match_string = create_match_statement(&query_segments);
+      println!("match_string: {}", match_string);
+      let tantivy_string = create_tantivy_query_statement(&query_segments);
+      println!("tantivy_string: {}", tantivy_string);
 
-        let body_fts_query = create_body_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
-        let body_search_results: Vec<DocumentSearchResult> =
-            diesel::sql_query(body_fts_query).load::<DocumentSearchResult>(&mut conn).unwrap_or(Vec::new());
-        println!("got {} results from body_fts", body_search_results.len());
-        let metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
-        let metadata_search_results: Vec<DocumentSearchResult> =
-            diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn).unwrap_or(Vec::new());
-        println!("got {} results from metadata_fts", metadata_search_results.len());
-        // combine the results from body_fts and metadata_fts
-        for result in metadata_search_results.iter().chain(body_search_results.iter()) {
-            search_results.push(result.clone());
-        }
+      let tantivy_index = get_tantivy_index(create_tantivy_schema()).unwrap();
+      let searcher = acquire_searcher_from_reader(&app).unwrap();
+      let new_conn = establish_connection(&app);
+      let tantivy_search_results = get_search_results_from_tantivy_index(&tantivy_string, limit, page, &searcher, &tantivy_index, new_conn).unwrap_or(Vec::new());
+
+      // let tantivy_search_results = Vec::new();
+      println!("got {} results from tantivy index", tantivy_search_results.len());
+
+      let metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
+      let metadata_search_results: Vec<DocumentSearchResult> = diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn).unwrap_or(Vec::new());
+      // let metadata_search_results = Vec::new();
+      println!("got {} results from metadata_fts", metadata_search_results.len());
+      // combine the results from body_fts and metadata_fts
+      for result in metadata_search_results.iter().chain(tantivy_search_results.iter()) {
+        search_results.push(result.clone());
+      }
     }
     // and order them by last_modified
     // TODO: change this to frequency rank
@@ -171,7 +229,20 @@ pub fn search_fts_index(
     Ok(search_results)
 }
 
-fn create_body_fts_query(
+fn get_search_results_from_tantivy_index(query: &String, limit: i32, page: i32, searcher: &Searcher, tantivy_index: &Index, mut conn:  PooledConnection<ConnectionManager<SqliteConnection>>,) -> Result<Vec<DocumentSearchResult>, Error> {
+  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, query.to_string(), limit, page*limit).unwrap();
+  let search_results = return_document_search_results(&tantivy_index, &searcher, top_docs).unwrap_or(vec![]);
+  let document_ids: Vec<i32> = search_results.iter().map(|result| result.id as i32).collect();
+
+  let search_results_to_return = document::table
+    .filter(document::id.eq_any(document_ids))
+    .load::<DocumentSearchResult>(&mut conn)
+    .unwrap_or(Vec::new());
+
+  Ok(search_results_to_return)
+}
+
+fn _create_body_fts_query(
     where_file_type: &String,
     where_date_limit: &String,
     match_string: &String,
@@ -547,19 +618,23 @@ pub fn get_metadata_title_matches(
 }
 
 // Get parsed text for file
-pub fn get_parsed_text_for_file(file_path: String, conn: &mut SqliteConnection) -> Result<Vec<String>, diesel::result::Error> {
-    // get all rows from body_fts::table where url is equal to file_path
-    let inner_query = format!(
-        r#"
-            SELECT text FROM body WHERE url = '{}';
-        "#,
-        file_path
-    );
-    let parsed_text_rows: Vec<BodyFTSSearchResult> = diesel::sql_query(inner_query).load::<BodyFTSSearchResult>(conn)?;
+pub fn get_parsed_text_for_file(document_id: i32, searcher: &Searcher) -> Result<Vec<String>, diesel::result::Error> {
+  // get all items from tantivy where url is equal to file_path
+  let parsed_text_vec = get_body_values_from_id(searcher, i64::from(document_id));
+  Ok(parsed_text_vec)
+}
 
-    let mut parsed_text_vec: Vec<String> = Vec::new();
-    for text in parsed_text_rows {
-        parsed_text_vec.push(text.text);
-    }
-    Ok(parsed_text_vec)
+// Get the file_id from the document table in the database
+pub fn get_file_id_from_path(file_path: &String, conn: &mut SqliteConnection) -> Result<i32, diesel::result::Error> {
+  use crate::database::schema::document::dsl::*;
+  let file_id = document
+    .select(id)
+    .filter(path.eq(file_path))
+    .first::<i32>(conn);
+
+  if file_id.is_ok() {
+    return Ok(file_id.unwrap());
+  } else {
+    return Ok(0);
+  }
 }

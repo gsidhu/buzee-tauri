@@ -17,6 +17,7 @@ extern crate serde_json;
 extern crate tantivy;
 extern crate xml;
 extern crate zip;
+extern crate csv;
 
 mod utils;
 mod custom_types;
