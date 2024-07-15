@@ -24,7 +24,7 @@ impl Extractor {
     file_type: String,
     app: &tauri::AppHandle
   ) -> Result<String, Box<dyn Error>> {
-    println!("Extracting text from file: {}", file_path);
+    // println!("Extracting text from file: {}", file_path);
     match file_type.as_str() {
       "csv" => csv::extract(&file_path, app),
       "docx" => docx::extract(&file_path, app),

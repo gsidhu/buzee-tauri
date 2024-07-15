@@ -107,7 +107,7 @@ pub fn add_docs_to_index(files_array: &Vec<TantivyDocumentItem>,) -> tantivy::Re
   for doc in files_array {
     index_writer.add_document(doc!(
       id => doc.source_id,
-      source_table => "document",
+      source_table => doc.source_table.as_str(),
       source_domain => doc.source_domain.as_str(),
       title => doc.name.as_str(),
       body => doc.body.as_str(),
@@ -130,31 +130,11 @@ pub fn add_docs_to_index(files_array: &Vec<TantivyDocumentItem>,) -> tantivy::Re
 
 pub fn delete_docs_from_index_with_ids(ids_to_delete: &Vec<i32>) -> tantivy::Result<()> {
   let index = get_tantivy_index(create_tantivy_schema()).unwrap();
-  let mut index_writer: IndexWriter = index.writer(50_000_000)?;
+  let mut index_writer: IndexWriter = index.writer(150_000_000)?;
 
   // for each ID in the array, find the document and delete it
   for id in ids_to_delete {
     index_writer.delete_term(Term::from_field_i64(index.schema().get_field("id").unwrap(), i64::from(*id)));
-  }
-
-  let commit_stamp = index_writer.commit()?;
-
-  if commit_stamp > 0 {
-    return Ok(());
-  } else {
-    return Err(tantivy::TantivyError::SystemError("Failed to commit changes to the index".to_string()));
-  }
-}
-
-pub fn delete_docs_from_index_with_paths(paths_to_delete: &Vec<String>) -> tantivy::Result<()> {
-  let index = get_tantivy_index(create_tantivy_schema()).unwrap();
-  let mut index_writer: IndexWriter = index.writer(50_000_000)?;
-  let url = index.schema().get_field("url").unwrap();
-
-  // for each ID in the array, find the document and delete it
-  for path in paths_to_delete {
-    let path_term = Term::from_field_text(url, path.as_str());
-    index_writer.delete_term(path_term);
   }
 
   let commit_stamp = index_writer.commit()?;

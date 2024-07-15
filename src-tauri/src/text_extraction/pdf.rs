@@ -12,7 +12,10 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
   // check if the file contains pdf in its name
   let mut text_based_content = String::new();
   if file.to_lowercase().contains(".pdf") {
-    text_based_content = text_based_extraction(file).unwrap_or_else(|_| "false".to_string());
+    text_based_content = match text_based_extraction(file) {
+        Ok(content) => content,
+        Err(_) => "false".to_string(),
+    };
   }
 
   if text_based_content != "false" && text_based_content.len() > 0 {
@@ -82,7 +85,22 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
   }
 }
 
+// pub fn text_based_extraction(file: &String) -> Result<String, Box<dyn Error>> {
+//   let content = match extract_text(Path::new(file)) {
+//     Ok(content) => content,
+//     Err(e) => return Ok("false".to_string()),
+//   };
+//   Ok(content)
+// }
+
+use std::panic::{catch_unwind, AssertUnwindSafe};
+
 pub fn text_based_extraction(file: &String) -> Result<String, Box<dyn Error>> {
-  let content = extract_text(Path::new(file)).map_err(|e| Box::new(e) as Box<dyn Error>)?;
+  let result = catch_unwind(AssertUnwindSafe(|| extract_text(Path::new(file))));
+
+  let content = match result {
+    Ok(Ok(content)) => content,
+    Ok(Err(_)) | Err(_) => return Ok("false".to_string()),
+  };
   Ok(content)
 }

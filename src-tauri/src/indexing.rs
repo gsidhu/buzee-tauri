@@ -10,7 +10,6 @@ use crate::tantivy_index;
 use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
-use tantivy::Searcher;
 // use log::{info, error};
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -325,7 +324,7 @@ pub fn add_file_metadata_to_database(files_array: &Vec<DocumentItem>, connection
     }
 }
 
-pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle, searcher: &Searcher) -> usize {
+pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::AppHandle) -> usize {
   let mut files_parsed = 0;
 
   let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
@@ -377,7 +376,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   // Append the image_files_data to all_files_data
   let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().chain(image_files_data.into_iter()).collect();
   
-  // Filter the files based on the ignore_list and allow_list
+  // Filter the files based on the ignore_list and allow_list, and last_parsed/last_modified
   let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().filter(|item| {
     let path = item.1.clone();
     // Check if the file is in the allowed_files list
@@ -396,11 +395,19 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     if ignored_folders.iter().any(|ignored_folder| path.starts_with(&ignored_folder.path)) {
       return false;
     }
+    // Check if last_parsed is 0 (default) OR last_modified > last_parsed
+    if item.6 != 0 && item.5 < item.6 {
+      return false;
+    }
     true
   }).collect();
 
   // Get sync_running status
   let mut sync_running = sync_status(&app).0;
+
+  // Set up body_tantivy_items
+  let mut body_tantivy_items: Vec<TantivyDocumentItem> = vec![];
+  let mut body_tantivy_source_ids: Vec<i32> = vec![];
 
   // Iterate over all_files_data and extract text from each file
   for file_item in all_files_data {
@@ -418,10 +425,8 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
       break;
     }
 
-    let last_parsed_from_index: i64 = tantivy_index::get_last_parsed_value_from_id(&searcher, i64::from(source_id));
-
-    // If last_parsed is 0 (default) OR last_modified > last_parsed OR last_parsed_from_index is 0
-    if last_parsed == 0 || last_modified > last_parsed || last_parsed_from_index == 0 {
+    // If last_parsed is 0 (default) OR last_modified > last_parsed
+    if last_parsed == 0 || last_modified > last_parsed {
       // Extract text from the file
       // info!("Extracting text from: {}", path.clone());
       let text = extract_text_from_path(path.clone(), file_type.clone(), &app).await;
@@ -429,7 +434,6 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
       // Chunk the text into 2000 character chunks
       let chunks = chunk_text(text);
 
-      let mut body_tantivy_items = Vec::new();
       // For each chunk, create a TantivyDocumentItem, with the body key as the chunk
       let mut chunk_id = 0;
       for chunk in chunks {
@@ -450,25 +454,33 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
         );
       }
 
-      // Delete this file from the Tantivy Index
-      let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&vec![source_id]);
-      if indexing_commit_response.is_err() {
-        println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
-      }
-
-      // Add the body_tantivy_items to the Tantivy Index
-      let indexing_commit_response = tantivy_index::add_docs_to_index(&body_tantivy_items);
-      if indexing_commit_response.is_err() {
-        println!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
-      }
-      
-      // update last_parsed in document table for this file
-      let _ = diesel::update(document::table.filter(document::id.eq(source_id)))
-        .set(document::last_parsed.eq(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64))
-        .execute(conn)
-        .unwrap();
+      body_tantivy_source_ids.push(source_id);
       files_parsed += 1;
+
+      // if there are >= 500 items in body_tantivy_items, add them to the database and clear the array
+      if body_tantivy_items.len() >= 500 {
+        println!("Adding {} items to Tantivy Index", body_tantivy_items.len());
+        // Delete all items from the Tantivy Index using source_ids
+        let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&body_tantivy_source_ids);
+        if indexing_commit_response.is_err() {
+          println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+        } else {
+          println!("Successfully deleted files from Tantivy index");
+        }
+        // Add all body_tantivy_items to the Tantivy Index
+        let indexing_commit_response = tantivy_index::add_docs_to_index(&body_tantivy_items);
+        if indexing_commit_response.is_err() {
+          println!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
+        } else {
+          println!("Successfully added files to Tantivy index");
+        }
+        // Update last_parsed in document table for these files
+        update_last_parsed_in_document_table(conn, body_tantivy_source_ids.clone());
+        body_tantivy_items.clear();
+        body_tantivy_source_ids.clear();
+      }
     }
+
     // 2. AFTER ADDING TO DB: Break the loop if sync_running is false
     if sync_running == "false" {
       break;
@@ -477,7 +489,36 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     sync_running = sync_status(&app).0;
   }
 
+  // 1.5 process leftover files from the last iteration
+  if body_tantivy_items.len() > 0 {
+    // Delete all items from the Tantivy Index using source_ids
+    let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&body_tantivy_source_ids);
+    if indexing_commit_response.is_err() {
+      println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+    }
+    // Add all body_tantivy_items to the Tantivy Index
+    let indexing_commit_response = tantivy_index::add_docs_to_index(&body_tantivy_items);
+    if indexing_commit_response.is_err() {
+      println!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
+    }
+    // Update last_parsed in document table for these files
+    update_last_parsed_in_document_table(conn, body_tantivy_source_ids.clone());
+    body_tantivy_items.clear();
+    body_tantivy_source_ids.clear();
+  }
+
   files_parsed
+}
+
+pub fn update_last_parsed_in_document_table(conn: &mut SqliteConnection, body_tantivy_source_ids: Vec<i32>) {
+  let last_parsed_timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+  
+  // update last_parsed in document table for all files in body_tantivy_source_ids using a SQLite Transaction
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::update(document::table.filter(document::id.eq_any(body_tantivy_source_ids)))
+      .set(document::last_parsed.eq(last_parsed_timestamp))
+      .execute(connection)
+  }).unwrap();
 }
 
 pub async fn extract_text_from_path(path: String, file_type: String, app: &tauri::AppHandle) -> String {
@@ -570,10 +611,6 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
     for chunks_of_files_to_remove in chunked_files_to_remove {
       println!("Removing {} files from chunk", chunks_of_files_to_remove.len());
       remove_vector_of_file_paths_from_db(&chunks_of_files_to_remove, conn);
-      let indexing_commit_response = tantivy_index::delete_docs_from_index_with_paths(&chunks_of_files_to_remove);
-      if indexing_commit_response.is_err() {
-        println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
-      }
     }
   }
 }
@@ -588,36 +625,30 @@ fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut Sqli
     .select(metadata::id)
     .load::<i32>(conn)
     .unwrap();
+  // get document_id for all file_paths
+  let document_ids = document::table
+    .filter(document::path.eq_any(file_paths_clone_two))
+    .select(document::id)
+    .load::<i32>(conn)
+    .unwrap();
 
-  // first delete from body_fts, then body, then metadata_fts, then metadata, then document
-  // delete from body_fts
-  // conn.transaction::<_, diesel::result::Error, _>(|connection| {
-  //   diesel::delete(body_fts::table.filter(body_fts::metadata_id.eq_any(metadata_ids.clone())))
-  //     .execute(connection)
-  // }).unwrap();
-  // delete from body
-  // conn.transaction::<_, diesel::result::Error, _>(|connection| {
-  //   diesel::delete(body::table.filter(body::metadata_id.eq_any(metadata_ids.clone())))
-  //     .execute(connection)
-  // }).unwrap();
-  // delete from metadata_fts
+  // delete from metadata_fts using metadata_ids
   conn.transaction::<_, diesel::result::Error, _>(|connection| {
     diesel::delete(metadata_fts::table.filter(metadata_fts::id.eq_any(metadata_ids.clone())))
       .execute(connection)
   }).unwrap();
-  // delete from metadata
+  // delete from metadata using metadata_ids
   conn.transaction::<_, diesel::result::Error, _>(|connection| {
     diesel::delete(metadata::table.filter(metadata::id.eq_any(metadata_ids.clone())))
       .execute(connection)
   }).unwrap();
-  // delete from document
+  // delete from document using file_paths
   conn.transaction::<_, diesel::result::Error, _>(|connection| {
     diesel::delete(document::table.filter(document::path.eq_any(file_paths)))
       .execute(connection)
   }).unwrap();
-
-  // delete these files from the Tantivy Index
-  let indexing_commit_response = tantivy_index::delete_docs_from_index_with_paths(&file_paths_clone_two);
+  // delete these files from the Tantivy Index using document_ids
+  let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&document_ids);
   if indexing_commit_response.is_err() {
     println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
   }  

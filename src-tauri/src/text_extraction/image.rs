@@ -7,7 +7,6 @@ use crate::text_extraction::txt;
 use crate::utils::install_poppler_from_github;
 
 pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
-  println!("Extracting text from: {}", file);
   // check if the file contains svg in its name
   let mut text_based_content = String::new();
   

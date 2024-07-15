@@ -12,6 +12,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Scratchpad autosaves to local file.
 - Text is also scanned out of images (PNG, JPG, JPEG, SVG). Only for files > 50KB.
 - Using Tantivy as a replacement for Body_FTS. Each source gets its own table in the SQLite database and is coordinated with the Metadata table.
+- Proper `panic` handling when extracting PDFs.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.

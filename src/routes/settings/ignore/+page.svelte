@@ -22,15 +22,15 @@
 	function addToIgnoreList() {
 		if (pathToIgnore === '') return;
 		$statusMessage = `Adding to Ignore List... Please wait.`;
-        $syncStatus = true;
-        $disableInteraction = true;
-				if (ignoreIndex) { ignoreContent = true }
-        invoke('ignore_file_or_folder', { path: pathToIgnore, isDirectory: true, shouldIgnoreIndexing: ignoreIndex, shouldIgnoreContent: ignoreContent }).then(() => {
-          $statusMessage = `Removed!`;
-          $syncStatus = false;
-          $disableInteraction = false;
-					$ignoredPaths  = [...$ignoredPaths, { path: pathToIgnore, is_folder: true, ignore_indexing: ignoreIndex, ignore_content: ignoreContent }];
-        });
+		$syncStatus = true;
+		$disableInteraction = true;
+		if (ignoreIndex) { ignoreContent = true }
+		invoke('ignore_file_or_folder', { path: pathToIgnore, isDirectory: true, shouldIgnoreIndexing: ignoreIndex, shouldIgnoreContent: ignoreContent }).then(() => {
+			$statusMessage = `Removed!`;
+			$syncStatus = false;
+			$disableInteraction = false;
+			$ignoredPaths  = [...$ignoredPaths, { path: pathToIgnore, is_folder: true, ignore_indexing: ignoreIndex, ignore_content: ignoreContent }];
+		});
 	}
 
 	async function showFolderDialog() {

@@ -63,6 +63,13 @@
 		}
 		// @ts-ignore
 		columnsArray = columns.map((column: any) => ({ id: column.id, header: column.header }));
+		// select the first result when loading new search results
+		$selectedResult = $documentsShown[0];
+		let firstResult = document.querySelector('.result-0') as HTMLElement | null;
+		if (firstResult) {
+			firstResult.focus();
+		}
+		resetColumnSize();
 	}
 	
 	$: $hiddenColumnIds = Object.entries(hideForId)
