@@ -14,18 +14,17 @@
 	import { Subscribe, Render } from 'svelte-headless-table';
 	import Label from '../ui/label/label.svelte';
 	import { loadMoreResults } from '$lib/utils/dbUtils';
-	import { LoaderCircle } from 'lucide-svelte';
+	import { Check, LoaderCircle } from 'lucide-svelte';
 
-	function toggleLastModifiedOrOpened(cellID: string) {
+	function showHideColumn(colID: string) {
+		console.log("Hiding column", colID);
+		trackEvent('right_click:resultTableHeaderContextMenu', {colID});
 		resetColumnSize();
-		trackEvent('right_click:resultTableHeaderContextMenu', {cellID});
-		$preferLastOpened = !$preferLastOpened;
-		if ($preferLastOpened) {
-			hideForId['lastModified'] = false;
-			hideForId['lastOpened'] = true;
-		} else {
-			hideForId['lastModified'] = true;
-			hideForId['lastOpened'] = false;
+		hideForId[colID] = !hideForId[colID];
+		if (colID === 'lastModified' || colID === 'lastOpened') {
+			if (hideForId['lastModified']) {
+				$preferLastOpened = true;
+			}
 		}
 	}
 
@@ -34,26 +33,14 @@
 		// @ts-ignore
 		const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
 		const { hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize } = pluginStates.page;
-		return { table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize };
+		const { hiddenColumnIds } = pluginStates.hideCols;
+		const ids = flatColumns.map((c: any) => c.id);
+		const labels = flatColumns.map((c: any) => c.header);
+		const hideForId: Record<string, boolean> = Object.fromEntries(ids.map((id: any) => [id, false]));
+		return { table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize, hiddenColumnIds, ids, labels, hideForId };
 	}
 
-	let { table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize } = createTableVars($documentsShown);
-
-
-	$: if ($documentsShown) {
-		console.log(">>> reloading...");
-		
-		({ table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize } = createTableVars($documentsShown));
-	}
-
-	let { hiddenColumnIds } = pluginStates.hideCols;
-	let ids = flatColumns.map((c: any) => c.id);
-	let labels = flatColumns.map((c: any) => c.header);
-	let hideForId: Record<string, boolean> = Object.fromEntries(ids.map((id: any) => [id, false]));
-	$: $hiddenColumnIds = Object.entries(hideForId)
-		.filter(([, hide]) => hide)
-		.map(([id]) => id);
-
+	let { table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize, hiddenColumnIds, ids, labels, hideForId } = createTableVars($documentsShown);
 	// HACK: hide columns by default
 	// hideForId['size'] = true;
 	if ($preferLastOpened) {
@@ -61,6 +48,26 @@
 	} else {
 		hideForId['lastOpened'] = true;
 	}
+	// @ts-ignore
+	let columnsArray = columns.map((column: any) => ({ id: column.id, header: column.header }));
+
+	$: if ($documentsShown) {
+		console.log(">>> reloading...");
+		
+		({ table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize, hiddenColumnIds, ids, labels, hideForId } = createTableVars($documentsShown));
+		
+		if ($preferLastOpened) {
+			hideForId['lastModified'] = true;
+		} else {
+			hideForId['lastOpened'] = true;
+		}
+		// @ts-ignore
+		columnsArray = columns.map((column: any) => ({ id: column.id, header: column.header }));
+	}
+	
+	$: $hiddenColumnIds = Object.entries(hideForId)
+		.filter(([, hide]) => hide)
+		.map(([id]) => id);
 
 	function findBase64ImageObjectFromPathLocal(path: string) {
 		let imageObject = $base64Images.find(image => image.path === path);
@@ -177,42 +184,29 @@
 											</div>
 										</div>
 									{:else}
-										{#if cell.id === 'lastModified' || cell.id === 'lastOpened'}
-											<ContextMenu.Root>
-												<ContextMenu.Trigger>
-													<div class="header-grid justify-items-stretch items-center px-2">
-														<div class="flex justify-items-start">
-															<Render of={cell.render()} />
-														</div>
-														<div class="flex justify-end">
-															{#if props.sort.order === 'asc'}
-																<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
-															{:else if props.sort.order === 'desc'}
-																<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
-															{/if}
-														</div>
+										<ContextMenu.Root>
+											<ContextMenu.Trigger>
+												<div class="header-grid justify-items-stretch items-center px-2">
+													<div class="flex justify-items-start">
+														<Render of={cell.render()} />
 													</div>
-												</ContextMenu.Trigger>
-												<ContextMenu.Content>
-													<ContextMenu.Item on:click={() => toggleLastModifiedOrOpened(cell.id)}>
-														Show Last {cell.id === 'lastModified' ? 'Opened' : 'Modified'}
+													<div class="flex justify-end">
+														{#if props.sort.order === 'asc'}
+															<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
+														{:else if props.sort.order === 'desc'}
+															<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
+														{/if}
+													</div>
+												</div>
+											</ContextMenu.Trigger>
+											<ContextMenu.Content>
+												{#each columnsArray as col}
+													<ContextMenu.Item on:click={() => {showHideColumn(col.id)}}>
+														<Check class={`mr-2 h-3 w-3 ${hideForId[col.id] ? 'text-white' : ''}`} />{col.header}
 													</ContextMenu.Item>
-												</ContextMenu.Content>
-											</ContextMenu.Root>
-										{:else}
-											<div class="header-grid justify-items-stretch items-center px-2">
-												<div class="flex justify-items-start">
-													<Render of={cell.render()} />
-												</div>
-												<div class="flex justify-end">
-													{#if props.sort.order === 'asc'}
-														<i class="bi bi-caret-up-fill" style="font-size: 0.5rem;" />
-													{:else if props.sort.order === 'desc'}
-														<i class="bi bi-caret-down-fill" style="font-size: 0.5rem;" />
-													{/if}
-												</div>
-											</div>
-										{/if}
+												{/each}
+											</ContextMenu.Content>
+										</ContextMenu.Root>
 									{/if}
 									{#if !props.resize.disabled}
 										<button
@@ -266,7 +260,6 @@
 														<span><Render of={cell.render()} /></span>
 													{/if}
 												{:else if cell.id === 'path'}
-													<!-- <span on:click={() => openFileFolder(cell.render().toString())}><Render of={cell.render()} /></span> -->
 													<button class="w-full text-left truncate hover:underline hover:cursor-pointer" on:click={() => openFileFolder(cell.render().toString())}>
 														<Render of={formatPath(cell.render().toString())} />
 													</button>
