@@ -6,7 +6,6 @@ use crate::database::search::{get_parsed_text_for_file, get_file_id_from_path};
 use crate::db_sync::sync_status;
 use crate::housekeeping::get_app_directory;
 use crate::indexing::extract_text_from_path;
-use crate::tantivy_index::acquire_searcher_from_reader;
 use crate::user_prefs::set_scan_running_status;
 use std::process::Command;
 use crate::custom_types::Error;
@@ -177,8 +176,7 @@ pub async fn extract_text_from_pdf(file_path: String, conn: &mut SqliteConnectio
   // first, get the file's ID from the document table in the database
   let file_id = get_file_id_from_path(&file_path, conn).unwrap();
   if file_id > 0 {
-    let searcher = acquire_searcher_from_reader(&app).unwrap();
-    text = get_parsed_text_for_file(file_id, &searcher).unwrap();
+    text = get_parsed_text_for_file(file_id, conn).unwrap();
   } 
   
   if text.is_empty() {

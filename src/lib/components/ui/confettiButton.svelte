@@ -4,7 +4,7 @@
 	export let icon = '';
 	export let id = '';
 	export let label = 'Click here';
-	export let marginClass = '!mx-2';
+	export let marginClass = 'mx-2 p-2';
 	export let showIcon = false;
 	export let showText = true;
 	export let showSpinner = false;
@@ -34,7 +34,7 @@
 
 <button
 	{id}
-	class={`btn ${marginClass} ${type}`}
+	class={`${marginClass} ${type} rounded-md`}
 	on:click={(e) => animateButton(e)}
 	{title}
   data-bs-toggle={dataBSToggle}
@@ -42,7 +42,7 @@
 	disabled={isDisabled}
 >
 	{#if showSpinner}
-		<div class="spinner-border !mx-2" style="height: 1rem; width: 1rem;" role="status">
+		<div class="spinner-border mx-2" style="height: 1rem; width: 1rem;" role="status">
 			<span class="visually-hidden">Loading...</span>
 		</div>
 	{/if}
@@ -100,7 +100,7 @@
 
   .confetti-button:active {
     transform: scale(0.9);
-    background-color: var(--bs-purple);
+    background-color: var(--light-purple);
     box-shadow: 0 2px 25px var(--light-purple);
   }
 

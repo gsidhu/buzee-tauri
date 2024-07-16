@@ -7,6 +7,6 @@
   <h3 class="text-lg font-semibold leading-none tracking-tight">Document Stats</h3>
   <p class="text-sm text-muted-foreground">A data fan we have here, do we?</p>
 </div>
-<div class="!p-4 w-full items-center justify-center rounded-lg border border-dashed shadow-sm">
+<div class="flex flex-1 flex-col w-full items-center justify-center rounded-lg border border-dashed shadow-sm">
   <UniqueDocumentProfile />
 </div>

@@ -150,6 +150,7 @@ ol ol, ul ul, ol ul, ul ol {
 .disable-interaction {
   user-select: none;
   pointer-events: none;
+  cursor: not-allowed;
 }
 
 .cursor-default {

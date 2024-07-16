@@ -17,9 +17,11 @@
   })
 </script>
 
-<div in:fly={{ delay: 200, y: 100 }}>
+<div in:fly={{ delay: 200, y: 100 }} class="my-10">
   {#if showWaiting}
-    <Waiting />
+    <div>
+      <Waiting />
+    </div>
   {:else}
     <h3>Allow us to Scan Your Computer</h3>
     <p>We will need your permission to scan your computer.</p>
@@ -27,7 +29,7 @@
     <h6 class="mt-4">Why Do We Need To Scan?</h6>
     <p class="small">Scanning helps us tailor Buzee to your unique use-case. The scanned results are stored in an encrypted database in your Documents folder. Your data never leaves your computer. Promise.</p>
 
-    <div class="text-center my-5">
+    <div class="text-center my-10">
       <ConfettiButton label="Start Scan" handleClick={startFileScan}/>
     </div>
   {/if}

@@ -21,6 +21,7 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
   if text_based_content != "false" && text_based_content.len() > 0 {
     return Ok(text_based_content)
   } else {
+    println!("Running OCR based text extraction");
     // run textra on the file and save the output to a temporary file
     let app_directory = get_app_directory();
 

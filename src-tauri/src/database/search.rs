@@ -2,7 +2,7 @@ use crate::custom_types::{Error, DBStat, DateLimit, QuerySegments};
 use crate::database::establish_connection;
 use crate::database::models::{DocumentSearchResult, MetadataFTSSearchResult};
 use crate::indexing::all_allowed_filetypes;
-use crate::tantivy_index::{acquire_searcher_from_reader, create_tantivy_schema, get_body_values_from_id, get_tantivy_index, parse_query_and_get_top_docs, return_document_search_results};
+use crate::tantivy_index::{acquire_searcher_from_reader, create_tantivy_schema, get_tantivy_index, parse_query_and_get_top_docs, return_document_search_results};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_json;
@@ -212,9 +212,9 @@ pub fn search_fts_index(
 
       let metadata_fts_query = create_metadata_fts_query(&where_file_type, &where_date_limit, &match_string, limit, page);
       let metadata_search_results: Vec<DocumentSearchResult> = diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn).unwrap_or(Vec::new());
-      // let metadata_search_results = Vec::new();
       println!("got {} results from metadata_fts", metadata_search_results.len());
       // combine the results from body_fts and metadata_fts
+      let metadata_search_results = Vec::new();
       for result in metadata_search_results.iter().chain(tantivy_search_results.iter()) {
         search_results.push(result.clone());
       }
@@ -418,6 +418,16 @@ pub fn get_counts_for_all_filetypes(
     Ok(counts)
 }
 
+// Get counts for total files and num files parsed
+pub fn get_file_parsed_count(mut conn: PooledConnection<ConnectionManager<SqliteConnection>>) -> Result<i64, diesel::result::Error> {
+    use crate::database::schema::document::dsl::*;
+    let parsed_files = document
+        .filter(last_parsed.gt(0))
+        .filter(file_type.ne("folder"))
+        .count().get_result(&mut conn)?;
+    Ok(parsed_files)
+}
+
 // Handle special case with NEGATIVE query only
 // Get recently opened docs (which is what the user was seeing when they typed the query)
 // Then filter out the results that match the negative query/queries
@@ -607,9 +617,21 @@ pub fn get_metadata_title_matches(
 }
 
 // Get parsed text for file
-pub fn get_parsed_text_for_file(document_id: i32, searcher: &Searcher) -> Result<Vec<String>, diesel::result::Error> {
+pub fn get_parsed_text_for_file(document_id: i32, conn: &mut SqliteConnection) -> Result<Vec<String>, diesel::result::Error> {
   // get all items from tantivy where url is equal to file_path
-  let parsed_text_vec = get_body_values_from_id(searcher, i64::from(document_id));
+  // get all rows from body_fts::table where url is equal to file_path
+  let inner_query = format!(
+    r#"
+        SELECT text FROM body WHERE source_id = '{}';
+    "#,
+    document_id
+  );
+  // let parsed_text_rows: Vec<BodyFTSSearchResult> = diesel::sql_query(inner_query).load::<BodyFTSSearchResult>(conn)?;
+
+  let mut parsed_text_vec: Vec<String> = Vec::new();
+  // for text in parsed_text_rows {
+  //     parsed_text_vec.push(text.text);
+  // }
   Ok(parsed_text_vec)
 }
 

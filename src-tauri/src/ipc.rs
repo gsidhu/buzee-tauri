@@ -5,7 +5,7 @@ use crate::custom_types::{ContextMenuState, DBConnPoolState, DBStat, DateLimit, 
 use crate::database::{establish_connection, get_connection_pool};
 use crate::database::models::{DocumentSearchResult, IgnoreList};
 use crate::database::search::{
-    get_counts_for_all_filetypes, get_metadata_title_matches, get_parsed_text_for_file, get_recently_opened_docs, search_fts_index
+    get_counts_for_all_filetypes, get_metadata_title_matches, get_parsed_text_for_file, get_recently_opened_docs, get_file_parsed_count, search_fts_index
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
@@ -219,17 +219,25 @@ fn get_recent_docs(
 // Get DB Stats
 #[tauri::command]
 fn get_db_stats(app: tauri::AppHandle) -> Result<Vec<DBStat>, Error> {
-    let conn = establish_connection(&app);
-    let db_stats = get_counts_for_all_filetypes(conn).unwrap();
-    Ok(db_stats)
+  let conn = establish_connection(&app);
+  let db_stats = get_counts_for_all_filetypes(conn).unwrap();
+  Ok(db_stats)
+}
+
+// Get Total Files and Files Parsed
+#[tauri::command]
+fn get_count_of_files_parsed(app: tauri::AppHandle) -> Result<i64, Error> {
+  let conn = establish_connection(&app);
+  let result = get_file_parsed_count(conn).unwrap();
+  Ok(result)
 }
 
 // Get parsed text for file
 #[tauri::command]
 async fn get_text_for_file(document_id: i32, app: tauri::AppHandle) -> Result<Vec<String>, Error> {
     println!("Getting text for file ID: {}", document_id);
-    let searcher = acquire_searcher_from_reader(&app).unwrap();
-    let text = get_parsed_text_for_file(document_id, &searcher).unwrap();
+    let mut conn = establish_connection(&app);
+    let text = get_parsed_text_for_file(document_id, &mut conn).unwrap();
     Ok(text)
 }
 
@@ -449,6 +457,7 @@ pub fn initialize() {
       run_search,
       get_recent_docs,
       get_db_stats,
+      get_count_of_files_parsed,
       get_text_for_file,
       extract_text_from_pdf_file,
       write_text_to_file,

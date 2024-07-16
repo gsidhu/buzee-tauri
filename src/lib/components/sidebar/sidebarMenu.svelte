@@ -20,7 +20,7 @@
 	import { openInBrowser } from '$lib/utils/miscUtils';
 </script>
 
-<div class="flex flex-col h-full gap-2">
+<div class={`flex flex-col h-full gap-2`}>
 	<div class="flex items-center border-b px-4 h-[60px] min-h-[60px] lg:px-6">
 		<a href="/" class="flex items-center gap-2 font-semibold">
 			<!-- <Rocket class="h-6 w-6" /> -->

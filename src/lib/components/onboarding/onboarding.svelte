@@ -8,11 +8,13 @@
   import { goto } from '$app/navigation';
 	import { onDestroy, onMount } from 'svelte';
   import { trackEvent } from '@aptabase/web';
+	import { userPreferences } from '$lib/stores';
 
   let processingDone = false;
   let showPermissions = false;
 
   function gotoSearch() {
+    $userPreferences.onboarding_done = true;
     goto("/search?highlight-search-bar=true&q=last%20month");
     trackEvent("onboarding:complete");
   }
@@ -33,16 +35,16 @@
   })
 </script>
 
-<div class="container px-4">
+<div class="container my-10 h-full w-full px-4 lg:max-w-2xl">
   {#if !showPermissions}
-    <div in:fly={{ y: 20 }}>
-      <div class="text-center my-2">
+    <div in:fly={{ y: 20 }} class="">
+      <div class="text-center my-10">
         <img src="Buzee Logo.png" alt="Buzee Logo" width="96" height="96"/>
       </div>
       <h1>Welcome to Buzee!</h1>
       <p>Buzee helps you find your documents, effortlessly</p>
 
-      <div class="col-4 mx-auto flex flex-col gap-3 my-5">
+      <div class="text-center my-10">
         <ConfettiButton label="Get started!" handleClick={() => showPermissions = true} />
       </div>
     </div>
@@ -50,11 +52,11 @@
     <Permissions />
   {/if}
   <div id="processing-complete" class={`mt-5 text-center small ${processingDone ? 'faded' : 'hidden'} `} in:fade={{ delay: 200, duration: 1000 }}>
-    <p class="mb-1">Buzee is ready</p>
+    <p class="my-5">Buzee is ready 💪</p>
     <button type="button" class="btn py-1 px-2 leading-tight text-xs my-2 text-dark border-2 border-dark rounded border-hover-purple" on:click={() => gotoSearch()}>
       Start searching!
     </button>
-    <p class="small-explanation my-2">Note: Once the first full background scan <i class="fw-bold bi bi-arrow-repeat"/> finishes, you will be able to search keywords <em>inside</em> documents!<br/>The background scan runs automatically twice an hour. You can manually start/stop it using the button in the Status Bar below.</p>
+    <p class="small-explanation my-2">Note: Once the first full background scan <i class="fw-bold bi bi-arrow-repeat"/> finishes, you will be able to search keywords <em>inside</em> documents!<br/>The background scan runs automatically twice an hour. You can manually start/stop it using the <i class="fw-bold bi bi-arrow-repeat"/> button.</p>
   </div>
 </div>
 

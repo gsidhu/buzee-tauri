@@ -1,12 +1,15 @@
 <script lang="ts">
 	import FileTypeIcon from "../ui/FileTypeIcon.svelte";
+  import * as Tooltip from "$lib/components/ui/tooltip";
   import PopoverIcon from '../ui/popoverIcon.svelte';
   import { onMount } from 'svelte';
   import { invoke } from "@tauri-apps/api/core";
+	import Separator from "../ui/separator/separator.svelte";
 
   let dbStats: DBStat[] = [];
   let totalItems = 0;
   let totalDocs = 0;
+  let filesParsed = 0;
   let docStats: DBStat[] = [];
   let statPercentage: DBStat[] = [];
   const officePDFTypes = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'];
@@ -45,6 +48,8 @@
       file_type: 'other',
       count: totalItems - totalDocs
     });
+
+    filesParsed = await invoke("get_count_of_files_parsed");
   }
 
   // function saveUniqueDocumentProfile() {
@@ -74,24 +79,22 @@
 </script>
 
 <h6 class="text-center cursor-default">Your Unique Document Profile</h6>
+
 <div class="flex overflow-hidden w-90 mx-auto rounded my-8">
   {#each docStats as stat, index}
-    <div style={`width: ${statPercentage[index].count}%`} class="">
-      <div
-        class="text-white text-center"
-        style={stat.file_type === "other"
-          ? `background-color: #E15554;`
-          : `background-color: var(--${stat.file_type}-icon);`}
-      >
-        <PopoverIcon
-          icon={stat.file_type === "other"
-          ? 'other-file-folder'
-          : stat.file_type
-          }
-          filetypeicon={true}
-          title={`${stat.count} ${stat.file_type} files (${statPercentage[index].count}%)`}
-        />
-      </div>
+    <div style={`width: ${statPercentage[index].count}%`} class="bar-segment">
+      <Tooltip.Root>
+        <Tooltip.Trigger 
+          id={`${stat.file_type}-segment`}
+          class="text-white text-center w-full"
+          style={stat.file_type === "other"
+            ? `background-color: #E15554;`
+            : `background-color: var(--${stat.file_type}-icon);`}
+        >
+          <FileTypeIcon filetype={stat.file_type === "other" ? 'other-file-folder' : stat.file_type} color={false}/>
+        </Tooltip.Trigger>
+        <Tooltip.Content>{`${stat.count} ${stat.file_type} files (${statPercentage[index].count}%)`}</Tooltip.Content>
+      </Tooltip.Root>
     </div>
   {/each}
 </div>
@@ -113,17 +116,32 @@
         </div>
       {/if}
     {/each}
+  </div>
+  <Separator class="my-2" />
+  <div class="columns-1 justify-center">
     <div class="columns-2">
       <div class="">
-        <i class="bi bi-circle-fill pe-2" style={`color: var(--purple)`}/><small>Total Docs</small>
+        <i class="bi bi-circle-fill pe-2" style={`color: var(--hot-pink)`}/><small>Total Files & Folders</small>
+      </div>
+      <div class="text-end"><small>{totalItems}</small></div>
+    </div>
+    <div class="columns-2">
+      <div class="">
+        <i class="bi bi-circle-fill pe-2" style={`color: var(--xls-icon)`}/><small>Total Docs</small>
       </div>
       <div class="text-end"><small>{totalDocs}</small></div>
     </div>
     <div class="columns-2">
       <div class="">
-        <i class="bi bi-circle-fill pe-2" style={`color: var(--hot-pink)`}/><small>Total Files</small>
+        <i class="bi bi-circle-fill pe-2" style={`color: var(--purple)`}/><small>Total Docs Parsed</small>
       </div>
-      <div class="text-end"><small>{totalItems}</small></div>
+      <div class="text-end"><small>{filesParsed}</small></div>
     </div>
   </div>
 </div>
+
+<style lang="scss">
+  .bar-segment:hover {
+    filter: brightness(1.1) !important;
+  }
+</style>

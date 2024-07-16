@@ -22,31 +22,30 @@ pub fn create_tantivy_schema() -> Schema {
   // common attributes
   // ID here refers to Source_ID in the Metadata Table in the SQLite database
   schema_builder.add_i64_field("id", INDEXED | STORED);
-  schema_builder.add_text_field("source_table", STRING | STORED);
-  schema_builder.add_text_field("source_domain", STRING | STORED);
-  schema_builder.add_text_field("comment", TEXT | STORED);
-  schema_builder.add_text_field("chunk_id", STORED);
+  schema_builder.add_text_field("source_table", STRING);
+  schema_builder.add_text_field("source_domain", STRING);
+  schema_builder.add_text_field("comment", TEXT);
 
   // documents attributes
-  schema_builder.add_text_field("title", TEXT | STORED);
-  schema_builder.add_text_field("body", TEXT | STORED);
-  schema_builder.add_text_field("file_type", STRING | STORED);
+  schema_builder.add_text_field("title", TEXT);
+  schema_builder.add_text_field("body", TEXT);
+  schema_builder.add_text_field("file_type", STRING);
   schema_builder.add_i64_field("last_parsed", STORED);
 
   // additional browser history attributes
   // URL doubles up as PATH for documents
-  schema_builder.add_text_field("url", STRING | STORED);
+  schema_builder.add_text_field("url", STRING);
 
   // additional bookmarks/articles attributes
-  schema_builder.add_text_field("tags", TEXT | STORED);
+  schema_builder.add_text_field("tags", TEXT);
 
   // additional email attributes
-  schema_builder.add_text_field("sender", STRING | STORED);
-  schema_builder.add_text_field("recipient", STRING | STORED);
-  schema_builder.add_text_field("cc", STRING | STORED);
-  schema_builder.add_text_field("bcc", STRING | STORED);
-  schema_builder.add_text_field("subject", TEXT | STORED);
-  schema_builder.add_text_field("attachments", TEXT | STORED);
+  schema_builder.add_text_field("sender", STRING);
+  schema_builder.add_text_field("recipient", STRING);
+  schema_builder.add_text_field("cc", STRING);
+  schema_builder.add_text_field("bcc", STRING);
+  schema_builder.add_text_field("subject", TEXT);
+  schema_builder.add_text_field("attachments", TEXT);
 
   schema_builder.build()
 }
@@ -97,7 +96,6 @@ pub fn add_docs_to_index(files_array: &Vec<TantivyDocumentItem>,) -> tantivy::Re
   let source_domain = index.schema().get_field("source_domain").unwrap();
   let title = index.schema().get_field("title").unwrap();
   let body = index.schema().get_field("body").unwrap();
-  let chunk_id = index.schema().get_field("chunk_id").unwrap();
   let url = index.schema().get_field("url").unwrap();
   let file_type = index.schema().get_field("file_type").unwrap();
   let last_parsed = index.schema().get_field("last_parsed").unwrap();
@@ -111,7 +109,6 @@ pub fn add_docs_to_index(files_array: &Vec<TantivyDocumentItem>,) -> tantivy::Re
       source_domain => doc.source_domain.as_str(),
       title => doc.name.as_str(),
       body => doc.body.as_str(),
-      chunk_id => doc.chunk_id,
       url => doc.url.as_str(),
       file_type => doc.file_type.as_str(),
       last_parsed => doc.last_parsed,
@@ -196,7 +193,6 @@ pub fn return_document_search_results(index: &Index, searcher: &Searcher, top_do
   let comment = index.schema().get_field("comment").unwrap();
   let title = index.schema().get_field("title").unwrap();
   let body = index.schema().get_field("body").unwrap();
-  let chunk_id = index.schema().get_field("chunk_id").unwrap();
   let url = index.schema().get_field("url").unwrap();
   let file_type = index.schema().get_field("file_type").unwrap();
   let last_parsed = index.schema().get_field("last_parsed").unwrap();
@@ -214,7 +210,6 @@ pub fn return_document_search_results(index: &Index, searcher: &Searcher, top_do
         comment: retrieved_doc.get_first(comment).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
         title: retrieved_doc.get_first(title).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
         body: retrieved_doc.get_first(body).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
-        chunk_id: retrieved_doc.get_first(chunk_id).and_then(|value| value.as_i64()).unwrap_or_else(|| {return 0_i64 ;}),
         url: retrieved_doc.get_first(url).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
         file_type: retrieved_doc.get_first(file_type).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
         last_parsed: retrieved_doc.get_first(last_parsed).and_then(|value| value.as_i64()).or(None),
@@ -297,7 +292,7 @@ pub fn _get_all_unique_ids_from_index(searcher: &Searcher) -> Vec<i64> {
   unique_ids
 }
 
-pub fn get_last_parsed_value_from_id(searcher: &Searcher, given_id: i64) -> i64 {
+pub fn _get_last_parsed_value_from_id(searcher: &Searcher, given_id: i64) -> i64 {
   let index = get_tantivy_index(create_tantivy_schema()).unwrap();
   let id = index.schema().get_field("id").unwrap();
   let last_parsed = index.schema().get_field("last_parsed").unwrap();
@@ -315,7 +310,7 @@ pub fn get_last_parsed_value_from_id(searcher: &Searcher, given_id: i64) -> i64 
   last_parsed_value
 }
 
-pub fn get_body_values_from_id(searcher: &Searcher, given_id: i64) -> Vec<String> {
+pub fn _get_body_values_from_id(searcher: &Searcher, given_id: i64) -> Vec<String> {
   let index = get_tantivy_index(create_tantivy_schema()).unwrap();
   let id = index.schema().get_field("id").unwrap();
   let body = index.schema().get_field("body").unwrap();

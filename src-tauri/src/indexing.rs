@@ -194,17 +194,19 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
           }
         };
 
-        // if file is in the ignored_files list and ignore_indexing is true
+        // if file is in the ignored_files list AND ignore_indexing is true
         if ignored_files.iter().any(|item| item.path == file_item.path && item.ignore_indexing) {
-          // if file is not in allowed_files or file path does not start with a path in allowed_folders, continue
+          // if file is not in allowed_files list AND file path does not start with a path in allowed_folders, skip this file
           if !allowed_files.iter().any(|item| item.path == file_item.path) && !allowed_folders.iter().any(|item| file_item.path.starts_with(&item.path)) {
+            // skip this file
             continue;
           }
         }
-        // if file path starts with a path in the ignored_folders
+        // if file path starts with a path in the ignored_folders AND ignore_indexing is true
         if ignored_folders.iter().any(|item| file_item.path.starts_with(&item.path) && item.ignore_indexing) {
-          // if file is not in allowed_files or file path does not start with a path in allowed_folders, continue
+          // if file is not in allowed_files AND file path does not start with a path in allowed_folders, skip this file
           if !allowed_files.iter().any(|item| item.path == file_item.path) && !allowed_folders.iter().any(|item| file_item.path.starts_with(&item.path)) {
+            // skip this file
             continue;
           }
         }
@@ -346,24 +348,24 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   // For all files that have the filetype in the array above
   let not_pdf_files_data = document::table
     .filter(document::file_type.eq_any(document_filetypes))
-    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment))
+    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment, document::size))
     .order_by(document::size.asc())
-    .load::<(i32, String, String, String, String, i64, i64, Option<String>)>(conn)
+    .load::<(i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)>(conn)
     .unwrap();
   // Get the same for all PDF files
   let pdf_files_data = document::table
     .filter(document::file_type.eq_any(["pdf"]))
-    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment))
+    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment, document::size))
     .order_by(document::size.asc())
-    .load::<(i32, String, String, String, String, i64, i64, Option<String>)>(conn)
+    .load::<(i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)>(conn)
     .unwrap();
   // Get the same for all Image files (only files > 50KB)
   let image_files_data = document::table
     .filter(document::file_type.eq_any(image_filetypes))
     .filter(document::size.gt(image_cutoff_size))
-    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment))
+    .select((document::id, document::source_domain, document::name, document::path, document::file_type, document::last_modified, document::last_parsed, document::comment, document::size))
     .order_by(document::size.asc())
-    .load::<(i32, String, String, String, String, i64, i64, Option<String>)>(conn)
+    .load::<(i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)>(conn)
     .unwrap();
   
   println!("PDF files: {}", pdf_files_data.len());
@@ -372,12 +374,12 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   
   let all_files_data = not_pdf_files_data.clone();
   // Append the pdf_files_data to all_files_data
-  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
+  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)> = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
   // Append the image_files_data to all_files_data
-  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().chain(image_files_data.into_iter()).collect();
+  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)> = all_files_data.into_iter().chain(image_files_data.into_iter()).collect();
   
   // Filter the files based on the ignore_list and allow_list, and last_parsed/last_modified
-  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>)> = all_files_data.into_iter().filter(|item| {
+  let all_files_data: Vec<(i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)> = all_files_data.into_iter().filter(|item| {
     let path = item.1.clone();
     // Check if the file is in the allowed_files list
     if allowed_files.iter().any(|allowed_file| path.contains(&allowed_file.path)) {
@@ -408,6 +410,9 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   // Set up body_tantivy_items
   let mut body_tantivy_items: Vec<TantivyDocumentItem> = vec![];
   let mut body_tantivy_source_ids: Vec<i32> = vec![];
+  let mut body_file_sizes: Vec<f64> = vec![];
+  let mut body_file_chunk_cutoff = 500;
+  let mut average_body_file_size;
 
   // Iterate over all_files_data and extract text from each file
   for file_item in all_files_data {
@@ -419,6 +424,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     let last_modified = file_item.5;
     let last_parsed = file_item.6;
     let comment = file_item.7;
+    let file_size = file_item.8;
 
     // 1. BEFORE EXTRACTING TEXT: Break the loop if sync_running is false
     if sync_running == "false" {
@@ -435,9 +441,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
       let chunks = chunk_text(text);
 
       // For each chunk, create a TantivyDocumentItem, with the body key as the chunk
-      let mut chunk_id = 0;
       for chunk in chunks {
-        chunk_id += 1;
         body_tantivy_items.push(
           TantivyDocumentItem {
             source_id: i64::from(source_id),
@@ -446,7 +450,6 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
             name: name.clone(),
             url: path.clone(),
             body: chunk,
-            chunk_id: i64::from(chunk_id),
             file_type: file_type.clone(),
             last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
             comment: comment.clone().unwrap_or_else(|| {return "".to_string(); }),
@@ -455,10 +458,29 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
       }
 
       body_tantivy_source_ids.push(source_id);
+      body_file_sizes.push(file_size.unwrap_or(0.0));
       files_parsed += 1;
 
+      if files_parsed % 50 == 0 {
+        println!(">>>>>>> Files parsed: {} <<<<<<<<<<", files_parsed);
+      }
+
+      if files_parsed % 50 == 0 {
+        average_body_file_size = body_file_sizes.iter().sum::<f64>() / body_file_sizes.len() as f64;
+        // if average of body_file_sizes is >= 250KB, set body_file_chunk_cutoff to 250
+        if average_body_file_size >= 500_000.0 {
+          println!("Changing body_file_chunk_cutoff to 50");
+          body_file_chunk_cutoff = 50;
+        } else if average_body_file_size >= 250_000.0 {
+          println!("Changing body_file_chunk_cutoff to 50");
+          body_file_chunk_cutoff = 200;
+        } else {
+          body_file_chunk_cutoff = 500;
+        }
+      }
+
       // if there are >= 500 items in body_tantivy_items, add them to the database and clear the array
-      if body_tantivy_items.len() >= 500 {
+      if body_tantivy_items.len() >= body_file_chunk_cutoff {
         println!("Adding {} items to Tantivy Index", body_tantivy_items.len());
         // Delete all items from the Tantivy Index using source_ids
         let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&body_tantivy_source_ids);
@@ -587,7 +609,7 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
       files_to_remove.push(path.clone());
     }
     // if path starts with a folder in the ignored_folders list, continue
-    if ignored_folders.iter().any(|item| path.starts_with(&item.path)) {
+    if ignored_folders.iter().any(|item| path.starts_with(&item.path) && item.ignore_indexing) {
       files_to_remove.push(path.clone());
     }
   }
@@ -625,9 +647,10 @@ fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut Sqli
     .select(metadata::id)
     .load::<i32>(conn)
     .unwrap();
-  // get document_id for all file_paths
+  // get document_id for all the file_paths where last_parsed > 0 (these are the ones in tantivy index)
   let document_ids = document::table
     .filter(document::path.eq_any(file_paths_clone_two))
+    .filter(document::last_parsed.gt(0))
     .select(document::id)
     .load::<i32>(conn)
     .unwrap();

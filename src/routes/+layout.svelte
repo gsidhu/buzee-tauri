@@ -143,20 +143,20 @@
 <EventListeners />
 
 <!-- <Button on:click={() => run_tantivy()}>Search</Button> -->
-<!-- <Button on:click={() => run_tantivy_index()}>Create</Button> -->
+<Button on:click={() => run_tantivy_index()}>Create</Button>
 <main class={`min-h-screen max-h-screen overflow-auto ${$windowBlurred ? "grayscale-no" : ""}`}>
-	<div class="grid min-h-screen max-h-screen w-full lg:grid-cols-[20vw_1fr]">
-    <div class="hidden max-h-screen overflow-y-auto border-r bg-muted/40 lg:block">
+	<div class={`grid min-h-screen max-h-screen w-full ${$userPreferences.onboarding_done ? "lg:grid-cols-[20vw_1fr] " : ""}`}>
+    <div class={`hidden max-h-screen overflow-y-auto border-r bg-muted/40 ${$userPreferences.onboarding_done ? "lg:block" : ""}`}>
       <SidebarMenu />
     </div>
-    <div class="flex flex-col lg:max-w-[80vw]">
-      <header class="flex max-w-screen items-center gap-4 border-b bg-muted/40 px-4 h-[60px] lg:px-6">
+    <div class={`flex flex-col ${$userPreferences.onboarding_done ? "lg:max-w-[80vw]" : ""}`}>
+      <header class={`flex max-w-screen items-center gap-4 border-b bg-muted/40 px-4 h-[60px] lg:px-6 ${$userPreferences.onboarding_done ? "" : "hidden"}`}>
         <Sheet.Root>
           <Sheet.Trigger asChild let:builder>
             <Button
               variant="outline"
               size="icon"
-              class="shrink-0 lg:hidden"
+              class={`${$userPreferences.onboarding_done ? "shrink-0 lg:hidden" : "hidden"}`}
               builders={[builder]}
             >
               <Menu class="h-5 w-5" />
@@ -172,7 +172,7 @@
         </div>
         <SyncStatusButton />
       </header>
-      <section class="flex max-w-screen overflow-auto flex-1 flex-col gap-4 p-4">
+      <section class={`flex max-w-screen overflow-auto flex-1 flex-col gap-4 p-4 ${$userPreferences.onboarding_done ? "hack-section-height" : "" }`}>
         <slot />
       </section>
     </div>
@@ -198,7 +198,7 @@
 </Dialog.Root> -->
 
 <style>
-  section {
+  .hack-section-height {
     max-height: calc(100vh - 60px);
   }
 </style>
