@@ -591,6 +591,7 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
   println!("All files: {}", &all_file_paths.len());
 
   let mut files_to_remove: Vec<String> = vec![];
+  let mut files_to_remove_from_index_only: Vec<String> = vec![];
   for path in all_file_paths {
     // if path does not exist, add it to files_to_remove
     if !std::path::Path::new(&path).exists() {
@@ -604,20 +605,28 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
     if allowed_folders.iter().any(|item| path.starts_with(&item.path)) {
       continue;
     }
-    // if path is in the ignored_files list, continue
-    if ignored_files.iter().any(|item| item.path == *path) {
+    // if path is in the ignored_files list and has ignore_indexing true, add it to files_to_remove
+    if ignored_files.iter().any(|item| item.path == *path && item.ignore_indexing) {
       files_to_remove.push(path.clone());
     }
-    // if path starts with a folder in the ignored_folders list, continue
+    // if path is in the ignored_files list and has ignore_indexing false, add it to files_to_remove_from_index_only
+    if ignored_files.iter().any(|item| item.path == *path && !item.ignore_indexing) {
+      files_to_remove_from_index_only.push(path.clone());
+    }
+    // if path starts with a folder in the ignored_folders list and has ignore_indexing true, add it to files_to_remove
     if ignored_folders.iter().any(|item| path.starts_with(&item.path) && item.ignore_indexing) {
       files_to_remove.push(path.clone());
+    }
+    // if path starts with a folder in the ignored_folders list and has ignore_indexing false, add it to files_to_remove_from_index_only
+    if ignored_folders.iter().any(|item| path.starts_with(&item.path) && !item.ignore_indexing) {
+      files_to_remove_from_index_only.push(path.clone());
     }
   }
 
   println!("Files to remove: {}", files_to_remove.len());
+  println!("Files to remove from index only: {}", files_to_remove_from_index_only.len());
 
   if files_to_remove.len() > 0 {
-    println!("Removing {} files", files_to_remove.len());
     // create transactions of 500 files each
     let mut chunked_files_to_remove: Vec<Vec<String>> = vec![];
     let mut chunk: Vec<String> = vec![];
@@ -632,44 +641,65 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
     // remove files from the database
     for chunks_of_files_to_remove in chunked_files_to_remove {
       println!("Removing {} files from chunk", chunks_of_files_to_remove.len());
-      remove_vector_of_file_paths_from_db(&chunks_of_files_to_remove, conn);
+      remove_vector_of_file_paths_from_db(&chunks_of_files_to_remove, conn, false);
+    }
+  }
+
+  if files_to_remove_from_index_only.len() > 0 {
+    // create transactions of 500 files each
+    let mut chunked_files_to_remove: Vec<Vec<String>> = vec![];
+    let mut chunk: Vec<String> = vec![];
+    for file in files_to_remove_from_index_only {
+      if chunk.len() == 500 {
+        chunked_files_to_remove.push(chunk.clone());
+        chunk.clear();
+      }
+      chunk.push(file);
+    }
+    chunked_files_to_remove.push(chunk.clone());
+    // remove files from the database
+    for chunks_of_files_to_remove in chunked_files_to_remove {
+      println!("Removing {} files from chunk", chunks_of_files_to_remove.len());
+      remove_vector_of_file_paths_from_db(&chunks_of_files_to_remove, conn, true);
     }
   }
 }
 
-fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut SqliteConnection) {
+fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut SqliteConnection, remove_from_index_only: bool) {
+  if !remove_from_index_only {
+    let file_paths_clone_two = file_paths.clone();
+    // get metadata_id for all file_paths
+    let metadata_ids = document::table
+      .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
+      .filter(document::path.eq_any(file_paths_clone_two))
+      .select(metadata::id)
+      .load::<i32>(conn)
+      .unwrap();
+
+    // delete from metadata_fts using metadata_ids
+    conn.transaction::<_, diesel::result::Error, _>(|connection| {
+      diesel::delete(metadata_fts::table.filter(metadata_fts::id.eq_any(metadata_ids.clone())))
+        .execute(connection)
+    }).unwrap();
+    // delete from metadata using metadata_ids
+    conn.transaction::<_, diesel::result::Error, _>(|connection| {
+      diesel::delete(metadata::table.filter(metadata::id.eq_any(metadata_ids.clone())))
+        .execute(connection)
+    }).unwrap();
+    // delete from document using file_paths
+    conn.transaction::<_, diesel::result::Error, _>(|connection| {
+      diesel::delete(document::table.filter(document::path.eq_any(file_paths)))
+        .execute(connection)
+    }).unwrap();
+  }
   let file_paths_clone = file_paths.clone();
-  let file_paths_clone_two = file_paths.clone();
-  // get metadata_id for all file_paths
-  let metadata_ids = document::table
-    .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
-    .filter(document::path.eq_any(file_paths_clone))
-    .select(metadata::id)
-    .load::<i32>(conn)
-    .unwrap();
   // get document_id for all the file_paths where last_parsed > 0 (these are the ones in tantivy index)
   let document_ids = document::table
-    .filter(document::path.eq_any(file_paths_clone_two))
-    .filter(document::last_parsed.gt(0))
-    .select(document::id)
-    .load::<i32>(conn)
-    .unwrap();
-
-  // delete from metadata_fts using metadata_ids
-  conn.transaction::<_, diesel::result::Error, _>(|connection| {
-    diesel::delete(metadata_fts::table.filter(metadata_fts::id.eq_any(metadata_ids.clone())))
-      .execute(connection)
-  }).unwrap();
-  // delete from metadata using metadata_ids
-  conn.transaction::<_, diesel::result::Error, _>(|connection| {
-    diesel::delete(metadata::table.filter(metadata::id.eq_any(metadata_ids.clone())))
-      .execute(connection)
-  }).unwrap();
-  // delete from document using file_paths
-  conn.transaction::<_, diesel::result::Error, _>(|connection| {
-    diesel::delete(document::table.filter(document::path.eq_any(file_paths)))
-      .execute(connection)
-  }).unwrap();
+  .filter(document::path.eq_any(file_paths_clone))
+  .filter(document::last_parsed.gt(0))
+  .select(document::id)
+  .load::<i32>(conn)
+  .unwrap();
   // delete these files from the Tantivy Index using document_ids
   let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&document_ids);
   if indexing_commit_response.is_err() {

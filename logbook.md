@@ -13,6 +13,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Text is also scanned out of images (PNG, JPG, JPEG, SVG). Only for files > 50KB.
 - Using Tantivy as a replacement for Body_FTS. Each source gets its own table in the SQLite database and is coordinated with the Metadata table.
 - Proper `panic` handling when extracting PDFs.
+- Bring back Body table in SQLite. Use Tantivy for search results and search suggestions only. Storing fields in Tantivy blows up its size in comparison to SQLite.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.
