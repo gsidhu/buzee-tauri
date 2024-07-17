@@ -18,6 +18,8 @@ extern crate tantivy;
 extern crate xml;
 extern crate zip;
 extern crate csv;
+extern crate rusqlite;
+extern crate dirs;
 
 mod utils;
 mod custom_types;
@@ -32,6 +34,7 @@ mod context_menu;
 mod user_prefs;
 mod tantivy_index;
 mod window;
+mod firefox_read;
 
 fn main() {
   housekeeping::initialize();

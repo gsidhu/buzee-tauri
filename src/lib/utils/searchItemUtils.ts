@@ -1,10 +1,16 @@
 import { invoke, transformCallback } from "@tauri-apps/api/core";
 import { trackEvent } from '@aptabase/web';
+import { locationShown } from "$lib/stores";
+import { get } from 'svelte/store';
 import moment from 'moment';
 
 export async function openFileFolder(url: string) {
   trackEvent('click:openFile');
-  invoke('open_folder_containing_file', { filePath: url });
+  if (get(locationShown) === 'computer') {
+    invoke('open_folder_containing_file', { filePath: url });
+  } else {
+    invoke('open_file_or_folder', { filePath: url });
+  }
 }
 
 export async function openFile(url: string) {

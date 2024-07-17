@@ -102,7 +102,4 @@
 </div>
 
 <style lang="scss">
-  #toolbar > button:hover {
-    color: var(--purple);
-  }
 </style>

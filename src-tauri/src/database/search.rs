@@ -240,13 +240,17 @@ pub fn search_fts_index(
     search_results.sort_by(|a, b| b.last_modified.cmp(&a.last_modified));
     // remove duplicates by checking if the id is the same
     search_results.dedup_by(|a, b| a.id == b.id);
-    if date_limit_clone.is_some() {
-      // remove results that don't match the date limit
-      search_results.retain(|result| {
-        let last_modified = result.last_modified;
-        let date_limit = date_limit_clone.clone().unwrap();
-        last_modified >= date_limit.start.parse::<i64>().unwrap() && last_modified <= date_limit.end.parse::<i64>().unwrap()
-      });
+    if search_results.len() > 0 && date_limit_clone.is_some() {
+      let start_date = date_limit_clone.clone().unwrap().start.parse::<i64>().unwrap();
+      let end_date = date_limit_clone.clone().unwrap().end.parse::<i64>().unwrap();
+      if start_date > 0 || end_date > 0 {
+        // remove results that don't match the date limit
+        search_results.retain(|result| {
+          let last_modified = result.last_modified;
+          let date_limit = date_limit_clone.clone().unwrap();
+          last_modified >= date_limit.start.parse::<i64>().unwrap() && last_modified <= date_limit.end.parse::<i64>().unwrap()
+        });
+      }
     }
 
     Ok(search_results)

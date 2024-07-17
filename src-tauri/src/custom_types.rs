@@ -284,3 +284,11 @@ impl ContextMenuState {
     }
   }
 }
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct HistoryResult {
+  pub data: Vec<(i64, String, String, String)>,
+  pub is_loading: bool,
+  pub error_view: Option<String>,
+}

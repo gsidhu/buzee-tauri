@@ -37,6 +37,8 @@
 {:else if filetype === 'other-file-folder'}
 	<i class={`bi bi-folder-fill ${color ? 'txt-icon' : ''} ${extraClasses}`} title="Folder"></i>
 	<i class={`bi bi-file-earmark-image ${color ? 'txt-icon' : ''} ${extraClasses}`} title="Folder"></i>
+{:else if ['firefox-webpage'].includes(filetype)}
+	<i class={`bi bi-browser-firefox ${color ? 'pdf-icon' : ''} ${extraClasses}`} title="Webpage"></i>
 {:else}
 	<i class={`bi bi-file-earmark ${color ? 'txt-icon' : ''} ${extraClasses}`} title="File"></i>
 {/if}

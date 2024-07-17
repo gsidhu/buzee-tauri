@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { documentsShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview, noMoreResults, searchInProgress, showIconGrid, base64Images } from '$lib/stores';
+	import { documentsShown, locationShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview, noMoreResults, searchInProgress, showIconGrid, base64Images } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
 	import { stringToHash, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
@@ -41,13 +41,17 @@
 	}
 
 	let { table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize, hiddenColumnIds, ids, labels, hideForId } = createTableVars($documentsShown);
+	
 	// HACK: hide columns by default
 	// hideForId['size'] = true;
-	if ($preferLastOpened) {
-		hideForId['lastModified'] = true;
-	} else {
+	hideForId['lastModified'] = $preferLastOpened;
+	if ($locationShown === 'browser') {
 		hideForId['lastOpened'] = true;
+		hideForId['lastModified'] = false;
+	} else {
+		hideForId['lastOpened'] = !$preferLastOpened;
 	}
+	
 	// @ts-ignore
 	let columnsArray = columns.map((column: any) => ({ id: column.id, header: column.header }));
 
@@ -56,10 +60,12 @@
 		
 		({ table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize, hiddenColumnIds, ids, labels, hideForId } = createTableVars($documentsShown));
 		
-		if ($preferLastOpened) {
+		hideForId['lastModified'] = $preferLastOpened;
+		if ($locationShown === 'browser') {
+			hideForId['lastOpened'] = false;
 			hideForId['lastModified'] = true;
 		} else {
-			hideForId['lastOpened'] = true;
+			hideForId['lastOpened'] = !$preferLastOpened;
 		}
 		// @ts-ignore
 		columnsArray = columns.map((column: any) => ({ id: column.id, header: column.header }));
@@ -313,7 +319,8 @@
 		class="text-sm"
 		id="previous-page-results"
 		on:click={() => ($pageIndex = $pageIndex - 1)}
-		disabled={!$hasPreviousPage}>Previous</Button>
+		disabled={!$hasPreviousPage}>Previous</Button
+>
 	<Label class="font-normal text-sm">Page {$pageIndex + 1}</Label>
 	<Button
 		variant="outline"

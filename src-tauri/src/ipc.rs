@@ -8,6 +8,7 @@ use crate::database::search::{
     get_counts_for_all_filetypes, get_metadata_title_matches, get_parsed_text_for_file, get_recently_opened_docs, get_file_parsed_count, search_fts_index
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
+use crate::firefox_read::search_firefox;
 use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
 use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_roadmap_survey_answered_flag_in_db, set_skip_parsing_pdfs_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::{extract_text_from_pdf, graceful_restart, read_image_to_base64, read_text_from_file, save_text_to_file};
@@ -446,6 +447,12 @@ fn clear_index() {
   let _ = delete_all_docs_from_index();
 }
 
+#[tauri::command]
+fn search_firefox_history(user_query: String, limit: i32, page: i32) -> Result<Vec<DocumentSearchResult>, Error> {
+  let search_results = search_firefox(user_query, i64::from(limit), i64::from(page)).unwrap_or(vec![]);
+  Ok(search_results)
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -481,7 +488,8 @@ pub fn initialize() {
       search_tantivy_files_index,
       search_tantivy_bookmarks_index,
       create_csv_dump,
-      clear_index
+      clear_index,
+      search_firefox_history
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_updater::Builder::new().build())

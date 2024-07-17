@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { extractDate, cleanSearchQuery } from "./queryParsing";
-import { searchQuery, resultsPageShown, noMoreResults, searchInProgress, filetypeShown, resultsPerPage, documentsShown, allowedExtensions, base64Images, showIconGrid,  dateLimitUNIX } from "$lib/stores";
+import { searchQuery, locationShown, resultsPageShown, noMoreResults, searchInProgress, filetypeShown, resultsPerPage, documentsShown, allowedExtensions, base64Images, showIconGrid,  dateLimitUNIX } from "$lib/stores";
 import { trackEvent } from "@aptabase/web";
 import { setExtensionCategory } from "$lib/utils/miscUtils";
 import { getResultThumbnails } from '$lib/utils/fileTable';
@@ -21,35 +21,40 @@ export async function getDocumentsFromDB(page:number, limit:number) {
 }
 
 export async function searchDocuments(query:string, page:number, limit:number, type?:string, dateLimitUNIX?: ParsedDatesUNIX | null) {
+  let results: DocumentSearchResult[] = [];
   console.log("searching documents with query", query, "page", page, "limit", limit, "type", type, "dateLimitUNIX", dateLimitUNIX);
-  let dateLimit: ParsedDatesUNIX | null = null;
-  if (dateLimitUNIX) { dateLimit = dateLimitUNIX; }
-  let parsedDates = extractDate(query);
-  console.log("parsed dates:", parsedDates);
-  
-  if (dateLimitUNIX && dateLimitUNIX.start !== "" && dateLimitUNIX.end !== "") {
-    if (parsedDates && parsedDates.start === dateLimitUNIX.start && parsedDates.end === dateLimitUNIX.end) {
-      console.log("Dates are the same");
-      dateLimit = dateLimitUNIX;
-      query = dateLimit.text;
-    } else if (parsedDates) {
-      console.log("Dates are different");
-      dateLimit = parsedDates;
+
+  if (get(locationShown) === "computer") {
+    let dateLimit: ParsedDatesUNIX | null = null;
+    if (dateLimitUNIX) { dateLimit = dateLimitUNIX; }
+    let parsedDates = extractDate(query);
+    console.log("parsed dates:", parsedDates);
+    
+    if (dateLimitUNIX && dateLimitUNIX.start !== "" && dateLimitUNIX.end !== "") {
+      if (parsedDates && parsedDates.start === dateLimitUNIX.start && parsedDates.end === dateLimitUNIX.end) {
+        console.log("Dates are the same");
+        dateLimit = dateLimitUNIX;
+        query = dateLimit.text;
+      } else if (parsedDates) {
+        console.log("Dates are different");
+        dateLimit = parsedDates;
+        query = dateLimit.text;
+      }
+    }
+    if (dateLimit && dateLimit.text.length > 0) {
       query = dateLimit.text;
     }
-  }
-  if (dateLimit && dateLimit.text.length > 0) {
-    query = dateLimit.text;
-  }
-  let querySegments = cleanSearchQuery(query);
-  
-  if (type === "any") type = undefined;
+    let querySegments = cleanSearchQuery(query);
+    
+    if (type === "any") type = undefined;
 
-  let results: DocumentSearchResult[] = [];
-  if (query.length === 0 && !(dateLimitUNIX && dateLimitUNIX.start !== "" && dateLimitUNIX.end !== "")) {
-    results = await getDocumentsFromDB(page, limit);
-  } else {
-    results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type, dateLimit: dateLimit});
+    if (query.length === 0 && !(dateLimitUNIX && dateLimitUNIX.start !== "" && dateLimitUNIX.end !== "")) {
+      results = await getDocumentsFromDB(page, limit);
+    } else {
+      results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type, dateLimit: dateLimit});
+    }
+  } else if (get(locationShown) === "browser") {
+    results = await invoke("search_firefox_history", {userQuery: query, limit: limit, page: page});
   }
   return results;
 }
