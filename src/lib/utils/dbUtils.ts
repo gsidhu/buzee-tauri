@@ -23,12 +23,17 @@ export async function getDocumentsFromDB(page:number, limit:number) {
 export async function searchDocuments(query:string, page:number, limit:number, type?:string, dateLimitUNIX?: ParsedDatesUNIX | null) {
   console.log("searching documents with query", query, "page", page, "limit", limit, "type", type, "dateLimitUNIX", dateLimitUNIX);
   let dateLimit: ParsedDatesUNIX | null = null;
+  if (dateLimitUNIX) { dateLimit = dateLimitUNIX; }
   let parsedDates = extractDate(query);
+  console.log("parsed dates:", parsedDates);
+  
   if (dateLimitUNIX && dateLimitUNIX.start !== "" && dateLimitUNIX.end !== "") {
     if (parsedDates && parsedDates.start === dateLimitUNIX.start && parsedDates.end === dateLimitUNIX.end) {
+      console.log("Dates are the same");
       dateLimit = dateLimitUNIX;
       query = dateLimit.text;
     } else if (parsedDates) {
+      console.log("Dates are different");
       dateLimit = parsedDates;
       query = dateLimit.text;
     }

@@ -139,9 +139,10 @@ fn create_tantivy_query_statement(query_segments: &QuerySegments, file_type_stri
     // remove the trailing `OR )`
     tantivy_query_string = tantivy_query_string.trim().to_string();
 
-    if file_type_string.len() == 0 || tantivy_query_string.len() == 0 {
-      return tantivy_query_string;
-    } else {
+    if file_type_string.len() == 0 {
+        return tantivy_query_string;
+    } 
+    if tantivy_query_string.len() != 0 {
       // add file_type to query
       if !file_type_string.contains(",") {
         tantivy_query_string = format!("{} AND file_type:{}", tantivy_query_string, file_type_string);
@@ -189,6 +190,7 @@ pub fn search_fts_index(
       "".to_string()
     };
     // Add date limit(s)
+    let date_limit_clone = date_limit.clone();
     let where_date_limit: String = if let Some(date_limit) = date_limit {
       format!(
         r#"{} last_modified >= '{}' AND last_modified <= '{}'"#,
@@ -234,10 +236,18 @@ pub fn search_fts_index(
       }
     }
     // and order them by last_modified
-    // TODO: change this to frequency rank
+    // TODO: change this to frecency rank
     search_results.sort_by(|a, b| b.last_modified.cmp(&a.last_modified));
     // remove duplicates by checking if the id is the same
     search_results.dedup_by(|a, b| a.id == b.id);
+    if date_limit_clone.is_some() {
+      // remove results that don't match the date limit
+      search_results.retain(|result| {
+        let last_modified = result.last_modified;
+        let date_limit = date_limit_clone.clone().unwrap();
+        last_modified >= date_limit.start.parse::<i64>().unwrap() && last_modified <= date_limit.end.parse::<i64>().unwrap()
+      });
+    }
 
     Ok(search_results)
 }

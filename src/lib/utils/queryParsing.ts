@@ -28,13 +28,15 @@ export function extractDate(value: string) {
       }
       // make sure DD/MM is correctly parsed
       dateLimitTrimmed = checkDateMonth(dateLimitTrimmed, value);
-
+      console.log("trimmed dates:", dateLimitTrimmed);
+      
       // convert to UNIX timestamp
       let dateLimitTrimmedStart = new Date(dateLimitTrimmed.start + 'T00:00:00').getTime() / 1000;
       let dateLimitTrimmedEnd = new Date(dateLimitTrimmed.end + 'T23:59:59').getTime() / 1000;
       if (dateLimitTrimmedStart === dateLimitTrimmedEnd) {
         dateLimitTrimmedEnd = dateLimitTrimmedStart + 86400;
       }
+      console.log("UNIX dates:", dateLimitTrimmedStart, dateLimitTrimmedEnd);
       // save as string
       dateLimitTrimmed.start = dateLimitTrimmedStart.toString();
       dateLimitTrimmed.end = dateLimitTrimmedEnd.toString();
