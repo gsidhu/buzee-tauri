@@ -58,9 +58,8 @@ table! {
   body (id) {
       id -> Integer,
       metadata_id -> Integer,
+      source_id -> Integer,
       text -> Text,
-      title -> Text,
-      url -> Text,
       last_parsed -> BigInt,
   }
 }
@@ -96,7 +95,8 @@ table! {
     global_shortcut -> Text,
     automatic_background_sync -> Bool,
     detailed_scan -> Bool,
-    roadmap_survey_answered -> Bool
+    roadmap_survey_answered -> Bool,
+    skip_parsing_pdfs -> Bool
   }
 }
 
@@ -109,7 +109,7 @@ table! {
     app_theme -> Text,
     app_language -> Text,
     last_scan_time -> BigInt,
-    scan_running -> Bool,
+    scan_running -> Bool
   }
 }
 
@@ -118,8 +118,7 @@ table! {
     id -> Integer,
     path -> Text,
     is_folder -> Bool,
-    ignore_indexing -> Bool,
-    ignore_content -> Bool,
+    ignore_indexing -> Bool
   }
 }
 
@@ -137,6 +136,6 @@ table! {
     file_type -> Text,
     file_type_category -> Text,
     file_type_allowed -> Bool,
-    added_by_user -> Bool,
+    added_by_user -> Bool
   }
 }

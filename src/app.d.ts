@@ -65,8 +65,7 @@ declare global {
 
   interface IgnoreListType {
     path: string,
-    ignore_indexing: boolean,
-    ignore_content: boolean,
+    ignore_indexing: boolean
     is_folder: boolean,
   }
 

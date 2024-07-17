@@ -3,7 +3,7 @@
 
 use diesel::prelude::*;
 use diesel::Insertable;
-use super::schema::{document, metadata, metadata_fts, body, body_fts, user_preferences, app_data, ignore_list, allow_list, file_types};
+use super::schema::{document, metadata, metadata_fts, body, user_preferences, app_data, ignore_list, allow_list, file_types};
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -21,6 +21,7 @@ pub struct UserPrefs {
     pub automatic_background_sync: bool,
     pub detailed_scan: bool,
     pub roadmap_survey_answered: bool,
+    pub skip_parsing_pdfs: bool,
 }
 
 // This struct is for CRUD on the app_data table
@@ -43,7 +44,6 @@ pub struct IgnoreList {
     pub path: String,
     pub is_folder: bool,
     pub ignore_indexing: bool,
-    pub ignore_content: bool,
 }
 
 // This struct is for CRUD on the allow_list table
@@ -107,9 +107,8 @@ pub struct MetadataItem {
 #[diesel(table_name = body)]
 pub struct BodyItem {
     pub metadata_id: i32,
+    pub source_id: i32,
     pub text: String,
-    pub title: String,
-    pub url: String,
     pub last_parsed: i64,
 }
 
@@ -137,12 +136,12 @@ pub struct MetadataFTSSearchResult {
     pub title: String,
 }
 
-// This struct is for SELECTING from the metadata table without any JOINs
-#[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]
-#[diesel(table_name = body_fts)]
-pub struct BodyFTSSearchResult {
-    pub text: String,
-}
+// This struct is for SELECTING from the body_fts table without any JOINs
+// #[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]
+// #[diesel(table_name = body_fts)]
+// pub struct BodyFTSSearchResult {
+//     pub text: String,
+// }
 
 // This struct is for SELECTING from the document table without any JOINs
 #[derive(Serialize, Deserialize, Queryable, QueryableByName, PartialEq, Debug, Clone)]

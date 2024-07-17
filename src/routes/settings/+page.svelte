@@ -23,6 +23,7 @@
 	let globalShortcutCode: String = "Space";
 	let automaticBackgroundSyncEnabled: boolean;
 	let detailedScanEnabled: boolean;
+	let skipParsingPDF: boolean;
 
 	function toggleShowSearchSuggestions() {
 		showSearchSuggestions = !showSearchSuggestions;
@@ -62,6 +63,16 @@
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "detailed_scan", value: detailedScanEnabled}).then(() => {
 			console.log("Set detailed scan flag to: " + detailedScanEnabled);
+		});
+	}
+
+	function toggleSkipParsingPDF() {
+		skipParsingPDF = !skipParsingPDF;
+		trackEvent('click:toggleSkipParsingPDF', { skipParsingPDF });
+		$statusMessage = `Setting changed!`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
+		invoke("set_user_preference", {key: "skip_parsing_pdfs", value: skipParsingPDF}).then(() => {
+			console.log("Set skipParsingPDF flag to: " + skipParsingPDF);
 		});
 	}
 
@@ -235,6 +246,7 @@
 			console.log(globalShortcut);
 			automaticBackgroundSyncEnabled = $userPreferences.automatic_background_sync;
 			detailedScanEnabled = $userPreferences.detailed_scan;
+			skipParsingPDF = $userPreferences.skip_parsing_pdfs;
 		});
 
 		const shortcutInput = document.getElementById('shortcut-input');
@@ -434,6 +446,20 @@
 					<div>Keep this on so you can search inside files (PDFs are scanned last)</div>
 					<PopoverIcon
 						title="Disabling this setting may improve speed but reduce quality of search results"
+					/>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<Switch bind:checked={skipParsingPDF} on:click={() => toggleSkipParsingPDF()} />
+			</td>
+			<td class="py-2 skip-hover">
+				Skip Scanning Text from PDFs and Images
+				<div class="flex items-center small-explanation gap-1">
+					<div>PDFs and images take time to scan. Disable this if you don't have too many of them.</div>
+					<PopoverIcon
+						title="Disabling this setting may improve the quality of search results but make the app buggy"
 					/>
 				</div>
 			</td>

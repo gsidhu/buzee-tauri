@@ -11,6 +11,7 @@ use queries::{
   DOCUMENT_TABLE_CREATE_STATEMENT, 
   METADATA_TABLE_CREATE_STATEMENT, 
   METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT,
+  BODY_TABLE_CREATE_STATEMENT,
   TRIGGER_INSERT_DOCUMENT_METADATA, TRIGGER_UPDATE_DOCUMENT_METADATA,
   USER_PREFS_TABLE_CREATE_STATEMENT,
   APP_DATA_TABLE_CREATE_STATEMENT,
@@ -102,7 +103,7 @@ pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize,
   
   // Data Tables
   diesel::sql_query(DOCUMENT_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
-  // diesel::sql_query(BODY_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(BODY_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(METADATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(METADATA_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   // diesel::sql_query(BODY_FTS_VIRTUAL_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;

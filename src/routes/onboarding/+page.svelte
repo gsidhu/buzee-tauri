@@ -7,7 +7,7 @@
 	});
 </script>
 
-<div class="page relative h-full">
+<div class="page relative h-full rounded-sm">
 	<div id="gradient"></div>
 	{#if $dbCreationInProgress}
 		<div id="searching">

@@ -30,7 +30,7 @@ pub fn create_tantivy_schema() -> Schema {
   schema_builder.add_text_field("title", TEXT);
   schema_builder.add_text_field("body", TEXT);
   schema_builder.add_text_field("file_type", STRING);
-  schema_builder.add_i64_field("last_parsed", STORED);
+  schema_builder.add_i64_field("last_modified", INDEXED | STORED);
 
   // additional browser history attributes
   // URL doubles up as PATH for documents
@@ -98,7 +98,7 @@ pub fn add_docs_to_index(files_array: &Vec<TantivyDocumentItem>,) -> tantivy::Re
   let body = index.schema().get_field("body").unwrap();
   let url = index.schema().get_field("url").unwrap();
   let file_type = index.schema().get_field("file_type").unwrap();
-  let last_parsed = index.schema().get_field("last_parsed").unwrap();
+  let last_modified = index.schema().get_field("last_modified").unwrap();
   let comment = index.schema().get_field("comment").unwrap();
 
   // for each document in the array, add it to the index
@@ -111,7 +111,7 @@ pub fn add_docs_to_index(files_array: &Vec<TantivyDocumentItem>,) -> tantivy::Re
       body => doc.body.as_str(),
       url => doc.url.as_str(),
       file_type => doc.file_type.as_str(),
-      last_parsed => doc.last_parsed,
+      last_modified => doc.last_modified,
       comment => doc.comment.as_str(),
     ))?;
   }
@@ -188,14 +188,7 @@ pub fn parse_query_and_get_top_docs(index: &Index, searcher: &Searcher, user_que
 pub fn return_document_search_results(index: &Index, searcher: &Searcher, top_docs: Vec<(f32, DocAddress)>) -> Result<Vec<TantivyDocumentSearchResult>, TantivyError> {
   // Get the fields
   let id = index.schema().get_field("id").unwrap();
-  let source_table = index.schema().get_field("source_table").unwrap();
-  let source_domain = index.schema().get_field("source_domain").unwrap();
-  let comment = index.schema().get_field("comment").unwrap();
-  let title = index.schema().get_field("title").unwrap();
-  let body = index.schema().get_field("body").unwrap();
-  let url = index.schema().get_field("url").unwrap();
-  let file_type = index.schema().get_field("file_type").unwrap();
-  let last_parsed = index.schema().get_field("last_parsed").unwrap();
+  let last_modified = index.schema().get_field("last_modified").unwrap();
 
   // Retrieve the search results
   let mut search_results = Vec::new();
@@ -205,14 +198,7 @@ pub fn return_document_search_results(index: &Index, searcher: &Searcher, top_do
     let result: TantivyDocumentSearchResult = {
       TantivyDocumentSearchResult {
         id: retrieved_doc.get_first(id).and_then(|value| value.as_i64()).unwrap_or_else(|| {return 0_i64 ;}),
-        source_table: retrieved_doc.get_first(source_table).and_then(|value| value.as_str()).unwrap_or_else(|| {return "null" ;}).to_string(),
-        source_domain: retrieved_doc.get_first(source_domain).and_then(|value| value.as_str()).unwrap_or_else(|| {return "null" ;}).to_string(),
-        comment: retrieved_doc.get_first(comment).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
-        title: retrieved_doc.get_first(title).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
-        body: retrieved_doc.get_first(body).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
-        url: retrieved_doc.get_first(url).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
-        file_type: retrieved_doc.get_first(file_type).and_then(|value| value.as_str().map(|s| s.to_string())).or(None),
-        last_parsed: retrieved_doc.get_first(last_parsed).and_then(|value| value.as_i64()).or(None),
+        last_modified: retrieved_doc.get_first(last_modified).and_then(|value| value.as_i64()).unwrap_or_else(|| {return 0_i64 ;}),
       }
     };
     search_results.push(result);
@@ -292,24 +278,6 @@ pub fn _get_all_unique_ids_from_index(searcher: &Searcher) -> Vec<i64> {
   unique_ids
 }
 
-pub fn _get_last_parsed_value_from_id(searcher: &Searcher, given_id: i64) -> i64 {
-  let index = get_tantivy_index(create_tantivy_schema()).unwrap();
-  let id = index.schema().get_field("id").unwrap();
-  let last_parsed = index.schema().get_field("last_parsed").unwrap();
-
-  // find the document in the index where the ID matches the given ID
-  let query = QueryParser::for_index(&index, vec![id]).parse_query(format!("id:{}", given_id).as_str()).unwrap();
-  let top_docs = searcher.search(&query, &TopDocs::with_limit(1)).unwrap();
-
-  let mut last_parsed_value = 0_i64;
-  for (_score, doc_address) in top_docs {
-    let retrieved_doc: TantivyDocument = searcher.doc(doc_address).ok().unwrap();
-    last_parsed_value = retrieved_doc.get_first(last_parsed).and_then(|value| value.as_i64()).unwrap_or_else(|| {return 0_i64 ;});
-  }
-
-  last_parsed_value
-}
-
 pub fn _get_body_values_from_id(searcher: &Searcher, given_id: i64) -> Vec<String> {
   let index = get_tantivy_index(create_tantivy_schema()).unwrap();
   let id = index.schema().get_field("id").unwrap();
@@ -367,117 +335,3 @@ pub fn internal_test_create_csv_dump_from_index(searcher: &Searcher) {
 
   println!("CSV dump created successfully");
 }
-
-// pub fn create_tantivy_basic_example() -> tantivy::Result<()> {
-//   println!("--- Creating a Tantivy index with a basic example");
-//   let schema = create_tantivy_schema();
-//   let index = get_tantivy_index(schema.clone())?;
-//   add_docs_to_index(&index)?;
-//   Ok(())
-// }
-
-// let url = index.schema().get_field("url").unwrap();
-// let last_visited = index.schema().get_field("last_visited").unwrap();
-// let saved_at = index.schema().get_field("saved_at").unwrap();
-// let word_count = index.schema().get_field("word_count").unwrap();
-// let is_favorite = index.schema().get_field("is_favorite").unwrap();
-// let is_archived = index.schema().get_field("is_archived").unwrap();
-// let is_read = index.schema().get_field("is_read").unwrap();
-// let tags = index.schema().get_field("tags").unwrap();
-// 
-// let sender = index.schema().get_field("sender").unwrap();
-// let recipient = index.schema().get_field("recipient").unwrap();
-// let cc = index.schema().get_field("cc").unwrap();
-// let bcc = index.schema().get_field("bcc").unwrap();
-// let subject = index.schema().get_field("subject").unwrap();
-// let attachments = index.schema().get_field("attachments").unwrap();
-// // Sample Document - 1
-// index_writer.add_document(doc!(
-//   id => 0_i64,
-//   source_table => "files",
-//   source_domain => "document",
-//   is_pinned => true,
-//   comment => "This is a great book",
-//   created_at => 1614556800_i64,
-//   title => "Of Mice and Men",
-//   body => "A few miles south of Soledad, the Buzo Salinas River drops in close to the hillside \
-//           bank and runs deep and green. The water is warm too, for it has slipped twinkling \
-//           over the yellow sands in the sunlight before reaching the narrow pool. On one \
-//           side of the river the golden foothill slopes curve up to the strong and rocky \
-//           Gabilan Mountains, but on the valley side the water is lined with trees—willows \
-//           fresh and green with every spring, carrying in their lower leaf junctures the \
-//           debris of the winter’s flooding; and sycamores with mottled, white, recumbent \
-//           limbs and branches that arch over the pool",
-//   path => "/home/user/Documents/",
-//   size => 1024.0,
-//   file_type => "pdf",
-//   last_modified => 1614556800_i64,
-//   last_opened => 1614556800_i64,
-//   last_synced => 1614556800_i64,
-//   last_parsed => 1614556800_i64,
-// ))?;
-// 
-// // Sample Document - 2
-// index_writer.add_document(doc!(
-//   id => 1_i64,
-//   source_table => "files",
-//   source_domain => "document",
-//   is_pinned => false,
-//   comment => "This is a great book",
-//   created_at => 1614556800_i64,
-//   title => "Arcadia",
-//   body => "Arcadia is a play by Tom Stoppard concerning the relationship between past and present, \
-//           order and disorder, certainty and uncertainty. It has been praised by many critics as \
-//           the finest play from one of the most significant contemporary playwrights in the English \
-//           language. In 2006, the Royal Institution of Great Britain named it one of the best science-related \
-//           works ever written.",
-//   path => "/home/user/Documents/",
-//   size => 1024.0,
-// ))?;
-// 
-// // Sample Browser History
-// index_writer.add_document(doc!(
-//   id => 0_i64,
-//   source_table => "web_history",
-//   source_domain => "chrome",
-//   is_pinned => true,
-//   comment => "This is a great book",
-//   title => "Of Mice and Men",
-//   body => "Site description goes here... romeo",
-//   url => "https://en.wikipedia.org/",
-//   last_visited => 1614556800_i64,
-// ))?;
-// 
-// // Sample Bookmark/Article
-// index_writer.add_document(doc!(
-//   id => 0_i64,
-//   source_table => "bookmarks",
-//   source_domain => "instapaper",
-//   title => "Romeo and Juliet",
-//   url => "https://en.wikipedia.org/Romeo_and_Juliet",
-//   body => "Romeo and Juliet is a tragedy written by William Shakespeare early in his career about two young star-crossed lovers whose deaths ultimately reconcile their feuding families. It was among Shakespeare's most popular plays during his lifetime and along with Hamlet, is one of his most frequently performed plays. Today, the title characters are regarded as archetypal young lovers.",
-//   saved_at => 1614556800_i64,
-//   last_visited => 1614556800_i64,
-//   word_count => 1024_i64,
-//   is_favorite => true,
-//   is_archived => false,
-//   is_read => false,
-//   tags => "love, tragedy",
-// ))?;
-// 
-// // Sample Email
-// index_writer.add_document(doc!(
-//   id => 0_i64,
-//   source_table => "email",
-//   source_domain => "gmail",
-//   is_pinned => true,
-//   comment => "This is the best email",
-//   sender => "buzo@buzo.com",
-//   recipient => "goju@buzo.com",
-//   cc => "pogo@buzo.com",
-//   bcc => "",
-//   subject => "Hello",
-//   body => "Bow bow this is a great email",
-//   attachments => "file1.pdf, file2.docx",
-//   tags => "important",
-// ))?;

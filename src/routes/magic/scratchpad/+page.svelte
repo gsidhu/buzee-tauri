@@ -72,14 +72,14 @@
           <span class="text-xs text-muted-foreground">Last saved: {lastSaved}</span>
         {/if}
       </div>
-      <div id="toolbar" class="gap-1 flex justify-content-center">
-        <Button variant="outline" title="Copy text" on:click={() => copyTextToClipboard()}>
+      <div id="toolbar" class="gap-0 flex justify-content-center">
+        <Button variant="ghost" title="Copy text" on:click={() => copyTextToClipboard()}>
           <Copy class="h-4 w-4" />
         </Button>
-        <Button variant="outline" title="Save text as a file" on:click={() => downloadTextFile()}>
+        <Button variant="ghost" title="Save text as a file" on:click={() => downloadTextFile()}>
           <Download class="h-4 w-4" />
         </Button>
-        <Button variant="outline" title="Clear all text" on:click={() => $scratchPadText = ""}>
+        <Button variant="ghost" title="Clear all text" on:click={() => $scratchPadText = ""}>
           <Eraser class="h-4 w-4" />
         </Button>
       </div>
@@ -92,7 +92,4 @@
 </div>
 
 <style lang="scss">
-  #toolbar > button:hover {
-    color: var(--purple);
-  }
 </style>

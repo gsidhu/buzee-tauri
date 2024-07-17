@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import * as Drawer from "$lib/components/ui/drawer/index.js";
+  import { Button } from "$lib/components/ui/button";
+  import { save } from '@tauri-apps/plugin-dialog';
   import { selectedResult, selectedResultText, showResultTextPreview } from '$lib/stores';
   import { openFileFolder } from '$lib/utils/searchItemUtils';
  
@@ -27,6 +29,20 @@
     return true;
   }
 
+  saveAsText
+  async function saveAsText() {
+    const filePath = await save({
+      filters: [{
+        name: 'Text Files',
+        extensions: ['txt']
+      }]
+    });
+    if (filePath) {
+      await invoke("write_text_to_file", { filePath, text: $selectedResultText.join("") });
+      await invoke("open_folder_containing_file", { filePath });
+    }
+  }
+
   onMount(() => {
     if (window.innerWidth < 1024) {
       isDesktop = false;
@@ -45,7 +61,10 @@
           </button>
         </Dialog.Title>
         <Dialog.Description>
-          The text below is extracted from the file
+          <div class="flex justify-between items-center">
+            <span>The text below is extracted from the file</span>
+            <Button variant="link" on:click={() => saveAsText()}>Save as text</Button>
+          </div>
         </Dialog.Description>
       </Dialog.Header>
       <div class="p-4 max-h-[60vh] max-w-[60vw] overflow-auto text-interaction rounded-lg border border-dashed">
@@ -65,10 +84,13 @@
           </button>
         </Drawer.Title>
         <Drawer.Description>
-          The text below is extracted from the file
+          <div class="flex justify-between items-center">
+            <span>The text below is extracted from the file</span>
+            <Button variant="link" on:click={() => saveAsText()}>Save as text</Button>
+          </div>
         </Drawer.Description>
       </Drawer.Header>
-      <div class="p-4 overflow-auto max-h-[70vh] text-interaction rounded-lg border border-dashed">
+      <div class="p-4 overflow-auto max-h-[70vh] text-interaction border-t border-dashed">
         {#each $selectedResultText as para}
           {para}
         {/each}

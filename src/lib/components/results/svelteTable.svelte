@@ -313,8 +313,7 @@
 		class="text-sm"
 		id="previous-page-results"
 		on:click={() => ($pageIndex = $pageIndex - 1)}
-		disabled={!$hasPreviousPage}>Previous</Button
-	>
+		disabled={!$hasPreviousPage}>Previous</Button>
 	<Label class="font-normal text-sm">Page {$pageIndex + 1}</Label>
 	<Button
 		variant="outline"
@@ -332,8 +331,7 @@
 			{:else}
 				Next
 			{/if}
-		</Button
-	>
+		</Button>
 </div>
 
 {#key $selectedResult}

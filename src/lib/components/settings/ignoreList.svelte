@@ -14,15 +14,10 @@
 			accessor: 'path'
 		}),
 		table.column({
-			header: 'Ignore Scanning',
+			header: 'Ignore Type',
 			accessor: 'ignore_indexing',
-			cell: ({ value }: { value: boolean }) => value ? 'Yes' : 'No'
+			cell: ({ value }: { value: boolean }) => value ? 'Ignore Completely' : 'Ignore Content Only'
 		}),
-		table.column({
-			header: 'Ignore Content',
-			accessor: 'ignore_content',
-			cell: ({ value }: { value: boolean }) => value ? 'Yes' : 'No'
-		})
 	]);
 	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
 

@@ -57,14 +57,13 @@ pub const DOCUMENT_TABLE_CREATE_STATEMENT : &str = r#"
   source_id = id from the source table (document, email, article, website etc.)
   text = body content of the document, email, article, website etc.
 */
-pub const _BODY_TABLE_CREATE_STATEMENT : &str = r#"
+pub const BODY_TABLE_CREATE_STATEMENT : &str = r#"
   CREATE TABLE IF NOT EXISTS "body" 
   (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
+    source_id INTEGER NOT NULL,
     text TEXT NOT NULL,
-    title TEXT NOT NULL,
-    url TEXT NOT NULL,
     last_parsed BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (metadata_id) REFERENCES metadata(id)
   );
@@ -255,7 +254,8 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
     global_shortcut TEXT NOT NULL DEFAULT "Alt+Space",
     automatic_background_sync BOOLEAN NOT NULL DEFAULT 1,
     detailed_scan BOOLEAN NOT NULL DEFAULT 1,
-    roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0
+    roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0,
+    skip_parsing_pdfs BOOLEAN NOT NULL DEFAULT 1
   );
 "#;
 
@@ -286,8 +286,7 @@ pub const IGNORE_LIST_TABLE_CREATE_STATEMENT : &str = r#"
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     path TEXT NOT NULL,
     is_folder BOOLEAN NOT NULL DEFAULT 0,
-    ignore_indexing BOOLEAN NOT NULL DEFAULT 0,
-    ignore_content BOOLEAN NOT NULL DEFAULT 0
+    ignore_indexing BOOLEAN NOT NULL DEFAULT 0
   );
 "#;
 

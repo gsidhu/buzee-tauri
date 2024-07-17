@@ -6,7 +6,7 @@ use crate::tantivy_index::{acquire_searcher_from_reader, create_tantivy_schema, 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_json;
-use super::schema::document;
+use super::schema::{body, document};
 use tantivy::{Searcher, Index};
 
 fn parse_stringified_query_segments(json_string: &str) -> QuerySegments {
@@ -84,7 +84,7 @@ fn create_match_statement(query_segments: &QuerySegments) -> String {
     match_string
 }
 
-fn create_tantivy_query_statement(query_segments: &QuerySegments) -> String {
+fn create_tantivy_query_statement(query_segments: &QuerySegments, file_type_string: String) -> String {
     let mut tantivy_query_string: String = String::new();
 
     // If there are quoted segments, join them with double quotes
@@ -138,6 +138,19 @@ fn create_tantivy_query_statement(query_segments: &QuerySegments) -> String {
     }
     // remove the trailing `OR )`
     tantivy_query_string = tantivy_query_string.trim().to_string();
+
+    if file_type_string.len() == 0 || tantivy_query_string.len() == 0 {
+      return tantivy_query_string;
+    } else {
+      // add file_type to query
+      if !file_type_string.contains(",") {
+        tantivy_query_string = format!("{} AND file_type:{}", tantivy_query_string, file_type_string);
+      } else {
+        let file_type_query_string = file_type_string.replace(",", " OR file_type:");
+        tantivy_query_string = format!("{} AND (file_type:{})", tantivy_query_string, file_type_query_string);
+      }
+    }
+
     tantivy_query_string
 }
 
@@ -161,6 +174,7 @@ pub fn search_fts_index(
     println!("query_segments: {:?}", query_segments);
 
     let file_type_clone = file_type.clone();
+    let file_type_clone_two = file_type.clone();
     // Add file type(s)
     let where_file_type = if let Some(file_type) = file_type {
       if !file_type.contains(",") {
@@ -199,7 +213,7 @@ pub fn search_fts_index(
     else {
       let match_string = create_match_statement(&query_segments);
       println!("match_string: {}", match_string);
-      let tantivy_string = create_tantivy_query_statement(&query_segments);
+      let tantivy_string = create_tantivy_query_statement(&query_segments, file_type_clone_two.unwrap_or("".to_string()));
       println!("tantivy_string: {}", tantivy_string);
 
       let tantivy_index = get_tantivy_index(create_tantivy_schema()).unwrap();
@@ -214,7 +228,7 @@ pub fn search_fts_index(
       let metadata_search_results: Vec<DocumentSearchResult> = diesel::sql_query(metadata_fts_query).load::<DocumentSearchResult>(&mut conn).unwrap_or(Vec::new());
       println!("got {} results from metadata_fts", metadata_search_results.len());
       // combine the results from body_fts and metadata_fts
-      let metadata_search_results = Vec::new();
+      // let metadata_search_results = Vec::new();
       for result in metadata_search_results.iter().chain(tantivy_search_results.iter()) {
         search_results.push(result.clone());
       }
@@ -229,16 +243,20 @@ pub fn search_fts_index(
 }
 
 fn get_search_results_from_tantivy_index(query: &String, limit: i32, page: i32, searcher: &Searcher, tantivy_index: &Index, mut conn:  PooledConnection<ConnectionManager<SqliteConnection>>,) -> Result<Vec<DocumentSearchResult>, Error> {
-  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, query.to_string(), limit, page*limit).unwrap();
-  let search_results = return_document_search_results(&tantivy_index, &searcher, top_docs).unwrap_or(vec![]);
-  let document_ids: Vec<i32> = search_results.iter().map(|result| result.id as i32).collect();
+  let top_docs = parse_query_and_get_top_docs(&tantivy_index, &searcher, query.to_string(), limit, page*limit).unwrap_or(Vec::new());
+  if top_docs.len() > 0 {
+    let search_results = return_document_search_results(&tantivy_index, &searcher, top_docs).unwrap_or(vec![]);
+    let document_ids: Vec<i32> = search_results.iter().map(|result| result.id as i32).collect();
 
-  let search_results_to_return = document::table
-    .filter(document::id.eq_any(document_ids))
-    .load::<DocumentSearchResult>(&mut conn)
-    .unwrap_or(Vec::new());
+    let search_results_to_return = document::table
+      .filter(document::id.eq_any(document_ids))
+      .load::<DocumentSearchResult>(&mut conn)
+      .unwrap_or(Vec::new());
 
-  Ok(search_results_to_return)
+    Ok(search_results_to_return)
+  } else {
+    Ok(Vec::new())
+  }
 }
 
 fn _create_body_fts_query(
@@ -618,21 +636,15 @@ pub fn get_metadata_title_matches(
 
 // Get parsed text for file
 pub fn get_parsed_text_for_file(document_id: i32, conn: &mut SqliteConnection) -> Result<Vec<String>, diesel::result::Error> {
-  // get all items from tantivy where url is equal to file_path
-  // get all rows from body_fts::table where url is equal to file_path
-  let inner_query = format!(
-    r#"
-        SELECT text FROM body WHERE source_id = '{}';
-    "#,
-    document_id
-  );
-  // let parsed_text_rows: Vec<BodyFTSSearchResult> = diesel::sql_query(inner_query).load::<BodyFTSSearchResult>(conn)?;
+  // get all items from body where url is equal to file_path
+  let parsed_text_rows = body::table
+    .filter(body::source_id.eq(document_id))
+    .select(body::text)
+    .order_by(body::id.asc())
+    .load::<String>(conn)
+    .unwrap();
 
-  let mut parsed_text_vec: Vec<String> = Vec::new();
-  // for text in parsed_text_rows {
-  //     parsed_text_vec.push(text.text);
-  // }
-  Ok(parsed_text_vec)
+  Ok(parsed_text_rows)
 }
 
 // Get the file_id from the document table in the database

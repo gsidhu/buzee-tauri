@@ -33,7 +33,7 @@ pub struct TantivyDocumentItem {
     pub url: String,
     pub body: String,
     pub file_type: String,
-    pub last_parsed: i64,
+    pub last_modified: i64,
     pub comment: String,
 }
 
@@ -41,14 +41,7 @@ pub struct TantivyDocumentItem {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TantivyDocumentSearchResult {
   pub id: i64,
-  pub source_table: String,
-  pub source_domain: String,
-  pub comment: Option<String>,
-  pub title: Option<String>,
-  pub body: Option<String>,
-  pub url: Option<String>,
-  pub file_type: Option<String>,
-  pub last_parsed: Option<i64>,
+  pub last_modified: i64,
 }
 
 // Struct for TantivyBrowserHistorySearchResult
@@ -245,7 +238,8 @@ pub(crate) struct UserPreferencesState {
   pub global_shortcut: String,
   pub automatic_background_sync: bool,
   pub detailed_scan: bool,
-  pub roadmap_survey_answered: bool
+  pub roadmap_survey_answered: bool,
+  pub skip_parsing_pdfs: bool,
 }
 
 impl Default for UserPreferencesState {
@@ -260,7 +254,8 @@ impl Default for UserPreferencesState {
           global_shortcut: "Alt+Space".to_string(),
           automatic_background_sync: true,
           detailed_scan: true,
-          roadmap_survey_answered: false
+          roadmap_survey_answered: false,
+          skip_parsing_pdfs: true
         }
     }
 }

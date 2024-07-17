@@ -9,27 +9,26 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Folder, FolderPlus } from 'lucide-svelte';
 	import * as Dialog from "$lib/components/ui/dialog";
-	import { Checkbox } from "$lib/components/ui/checkbox/index.js";
+	import * as RadioGroup from "$lib/components/ui/radio-group/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
 
 	let pathToIgnore = "";
-	let ignoreIndex = true;
-	let ignoreContent = true;
+	let radioValue = "ignore-content-only"
+	let ignoreIndexing = false;
 	let dialogOpen = false;
-
-	$: if (ignoreIndex) { ignoreContent = true }
 
 	function addToIgnoreList() {
 		if (pathToIgnore === '') return;
 		$statusMessage = `Adding to Ignore List... Please wait.`;
 		$syncStatus = true;
 		$disableInteraction = true;
-		if (ignoreIndex) { ignoreContent = true }
-		invoke('ignore_file_or_folder', { path: pathToIgnore, isDirectory: true, shouldIgnoreIndexing: ignoreIndex, shouldIgnoreContent: ignoreContent }).then(() => {
+		if (radioValue === "ignore-completely") {ignoreIndexing = true;}
+		else { ignoreIndexing = false; }
+		invoke('ignore_file_or_folder', { path: pathToIgnore, isDirectory: true, shouldIgnoreIndexing: ignoreIndexing }).then(() => {
 			$statusMessage = `Removed!`;
 			$syncStatus = false;
 			$disableInteraction = false;
-			$ignoredPaths  = [...$ignoredPaths, { path: pathToIgnore, is_folder: true, ignore_indexing: ignoreIndex, ignore_content: ignoreContent }];
+			$ignoredPaths  = [...$ignoredPaths, { path: pathToIgnore, is_folder: true, ignore_indexing: ignoreIndexing }];
 		});
 	}
 
@@ -80,7 +79,7 @@
 					{/if}
 				</Dialog.Title>
 				<Dialog.Description>
-					{#if $disableInteraction || $statusMessage === "Removed!"}Please wait while the process completes..
+					{#if $disableInteraction || $statusMessage === "Removed!"}Please wait while the process completes...
 					{:else}Add the full path to the folder
 					{/if}
 				</Dialog.Description>
@@ -111,27 +110,21 @@
 						<Folder class="h-4 w-4" />
 					</Button>
 				</div>
-				<div class="flex justify-between mt-3">
-					<div class="flex items-center space-x-2">
-						<Checkbox bind:checked={ignoreIndex} aria-labelledby="terms-label" id="ignore-index" />
-						<Label
-							id="ignore-index-label"
-							for="ignore-index"
-							class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-						>
-							Ignore Scanning
-						</Label>
-					</div>
-					<div class="flex items-center space-x-2">
-						<Checkbox bind:checked={ignoreContent} aria-labelledby="terms-label" id="ignore-content" />
-						<Label
-							id="ignore-content-label"
-							for="ignore-content"
-							class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-						>
-							Ignore Content
-						</Label>
-					</div>
+				<div class="mt-3">
+					<RadioGroup.Root bind:value={radioValue}>
+						<div class="flex items-center space-x-2">
+							<RadioGroup.Item value="ignore-content-only" id="ignore-content-only" />
+							<Label for="ignore-content-only" class="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+								Keep in Index but Ignore Content
+							</Label>
+						</div>
+						<div class="flex items-center space-x-2">
+							<RadioGroup.Item value="ignore-completely" id="ignore-completely" />
+							<Label for="ignore-completely" class="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+								Ignore Completely
+							</Label>
+						</div>
+					</RadioGroup.Root>
 				</div>
 			{/if}
 			<Dialog.Footer>

@@ -72,7 +72,7 @@
   }
 
   async function run_tantivy() {
-    let results = await invoke("search_tantivy_files_index", { userQuery: "ignus* -rajasthan", limit: 25, page: 0 });
+    let results = await invoke("search_tantivy_files_index", { userQuery: "meghna", limit: 25, page: 0 });
     console.log(results);
   }
 
@@ -143,7 +143,7 @@
 <EventListeners />
 
 <!-- <Button on:click={() => run_tantivy()}>Search</Button> -->
-<Button on:click={() => run_tantivy_index()}>Create</Button>
+<!-- <Button on:click={() => run_tantivy_index()}>Create</Button> -->
 <main class={`min-h-screen max-h-screen overflow-auto ${$windowBlurred ? "grayscale-no" : ""}`}>
 	<div class={`grid min-h-screen max-h-screen w-full ${$userPreferences.onboarding_done ? "lg:grid-cols-[20vw_1fr] " : ""}`}>
     <div class={`hidden max-h-screen overflow-y-auto border-r bg-muted/40 ${$userPreferences.onboarding_done ? "lg:block" : ""}`}>
