@@ -56,7 +56,7 @@
 	let columnsArray = columns.map((column: any) => ({ id: column.id, header: column.header }));
 
 	$: if ($documentsShown) {
-		console.log(">>> reloading...");
+		console.log(">>> reloading... " + $documentsShown.length + " docs");
 		
 		({ table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize, hiddenColumnIds, ids, labels, hideForId } = createTableVars($documentsShown));
 		
@@ -330,8 +330,10 @@
 		disabled={!$hasNextPage && $noMoreResults}
 		on:click={async () => {
 			let currentPage = $pageIndex;
-			if (!$hasNextPage && !$noMoreResults) { await loadMoreResults(); }
-			if ($hasNextPage) { $pageIndex = currentPage + 1; }
+			let gotNewResults = false;
+			if (!$hasNextPage && !$noMoreResults) { await loadMoreResults(); gotNewResults = true; }
+			if (gotNewResults && $documentsShown.length % $pageSize > 0) { $pageIndex = currentPage; }
+			else if ($hasNextPage) { $pageIndex = currentPage + 1; }
 		}}>
 			{#if $searchInProgress}
 				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />

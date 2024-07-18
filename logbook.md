@@ -14,6 +14,7 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Using Tantivy as a replacement for Body_FTS. Each source gets its own table in the SQLite database and is coordinated with the Metadata table.
 - Proper `panic` handling when extracting PDFs.
 - Bring back Body table in SQLite. Use Tantivy for search results and search suggestions only. Storing fields in Tantivy blows up its size in comparison to SQLite.
+- Add firefox and chrome history search.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.
@@ -279,25 +280,5 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - ? Add a Preview sidebar that shows a thumbnail and complete metadata of the selected file.
 - Allow user to add/remove file types and categories.
 - Update Document Stats to reflect categories and # files indexed.
-- Add infinite scroll to search results. (Need Punnu's help for this.)
+- Add infinite scroll to search results.
 - Fix window overflow issue.
-
-
-# Chat with Ritwik
-"It serves an important everyday function" - Ritwik
-
-- Chrome History/Bookmarks?
-- Zotero?
-
-## Feature Idea
-- Download all files from a URL (PAB Minutes; Budget Files)
-
-## Second Order Contacts
-* Ritwik: Kartik Sundar; Aishita; IDEAS colleagues and professors; Shomu (KMC), Mandy (KMC), Vincy, Akshay (SRFTI); Manas; Avni
-* Snigdha:
-* Malavika:
-* Karan: Sukhman
-* Mallika Arora: Siddharth Santosh; Tanya
-* Shobhna: Aprajita
-* Poonam: Wrik, Padmaja
-* Ask Manisha/Ishani for editor contacts

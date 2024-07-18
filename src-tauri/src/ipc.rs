@@ -1,11 +1,12 @@
 // Inter-Process Communication between Rust and SvelteKit
 // The idea is to eventually keep only callers here and move the actual logic to other files. This way, for creating a web app, we just have to convert this file into an API and call the same functions from the frontend.
 
+use crate::chrome_read::{get_chrome_profiles, search_chrome};
 use crate::custom_types::{ContextMenuState, DBConnPoolState, DBStat, DateLimit, Error, Payload, SyncRunningState, TantivyBookmarkSearchResult, TantivyDocumentSearchResult, TantivyReaderState, UserPreferencesState};
 use crate::database::{establish_connection, get_connection_pool};
 use crate::database::models::{DocumentSearchResult, IgnoreList};
 use crate::database::search::{
-    get_counts_for_all_filetypes, get_metadata_title_matches, get_parsed_text_for_file, get_recently_opened_docs, get_file_parsed_count, search_fts_index
+    get_counts_for_all_filetypes, get_file_parsed_count, get_metadata_title_matches, get_parsed_text_for_file, get_recently_opened_docs, search_browser_history, search_fts_index
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::firefox_read::search_firefox;
@@ -453,6 +454,24 @@ fn search_firefox_history(user_query: String, limit: i32, page: i32) -> Result<V
   Ok(search_results)
 }
 
+#[tauri::command]
+fn get_chrome_user_profiles() -> Result<Vec<String>, Error> {
+  let user_profiles = get_chrome_profiles();
+  Ok(user_profiles)
+}
+
+#[tauri::command]
+fn search_chrome_history(user_profile: String, user_query: String, limit: i32, page: i32) -> Result<Vec<DocumentSearchResult>, Error> {
+  let search_results = search_chrome(user_profile, user_query, i64::from(limit), i64::from(page)).unwrap_or(vec![]);
+  Ok(search_results)
+}
+
+#[tauri::command]
+fn run_browser_history_search(user_profile: String, user_query: String, limit: i32, page: i32) -> Result<Vec<DocumentSearchResult>, Error> {
+  let search_results = search_browser_history(user_profile, user_query, limit, page).unwrap_or(vec![]);
+  Ok(search_results)
+}
+
 pub fn initialize() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -489,7 +508,10 @@ pub fn initialize() {
       search_tantivy_bookmarks_index,
       create_csv_dump,
       clear_index,
-      search_firefox_history
+      search_firefox_history,
+      get_chrome_user_profiles,
+      search_chrome_history,
+      run_browser_history_search
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_updater::Builder::new().build())

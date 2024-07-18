@@ -1,3 +1,5 @@
+use crate::chrome_read::search_chrome;
+use crate::firefox_read::search_firefox;
 use crate::custom_types::{Error, DBStat, DateLimit, QuerySegments};
 use crate::database::establish_connection;
 use crate::database::models::{DocumentSearchResult, MetadataFTSSearchResult};
@@ -241,8 +243,8 @@ pub fn search_fts_index(
     // remove duplicates by checking if the id is the same
     search_results.dedup_by(|a, b| a.id == b.id);
     if search_results.len() > 0 && date_limit_clone.is_some() {
-      let start_date = date_limit_clone.clone().unwrap().start.parse::<i64>().unwrap();
-      let end_date = date_limit_clone.clone().unwrap().end.parse::<i64>().unwrap();
+      let start_date = date_limit_clone.clone().unwrap().start.parse::<i64>().unwrap_or(0);
+      let end_date = date_limit_clone.clone().unwrap().end.parse::<i64>().unwrap_or(0);
       if start_date > 0 || end_date > 0 {
         // remove results that don't match the date limit
         search_results.retain(|result| {
@@ -674,4 +676,17 @@ pub fn get_file_id_from_path(file_path: &String, conn: &mut SqliteConnection) ->
   } else {
     return Ok(0);
   }
+}
+
+// Get search results from Firefox and Chrome history
+pub fn search_browser_history(user_profile: String, user_query: String, limit: i32, page: i32) -> Result<Vec<DocumentSearchResult>, Error> {
+  let chrome_search_results = search_chrome(user_profile, user_query.clone(), i64::from(limit), i64::from(page)).unwrap_or(vec![]);
+  let firefox_search_results = search_firefox(user_query, i64::from(limit), i64::from(page)).unwrap_or(vec![]);
+  println!("got {} results from chrome and {} results from firefox", chrome_search_results.len(), firefox_search_results.len());
+  let mut search_results: Vec<DocumentSearchResult> = chrome_search_results.into_iter().chain(firefox_search_results.into_iter()).collect();
+
+  // sort the search results by last_modified descending
+  search_results.sort_by(|a, b| b.last_modified.cmp(&a.last_modified));
+
+  Ok(search_results)
 }

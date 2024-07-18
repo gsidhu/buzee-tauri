@@ -35,6 +35,7 @@ mod user_prefs;
 mod tantivy_index;
 mod window;
 mod firefox_read;
+mod chrome_read;
 
 fn main() {
   housekeeping::initialize();

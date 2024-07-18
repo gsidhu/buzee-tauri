@@ -13,12 +13,14 @@
 	import { trackEvent } from '@aptabase/web';
 	import FileCategoryIcon from "../ui/FileCategoryIcon.svelte";
 
-	let selectedLocationOption = { value: $locationShown, label: ($locationShown === 'computer' ? "Computer" : $locationShown.slice(0,1).toUpperCase() + $locationShown.slice(1)) };
+	let selectedLocationOption = { value: $locationShown, label: ($locationShown.slice(0,1).toUpperCase() + $locationShown.slice(1)) };
 
 	async function showDocsForLocation(value: {}) {
     console.log(value);
     $locationShown = value.toString();
-		selectedLocationOption = { value: $locationShown, label: $locationShown };
+		selectedLocationOption = { value: $locationShown, label: ($locationShown.slice(0,1).toUpperCase() + $locationShown.slice(1)) };
+		console.log(selectedLocationOption);
+		
 		triggerSearch();
 		return;
 	}
@@ -38,7 +40,6 @@
 				<Select.Item value={category}>
 					<FileCategoryIcon category={category} className="mr-2 h-4 w-4" />
           {category.slice(0,1).toUpperCase() + category.slice(1)}
-					{#if category === 'browser'}<Badge class="ml-2 text-xs">Beta</Badge>{/if}
 				</Select.Item>
 			{/each}
 		</Select.Content>

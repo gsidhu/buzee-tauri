@@ -51,10 +51,14 @@ export async function searchDocuments(query:string, page:number, limit:number, t
     if (query.length === 0 && !(dateLimitUNIX && dateLimitUNIX.start !== "" && dateLimitUNIX.end !== "")) {
       results = await getDocumentsFromDB(page, limit);
     } else {
-      results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type, dateLimit: dateLimit});
+      if (dateLimit && dateLimit.start !== "" && dateLimit.end !== "") {
+        results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type, dateLimit: dateLimit});
+      } else {
+        results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type});
+      }
     }
   } else if (get(locationShown) === "browser") {
-    results = await invoke("search_firefox_history", {userQuery: query, limit: limit, page: page});
+    results = await invoke("run_browser_history_search", { userProfile: "Default", userQuery: query, limit: limit, page: page});
   }
   return results;
 }

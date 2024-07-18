@@ -39,6 +39,8 @@
 	<i class={`bi bi-file-earmark-image ${color ? 'txt-icon' : ''} ${extraClasses}`} title="Folder"></i>
 {:else if ['firefox-webpage'].includes(filetype)}
 	<i class={`bi bi-browser-firefox ${color ? 'pdf-icon' : ''} ${extraClasses}`} title="Webpage"></i>
+{:else if ['chrome-webpage'].includes(filetype)}
+	<i class={`bi bi-browser-chrome ${color ? 'word-icon' : ''} ${extraClasses}`} title="Webpage"></i>
 {:else}
 	<i class={`bi bi-file-earmark ${color ? 'txt-icon' : ''} ${extraClasses}`} title="File"></i>
 {/if}

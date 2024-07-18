@@ -1,3 +1,5 @@
+Disclaimer: The vision is lofty. Part of the vision was discussed on [this Hacker News thread](https://news.ycombinator.com/item?id=40680475).
+
 # Buzee - Vision and Roadmap
 One more app to reduce the clutter of all the others.
 

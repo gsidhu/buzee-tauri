@@ -76,8 +76,12 @@
     console.log(results);
   }
 
-  async function test_search_firefox() {
-    await invoke("test_firefox", { userQuery: "digitalocean"});
+  async function test_search_browser() {
+    let profiles = await invoke("get_chrome_user_profiles");
+    console.log(profiles);
+    
+    let results = await invoke("run_browser_history_search", { userProfile: "Personal", userQuery: "asimov", limit: 25, page: 0});
+    console.log(results);
   }
 
   async function run_tantivy_index() {
@@ -146,7 +150,7 @@
 <KeyboardListeners />
 <EventListeners />
 
-<!-- <Button on:click={() => test_search_firefox()}>Search</Button> -->
+<!-- <Button on:click={() => test_search_browser()}>Search</Button> -->
 <!-- <Button on:click={() => run_tantivy_index()}>Create</Button> -->
 <main class={`min-h-screen max-h-screen overflow-auto ${$windowBlurred ? "grayscale-no" : ""}`}>
 	<div class={`grid min-h-screen max-h-screen w-full ${$userPreferences.onboarding_done ? "lg:grid-cols-[20vw_1fr] " : ""}`}>

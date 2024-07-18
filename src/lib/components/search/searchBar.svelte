@@ -12,6 +12,7 @@
 		userPreferences,
 		metaKeyPressed,
 		searchSuggestionsDialogOpen,
+		locationShown,
 		isMac
 	} from '$lib/stores';
 	import { triggerSearch } from '$lib/utils/dbUtils';
@@ -34,6 +35,8 @@
 	}
 
 	async function getSearchSuggestions() {
+		// only get suggestions if locationShown is computer
+		if ($locationShown !== "computer") return;
 		let removeSpecialChars = $searchQuery.replace(/[^a-zA-Z0-9 ]/g, '');
 		$searchSuggestions = await invoke('get_search_suggestions', { query: removeSpecialChars });
 		$searchSuggestions = [...new Set($searchSuggestions)]; // remove duplicates
@@ -177,14 +180,14 @@
 						<Command.List>
 							<Command.Empty>No results found.</Command.Empty>
 							{#if $searchQuery.length > 0}
-								<Command.Group heading="Search Everywhere">
+								<Command.Group heading={`Search ${$locationShown.slice(0,1).toUpperCase() + $locationShown.slice(1)}`}>
 									<Command.Item value={$searchQuery.replaceAll('"', '>')} onSelect={() => {triggerSearchLocal($searchQuery);}}>
 										<span>{$searchQuery}</span>
 										<Command.Shortcut>⏎</Command.Shortcut>
 									</Command.Item>
 								</Command.Group>
 							{/if}
-							{#if $searchQuery.length === 0 || $searchSuggestions.length === 0}
+							{#if ($searchQuery.length === 0 || $searchSuggestions.length === 0) && $locationShown === "computer"}
 								<Command.Group heading="Suggestions">
 									{#each suggestionsList as suggestion, id}
 										<Command.Item data-result-shortcut="{id+1}" value={suggestion.value} onSelect={() => {triggerSearchLocal(suggestion.value);}}>
