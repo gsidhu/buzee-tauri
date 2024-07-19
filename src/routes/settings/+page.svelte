@@ -615,10 +615,6 @@
 			padding: 0;
 			background-color: inherit;
 			color: var(--bs-gray);
-
-			.btn {
-				font-size: inherit;
-			}	
 		}
 	}
 
