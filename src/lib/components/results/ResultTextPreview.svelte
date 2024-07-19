@@ -14,12 +14,13 @@
 
   import { invoke } from '@tauri-apps/api/core';
   import { trackEvent } from '@aptabase/web';
+	import { LoaderCircle } from "lucide-svelte";
 
   async function showTextPreview() {
     trackEvent('showText');
+    $selectedResultText = [];
     if ($selectedResult !== undefined) {
       invoke('get_text_for_file', { documentId: $selectedResult.id }).then((res) => {
-        $selectedResultText = [];
         // @ts-ignore
         res.forEach(element => {
           $selectedResultText.push(element);
@@ -68,9 +69,13 @@
         </Dialog.Description>
       </Dialog.Header>
       <div class="p-4 max-h-[60vh] max-w-[60vw] overflow-auto text-interaction rounded-lg border border-dashed">
-        {#each $selectedResultText as para}
-          {para}
-        {/each}
+        {#if $selectedResultText.length === 0}
+          <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+        {:else}
+          {#each $selectedResultText as para}
+            {para}
+          {/each}
+        {/if}
       </div>
     </Dialog.Content>
   </Dialog.Root>

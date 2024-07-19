@@ -1,7 +1,8 @@
 // Inter-Process Communication between Rust and SvelteKit
 // The idea is to eventually keep only callers here and move the actual logic to other files. This way, for creating a web app, we just have to convert this file into an API and call the same functions from the frontend.
 
-use crate::chrome_read::{get_chrome_profiles, search_chrome};
+use crate::arc_read::get_arc_profiles;
+use crate::chrome_read::get_chrome_profiles;
 use crate::custom_types::{ContextMenuState, DBConnPoolState, DBStat, DateLimit, Error, Payload, SyncRunningState, TantivyBookmarkSearchResult, TantivyDocumentSearchResult, TantivyReaderState, UserPreferencesState};
 use crate::database::{establish_connection, get_connection_pool};
 use crate::database::models::{DocumentSearchResult, IgnoreList};
@@ -9,9 +10,8 @@ use crate::database::search::{
     get_counts_for_all_filetypes, get_file_parsed_count, get_metadata_title_matches, get_parsed_text_for_file, get_recently_opened_docs, search_browser_history, search_fts_index
 };
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
-use crate::firefox_read::search_firefox;
-use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
-use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_roadmap_survey_answered_flag_in_db, set_skip_parsing_pdfs_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_show_search_suggestions_flag_in_db, set_user_preferences_state_from_db_value};
+use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, clear_last_parsed_dates_from_db, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
+use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_manual_setup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_roadmap_survey_answered_flag_in_db, set_show_search_suggestions_flag_in_db, set_skip_parsing_pdfs_flag_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::{extract_text_from_pdf, graceful_restart, read_image_to_base64, read_text_from_file, save_text_to_file};
 use crate::window::hide_or_show_window;
 use serde_json;
@@ -144,9 +144,9 @@ fn open_folder_containing_file(file_path: String) -> Result<String, Error> {
 
 // Run file indexing ONLY
 #[tauri::command]
-async fn run_file_indexing(window: tauri::WebviewWindow, file_paths: Vec<String>, is_folder: bool) -> Result<String, Error> {
+async fn run_file_indexing(window: tauri::WebviewWindow, file_paths: Vec<String>, is_folder: bool, app: tauri::AppHandle) -> Result<String, Error> {
   println!("File watcher started");
-  add_specific_folders(&window, file_paths, is_folder).await;
+  add_specific_folders(&window, file_paths, is_folder, app).await;
   Ok("File indexing complete".to_string())
 }
 
@@ -374,6 +374,10 @@ async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::Ap
       set_skip_parsing_pdfs_flag_in_db(value, &app_handle);
       set_user_preferences_state_from_db_value(&app_handle);
     }
+    "manual_setup" => {
+      set_manual_setup_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
+    }
     "global_shortcut_enabled" => {
       set_global_shortcut_flag_in_db(value, &app_handle);
       set_user_preferences_state_from_db_value(&app_handle);
@@ -444,14 +448,12 @@ fn create_csv_dump(app_handle: tauri::AppHandle) {
 }
 
 #[tauri::command]
-fn clear_index() {
+fn clear_index(app_handle: tauri::AppHandle) {
+  let mut conn = establish_connection(&app_handle);
+  // delete the tantivy index
   let _ = delete_all_docs_from_index();
-}
-
-#[tauri::command]
-fn search_firefox_history(user_query: String, limit: i32, page: i32) -> Result<Vec<DocumentSearchResult>, Error> {
-  let search_results = search_firefox(user_query, i64::from(limit), i64::from(page)).unwrap_or(vec![]);
-  Ok(search_results)
+  // clear last_parsed timestamps from the database
+  clear_last_parsed_dates_from_db(&mut conn);
 }
 
 #[tauri::command]
@@ -461,9 +463,9 @@ fn get_chrome_user_profiles() -> Result<Vec<String>, Error> {
 }
 
 #[tauri::command]
-fn search_chrome_history(user_profile: String, user_query: String, limit: i32, page: i32) -> Result<Vec<DocumentSearchResult>, Error> {
-  let search_results = search_chrome(user_profile, user_query, i64::from(limit), i64::from(page)).unwrap_or(vec![]);
-  Ok(search_results)
+fn get_arc_user_profiles() -> Result<Vec<String>, Error> {
+  let user_profiles = get_arc_profiles();
+  Ok(user_profiles)
 }
 
 #[tauri::command]
@@ -508,9 +510,8 @@ pub fn initialize() {
       search_tantivy_bookmarks_index,
       create_csv_dump,
       clear_index,
-      search_firefox_history,
       get_chrome_user_profiles,
-      search_chrome_history,
+      get_arc_user_profiles,
       run_browser_history_search
     ])
     .plugin(tauri_plugin_shell::init())

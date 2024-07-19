@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
-	import { documentsShown, locationShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview, noMoreResults, searchInProgress, showIconGrid, base64Images } from '$lib/stores';
+	import { onMount } from 'svelte';
+	import { documentsShown, ignoreDialogOpen, locationShown, preferLastOpened, shiftKeyPressed, compactViewMode, selectedResult, showResultTextPreview, noMoreResults, searchInProgress, showIconGrid, base64Images, isMac } from '$lib/stores';
 	import FileTypeIcon from '$lib/components/ui/FileTypeIcon.svelte';
 	import { stringToHash, resetColumnSize } from '$lib/utils/miscUtils';
 	import { clickRow } from '$lib/utils/fileUtils';
@@ -15,6 +15,9 @@
 	import Label from '../ui/label/label.svelte';
 	import { loadMoreResults } from '$lib/utils/dbUtils';
 	import { Check, LoaderCircle } from 'lucide-svelte';
+	import IgnoreDialog from '$lib/components/settings/IgnoreDialog.svelte';
+
+	let pathToIgnore = "";
 
 	function showHideColumn(colID: string) {
 		console.log("Hiding column", colID);
@@ -258,7 +261,7 @@
 								>
 									{#each row.cells as cell (cell.id)}
 										<Subscribe attrs={cell.attrs()} let:attrs>
-											<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''}`}
+											<td {...attrs} class={`${cell.id}-col ${$compactViewMode ? 'compact-view' : ''} ${cell.id === 'file_type' ? 'justify-center' : ''}`}
 												title={cell.id === 'name' || cell.id === 'path' ? String(cell.render()) : ''}
 											>
 												{#if cell.id === 'file_type'}
@@ -290,17 +293,30 @@
 										Show Preview
 									</ContextMenu.Item>
 								{/if}
-								<ContextMenu.Item>
+								<ContextMenu.Item on:click={() => {
+									$selectedResult = $documentsShown[Number(row.id)];
+									openFileFolder($selectedResult.path)}
+								}>
 									Open {$documentsShown[Number(row.id)].file_type === 'folder' ? 'Folder' : 'File'}
 								</ContextMenu.Item>
 								<ContextMenu.Sub>
 									<ContextMenu.SubTrigger>Ignore</ContextMenu.SubTrigger>
 									<ContextMenu.SubContent class="w-48">
-										<ContextMenu.Item>Ignore this {row.cells[0].render().toString() === 'folder' ? 'folder' : 'file'}</ContextMenu.Item>
-										<ContextMenu.Item>Ignore parent folder</ContextMenu.Item>
-										{#if row.cells[0].render().toString() !== 'folder'}
-											<ContextMenu.Item>Ignore this file's text</ContextMenu.Item>
-										{/if}
+										<ContextMenu.Item on:click={() => {
+											$ignoreDialogOpen = true;
+											$selectedResult = $documentsShown[Number(row.id)];
+											pathToIgnore = $selectedResult.path;
+										}}>
+											Ignore this {row.cells[0].render().toString() === 'folder' ? 'folder' : 'file'}
+										</ContextMenu.Item>
+										<ContextMenu.Item on:click={() => {
+											$ignoreDialogOpen = true; 
+											$selectedResult = $documentsShown[Number(row.id)];
+											if ($isMac) pathToIgnore = $selectedResult.path.split('/').slice(0, -1).join('/');
+											else pathToIgnore = $selectedResult.path.split('\\').slice(0, -1).join('\\');
+										}}>
+											Ignore parent folder
+										</ContextMenu.Item>
 									</ContextMenu.SubContent>
 								</ContextMenu.Sub>
 							</ContextMenu.Content>
@@ -346,6 +362,8 @@
 {#key $selectedResult}
 	<ResultTextPreview open={$showResultTextPreview} />
 {/key}
+
+<IgnoreDialog dialogOpen={$ignoreDialogOpen} {pathToIgnore} />
 
 <style lang="scss">
 	tr {

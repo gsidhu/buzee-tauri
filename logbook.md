@@ -1,8 +1,8 @@
 # Logbook
 Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr, poppler and sqlite3.dll on Windows.
 
-## UI Redesign
-- Using shadcn-svelte components and Tailwind CSS. Keeping a few essential classes from Bootstrap.
+## v0.2.0 updates
+- UI Redesign using shadcn-svelte components and Tailwind CSS. Keeping a few essential classes from Bootstrap.
 - Extracted triggerSearch function to synchronise it across filters.
 - Added Roadmap Survey page.
 - Trying JSON file store for user preferences and app data. Don't need it. SQLite works.
@@ -14,7 +14,9 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Using Tantivy as a replacement for Body_FTS. Each source gets its own table in the SQLite database and is coordinated with the Metadata table.
 - Proper `panic` handling when extracting PDFs.
 - Bring back Body table in SQLite. Use Tantivy for search results and search suggestions only. Storing fields in Tantivy blows up its size in comparison to SQLite.
-- Add firefox and chrome history search.
+- Add firefox, chrome and arc history search.
+- Add option for manual setup instead of full automatic sync.
+- Add MIT license.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.
@@ -25,10 +27,6 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Create db connection inside the Tokio runtime to prevent SQLite errors.
 - Run text-based PDF extraction first. If it fails, try OCR.
 - TODO: Add a context menu option for re-parsing a file. For PDFs, this will run OCR instead of text-based extraction.
-- TODO: Detect images inside PDFs and extract text from them using OCR. Append this to the file text.
-- TODO: Split database into two files. One for metadata and one for file contents. This should prevent the `database disk image malformed` error.
-- TODO: In addition to body_fts and metadata_fts, add results from a LIKE search to get matches for queries that may not be tokenised appropriately. For e.g. phone numbers.
-- TODO: Move search suggestions out of SQLite db.
 - TODO: Change UI to reduce text parsing dependence and use GUI filters instead.
 - TODO: Package `poppler` and `sqlite3.dll` with Windows build.
 - TODO: Disable unnecessary right click menus. (in `+layout.svlete`)

@@ -134,9 +134,9 @@ export function createTableFromResults(resultsShown: DocumentSearchResult[]) {
         accessor: 'path',
         plugins: {
           resize: {
-            initialWidth: 250,
-            minWidth: 250,
-            maxWidth: 250
+            initialWidth: 200,
+            minWidth: 200,
+            maxWidth: 200
           }
         }
       }),

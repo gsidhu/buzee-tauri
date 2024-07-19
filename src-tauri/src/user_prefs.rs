@@ -27,7 +27,8 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
         user_preferences::automatic_background_sync.eq(true),
         user_preferences::detailed_scan.eq(true),
         user_preferences::roadmap_survey_answered.eq(false),
-        user_preferences::skip_parsing_pdfs.eq(true)
+        user_preferences::skip_parsing_pdfs.eq(true),
+        user_preferences::manual_setup.eq(false),
       ))
       .execute(conn)
       .unwrap();
@@ -52,6 +53,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
       detailed_scan: true,
       roadmap_survey_answered: false,
       skip_parsing_pdfs: true,
+      manual_setup: false,
     };
     // insert new_user_prefs into the user_prefs table
     diesel::insert_into(user_preferences::table)
@@ -220,7 +222,8 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
       user_preferences::automatic_background_sync,
       user_preferences::detailed_scan,
       user_preferences::roadmap_survey_answered,
-      user_preferences::skip_parsing_pdfs
+      user_preferences::skip_parsing_pdfs,
+      user_preferences::manual_setup
     ))
     .first::<UserPrefs>(&mut conn)
     .expect("Error loading user_prefs");
@@ -237,6 +240,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
   state.detailed_scan = user_preferences_from_db.detailed_scan;
   state.roadmap_survey_answered = user_preferences_from_db.roadmap_survey_answered;
   state.skip_parsing_pdfs = user_preferences_from_db.skip_parsing_pdfs;
+  state.manual_setup = user_preferences_from_db.manual_setup;
 }
 
 pub fn fix_global_shortcut_string(new_shortcut_string: String) -> String {
@@ -314,6 +318,14 @@ pub fn set_skip_parsing_pdfs_flag_in_db(flag: bool, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)
     .set(user_preferences::skip_parsing_pdfs.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_manual_setup_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::manual_setup.eq(flag))
     .execute(&mut conn)
     .unwrap();
 }

@@ -73,7 +73,8 @@ export const userPreferences = writable({
   "onboarding_done": false,
   "show_in_dock": true,
   "roadmap_survey_answered": false,
-  "skip_parsing_pdfs": true
+  "skip_parsing_pdfs": true,
+  "manual_setup": false,
 })
 export const pagePath = writable("")
 export const isMac = writable(false)
@@ -112,6 +113,7 @@ export const showResultTextPreview = writable(false);
 export const noMoreResults = writable(false);
 export const searchSuggestionsDialogOpen = writable(false);
 export const searchFiltersOpen = writable(false);
+export const ignoreDialogOpen = writable(false);
 export const dateLimitUNIX = writable(storedDateLimitUNIX || null)
 
 // 3. Anytime the store changes, update the local storage value.

@@ -84,10 +84,10 @@
       <div class="flex justify-between">
         <Button variant="link" on:click={() => openFileFolder()}>{fileName}</Button>
         <div id="toolbar" class="gap-1 flex !p-2 justify-content-center">
-          <Button variant="outline" title="Copy text" on:click={() => copyTextToClipboard()}>
+          <Button variant="ghost" title="Copy text" on:click={() => copyTextToClipboard()}>
             <Copy class="h-4 w-4" />
           </Button>
-          <Button variant="outline" title="Save text as a file" on:click={() => downloadTextFile()}>
+          <Button variant="ghost" title="Save text as a file" on:click={() => downloadTextFile()}>
             <Download class="h-4 w-4" />
           </Button>
         </div>

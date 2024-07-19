@@ -51,8 +51,8 @@ pub fn create_tantivy_schema() -> Schema {
 }
 
 pub fn get_tantivy_index(schema: Schema) -> tantivy::Result<Index> {
-  let index_path = PathBuf::from(norm(format!("{}/{}", get_app_directory(), "tantivy_index").as_str()));
-  let meta_file_path = PathBuf::from(norm(format!("{}/{}/meta.json", get_app_directory(), "tantivy_index").as_str()));
+  let index_path = PathBuf::from(norm(format!("{}/{}", get_app_directory(), "buzee_tantivy_index").as_str()));
+  let meta_file_path = PathBuf::from(norm(format!("{}/{}/meta.json", get_app_directory(), "buzee_tantivy_index").as_str()));
   if index_path.exists() && meta_file_path.exists() {
     return Index::open_in_dir(&index_path);
   } else {
@@ -146,7 +146,7 @@ pub fn delete_docs_from_index_with_ids(ids_to_delete: &Vec<i32>) -> tantivy::Res
 pub fn delete_all_docs_from_index() -> tantivy::Result<()> {
   println!("WARNING: Deleting all documents from the index");
   let index = get_tantivy_index(create_tantivy_schema()).unwrap();
-  let mut index_writer: IndexWriter = index.writer(50_000_000)?;
+  let mut index_writer: IndexWriter = index.writer(150_000_000)?;
 
   let _ = index_writer.delete_all_documents().unwrap();
 

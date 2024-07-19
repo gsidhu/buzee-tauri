@@ -1,0 +1,2544 @@
+Summary Output
+├─ MIT: 282
+├─ ISC: 38
+├─ Apache-2.0: 13
+├─ BSD-3-Clause: 10
+├─ MIT*: 9
+├─ BSD-2-Clause: 9
+├─ BlueOak-1.0.0: 3
+├─ Apache-2.0 OR MIT: 2
+├─ 0BSD: 2
+├─ (MIT OR CC0-1.0): 2
+├─ Python-2.0: 1
+├─ CC-BY-4.0: 1
+├─ Apache*: 1
+└─ CC0-1.0: 1
+
+-------------
+Detailed Output
+
+├─ @aashutoshrathi/word-wrap@1.2.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/aashutoshrathi/word-wrap
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@aashutoshrathi/word-wrap
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@aashutoshrathi/word-wrap/LICENSE
+├─ @alloc/quick-lru@5.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/quick-lru
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@alloc/quick-lru
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@alloc/quick-lru/license
+├─ @ampproject/remapping@2.3.0
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/ampproject/remapping
+│  ├─ publisher: Justin Ridgewell
+│  ├─ email: jridgewell@google.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@ampproject/remapping
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@ampproject/remapping/LICENSE
+├─ @aptabase/web@0.4.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/aptabase/aptabase-js
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@aptabase/web
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@aptabase/web/LICENSE
+├─ @arktype/schema@0.1.13
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/arktypeio/arktype
+│  ├─ publisher: David Blass
+│  ├─ email: david@arktype.io
+│  ├─ url: https://arktype.io
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@arktype/schema
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@arktype/schema/LICENSE
+├─ @arktype/util@0.0.48
+│  ├─ licenses: MIT*
+│  ├─ publisher: David Blass
+│  ├─ email: david@arktype.io
+│  ├─ url: https://arktype.io
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@arktype/util
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@arktype/util/LICENSE
+├─ @babel/runtime@7.24.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/babel/babel
+│  ├─ publisher: The Babel Team
+│  ├─ url: https://babel.dev/team
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@babel/runtime
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@babel/runtime/LICENSE
+├─ @esbuild/darwin-arm64@0.20.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/evanw/esbuild
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@esbuild/darwin-arm64
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@esbuild/darwin-arm64/README.md
+├─ @eslint-community/eslint-utils@4.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/eslint-community/eslint-utils
+│  ├─ publisher: Toru Nagashima
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint-community/eslint-utils
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint-community/eslint-utils/LICENSE
+├─ @eslint-community/regexpp@4.10.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/eslint-community/regexpp
+│  ├─ publisher: Toru Nagashima
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint-community/regexpp
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint-community/regexpp/LICENSE
+├─ @eslint/eslintrc@2.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/eslint/eslintrc
+│  ├─ publisher: Nicholas C. Zakas
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint/eslintrc
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint/eslintrc/LICENSE
+├─ @eslint/js@8.57.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/eslint/eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint/js
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@eslint/js/LICENSE
+├─ @exodus/schemasafe@1.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ExodusMovement/schemasafe
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@exodus/schemasafe
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@exodus/schemasafe/LICENSE
+├─ @floating-ui/core@1.6.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floating-ui/floating-ui
+│  ├─ publisher: atomiks
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@floating-ui/core
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@floating-ui/core/LICENSE
+├─ @floating-ui/dom@1.6.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floating-ui/floating-ui
+│  ├─ publisher: atomiks
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@floating-ui/dom
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@floating-ui/dom/LICENSE
+├─ @floating-ui/utils@0.2.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floating-ui/floating-ui
+│  ├─ publisher: atomiks
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@floating-ui/utils
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@floating-ui/utils/LICENSE
+├─ @gcornut/valibot-json-schema@0.31.0
+│  ├─ licenses: MIT*
+│  ├─ repository: https://github.com/gcornut/valibot-json-schema
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@gcornut/valibot-json-schema
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@gcornut/valibot-json-schema/LICENSE.md
+├─ @hapi/hoek@9.3.0
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/hapijs/hoek
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@hapi/hoek
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@hapi/hoek/LICENSE.md
+├─ @hapi/topo@5.1.0
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/hapijs/topo
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@hapi/topo
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@hapi/topo/LICENSE.md
+├─ @humanwhocodes/config-array@0.11.14
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/humanwhocodes/config-array
+│  ├─ publisher: Nicholas C. Zakas
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@humanwhocodes/config-array
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@humanwhocodes/config-array/LICENSE
+├─ @humanwhocodes/module-importer@1.0.1
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/humanwhocodes/module-importer
+│  ├─ publisher: Nicholas C. Zaks
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@humanwhocodes/module-importer
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@humanwhocodes/module-importer/LICENSE
+├─ @humanwhocodes/object-schema@2.0.2
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/humanwhocodes/object-schema
+│  ├─ publisher: Nicholas C. Zakas
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@humanwhocodes/object-schema
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@humanwhocodes/object-schema/LICENSE
+├─ @internationalized/date@3.5.4
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/adobe/react-spectrum/tree/main/packages/@internationalized/date
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@internationalized/date
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@internationalized/date/LICENSE
+├─ @isaacs/cliui@8.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/yargs/cliui
+│  ├─ publisher: Ben Coe
+│  ├─ email: ben@npmjs.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@isaacs/cliui
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@isaacs/cliui/LICENSE.txt
+├─ @jridgewell/gen-mapping@0.3.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jridgewell/gen-mapping
+│  ├─ publisher: Justin Ridgewell
+│  ├─ email: justin@ridgewell.name
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/gen-mapping
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/gen-mapping/LICENSE
+├─ @jridgewell/resolve-uri@3.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jridgewell/resolve-uri
+│  ├─ publisher: Justin Ridgewell
+│  ├─ email: justin@ridgewell.name
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/resolve-uri
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/resolve-uri/LICENSE
+├─ @jridgewell/set-array@1.2.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jridgewell/set-array
+│  ├─ publisher: Justin Ridgewell
+│  ├─ email: justin@ridgewell.name
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/set-array
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/set-array/LICENSE
+├─ @jridgewell/sourcemap-codec@1.4.15
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jridgewell/sourcemap-codec
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/sourcemap-codec
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/sourcemap-codec/LICENSE
+├─ @jridgewell/trace-mapping@0.3.25
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jridgewell/trace-mapping
+│  ├─ publisher: Justin Ridgewell
+│  ├─ email: justin@ridgewell.name
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/trace-mapping
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@jridgewell/trace-mapping/LICENSE
+├─ @melt-ui/svelte@0.76.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/melt-ui/melt-ui
+│  ├─ publisher: Thomas G. Lopes
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@melt-ui/svelte
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@melt-ui/svelte/LICENSE
+├─ @nodelib/fs.scandir@2.1.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/nodelib/nodelib/tree/master/packages/fs/fs.scandir
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@nodelib/fs.scandir
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@nodelib/fs.scandir/LICENSE
+├─ @nodelib/fs.stat@2.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/nodelib/nodelib/tree/master/packages/fs/fs.stat
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@nodelib/fs.stat
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@nodelib/fs.stat/LICENSE
+├─ @nodelib/fs.walk@1.2.8
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/nodelib/nodelib/tree/master/packages/fs/fs.walk
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@nodelib/fs.walk
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@nodelib/fs.walk/LICENSE
+├─ @pkgjs/parseargs@0.11.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pkgjs/parseargs
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@pkgjs/parseargs
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@pkgjs/parseargs/LICENSE
+├─ @polka/url@1.0.0-next.24
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/polka
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke@lukeed.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@polka/url
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@polka/url/readme.md
+├─ @poppinss/macroable@1.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/poppinss/macroable
+│  ├─ publisher: virk,poppinss
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@poppinss/macroable
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@poppinss/macroable/LICENSE.md
+├─ @rollup/rollup-darwin-arm64@4.16.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/rollup/rollup
+│  ├─ publisher: Lukas Taegert-Atkinson
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@rollup/rollup-darwin-arm64
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@rollup/rollup-darwin-arm64/README.md
+├─ @sideway/address@4.1.5
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/sideway/address
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sideway/address
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sideway/address/LICENSE.md
+├─ @sideway/formula@3.0.1
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/sideway/formula
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sideway/formula
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sideway/formula/LICENSE.md
+├─ @sideway/pinpoint@2.0.0
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/sideway/pinpoint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sideway/pinpoint
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sideway/pinpoint/LICENSE.md
+├─ @sinclair/typebox@0.32.34
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sinclairzx81/typebox
+│  ├─ publisher: sinclairzx81
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sinclair/typebox
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sinclair/typebox/license
+├─ @sodaru/yup-to-json-schema@2.0.1
+│  ├─ licenses: MIT*
+│  ├─ repository: https://github.com/sodaru/yup-to-json-schema
+│  ├─ publisher: Raghavendra K R
+│  ├─ email: krraghavendra@yahoo.co.in
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sodaru/yup-to-json-schema
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sodaru/yup-to-json-schema/LICENSE
+├─ @sveltejs/adapter-static@3.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/kit
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/adapter-static
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/adapter-static/LICENSE
+├─ @sveltejs/kit@2.5.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/kit
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/kit
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/kit/LICENSE
+├─ @sveltejs/vite-plugin-svelte-inspector@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/vite-plugin-svelte
+│  ├─ publisher: dominikg
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/vite-plugin-svelte-inspector
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/vite-plugin-svelte-inspector/LICENSE
+├─ @sveltejs/vite-plugin-svelte@3.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/vite-plugin-svelte
+│  ├─ publisher: dominikg
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/vite-plugin-svelte
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@sveltejs/vite-plugin-svelte/LICENSE
+├─ @swc/helpers@0.5.11
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/swc-project/swc
+│  ├─ publisher: 강동윤
+│  ├─ email: kdy1997.dev@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@swc/helpers
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@swc/helpers/LICENSE
+├─ @tailwindcss/typography@0.5.13
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/tailwindlabs/tailwindcss-typography
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tailwindcss/typography
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tailwindcss/typography/LICENSE
+├─ @tauri-apps/api@2.0.0-beta.2
+│  ├─ licenses: Apache-2.0 OR MIT
+│  ├─ repository: https://github.com/tauri-apps/tauri
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-shell/node_modules/@tauri-apps/api
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-shell/node_modules/@tauri-apps/api/README.md
+├─ @tauri-apps/api@2.0.0-beta.4
+│  ├─ licenses: Apache-2.0 OR MIT
+│  ├─ repository: https://github.com/tauri-apps/tauri
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/api
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/api/README.md
+├─ @tauri-apps/cli-darwin-arm64@2.0.0-beta.6
+│  ├─ licenses: MIT
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/cli-darwin-arm64
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/cli-darwin-arm64/README.md
+├─ @tauri-apps/cli@2.0.0-beta.6
+│  ├─ licenses: Apache-2.0 OR MIT
+│  ├─ repository: https://github.com/tauri-apps/tauri
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/cli
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/cli/README.md
+├─ @tauri-apps/plugin-dialog@2.0.0-beta.2
+│  ├─ licenses: MIT*
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-dialog
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-dialog/LICENSE.spdx
+├─ @tauri-apps/plugin-shell@2.0.0-beta.1
+│  ├─ licenses: MIT*
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-shell
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-shell/LICENSE.spdx
+├─ @tauri-apps/plugin-updater@2.0.0-beta.2
+│  ├─ licenses: MIT*
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-updater
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tauri-apps/plugin-updater/LICENSE.spdx
+├─ @types/cookie@0.6.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/cookie
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/cookie/LICENSE
+├─ @types/eslint@8.56.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/eslint
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/eslint/LICENSE
+├─ @types/estree@1.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/estree
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/estree/LICENSE
+├─ @types/json-schema@7.0.15
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/json-schema
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/json-schema/LICENSE
+├─ @types/pug@2.0.10
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/pug
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/pug/LICENSE
+├─ @types/semver@7.5.8
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/semver
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/semver/LICENSE
+├─ @types/validator@13.12.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/validator
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@types/validator/LICENSE
+├─ @typescript-eslint/eslint-plugin@7.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/eslint-plugin
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/eslint-plugin/LICENSE
+├─ @typescript-eslint/parser@7.1.0
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/parser
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/parser/LICENSE
+├─ @typescript-eslint/scope-manager@7.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/scope-manager
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/scope-manager/LICENSE
+├─ @typescript-eslint/type-utils@7.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/type-utils
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/type-utils/LICENSE
+├─ @typescript-eslint/types@7.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/types
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/types/LICENSE
+├─ @typescript-eslint/typescript-estree@7.1.0
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/typescript-estree
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/typescript-estree/LICENSE
+├─ @typescript-eslint/utils@7.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/utils
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/utils/LICENSE
+├─ @typescript-eslint/visitor-keys@7.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/typescript-eslint/typescript-eslint
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/visitor-keys
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@typescript-eslint/visitor-keys/LICENSE
+├─ @ungap/structured-clone@1.2.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/ungap/structured-clone
+│  ├─ publisher: Andrea Giammarchi
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@ungap/structured-clone
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@ungap/structured-clone/LICENSE
+├─ @vinejs/compiler@2.5.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/vinejs/compiler
+│  ├─ publisher: virk,vinejs
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@vinejs/compiler
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@vinejs/compiler/LICENSE.md
+├─ @vinejs/vine@1.8.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/vinejs/vine
+│  ├─ publisher: virk,vinejs
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@vinejs/vine
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@vinejs/vine/LICENSE.md
+├─ acorn-jsx@5.3.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/acornjs/acorn-jsx
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/acorn-jsx
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/acorn-jsx/LICENSE
+├─ acorn@8.11.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/acornjs/acorn
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/acorn
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/acorn/LICENSE
+├─ ajv@6.12.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ajv-validator/ajv
+│  ├─ publisher: Evgeny Poberezkin
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ajv
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ajv/LICENSE
+├─ ansi-regex@5.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/ansi-regex
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ansi-regex
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ansi-regex/license
+├─ ansi-regex@6.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/ansi-regex
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width/node_modules/ansi-regex
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width/node_modules/ansi-regex/license
+├─ ansi-styles@4.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/ansi-styles
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ansi-styles
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ansi-styles/license
+├─ ansi-styles@6.2.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/ansi-styles
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrap-ansi/node_modules/ansi-styles
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrap-ansi/node_modules/ansi-styles/license
+├─ any-promise@1.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/kevinbeaty/any-promise
+│  ├─ publisher: Kevin Beaty
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/any-promise
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/any-promise/LICENSE
+├─ anymatch@3.1.3
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/micromatch/anymatch
+│  ├─ publisher: Elan Shanker
+│  ├─ url: https://github.com/es128
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/anymatch
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/anymatch/LICENSE
+├─ arg@5.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/vercel/arg
+│  ├─ publisher: Josh Junon
+│  ├─ email: junon@wavetilt.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/arg
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/arg/LICENSE.md
+├─ argparse@2.0.1
+│  ├─ licenses: Python-2.0
+│  ├─ repository: https://github.com/nodeca/argparse
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/argparse
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/argparse/LICENSE
+├─ aria-query@5.3.0
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/A11yance/aria-query
+│  ├─ publisher: Jesse Beach
+│  ├─ email: splendidnoise@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/aria-query
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/aria-query/LICENSE
+├─ arktype@2.0.0-dev.21
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/arktypeio/arktype
+│  ├─ publisher: David Blass
+│  ├─ email: david@arktype.io
+│  ├─ url: https://arktype.io
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/arktype
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/arktype/LICENSE
+├─ array-union@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/array-union
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/array-union
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/array-union/license
+├─ autoprefixer@10.4.19
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/autoprefixer
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/autoprefixer
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/autoprefixer/LICENSE
+├─ axobject-query@4.0.0
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/A11yance/axobject-query
+│  ├─ publisher: Jesse Beach
+│  ├─ email: splendidnoise@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/axobject-query
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/axobject-query/LICENSE
+├─ balanced-match@1.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/juliangruber/balanced-match
+│  ├─ publisher: Julian Gruber
+│  ├─ email: mail@juliangruber.com
+│  ├─ url: http://juliangruber.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/balanced-match
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/balanced-match/LICENSE.md
+├─ binary-extensions@2.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/binary-extensions
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/binary-extensions
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/binary-extensions/license
+├─ bits-ui@0.21.12
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/huntabyte/bits-ui
+│  ├─ publisher: Hunter Johnston
+│  ├─ email: https://github.com/huntabyte
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/bits-ui
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/bits-ui/LICENSE
+├─ brace-expansion@1.1.11
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/juliangruber/brace-expansion
+│  ├─ publisher: Julian Gruber
+│  ├─ email: mail@juliangruber.com
+│  ├─ url: http://juliangruber.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob/node_modules/brace-expansion
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob/node_modules/brace-expansion/LICENSE
+├─ brace-expansion@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/juliangruber/brace-expansion
+│  ├─ publisher: Julian Gruber
+│  ├─ email: mail@juliangruber.com
+│  ├─ url: http://juliangruber.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/brace-expansion
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/brace-expansion/LICENSE
+├─ braces@3.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromatch/braces
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/braces
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/braces/LICENSE
+├─ browserslist@4.23.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/browserslist/browserslist
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/browserslist
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/browserslist/LICENSE
+├─ buffer-crc32@0.2.13
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/brianloveswords/buffer-crc32
+│  ├─ publisher: Brian J. Brennan
+│  ├─ email: brianloveswords@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/buffer-crc32
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/buffer-crc32/LICENSE
+├─ buffer-from@1.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/LinusU/buffer-from
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/buffer-from
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/buffer-from/LICENSE
+├─ buzee@0.2.0
+│  ├─ licenses: MIT
+│  ├─ publisher: Gurjot Sidhu
+│  ├─ email: gurjot@thatgurjot.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/LICENSE
+├─ callsites@3.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/callsites
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/callsites
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/callsites/license
+├─ camelcase-css@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/stevenvachon/camelcase-css
+│  ├─ publisher: Steven Vachon
+│  ├─ email: contact@svachon.com
+│  ├─ url: https://www.svachon.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/camelcase-css
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/camelcase-css/license
+├─ camelcase@8.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/camelcase
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/camelcase
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/camelcase/license
+├─ caniuse-lite@1.0.30001637
+│  ├─ licenses: CC-BY-4.0
+│  ├─ repository: https://github.com/browserslist/caniuse-lite
+│  ├─ publisher: Ben Briggs
+│  ├─ email: beneb.info@gmail.com
+│  ├─ url: http://beneb.info
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/caniuse-lite
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/caniuse-lite/LICENSE
+├─ chalk@4.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/chalk
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/chalk
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/chalk/license
+├─ chokidar@3.6.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/paulmillr/chokidar
+│  ├─ publisher: Paul Miller
+│  ├─ url: https://paulmillr.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/chokidar
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/chokidar/LICENSE
+├─ clsx@2.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/clsx
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/clsx
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/clsx/license
+├─ cmdk-sv@0.0.18
+│  ├─ licenses: MIT*
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cmdk-sv
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cmdk-sv/LICENSE
+├─ code-red@1.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Rich-Harris/code-red
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/code-red
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/code-red/LICENSE
+├─ color-convert@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Qix-/color-convert
+│  ├─ publisher: Heather Arthur
+│  ├─ email: fayearthur@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/color-convert
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/color-convert/LICENSE
+├─ color-name@1.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/colorjs/color-name
+│  ├─ publisher: DY
+│  ├─ email: dfcreative@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/color-name
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/color-name/LICENSE
+├─ commander@4.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/tj/commander.js
+│  ├─ publisher: TJ Holowaychuk
+│  ├─ email: tj@vision-media.ca
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/commander
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/commander/LICENSE
+├─ compromise-dates@3.5.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/spencermountain/compromise
+│  ├─ publisher: Spencer Kelly
+│  ├─ email: spencermountain@gmail.com
+│  ├─ url: http://spencermounta.in
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/compromise-dates
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/compromise-dates/README.md
+├─ compromise@14.12.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/spencermountain/compromise
+│  ├─ publisher: Spencer Kelly
+│  ├─ email: spencermountain@gmail.com
+│  ├─ url: http://spencermounta.in
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/compromise
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/compromise/LICENSE
+├─ concat-map@0.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/substack/node-concat-map
+│  ├─ publisher: James Halliday
+│  ├─ email: mail@substack.net
+│  ├─ url: http://substack.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/concat-map
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/concat-map/LICENSE
+├─ cookie@0.6.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jshttp/cookie
+│  ├─ publisher: Roman Shtylman
+│  ├─ email: shtylman@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cookie
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cookie/LICENSE
+├─ cross-spawn@7.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/moxystudio/node-cross-spawn
+│  ├─ publisher: André Cruz
+│  ├─ email: andre@moxy.studio
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cross-spawn
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cross-spawn/LICENSE
+├─ css-tree@2.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/csstree/csstree
+│  ├─ publisher: Roman Dvornov
+│  ├─ email: rdvornov@gmail.com
+│  ├─ url: https://github.com/lahmatiy
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/css-tree
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/css-tree/LICENSE
+├─ cssesc@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mathiasbynens/cssesc
+│  ├─ publisher: Mathias Bynens
+│  ├─ url: https://mathiasbynens.be/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cssesc
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/cssesc/LICENSE-MIT.txt
+├─ dayjs@1.11.11
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/iamkun/dayjs
+│  ├─ publisher: iamkun
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dayjs
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dayjs/LICENSE
+├─ debug@4.3.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/debug-js/debug
+│  ├─ publisher: Josh Junon
+│  ├─ email: josh.junon@protonmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/debug
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/debug/LICENSE
+├─ deep-is@0.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/thlorenz/deep-is
+│  ├─ publisher: Thorsten Lorenz
+│  ├─ email: thlorenz@gmx.de
+│  ├─ url: http://thlorenz.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/deep-is
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/deep-is/LICENSE
+├─ deepmerge@4.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/TehShrike/deepmerge
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/deepmerge
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/deepmerge/license.txt
+├─ dequal@2.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/dequal
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dequal
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dequal/license
+├─ detect-indent@6.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/detect-indent
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/detect-indent
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/detect-indent/license
+├─ devalue@4.3.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Rich-Harris/devalue
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/devalue
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/devalue/LICENSE
+├─ devalue@5.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Rich-Harris/devalue
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sveltekit-superforms/node_modules/devalue
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sveltekit-superforms/node_modules/devalue/LICENSE
+├─ didyoumean@1.2.2
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/dcporter/didyoumean.js
+│  ├─ publisher: Dave Porter
+│  ├─ email: dcporter@gmail.com
+│  ├─ url: http://dcporter.net/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/didyoumean
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/didyoumean/LICENSE
+├─ dir-glob@3.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/kevva/dir-glob
+│  ├─ publisher: Kevin Mårtensson
+│  ├─ email: kevinmartensson@gmail.com
+│  ├─ url: github.com/kevva
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dir-glob
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dir-glob/license
+├─ dlv@1.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/developit/dlv
+│  ├─ publisher: Jason Miller
+│  ├─ email: jason@developit.ca
+│  ├─ url: http://jasonformat.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dlv
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dlv/README.md
+├─ doctrine@3.0.0
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/eslint/doctrine
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/doctrine
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/doctrine/LICENSE
+├─ dotenv@16.4.5
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/motdotla/dotenv
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dotenv
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/dotenv/LICENSE
+├─ eastasianwidth@0.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/komagata/eastasianwidth
+│  ├─ publisher: Masaki Komagata
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eastasianwidth
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eastasianwidth/README.md
+├─ efrt@2.7.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/spencermountain/efrt
+│  ├─ publisher: Spencer Kelly
+│  ├─ email: spencermountain@gmail.com
+│  ├─ url: http://spencermounta.in
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/efrt
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/efrt/LICENSE
+├─ electron-to-chromium@1.4.812
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/kilian/electron-to-chromium
+│  ├─ publisher: Kilian Valkhof
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/electron-to-chromium
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/electron-to-chromium/LICENSE
+├─ emoji-regex@8.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mathiasbynens/emoji-regex
+│  ├─ publisher: Mathias Bynens
+│  ├─ url: https://mathiasbynens.be/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width-cjs/node_modules/emoji-regex
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width-cjs/node_modules/emoji-regex/LICENSE-MIT.txt
+├─ emoji-regex@9.2.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mathiasbynens/emoji-regex
+│  ├─ publisher: Mathias Bynens
+│  ├─ url: https://mathiasbynens.be/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/emoji-regex
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/emoji-regex/LICENSE-MIT.txt
+├─ es6-promise@3.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/stefanpenner/es6-promise
+│  ├─ publisher: Yehuda Katz, Tom Dale, Stefan Penner and contributors
+│  ├─ url: Conversion to ES6 API by Jake Archibald
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/es6-promise
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/es6-promise/LICENSE
+├─ esbuild-runner@2.2.2
+│  ├─ licenses: Apache*
+│  ├─ repository: https://github.com/folke/esbuild-runner
+│  ├─ publisher: Folke Lemaitre
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esbuild-runner
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esbuild-runner/LICENSE
+├─ esbuild@0.20.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/evanw/esbuild
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esbuild
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esbuild/LICENSE.md
+├─ escalade@3.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/escalade
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/escalade
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/escalade/license
+├─ escape-string-regexp@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/escape-string-regexp
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/escape-string-regexp
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/escape-string-regexp/license
+├─ eslint-compat-utils@0.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ota-meshi/eslint-compat-utils
+│  ├─ publisher: Yosuke Ota
+│  ├─ url: https://github.com/ota-meshi
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-compat-utils
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-compat-utils/LICENSE
+├─ eslint-config-prettier@9.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/prettier/eslint-config-prettier
+│  ├─ publisher: Simon Lydell
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-config-prettier
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-config-prettier/LICENSE
+├─ eslint-plugin-svelte@2.35.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/eslint-plugin-svelte
+│  ├─ publisher: Yosuke Ota
+│  ├─ url: https://github.com/ota-meshi
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-plugin-svelte
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-plugin-svelte/LICENSE
+├─ eslint-scope@7.2.2
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/eslint/eslint-scope
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-scope
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-scope/LICENSE
+├─ eslint-visitor-keys@3.4.3
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/eslint/eslint-visitor-keys
+│  ├─ publisher: Toru Nagashima
+│  ├─ url: https://github.com/mysticatea
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-visitor-keys
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint-visitor-keys/LICENSE
+├─ eslint@8.57.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/eslint/eslint
+│  ├─ publisher: Nicholas C. Zakas
+│  ├─ email: nicholas+npm@nczconsulting.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/eslint/LICENSE
+├─ esm-env@1.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/benmccann/esm-env
+│  ├─ publisher: Ben McCann
+│  ├─ url: https://www.benmccann.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esm-env
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esm-env/LICENSE
+├─ espree@9.6.1
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/eslint/espree
+│  ├─ publisher: Nicholas C. Zakas
+│  ├─ email: nicholas+npm@nczconsulting.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/espree
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/espree/LICENSE
+├─ esquery@1.5.0
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/estools/esquery
+│  ├─ publisher: Joel Feenstra
+│  ├─ email: jrfeenst+esquery@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esquery
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esquery/license.txt
+├─ esrecurse@4.3.0
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/estools/esrecurse
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esrecurse
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esrecurse/README.md
+├─ estraverse@5.3.0
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/estools/estraverse
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/estraverse
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/estraverse/LICENSE.BSD
+├─ estree-walker@3.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Rich-Harris/estree-walker
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/estree-walker
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/estree-walker/LICENSE
+├─ esutils@2.0.3
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/estools/esutils
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esutils
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esutils/LICENSE.BSD
+├─ fast-deep-equal@3.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/epoberezkin/fast-deep-equal
+│  ├─ publisher: Evgeny Poberezkin
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-deep-equal
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-deep-equal/LICENSE
+├─ fast-glob@3.3.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mrmlnc/fast-glob
+│  ├─ publisher: Denis Malinochkin
+│  ├─ url: https://mrmlnc.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-glob
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-glob/LICENSE
+├─ fast-json-stable-stringify@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/epoberezkin/fast-json-stable-stringify
+│  ├─ publisher: James Halliday
+│  ├─ email: mail@substack.net
+│  ├─ url: http://substack.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-json-stable-stringify
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-json-stable-stringify/LICENSE
+├─ fast-levenshtein@2.0.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/hiddentao/fast-levenshtein
+│  ├─ publisher: Ramesh Nair
+│  ├─ email: ram@hiddentao.com
+│  ├─ url: http://www.hiddentao.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-levenshtein
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-levenshtein/LICENSE.md
+├─ fastq@1.17.1
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/mcollina/fastq
+│  ├─ publisher: Matteo Collina
+│  ├─ email: hello@matteocollina.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fastq
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fastq/LICENSE
+├─ file-entry-cache@6.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/royriojas/file-entry-cache
+│  ├─ publisher: Roy Riojas
+│  ├─ url: http://royriojas.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/file-entry-cache
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/file-entry-cache/LICENSE
+├─ fill-range@7.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jonschlinkert/fill-range
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fill-range
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fill-range/LICENSE
+├─ find-up@5.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/find-up
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/find-up
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/find-up/license
+├─ flat-cache@3.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jaredwray/flat-cache
+│  ├─ publisher: Jared Wray
+│  ├─ url: https://jaredwray.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/flat-cache
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/flat-cache/LICENSE
+├─ flatted@3.3.1
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/WebReflection/flatted
+│  ├─ publisher: Andrea Giammarchi
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/flatted
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/flatted/LICENSE
+├─ focus-trap@7.5.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/focus-trap/focus-trap
+│  ├─ publisher: David Clark
+│  ├─ url: http://davidtheclark.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/focus-trap
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/focus-trap/LICENSE
+├─ foreground-child@3.2.1
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/tapjs/foreground-child
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/foreground-child
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/foreground-child/LICENSE
+├─ formsnap@1.0.1
+│  ├─ licenses: MIT
+│  ├─ publisher: Hunter Johnston
+│  ├─ url: https://github.com/huntabyte
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/formsnap
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/formsnap/LICENSE
+├─ fraction.js@4.3.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/rawify/Fraction.js
+│  ├─ publisher: Robert Eisele
+│  ├─ email: robert@raw.org
+│  ├─ url: https://raw.org/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fraction.js
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fraction.js/LICENSE
+├─ fs.realpath@1.0.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/fs.realpath
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fs.realpath
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fs.realpath/LICENSE
+├─ fsevents@2.3.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/fsevents/fsevents
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fsevents
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fsevents/LICENSE
+├─ function-bind@1.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Raynos/function-bind
+│  ├─ publisher: Raynos
+│  ├─ email: raynos2@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/function-bind
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/function-bind/LICENSE
+├─ glob-parent@5.1.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/gulpjs/glob-parent
+│  ├─ publisher: Gulp Team
+│  ├─ email: team@gulpjs.com
+│  ├─ url: https://gulpjs.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-glob/node_modules/glob-parent
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/fast-glob/node_modules/glob-parent/LICENSE
+├─ glob-parent@6.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/gulpjs/glob-parent
+│  ├─ publisher: Gulp Team
+│  ├─ email: team@gulpjs.com
+│  ├─ url: https://gulpjs.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob-parent
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob-parent/LICENSE
+├─ glob@10.4.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/node-glob
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: https://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sucrase/node_modules/glob
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sucrase/node_modules/glob/LICENSE
+├─ glob@7.2.3
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/node-glob
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob/LICENSE
+├─ globals@13.24.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/globals
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globals
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globals/license
+├─ globalyzer@0.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/terkelg/globalyzer
+│  ├─ publisher: Terkel Gjervig
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globalyzer
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globalyzer/license
+├─ globby@11.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/globby
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globby
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globby/license
+├─ globrex@0.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/terkelg/globrex
+│  ├─ publisher: Terkel Gjervig
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globrex
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/globrex/license
+├─ graceful-fs@4.2.11
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/node-graceful-fs
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/graceful-fs
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/graceful-fs/LICENSE
+├─ grad-school@0.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/spencermountain/grounder
+│  ├─ publisher: Spencer Kelly
+│  ├─ email: spencermountain@gmail.com
+│  ├─ url: http://spencermounta.in
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/grad-school
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/grad-school/LICENSE
+├─ graphemer@1.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/flmnt/graphemer
+│  ├─ publisher: Matt Davies
+│  ├─ email: matt@filament.so
+│  ├─ url: https://github.com/mattpauldavies
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/graphemer
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/graphemer/LICENSE
+├─ has-flag@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/has-flag
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/has-flag
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/has-flag/license
+├─ hasown@2.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/inspect-js/hasOwn
+│  ├─ publisher: Jordan Harband
+│  ├─ email: ljharb@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/hasown
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/hasown/LICENSE
+├─ ignore@5.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/kaelzhang/node-ignore
+│  ├─ publisher: kael
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ignore
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ignore/LICENSE-MIT
+├─ immutable@4.3.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/immutable-js/immutable-js
+│  ├─ publisher: Lee Byron
+│  ├─ url: https://github.com/leebyron
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/immutable
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/immutable/LICENSE
+├─ import-fresh@3.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/import-fresh
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/import-fresh
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/import-fresh/license
+├─ import-meta-resolve@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/import-meta-resolve
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ url: https://wooorm.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/import-meta-resolve
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/import-meta-resolve/license
+├─ imurmurhash@0.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jensyt/imurmurhash-js
+│  ├─ publisher: Jens Taylor
+│  ├─ email: jensyt@gmail.com
+│  ├─ url: https://github.com/homebrewing
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/imurmurhash
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/imurmurhash/README.md
+├─ inflight@1.0.6
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/npm/inflight
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/inflight
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/inflight/LICENSE
+├─ inherits@2.0.4
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/inherits
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/inherits
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/inherits/LICENSE
+├─ is-binary-path@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/is-binary-path
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-binary-path
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-binary-path/license
+├─ is-core-module@2.14.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/inspect-js/is-core-module
+│  ├─ publisher: Jordan Harband
+│  ├─ email: ljharb@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-core-module
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-core-module/LICENSE
+├─ is-extglob@2.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jonschlinkert/is-extglob
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-extglob
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-extglob/LICENSE
+├─ is-fullwidth-code-point@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/is-fullwidth-code-point
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-fullwidth-code-point
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-fullwidth-code-point/license
+├─ is-glob@4.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromatch/is-glob
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-glob
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-glob/LICENSE
+├─ is-number@7.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jonschlinkert/is-number
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-number
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-number/LICENSE
+├─ is-path-inside@3.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/is-path-inside
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-path-inside
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-path-inside/license
+├─ is-reference@3.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Rich-Harris/is-reference
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-reference
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/is-reference/README.md
+├─ isexe@2.0.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/isexe
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/isexe
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/isexe/LICENSE
+├─ jackspeak@3.4.0
+│  ├─ licenses: BlueOak-1.0.0
+│  ├─ repository: https://github.com/isaacs/jackspeak
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/jackspeak
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/jackspeak/LICENSE.md
+├─ jiti@1.21.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/unjs/jiti
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/jiti
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/jiti/LICENSE
+├─ joi@17.13.3
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/hapijs/joi
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/joi
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/joi/LICENSE.md
+├─ js-yaml@4.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/nodeca/js-yaml
+│  ├─ publisher: Vladimir Zapparov
+│  ├─ email: dervus.grim@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/js-yaml
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/js-yaml/LICENSE
+├─ json-buffer@3.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/dominictarr/json-buffer
+│  ├─ publisher: Dominic Tarr
+│  ├─ email: dominic.tarr@gmail.com
+│  ├─ url: http://dominictarr.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-buffer
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-buffer/LICENSE
+├─ json-schema-to-ts@3.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ThomasAribart/json-schema-to-ts
+│  ├─ publisher: Thomas Aribart
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-schema-to-ts
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-schema-to-ts/LICENSE
+├─ json-schema-traverse@0.4.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/epoberezkin/json-schema-traverse
+│  ├─ publisher: Evgeny Poberezkin
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-schema-traverse
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-schema-traverse/LICENSE
+├─ json-stable-stringify-without-jsonify@1.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/samn/json-stable-stringify
+│  ├─ publisher: James Halliday
+│  ├─ email: mail@substack.net
+│  ├─ url: http://substack.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-stable-stringify-without-jsonify
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/json-stable-stringify-without-jsonify/LICENSE
+├─ just-clone@6.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/angus-c/just
+│  ├─ publisher: Angus Croll
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/just-clone
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/just-clone/LICENSE
+├─ keyv@4.5.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jaredwray/keyv
+│  ├─ publisher: Jared Wray
+│  ├─ email: me@jaredwray.com
+│  ├─ url: http://jaredwray.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/keyv
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/keyv/README.md
+├─ kleur@4.1.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/kleur
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/kleur
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/kleur/license
+├─ known-css-properties@0.29.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/known-css/known-css-properties
+│  ├─ publisher: Viorel Cojocaru
+│  ├─ email: vio@beanon.com
+│  ├─ url: http://beanon.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/known-css-properties
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/known-css-properties/LICENSE
+├─ levn@0.4.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/gkz/levn
+│  ├─ publisher: George Zahariev
+│  ├─ email: z@georgezahariev.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/levn
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/levn/LICENSE
+├─ lilconfig@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/antonk52/lilconfig
+│  ├─ publisher: antonk52
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lilconfig
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lilconfig/LICENSE
+├─ lilconfig@3.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/antonk52/lilconfig
+│  ├─ publisher: antonk52
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss/node_modules/postcss-load-config/node_modules/lilconfig
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss/node_modules/postcss-load-config/node_modules/lilconfig/LICENSE
+├─ lines-and-columns@1.2.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/eventualbuddha/lines-and-columns
+│  ├─ publisher: Brian Donovan
+│  ├─ email: brian@donovans.cc
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lines-and-columns
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lines-and-columns/LICENSE
+├─ locate-character@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: git+https://gitlab.com/Rich-Harris/locate-character
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/locate-character
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/locate-character/README.md
+├─ locate-path@6.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/locate-path
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/locate-path
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/locate-path/license
+├─ lodash.castarray@4.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lodash/lodash
+│  ├─ publisher: John-David Dalton
+│  ├─ email: john.david.dalton@gmail.com
+│  ├─ url: http://allyoucanleet.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lodash.castarray
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lodash.castarray/LICENSE
+├─ lodash.isplainobject@4.0.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lodash/lodash
+│  ├─ publisher: John-David Dalton
+│  ├─ email: john.david.dalton@gmail.com
+│  ├─ url: http://allyoucanleet.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lodash.isplainobject
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lodash.isplainobject/LICENSE
+├─ lodash.merge@4.6.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lodash/lodash
+│  ├─ publisher: John-David Dalton
+│  ├─ email: john.david.dalton@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lodash.merge
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lodash.merge/LICENSE
+├─ lru-cache@10.2.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/node-lru-cache
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-scurry/node_modules/lru-cache
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-scurry/node_modules/lru-cache/LICENSE
+├─ lru-cache@6.0.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/node-lru-cache
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lru-cache
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lru-cache/LICENSE
+├─ lucide-svelte@0.396.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/lucide-icons/lucide
+│  ├─ publisher: Eric Fennis
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lucide-svelte
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/lucide-svelte/LICENSE
+├─ magic-string@0.30.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/rich-harris/magic-string
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/magic-string
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/magic-string/LICENSE
+├─ mdn-data@2.0.30
+│  ├─ licenses: CC0-1.0
+│  ├─ repository: https://github.com/mdn/data
+│  ├─ publisher: Mozilla Developer Network
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mdn-data
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mdn-data/LICENSE
+├─ memoize-weak@1.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/timkendrick/memoize-weak
+│  ├─ publisher: Tim Kendrick
+│  ├─ email: timkendrick@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/memoize-weak
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/memoize-weak/README.md
+├─ merge2@1.4.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/teambition/merge2
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/merge2
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/merge2/LICENSE
+├─ micromatch@4.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromatch/micromatch
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/micromatch
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/micromatch/LICENSE
+├─ min-indent@1.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/thejameskyle/min-indent
+│  ├─ publisher: James Kyle
+│  ├─ email: me@thejameskyle.com
+│  ├─ url: thejameskyle.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/min-indent
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/min-indent/license
+├─ minimatch@3.1.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/minimatch
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob/node_modules/minimatch
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/glob/node_modules/minimatch/LICENSE
+├─ minimatch@9.0.3
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/minimatch
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/minimatch
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/minimatch/LICENSE
+├─ minimatch@9.0.5
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/minimatch
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sucrase/node_modules/minimatch
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sucrase/node_modules/minimatch/LICENSE
+├─ minimist@1.2.8
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/minimistjs/minimist
+│  ├─ publisher: James Halliday
+│  ├─ email: mail@substack.net
+│  ├─ url: http://substack.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/minimist
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/minimist/LICENSE
+├─ minipass@7.1.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/minipass
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/minipass
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/minipass/LICENSE
+├─ mkdirp@0.5.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/substack/node-mkdirp
+│  ├─ publisher: James Halliday
+│  ├─ email: mail@substack.net
+│  ├─ url: http://substack.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mkdirp
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mkdirp/LICENSE
+├─ moment@2.30.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/moment/moment
+│  ├─ publisher: Iskren Ivov Chernev
+│  ├─ email: iskren.chernev@gmail.com
+│  ├─ url: https://github.com/ichernev
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/moment
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/moment/LICENSE
+├─ mri@1.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/mri
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mri
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mri/license.md
+├─ mrmime@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/mrmime
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mrmime
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mrmime/license
+├─ ms@2.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/zeit/ms
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ms
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ms/license.md
+├─ mz@2.7.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/normalize/mz
+│  ├─ publisher: Jonathan Ong
+│  ├─ email: me@jongleberry.com
+│  ├─ url: http://jongleberry.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mz
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/mz/LICENSE
+├─ nanoid@3.3.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ai/nanoid
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/nanoid
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/nanoid/LICENSE
+├─ nanoid@5.0.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ai/nanoid
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@melt-ui/svelte/node_modules/nanoid
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@melt-ui/svelte/node_modules/nanoid/LICENSE
+├─ natural-compare@1.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/litejs/natural-compare-lite
+│  ├─ publisher: Lauri Rooden
+│  ├─ url: https://github.com/litejs/natural-compare-lite
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/natural-compare
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/natural-compare/README.md
+├─ node-releases@2.0.14
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chicoxyzzy/node-releases
+│  ├─ publisher: Sergey Rubanov
+│  ├─ email: chi187@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/node-releases
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/node-releases/LICENSE
+├─ normalize-path@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jonschlinkert/normalize-path
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/normalize-path
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/normalize-path/LICENSE
+├─ normalize-range@0.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jamestalmage/normalize-range
+│  ├─ publisher: James Talmage
+│  ├─ email: james@talmage.io
+│  ├─ url: github.com/jamestalmage
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/normalize-range
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/normalize-range/license
+├─ normalize-url@8.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/normalize-url
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/normalize-url
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/normalize-url/license
+├─ object-assign@4.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/object-assign
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/object-assign
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/object-assign/license
+├─ object-hash@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/puleos/object-hash
+│  ├─ publisher: Scott Puleo
+│  ├─ email: puleos@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/object-hash
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/object-hash/LICENSE
+├─ once@1.4.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/once
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/once
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/once/LICENSE
+├─ optionator@0.9.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/gkz/optionator
+│  ├─ publisher: George Zahariev
+│  ├─ email: z@georgezahariev.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/optionator
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/optionator/LICENSE
+├─ p-limit@3.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/p-limit
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/p-limit
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/p-limit/license
+├─ p-locate@5.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/p-locate
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/p-locate
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/p-locate/license
+├─ package-json-from-dist@1.0.0
+│  ├─ licenses: BlueOak-1.0.0
+│  ├─ repository: https://github.com/isaacs/package-json-from-dist
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: https://izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/package-json-from-dist
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/package-json-from-dist/LICENSE.md
+├─ paneforge@0.0.5
+│  ├─ licenses: MIT*
+│  ├─ repository: https://github.com/huntabyte/paneforge
+│  ├─ publisher: Hunter Johnston
+│  ├─ url: https://github.com/huntabyte
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/paneforge
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/paneforge/LICENSE
+├─ parent-module@1.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/parent-module
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/parent-module
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/parent-module/license
+├─ path-exists@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/path-exists
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-exists
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-exists/license
+├─ path-is-absolute@1.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/path-is-absolute
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-is-absolute
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-is-absolute/license
+├─ path-key@3.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/path-key
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-key
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-key/license
+├─ path-parse@1.0.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jbgutierrez/path-parse
+│  ├─ publisher: Javier Blanco
+│  ├─ email: http://jbgutierrez.info
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-parse
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-parse/LICENSE
+├─ path-scurry@1.11.1
+│  ├─ licenses: BlueOak-1.0.0
+│  ├─ repository: https://github.com/isaacs/path-scurry
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: https://blog.izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-scurry
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-scurry/LICENSE.md
+├─ path-type@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/path-type
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-type
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/path-type/license
+├─ periscopic@3.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Rich-Harris/periscopic
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/periscopic
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/periscopic/LICENSE
+├─ picocolors@1.0.1
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/alexeyraspopov/picocolors
+│  ├─ publisher: Alexey Raspopov
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/picocolors
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/picocolors/LICENSE
+├─ picomatch@2.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromatch/picomatch
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/picomatch
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/picomatch/LICENSE
+├─ pify@2.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/pify
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/pify
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/pify/license
+├─ pirates@4.0.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/danez/pirates
+│  ├─ publisher: Ari Porad
+│  ├─ email: ari@ariporad.com
+│  ├─ url: http://ariporad.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/pirates
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/pirates/LICENSE
+├─ postcss-import@15.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-import
+│  ├─ publisher: Maxime Thirouin
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-import
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-import/LICENSE
+├─ postcss-js@4.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-js
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-js
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-js/LICENSE
+├─ postcss-load-config@3.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-load-config
+│  ├─ publisher: Michael Ciniawky
+│  ├─ email: michael.ciniawsky@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-load-config
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-load-config/LICENSE
+├─ postcss-load-config@4.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-load-config
+│  ├─ publisher: Michael Ciniawky
+│  ├─ email: michael.ciniawsky@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss/node_modules/postcss-load-config
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss/node_modules/postcss-load-config/LICENSE
+├─ postcss-nested@6.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-nested
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-nested
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-nested/LICENSE
+├─ postcss-safe-parser@6.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-safe-parser
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-safe-parser
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-safe-parser/LICENSE
+├─ postcss-scss@4.0.9
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-scss
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-scss
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-scss/LICENSE
+├─ postcss-selector-parser@6.0.10
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-selector-parser
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tailwindcss/typography/node_modules/postcss-selector-parser
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@tailwindcss/typography/node_modules/postcss-selector-parser/LICENSE-MIT
+├─ postcss-selector-parser@6.0.15
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss-selector-parser
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-selector-parser
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-selector-parser/LICENSE-MIT
+├─ postcss-value-parser@4.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/TrySound/postcss-value-parser
+│  ├─ publisher: Bogdan Chadkin
+│  ├─ email: trysound@yandex.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-value-parser
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss-value-parser/LICENSE
+├─ postcss@8.4.38
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/postcss/postcss
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/postcss/LICENSE
+├─ prelude-ls@1.2.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/gkz/prelude-ls
+│  ├─ publisher: George Zahariev
+│  ├─ email: z@georgezahariev.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prelude-ls
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prelude-ls/LICENSE
+├─ prettier-plugin-svelte@3.2.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/prettier-plugin-svelte
+│  ├─ publisher: James Birtles
+│  ├─ email: jameshbirtles@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prettier-plugin-svelte
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prettier-plugin-svelte/LICENSE
+├─ prettier-plugin-tailwindcss@0.6.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/tailwindlabs/prettier-plugin-tailwindcss
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prettier-plugin-tailwindcss
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prettier-plugin-tailwindcss/LICENSE
+├─ prettier@3.2.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/prettier/prettier
+│  ├─ publisher: James Long
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prettier
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/prettier/LICENSE
+├─ property-expr@2.0.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jquense/expr
+│  ├─ publisher: @monasticpanic Jason Quense
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/property-expr
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/property-expr/LICENSE.txt
+├─ punycode@2.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mathiasbynens/punycode.js
+│  ├─ publisher: Mathias Bynens
+│  ├─ url: https://mathiasbynens.be/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/punycode
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/punycode/LICENSE-MIT.txt
+├─ queue-microtask@1.2.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/feross/queue-microtask
+│  ├─ publisher: Feross Aboukhadijeh
+│  ├─ email: feross@feross.org
+│  ├─ url: https://feross.org
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/queue-microtask
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/queue-microtask/LICENSE
+├─ read-cache@1.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/TrySound/read-cache
+│  ├─ publisher: Bogdan Chadkin
+│  ├─ email: trysound@yandex.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/read-cache
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/read-cache/LICENSE
+├─ readdirp@3.6.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/paulmillr/readdirp
+│  ├─ publisher: Thorsten Lorenz
+│  ├─ email: thlorenz@gmx.de
+│  ├─ url: thlorenz.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/readdirp
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/readdirp/LICENSE
+├─ regenerator-runtime@0.14.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/regenerator/tree/main/packages/runtime
+│  ├─ publisher: Ben Newman
+│  ├─ email: bn@cs.stanford.edu
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/regenerator-runtime
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/regenerator-runtime/LICENSE
+├─ resolve-from@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/resolve-from
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/resolve-from
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/resolve-from/license
+├─ resolve@1.22.8
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/browserify/resolve
+│  ├─ publisher: James Halliday
+│  ├─ email: mail@substack.net
+│  ├─ url: http://substack.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/resolve
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/resolve/LICENSE
+├─ reusify@1.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mcollina/reusify
+│  ├─ publisher: Matteo Collina
+│  ├─ email: hello@matteocollina.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/reusify
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/reusify/LICENSE
+├─ rimraf@2.7.1
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/rimraf
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sander/node_modules/rimraf
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sander/node_modules/rimraf/LICENSE
+├─ rimraf@3.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/rimraf
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/rimraf
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/rimraf/LICENSE
+├─ rollup@4.16.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/rollup/rollup
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/rollup
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/rollup/LICENSE.md
+├─ run-parallel@1.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/feross/run-parallel
+│  ├─ publisher: Feross Aboukhadijeh
+│  ├─ email: feross@feross.org
+│  ├─ url: https://feross.org
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/run-parallel
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/run-parallel/LICENSE
+├─ sade@1.8.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/sade
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sade
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sade/license
+├─ sander@0.5.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/rich-harris/sander
+│  ├─ publisher: Rich Harris
+│  └─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sander
+├─ sass@1.71.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sass/dart-sass
+│  ├─ publisher: Natalie Weizenbaum
+│  ├─ email: nweiz@google.com
+│  ├─ url: https://github.com/nex3
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sass
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sass/LICENSE
+├─ semver@7.6.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/npm/node-semver
+│  ├─ publisher: GitHub Inc.
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/semver
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/semver/LICENSE
+├─ set-cookie-parser@2.6.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/nfriedly/set-cookie-parser
+│  ├─ publisher: Nathan Friedly
+│  ├─ url: http://nfriedly.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/set-cookie-parser
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/set-cookie-parser/LICENSE
+├─ shebang-command@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/kevva/shebang-command
+│  ├─ publisher: Kevin Mårtensson
+│  ├─ email: kevinmartensson@gmail.com
+│  ├─ url: github.com/kevva
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/shebang-command
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/shebang-command/license
+├─ shebang-regex@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/shebang-regex
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/shebang-regex
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/shebang-regex/license
+├─ signal-exit@4.1.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/tapjs/signal-exit
+│  ├─ publisher: Ben Coe
+│  ├─ email: ben@npmjs.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/signal-exit
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/signal-exit/LICENSE.txt
+├─ sirv@2.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/sirv
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke@lukeed.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sirv
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sirv/readme.md
+├─ slash@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/slash
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/slash
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/slash/license
+├─ sorcery@0.11.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/Rich-Harris/sorcery
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sorcery
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sorcery/README.md
+├─ source-map-js@1.2.0
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/7rulnik/source-map-js
+│  ├─ publisher: Valentin 7rulnik Semirulnik
+│  ├─ email: v7rulnik@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/source-map-js
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/source-map-js/LICENSE
+├─ source-map-support@0.5.21
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/evanw/node-source-map-support
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/source-map-support
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/source-map-support/LICENSE.md
+├─ source-map@0.6.1
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/mozilla/source-map
+│  ├─ publisher: Nick Fitzgerald
+│  ├─ email: nfitzgerald@mozilla.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/source-map
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/source-map/LICENSE
+├─ spacetime-holiday@0.3.0
+│  ├─ licenses: MIT*
+│  ├─ repository: https://github.com/spencermountain/spacetime
+│  ├─ publisher: Spencer Kelly
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/spacetime-holiday
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/spacetime-holiday/README.md
+├─ spacetime@7.6.0
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/spencermountain/spacetime
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/spacetime
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/spacetime/LICENSE
+├─ string-width@4.2.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/string-width
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width-cjs
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width-cjs/license
+├─ string-width@5.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/string-width
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width/license
+├─ strip-ansi@6.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/strip-ansi
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/strip-ansi
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/strip-ansi/license
+├─ strip-ansi@7.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/strip-ansi
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width/node_modules/strip-ansi
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/string-width/node_modules/strip-ansi/license
+├─ strip-indent@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/strip-indent
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/strip-indent
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/strip-indent/license
+├─ strip-json-comments@3.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/strip-json-comments
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/strip-json-comments
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/strip-json-comments/license
+├─ sucrase@3.35.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/alangpierce/sucrase
+│  ├─ publisher: Alan Pierce
+│  ├─ email: alangpierce@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sucrase
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sucrase/LICENSE
+├─ suffix-thumb@5.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/spencermountain/suffix-thumb
+│  ├─ publisher: Spencer Kelly
+│  ├─ email: spencermountain@gmail.com
+│  ├─ url: http://spencermounta.in
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/suffix-thumb
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/suffix-thumb/LICENSE.txt
+├─ superstruct@1.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ianstormtaylor/superstruct
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/superstruct
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/superstruct/License.md
+├─ supports-color@7.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/supports-color
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/supports-color
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/supports-color/license
+├─ supports-preserve-symlinks-flag@1.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/inspect-js/node-supports-preserve-symlinks-flag
+│  ├─ publisher: Jordan Harband
+│  ├─ email: ljharb@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/supports-preserve-symlinks-flag
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/supports-preserve-symlinks-flag/LICENSE
+├─ svelte-check@3.6.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/language-tools
+│  ├─ publisher: The Svelte Community
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-check
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-check/LICENSE
+├─ svelte-eslint-parser@0.33.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/svelte-eslint-parser
+│  ├─ publisher: Yosuke Ota
+│  ├─ url: https://github.com/ota-meshi
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-eslint-parser
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-eslint-parser/LICENSE
+├─ svelte-headless-table@0.18.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/bryanmylee/svelte-headless-table
+│  ├─ publisher: Bryan Lee
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-headless-table
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-headless-table/README.md
+├─ svelte-hmr@0.15.3
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/sveltejs/svelte-hmr
+│  ├─ publisher: rixo
+│  ├─ email: rixo@rixo.fr
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-hmr
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-hmr/LICENSE
+├─ svelte-keyed@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/bryanmylee/svelte-keyed
+│  ├─ publisher: Bryan Lee
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-keyed
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-keyed/LICENSE
+├─ svelte-preprocess@5.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/svelte-preprocess
+│  ├─ publisher: Christian Kaisermann
+│  ├─ email: christian@kaisermann.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-preprocess
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-preprocess/LICENSE
+├─ svelte-render@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/bryanmylee/svelte-render
+│  ├─ publisher: Bryan Lee
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-render
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-render/LICENSE
+├─ svelte-subscribe@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/bryanmylee/svelte-subscribe
+│  ├─ publisher: Bryan Lee
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-subscribe
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte-subscribe/LICENSE
+├─ svelte@4.2.12
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sveltejs/svelte
+│  ├─ publisher: Rich Harris
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/svelte/LICENSE.md
+├─ sveltekit-superforms@2.15.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ciscoheat/sveltekit-superforms
+│  ├─ publisher: Andreas Söderlund
+│  ├─ email: ciscoheat@gmail.com
+│  ├─ url: https://blog.encodeart.dev
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sveltekit-superforms
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/sveltekit-superforms/LICENSE
+├─ tabbable@6.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/focus-trap/tabbable
+│  ├─ publisher: David Clark
+│  ├─ url: http://davidtheclark.com/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tabbable
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tabbable/LICENSE
+├─ tailwind-merge@2.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/dcastil/tailwind-merge
+│  ├─ publisher: Dany Castillo
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwind-merge
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwind-merge/LICENSE.md
+├─ tailwind-variants@0.2.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/nextui-org/tailwind-variants
+│  ├─ publisher: Junior Garcia
+│  ├─ email: jrgarciadev@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwind-variants
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwind-variants/LICENSE
+├─ tailwindcss@3.4.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/tailwindlabs/tailwindcss
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss/LICENSE
+├─ text-table@0.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/substack/text-table
+│  ├─ publisher: James Halliday
+│  ├─ email: mail@substack.net
+│  ├─ url: http://substack.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/text-table
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/text-table/LICENSE
+├─ thenify-all@1.6.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/thenables/thenify-all
+│  ├─ publisher: Jonathan Ong
+│  ├─ email: me@jongleberry.com
+│  ├─ url: http://jongleberry.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/thenify-all
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/thenify-all/LICENSE
+├─ thenify@3.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/thenables/thenify
+│  ├─ publisher: Jonathan Ong
+│  ├─ email: me@jongleberry.com
+│  ├─ url: http://jongleberry.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/thenify
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/thenify/LICENSE
+├─ tiny-case@1.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jquense/tiny-case
+│  ├─ publisher: Jason Quense
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tiny-case
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tiny-case/README.md
+├─ tiny-glob@0.2.9
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/terkelg/tiny-glob
+│  ├─ publisher: Terkel Gjervig
+│  ├─ email: terkel@terkel.com
+│  ├─ url: https://terkel.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tiny-glob
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tiny-glob/license
+├─ to-regex-range@5.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromatch/to-regex-range
+│  ├─ publisher: Jon Schlinkert
+│  ├─ url: https://github.com/jonschlinkert
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/to-regex-range
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/to-regex-range/LICENSE
+├─ toposort@2.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/marcelklehr/toposort
+│  ├─ publisher: Marcel Klehr
+│  ├─ email: mklehr@gmx.net
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/toposort
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/toposort/License
+├─ totalist@3.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/totalist
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ url: https://lukeed.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/totalist
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/totalist/license
+├─ ts-algebra@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/ThomasAribart/ts-algebra
+│  ├─ publisher: Thomas Aribart
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-algebra
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-algebra/LICENSE
+├─ ts-api-utils@1.2.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/JoshuaKGoldberg/ts-api-utils
+│  ├─ publisher: JoshuaKGoldberg
+│  ├─ email: npm@joshuakgoldberg.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-api-utils
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-api-utils/LICENSE.md
+├─ ts-deepmerge@7.0.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/voodoocreation/ts-deepmerge
+│  ├─ publisher: Raice Hannay
+│  ├─ email: voodoocreation@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-deepmerge
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-deepmerge/README.md
+├─ ts-interface-checker@0.1.13
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/gristlabs/ts-interface-checker
+│  ├─ publisher: Dmitry S, Grist Labs
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-interface-checker
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/ts-interface-checker/LICENSE
+├─ tslib@2.4.0
+│  ├─ licenses: 0BSD
+│  ├─ repository: https://github.com/Microsoft/tslib
+│  ├─ publisher: Microsoft Corp.
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esbuild-runner/node_modules/tslib
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/esbuild-runner/node_modules/tslib/LICENSE.txt
+├─ tslib@2.6.2
+│  ├─ licenses: 0BSD
+│  ├─ repository: https://github.com/Microsoft/tslib
+│  ├─ publisher: Microsoft Corp.
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tslib
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tslib/LICENSE.txt
+├─ type-check@0.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/gkz/type-check
+│  ├─ publisher: George Zahariev
+│  ├─ email: z@georgezahariev.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/type-check
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/type-check/LICENSE
+├─ type-fest@0.20.2
+│  ├─ licenses: (MIT OR CC0-1.0)
+│  ├─ repository: https://github.com/sindresorhus/type-fest
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/type-fest
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/type-fest/license
+├─ type-fest@2.19.0
+│  ├─ licenses: (MIT OR CC0-1.0)
+│  ├─ repository: https://github.com/sindresorhus/type-fest
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yup/node_modules/type-fest
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yup/node_modules/type-fest/readme.md
+├─ typescript@5.3.3
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/Microsoft/TypeScript
+│  ├─ publisher: Microsoft Corp.
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/typescript
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/typescript/LICENSE.txt
+├─ update-browserslist-db@1.0.16
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/browserslist/update-db
+│  ├─ publisher: Andrey Sitnik
+│  ├─ email: andrey@sitnik.ru
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/update-browserslist-db
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/update-browserslist-db/LICENSE
+├─ uri-js@4.4.1
+│  ├─ licenses: BSD-2-Clause
+│  ├─ repository: https://github.com/garycourt/uri-js
+│  ├─ publisher: Gary Court
+│  ├─ email: gary.court@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/uri-js
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/uri-js/LICENSE
+├─ util-deprecate@1.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/TooTallNate/util-deprecate
+│  ├─ publisher: Nathan Rajlich
+│  ├─ email: nathan@tootallnate.net
+│  ├─ url: http://n8.io/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/util-deprecate
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/util-deprecate/LICENSE
+├─ valibot@0.31.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/fabian-hiller/valibot
+│  ├─ publisher: Fabian Hiller
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@gcornut/valibot-json-schema/node_modules/valibot
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/@gcornut/valibot-json-schema/node_modules/valibot/README.md
+├─ valibot@0.35.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/fabian-hiller/valibot
+│  ├─ publisher: Fabian Hiller
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/valibot
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/valibot/README.md
+├─ validator@13.12.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/validatorjs/validator.js
+│  ├─ publisher: Chris O'Hara
+│  ├─ email: cohara87@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/validator
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/validator/LICENSE
+├─ vaul-svelte@0.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/huntabyte/vaul-svelte
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/vaul-svelte
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/vaul-svelte/LICENSE
+├─ vite@5.2.10
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/vitejs/vite
+│  ├─ publisher: Evan You
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/vite
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/vite/LICENSE.md
+├─ vitefu@0.2.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/svitejs/vitefu
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/vitefu
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/vitefu/LICENSE
+├─ which@2.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/node-which
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/which
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/which/LICENSE
+├─ wrap-ansi@7.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/wrap-ansi
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrap-ansi-cjs
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrap-ansi-cjs/license
+├─ wrap-ansi@8.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/chalk/wrap-ansi
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrap-ansi
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrap-ansi/license
+├─ wrappy@1.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/npm/wrappy
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrappy
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/wrappy/LICENSE
+├─ yallist@4.0.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/yallist
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ url: http://blog.izs.me/
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yallist
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yallist/LICENSE
+├─ yaml@1.10.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/eemeli/yaml
+│  ├─ publisher: Eemeli Aro
+│  ├─ email: eemeli@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yaml
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yaml/LICENSE
+├─ yaml@2.4.5
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/eemeli/yaml
+│  ├─ publisher: Eemeli Aro
+│  ├─ email: eemeli@gmail.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss/node_modules/yaml
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/tailwindcss/node_modules/yaml/LICENSE
+├─ yocto-queue@0.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/yocto-queue
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ url: https://sindresorhus.com
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yocto-queue
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yocto-queue/license
+├─ yup@1.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jquense/yup
+│  ├─ publisher: @monasticpanic Jason Quense
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yup
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/yup/LICENSE.md
+├─ zod-to-json-schema@3.23.1
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/StefanTerdell/zod-to-json-schema
+│  ├─ publisher: Stefan Terdell
+│  ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/zod-to-json-schema
+│  └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/zod-to-json-schema/LICENSE
+└─ zod@3.23.8
+   ├─ licenses: MIT
+   ├─ repository: https://github.com/colinhacks/zod
+   ├─ publisher: Colin McDonnell
+   ├─ email: colin@colinhacks.com
+   ├─ path: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/zod
+   └─ licenseFile: /Users/thatgurjot/Documents/GitHub/buzee-tauri/node_modules/zod/LICENSE
+

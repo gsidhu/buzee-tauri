@@ -45,7 +45,7 @@ pub fn get_app_directory() -> String {
 
 pub fn create_tantivy_index_directory_if_not_exists() -> Result<(), std::io::Error> {
   let app_dir_path = get_app_directory();
-  let index_dir_path = format!("{}/{}", app_dir_path, "tantivy_index");
+  let index_dir_path = format!("{}/{}", app_dir_path, "buzee_tantivy_index");
   let index_dir_path = norm(&index_dir_path);
   println!("creating tantivy index dir at:{}", &index_dir_path);
   std::fs::create_dir_all(index_dir_path)

@@ -5,25 +5,53 @@
 	import { goto } from '$app/navigation';
 	import { trackEvent } from '@aptabase/web';
 	import { invoke } from '@tauri-apps/api/core';
-	import { isMac, statusMessage, userPreferences, dbCreationInProgress } from '$lib/stores';
+	import { isMac, statusMessage, userPreferences, dbCreationInProgress, syncStatus } from '$lib/stores';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, open, message } from '@tauri-apps/plugin-dialog';
 	import * as Dialog from "$lib/components/ui/dialog";
   import Button from "$lib/components/ui/button/button.svelte";
-	import * as Card from "$lib/components/ui/card/index.js";
+	import * as Select from "$lib/components/ui/select";
 	import { Switch } from "$lib/components/ui/switch";
-	import {FilePlus2, ListX, ListChecks} from "lucide-svelte";
+	import {PencilLine, TriangleAlert} from "lucide-svelte";
 	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
 
 	let showSearchSuggestions: boolean;
 	let launchAtStartup: boolean;
+	let globalShortcutDialogOpen = false;
 	let globalShortcutEnabled: boolean;
 	let globalShortcut: String;
-	let globalShortcutModifiers: String[] = ["Option", ""];
+	let globalShortcutModifiers: any[] = [{value: "Alt", label: "Option (⌥)"}, {value: "", label: " "}];
+	if (!$isMac) { globalShortcutModifiers[0].label = "Alt"; }
 	let globalShortcutCode: String = "Space";
 	let automaticBackgroundSyncEnabled: boolean;
 	let detailedScanEnabled: boolean;
 	let skipParsingPDF: boolean;
+	let manualSetupMode: boolean;
+	let clearIndexDialogOpen = false;
+
+	function setKeydownHandlerOnGlobalShortuctInput(event: KeyboardEvent) {
+		console.log("~>>! pressed:", event.key);
+		event.preventDefault(); // Prevent the default action of the keypress
+		if (event.key === 'Backspace' || event.key === 'Delete') {
+			// if the pressed key is backspace or delete, clear the input field
+			const shortcutInput = document.getElementById('shortcut-input');
+			(shortcutInput as HTMLInputElement).value = '';
+			globalShortcutCode = '';
+			return;
+		}
+		// if event.key is alphanumeric, space or F1-F24, proceed
+		console.log("pressed:", event.key);
+		if (event.key.match(/^[a-zA-Z0-9]$/) || event.key.match(/^F[1-2]?[0-9]$/) || event.key === ' ') {
+			let shortcut = '';
+			if (event.key === ' ') shortcut = 'Space';
+			else shortcut = event.key.toUpperCase();
+			// Update the input field value with the captured shortcut
+			const shortcutInput = document.getElementById('shortcut-input');
+			(shortcutInput as HTMLInputElement).value = shortcut;
+			globalShortcutCode = shortcut;
+		}
+	}
 
 	function toggleShowSearchSuggestions() {
 		showSearchSuggestions = !showSearchSuggestions;
@@ -66,6 +94,16 @@
 		});
 	}
 
+	function toggleManualSetupMode() {
+		manualSetupMode = !manualSetupMode;
+		trackEvent('click:toggleManualSetupMode', { manualSetupMode });
+		$statusMessage = `Setting changed!`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
+		invoke("set_user_preference", {key: "manual_setup", value: manualSetupMode}).then(() => {
+			console.log("Set manual setup flag to: " + manualSetupMode);
+		});
+	}
+
 	function toggleSkipParsingPDF() {
 		skipParsingPDF = !skipParsingPDF;
 		trackEvent('click:toggleSkipParsingPDF', { skipParsingPDF });
@@ -93,6 +131,12 @@
 		invoke("reset_user_preferences").then(() => {
 			console.log("User preferences reset to default");
 		});
+	}
+
+	async function clearIndex() {
+    trackEvent('click:clearIndex');
+		await invoke("clear_index");
+		$statusMessage = `Cleared!`;
 	}
 
 	function uninstallApp() {
@@ -137,25 +181,27 @@
 		}
 		$statusMessage = "Adding documents to the database...";
 		$dbCreationInProgress = true;
+		$syncStatus = true;
 		invoke("run_file_indexing", {filePaths: filePaths, isFolder: isFolder }).then((res) => {
 			console.log(res);
 			$statusMessage = "Documents added successfully!";
 			setTimeout(() => {
 				$statusMessage = "";
 				$dbCreationInProgress = false;
+				$syncStatus = false;
 			}, 3000);
 		});
 	}
 
 	function setNewGlobalShortcut() {
 		// ensure that globalShortcutModifers[1] is not empty and different from globalShortcutModifiers[0]
-		if (globalShortcutModifiers[1] === globalShortcutModifiers[0]) {
-			globalShortcutModifiers[1] = "";
+		if (globalShortcutModifiers[1].value === globalShortcutModifiers[0].value) {
+			globalShortcutModifiers[1] = {value: "", label: ""};
 		}
-		if (globalShortcutModifiers[1] === "") {
-			globalShortcut = globalShortcutModifiers[0] + "+" + globalShortcutCode;
+		if (globalShortcutModifiers[1].value === "") {
+			globalShortcut = globalShortcutModifiers[0].value + "+" + globalShortcutCode;
 		} else {
-			globalShortcut = globalShortcutModifiers[0] + "+" + globalShortcutModifiers[1] + "+" + globalShortcutCode;
+			globalShortcut = globalShortcutModifiers[0].value + "+" + globalShortcutModifiers[1].value + "+" + globalShortcutCode;
 		}
 		console.log(globalShortcut);
 		$statusMessage = `Setting changed. Restarting the app...`;
@@ -229,12 +275,16 @@
 			globalShortcut = globalShortcut.replace("Key", "");
 			globalShortcut = globalShortcut.replace("Digit", "");
 			if (globalShortcut.split("+").length === 2) {
-				globalShortcutModifiers[0] = globalShortcut.split("+")[0];
-				globalShortcutModifiers[1] = "";
+				globalShortcutModifiers[0].value = globalShortcut.split("+")[0];
+				globalShortcutModifiers[1].value = "";
+				globalShortcutModifiers[0].label = globalShortcut.split("+")[0];
+				globalShortcutModifiers[1].label = " ";
 				globalShortcutCode = globalShortcut.split("+")[1];
 			} else if (globalShortcut.split("+").length === 3) {
-				globalShortcutModifiers[0] = globalShortcut.split("+")[0];
-				globalShortcutModifiers[1] = globalShortcut.split("+")[1];
+				globalShortcutModifiers[0].value = globalShortcut.split("+")[0];
+				globalShortcutModifiers[1].value = globalShortcut.split("+")[1];
+				globalShortcutModifiers[0].label = globalShortcut.split("+")[0];
+				globalShortcutModifiers[1].label = globalShortcut.split("+")[1];
 				globalShortcutCode = globalShortcut.split("+")[2];
 			}
 			console.log(globalShortcutModifiers);
@@ -247,27 +297,7 @@
 			automaticBackgroundSyncEnabled = $userPreferences.automatic_background_sync;
 			detailedScanEnabled = $userPreferences.detailed_scan;
 			skipParsingPDF = $userPreferences.skip_parsing_pdfs;
-		});
-
-		const shortcutInput = document.getElementById('shortcut-input');
-		shortcutInput?.addEventListener('keydown', function(event) {
-			event.preventDefault(); // Prevent the default action of the keypress
-			if (event.key === 'Backspace' || event.key === 'Delete') {
-				// if the pressed key is backspace or delete, clear the input field
-				(shortcutInput as HTMLInputElement).value = '';
-				globalShortcutCode = '';
-				return;
-			}
-			// if event.key is alphanumeric, space or F1-F24, proceed
-			console.log("pressed:", event.key);
-      if (event.key.match(/^[a-zA-Z0-9]$/) || event.key.match(/^F[1-2]?[0-9]$/) || event.key === ' ') {
-				let shortcut = '';
-				if (event.key === ' ') shortcut = 'Space';
-				else shortcut = event.key.toUpperCase();
-				// Update the input field value with the captured shortcut
-				(shortcutInput as HTMLInputElement).value = shortcut;
-				globalShortcutCode = shortcut;
-			}
+			manualSetupMode = $userPreferences.manual_setup;
 		});
 	});
 </script>
@@ -277,11 +307,11 @@
   <p class="text-sm text-muted-foreground">Tune the knobs to make Buzee yours</p>
 </div>
 <div class="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed shadow-sm p-4">
-	<table class="w-3/5 table table-bordered mb-4">
+	<table class="w-4/5 md:w-3/5 table table-bordered my-2">
 		<!-- Buttons / Links -->
-		<tr>
+		<tr class="hover:text-violet-500">
 			<td class="text-center px-2">
-				<button class="btn" on:click={() => addDocsToDB()}>
+				<button on:click={() => addDocsToDB()}>
 					<i class="bi bi-plus-circle" />
 				</button>
 			</td>
@@ -289,15 +319,17 @@
 				Add Documents
 				<div class="flex items-center small-explanation gap-1">
 					Add more documents to search in Buzee
-					<PopoverIcon
-						title="By default, Buzee scans your entire system. You can add files from external drives or network drives here."
-					/>
 				</div>
 			</td>
+			<td class="">
+				<PopoverIcon
+					title="By default, Buzee scans your entire system. You can add files from external drives or network drives here."
+				/>
+			</td>
 		</tr>
-		<tr>
+		<tr class="hover:text-violet-500">
 			<td class="text-center px-2">
-				<button class="btn" on:click={() => goto('/settings/ignore')}>
+				<button on:click={() => goto('/settings/ignore')}>
 					<div class="flex">
 						<i class="bi bi-file-earmark-x" />
 						<i class="bi bi-folder-x" />
@@ -311,9 +343,9 @@
 				</div>
 			</td>
 		</tr>
-		<tr>
+		<tr class="hover:text-violet-500">
 			<td class="text-center px-2">
-				<button class="btn" on:click={() => goto('/settings/filetype-list')}>
+				<button on:click={() => goto('/settings/filetype-list')}>
 					<div class="flex">
 						<i class="bi bi-file-earmark" />
 					</div>
@@ -327,14 +359,14 @@
 			</td>
 		</tr>
 
-		<tr>
-			<td colspan="2"><Separator /></td>
+		<tr class="h-10">
+			<td colspan="3"><Separator /></td>
 		</tr>
 
 		<!-- On/Off Toggles -->
 		<tr>
 			<td class="text-center px-2">
-				<Switch bind:checked={showSearchSuggestions} on:click={() => toggleShowSearchSuggestions()} />
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={showSearchSuggestions} on:click={() => toggleShowSearchSuggestions()} />
 			</td>
 			<td class="py-2 skip-hover">
 				Show Search Suggestions
@@ -345,131 +377,215 @@
 		</tr>
 		<tr>
 			<td class="text-center px-2">
-				<Switch bind:checked={globalShortcutEnabled} on:click={() => toggleGlobalShortcut()} />
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={globalShortcutEnabled} on:click={() => toggleGlobalShortcut()} />
 			</td>
 			<td class="py-2 skip-hover">
 				Allow Global Shortcut
 				<div class="flex items-center small-explanation gap-1">
-						<div>
-							Pressing 
-							<Dialog.Root>
-								<Dialog.Trigger><code class="small-explanation">{globalShortcut}</code></Dialog.Trigger>
-								<Dialog.Content>
-									<Dialog.Header>
-										<Dialog.Title>Change Global Shortcut</Dialog.Title>
-										<Dialog.Description>Changes will take effect on app restart</Dialog.Description>
-									</Dialog.Header>
-									<div>
-										<p>Pressing the global shortcut shows the app from anywhere.</p>
-										<p>Current shortcut: <code>{globalShortcut}</code></p>
-										<p>Set new shortcut below:</p>
-										<div class="flex gap-1">
-											<div class="col-4 flex items-center">
-												<select bind:value={globalShortcutModifiers[0]}>
+					Pressing <code class="small-explanation">{globalShortcut}</code>
+						<Dialog.Root bind:open={globalShortcutDialogOpen}>
+							<Dialog.Trigger class="skip-hover border p-1 rounded-full flex justify-center items-center gap-1 hover:border-violet-500 hover:text-violet-500"><PencilLine class="h-3 w-3"/></Dialog.Trigger>
+							<Dialog.Content>
+								<Dialog.Header>
+									<Dialog.Title>Change Global Shortcut</Dialog.Title>
+								</Dialog.Header>
+								<div>
+									<p>Pressing the global shortcut shows the app from anywhere.</p>
+									<p>Current shortcut: <code>{globalShortcut}</code></p>
+									<p>Set new shortcut below:</p>
+									<div class="flex gap-1 justify-center items-center">
+										<div class="col-4 flex items-center">
+											<Select.Root bind:selected={globalShortcutModifiers[0]}>
+												<Select.Trigger class="md:w-[150px]">
+													<Select.Value placeholder={globalShortcutModifiers[0]} />
+												</Select.Trigger>
+												<Select.Content>
 													{#if $isMac}
-														<option value="Super">Command (⌘)</option>
-														<option value="Alt">Option (⌥)</option>
-														<option value="Control">Control (^)</option>
+														<Select.Item value="Super">Command (⌘)</Select.Item>
+														<Select.Item value="Alt">Option (⌥)</Select.Item>
+														<Select.Item value="Control">Control (^)</Select.Item>
 													{:else}
-														<option value="Control">Control</option>
-														<option value="Alt">Alt</option>
+														<Select.Item value="Control">Control</Select.Item>
+														<Select.Item value="Alt">Alt</Select.Item>
 													{/if}
-													<option value="Shift">Shift</option>
-												</select>
-											</div>
-											<div class="col-4 flex items-center">
-												<select bind:value={globalShortcutModifiers[1]}>
-													<option value=""></option>
-													{#if $isMac}
-														<option value="Super">Command (⌘)</option>
-														<option value="Alt">Option (⌥)</option>
-														<option value="Control">Control (^)</option>
-													{:else}
-														<option value="Control">Control</option>
-														<option value="Alt">Alt</option>
-													{/if}
-													<option value="Shift">Shift</option>
-												</select>
-											</div>
-											<div class="col-4">
-												<input
-													type="text"
-													id="shortcut-input"
-													class={`form-control ${globalShortcutCode === '' ? 'border-danger' : ''}`}
-													placeholder="Key"
-													bind:value={globalShortcutCode}
-												/>
-											</div>
+													<Select.Item value="Shift">Shift</Select.Item>
+												</Select.Content>
+											</Select.Root>
 										</div>
+										<div class="col-4 flex items-center">
+											<Select.Root bind:selected={globalShortcutModifiers[1]}>
+												<Select.Trigger class="md:w-[150px]">
+													<Select.Value placeholder={globalShortcutModifiers[1]} />
+												</Select.Trigger>
+												<Select.Content>
+													{#if $isMac}
+														<Select.Item value="Super">Command (⌘)</Select.Item>
+														<Select.Item value="Alt">Option (⌥)</Select.Item>
+														<Select.Item value="Control">Control (^)</Select.Item>
+													{:else}
+														<Select.Item value="Control">Control</Select.Item>
+														<Select.Item value="Alt">Alt</Select.Item>
+													{/if}
+													<Select.Item value="Shift">Shift</Select.Item>
+													<Select.Item value="">&nbsp;</Select.Item>
+												</Select.Content>
+											</Select.Root>
+										</div>
+										<div class="col-4">
+											<Input
+												type="text"
+												id="shortcut-input"
+												class={`flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-offset-0 focus-visible:ring-0 md:w-[150px] ${globalShortcutCode === '' ? 'border-red-500' : ''}`}
+												placeholder="Key"
+												on:keydown={(e) => setKeydownHandlerOnGlobalShortuctInput(e)}
+												bind:value={globalShortcutCode}
+											/>
+										</div>
+									</div>
+									<div class="my-2">
 										{#if globalShortcutCode === ""}
 											<small class="text-danger small-explanation">Shortcut value cannot be empty</small>
-											{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}<br/>{/if}
+											{#if globalShortcutModifiers[1].value === globalShortcutModifiers[0].value}<br/>{/if}
 										{/if}
-										{#if globalShortcutModifiers[1] === globalShortcutModifiers[0]}
+										{#if globalShortcutModifiers[1].value === globalShortcutModifiers[0].value}
 											<small class="text-danger small-explanation">Both modifier keys cannot be the same</small>
 										{/if}
 									</div>
-									<Dialog.Footer>
-										<Button
-													type="button"
-													class="btn btn-success"
-													disabled={globalShortcutCode === "" || globalShortcutModifiers[1] === globalShortcutModifiers[0]}
-													on:click={() => setNewGlobalShortcut()}>Save</Button>
-									</Dialog.Footer>
-								</Dialog.Content>
-							</Dialog.Root>
-							will show the app from anywhere
-						</div>
-						<PopoverIcon title="Changes will take effect after the app restarts" />
+								</div>
+								<Dialog.Footer class="flex sm:justify-between items-center gap-2">
+									<Dialog.Description>Setting a new shortcut will automatically restart the app</Dialog.Description>
+									<Button
+												type="button"
+												class="btn btn-success"
+												disabled={globalShortcutCode === "" || globalShortcutModifiers[1].value === globalShortcutModifiers[0].value}
+												on:click={() => setNewGlobalShortcut()}>Save</Button>
+								</Dialog.Footer>
+							</Dialog.Content>
+						</Dialog.Root>
+					will show the app from anywhere
 				</div>
 			</td>
+			<td>
+				<PopoverIcon title="Changes will take effect after the app restarts" />
+			</td>
 		</tr>
+
+		<tr class="h-10">
+			<td colspan="3"><Separator /></td>
+		</tr>
+
+		<tr class="h-10">
+			<td colspan="3" class="text-center text-muted-foreground font-mono"><small>ADVANCED</small></td>
+		</tr>
+
 		<tr>
 			<td class="text-center px-2">
-				<Switch bind:checked={automaticBackgroundSyncEnabled} on:click={() => toggleAutomaticBackgroundSync()} />
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={automaticBackgroundSyncEnabled} on:click={() => toggleAutomaticBackgroundSync()} />
 			</td>
 			<td class="py-2 skip-hover">
 				Allow Automatic Background Scan
 				<div class="flex items-center small-explanation gap-1">
 					<div>This allows Buzee to scan your files automatically (twice an hour)</div>
-					<PopoverIcon title="We recommend keeping this setting enabled" />
 				</div>
+			</td>
+			<td>
+				<PopoverIcon title="We recommend keeping this setting enabled" />
 			</td>
 		</tr>
 		<tr>
 			<td class="text-center px-2">
-				<Switch bind:checked={detailedScanEnabled} on:click={() => toggleDetailedScan()} />
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={detailedScanEnabled} on:click={() => toggleDetailedScan()} />
 			</td>
 			<td class="py-2 skip-hover">
 				Scan File Text
 				<div class="flex items-center small-explanation gap-1">
 					<div>Keep this on so you can search inside files (PDFs are scanned last)</div>
-					<PopoverIcon
-						title="Disabling this setting may improve speed but reduce quality of search results"
-					/>
 				</div>
+			</td>
+			<td>
+				<PopoverIcon title="Disabling this setting may improve speed but reduce quality of search results"/>
 			</td>
 		</tr>
 		<tr>
 			<td class="text-center px-2">
-				<Switch bind:checked={skipParsingPDF} on:click={() => toggleSkipParsingPDF()} />
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={skipParsingPDF} on:click={() => toggleSkipParsingPDF()} />
 			</td>
 			<td class="py-2 skip-hover">
 				Skip Scanning Text from PDFs and Images
 				<div class="flex items-center small-explanation gap-1">
 					<div>PDFs and images take time to scan. Disable this if you don't have too many of them.</div>
-					<PopoverIcon
-						title="Disabling this setting may improve the quality of search results but make the app buggy"
-					/>
 				</div>
 			</td>
+			<td>
+				<PopoverIcon title="Disabling this setting may improve the quality of search results but make the app buggy"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={manualSetupMode} on:click={() => toggleManualSetupMode()} />
+			</td>
+			<td class="py-2 skip-hover">
+				Run in Manual Setup Mode
+				<div class="flex items-center small-explanation gap-1">
+					<div>In manual mode, Buzee will only sync the files and folders that you add yourself.</div>
+				</div>
+			</td>
+			<td>
+				<PopoverIcon title="Disabling this setting will make Buzee scan your entire system automatically"/>
+			</td>
+		</tr>
+		<tr class="hover:text-red-500">
+			<td class="text-center px-2">
+				<!-- <Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={manualSetupMode} on:click={() => toggleManualSetupMode()} /> -->
+				<Dialog.Root bind:open={clearIndexDialogOpen}>
+					<Dialog.Trigger class="flex justify-center items-center w-full">
+						<TriangleAlert class="h-6 w-6" />
+					</Dialog.Trigger>
+					<Dialog.Content>
+						<Dialog.Header>
+							<Dialog.Title>Clear Index</Dialog.Title>
+							<Dialog.Description>Remember to run the background sync after clearing the index</Dialog.Description>
+						</Dialog.Header>
+						{#if $statusMessage === "Cleared!"}
+							<p>Done!</p>
+							<div class="flex justify-center items-center">
+								<lottie-player src="/checkmark-done.json" background="transparent"  speed="1"  style="width: 200px; height: 200px;" autoplay></lottie-player>
+							</div>
+						{:else}
+							<p class="mb-0">
+								If the search results are of poor quality, clearing the index and then rebuilding it can help.<br/><br/>
+								Alternatively, you can clear the index, turn off the Scan File Text setting and use Buzee only for searching file metadata.
+							</p>
+						{/if}
+						<Dialog.Footer>
+							<Dialog.Close asChild let:builder>
+								<Button variant="secondary" aria-label="Close" builders={[builder]}>Close</Button>
+							</Dialog.Close>
+							<Button on:click={() => clearIndex()}>Yes, clear the index</Button>
+						</Dialog.Footer>
+					</Dialog.Content>
+				</Dialog.Root>
+			</td>
+			<td class="py-2 skip-hover" role="button" on:click={() => {clearIndexDialogOpen = true;}}>
+				Clear the Index
+				<div class="flex items-center small-explanation gap-1">
+					<div>If the search results are of poor quality, clearing the index can help.</div>
+				</div>
+			</td>
+			<td>
+				
+			</td>
+		</tr>
+
+		<tr class="h-10">
+			<td colspan="3"><Separator /></td>
 		</tr>
 	</table>
-	<div class="w-3/5 flex justify-between settings-links">
+	<div class="w-4/5 md:w-3/5 flex justify-between settings-links">
 		<div class="relative flex-grow max-w-full flex-1 px-4 text-start mobile-text-center my-1">
 			<Button variant="link" class="gap-2 text-xs !px-2" on:click={() => resetDefault()}>
 				<span class="font-normal text-xs">Reset Default</span>
-				<PopoverIcon title="Reset all settings to default and restart the app" />
+				<PopoverIcon title="Reset all settings to default and restart the app. This will NOT clear the database." />
 			</Button>
 		</div>
 		<div class="relative flex-grow max-w-full flex-1 px-4 text-end mobile-text-center my-1">
@@ -507,10 +623,11 @@
 	}
 
 	tr {
-		&:not(.skip-hover):hover {
-			cursor: default;
-			color: var(--purple);
-		}
+		cursor: default;
+		// &:not(.skip-hover):hover {
+		// 	cursor: default;
+		// 	color: var(--purple);
+		// }
 	}
 
 	i {

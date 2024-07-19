@@ -24,7 +24,9 @@
 
 <!-- ![Demo](./static/demo.gif) -->
 
-Buzee is a **full-text search** application for your life. 
+Buzee (pronounced _boozey_) is a eight-year-old labrador retriever who can't play fetch but can love you like no other.
+
+Buzee is also a full-text search application for your life. It helps you find your files, effortlessly.
 
 Download v0.2.0 from the [Releases](/releases) page.
 
@@ -48,11 +50,7 @@ Audio: mp3, wav, aac, flac, ogg
 Video: mp4, mkv, avi, mov, wmv
 ```
 
-### Benchmarks
-- Indexing 40,000 documents takes 10 seconds on my Macbook M1 Pro.
-- Parsing content from 15,000 documents and storing it in the Tantivy index and SQLite database takes about 2-3 minutes (excluding pdfs and xlsx).
-
-## TODO / Issues
+## TODO / Known Issues
 ```
 Index:
 (~) : partly implemented
@@ -66,7 +64,7 @@ Index:
 - (~) Enable adding 'comments' to documents.
 - (~) Enable pinning documents/folders to the top of search results.
 - (~) Allow user to add or remove supported file types.
-- (~) Allow user to switch between Chrome profiles. (Currently uses the default profile)
+- (~) Allow user to switch between profiles on Arc and Chrome. (Currently uses the default profile)
 - (~) Test for Linux.
 - (~) Improve the speed of parsing PDFs, Images and XLSX files. Especially OCR operations.
 - (+) Enable adding 'tags' to documents.
@@ -94,7 +92,7 @@ See all dependencies in the [Cargo.toml](/src-tauri/Cargo.toml) and [package.jso
 - A full-text index is created on `metadata` and stored as the `metadata_fts` table.
 - Parsed text from documents is stored in the `body` table.
 - A full-text index is created in Tantivy at the same time.
-- The Firefox and Chrome history is searched using their respective history databases directly.
+- The Firefox, Chrome and Arc history is searched using their respective history databases directly.
 - All front-end code is in the `src` directory. All back-end code is in the `src-tauri` directory.
 
 ## Contributing / Way Forward

@@ -20,7 +20,7 @@ use queries::{
   FILE_TYPES_TABLE_CREATE_STATEMENT
 };
 
-const DB_NAME: &str = r#"buzee_v0_2.db"#;
+const DB_NAME: &str = r#"buzee.db"#;
 
 // pub mod crud;
 pub mod schema;

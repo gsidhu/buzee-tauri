@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { Button } from "$lib/components/ui/button/index.js";
-  import { RefreshCw } from "lucide-svelte";
-  import { syncStatus, statusMessage } from "$lib/stores";
+  import { Check, RefreshCw } from "lucide-svelte";
+  import { syncStatus, statusMessage, dbCreationInProgress } from "$lib/stores";
   import { trackEvent } from "@aptabase/web";
   import { listen, type UnlistenFn } from '@tauri-apps/api/event';
   import { invoke } from '@tauri-apps/api/core';
@@ -83,8 +83,12 @@
         `Click to ${$syncStatus ? 'stop' : 'start'} background scan`
       }
     >
-      <RefreshCw class={`h-5 w-5 ${$syncStatus ? 'spin-right' : ''}`} />
-      <span class="sr-only">Toggle background sync</span>
+      {#if $dbCreationInProgress && $syncStatus}
+        <Check class="h-5 w-5" />
+      {:else}
+        <RefreshCw class={`h-5 w-5 ${$syncStatus ? 'spin-right' : ''}`} />
+        <span class="sr-only">Toggle background sync</span>
+      {/if}
     </Button>
   </ContextMenu.Trigger>
   <ContextMenu.Content>

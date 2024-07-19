@@ -22,6 +22,7 @@ pub struct UserPrefs {
     pub detailed_scan: bool,
     pub roadmap_survey_answered: bool,
     pub skip_parsing_pdfs: bool,
+    pub manual_setup: bool,
 }
 
 // This struct is for CRUD on the app_data table

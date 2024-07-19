@@ -49,7 +49,7 @@
 
 </script>
 
-<table class="lg:w-[70%]" {...$tableAttrs}>
+<table class="w-full max-w-[90%] lg:w-[70%]" {...$tableAttrs}>
 	<thead id="real-thead">
 		{#each $headerRows as headerRow (headerRow.id)}
 			<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>

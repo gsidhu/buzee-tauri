@@ -7,8 +7,15 @@ use crate::custom_types::{Error, HistoryResult};
 use crate::database::models::DocumentSearchResult;
 
 fn user_data_directory_path() -> PathBuf {
-    let home_dir = dirs::home_dir().expect("Could not find home directory");
-    home_dir.join("Library").join("Application Support").join("Firefox").join("Profiles")
+  let home_dir = dirs::home_dir().expect("Could not find home directory");
+  
+  #[cfg(target_os = "macos")]
+  let user_data_directory_path = home_dir.join("Library").join("Application Support").join("Firefox").join("Profiles");
+
+  #[cfg(target_os = "windows")]
+  let user_data_directory_path = home_dir.join("AppData").join("Roaming").join("Mozilla").join("Firefox").join("Profiles");
+
+  user_data_directory_path
 }
 
 fn get_profile_name(user_directory_path: &Path) -> Option<String> {

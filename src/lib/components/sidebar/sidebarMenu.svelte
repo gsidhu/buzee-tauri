@@ -57,36 +57,7 @@
 			>
 				<Pin class="h-4 w-4" />
 				Pinned Items
-				<!-- <Badge variant="outline" class="font-medium">Soon</Badge> -->
 			</a>
-			<!-- <a
-				href="##"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/browser-history' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
-			>
-				<Compass class="h-4 w-4" />
-				Browser History
-			</a>
-			<Accordion.Root class="px-3">
-				<Accordion.Item class="border-0" value="item-1">
-					<Accordion.Trigger class="hover:no-underline py-2">Coming Soon</Accordion.Trigger>
-					<Accordion.Content>
-						<a
-							href="##"
-							class={`flex items-center gap-3 rounded-lg py-2 transition-all hover:text-primary ${$pagePath === '/bookmarks' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
-						>
-							<Bookmark class="h-4 w-4" />
-							Bookmarks
-						</a>
-						<a
-							href="##"
-							class={`flex items-center gap-3 rounded-lg py-2 transition-all hover:text-primary ${$pagePath === '/cloud' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
-						>
-							<Cloud class="h-4 w-4" />
-							Cloud Storage
-						</a>
-					</Accordion.Content>
-				</Accordion.Item>
-			</Accordion.Root> -->
 		</nav>
 	</div>
 
@@ -94,7 +65,13 @@
 
 	<div class="flex-1">
 		<nav class="grid items-start px-2 text-sm font-normal lg:px-4">
-			<!-- <Label class="px-3 py-2 text-muted-foreground font-semibold">Magic Services</Label> -->
+			<a
+				href="/magic/deep-breathing"
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/deep-breathing' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+			>
+				<Wind class="h-4 w-4" />
+				Deep Breathing
+			</a>
 			<a
 				href="/magic/extract-text"
 				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/extract-text' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
@@ -119,13 +96,6 @@
 					Deadline
 					<ExternalLink class="h-3 w-3 inline-block" />
 				</span>
-			</a>
-			<a
-				href="/magic/deep-breathing"
-				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/magic/deep-breathing' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
-			>
-				<Wind class="h-4 w-4" />
-				Deep Breathing
 			</a>
 		</nav>
 	</div>

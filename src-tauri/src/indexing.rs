@@ -161,7 +161,7 @@ pub fn create_document_item(file_path: PathBuf, allowed_extensions: &Vec<String>
   Ok(file_item)
 }
 
-pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow, file_paths: Vec<String>) -> usize {
+pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow, file_paths: Vec<String>, app: tauri::AppHandle) -> usize {
     let mut files_array: Vec<DocumentItem> = vec![];
     let all_forbidden_directories = get_all_forbidden_directories();
     let mut files_added = 0;
@@ -176,6 +176,8 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
     let allowed_items = get_all_allowed_paths(conn);
     let allowed_files: Vec<AllowList> = allowed_items.iter().filter(|item| !item.is_folder).cloned().collect();
     let allowed_folders: Vec<AllowList> = allowed_items.iter().filter(|item| item.is_folder).cloned().collect();
+
+    let user_preferences = return_user_prefs_state(&app);
 
     for path in file_paths {
       println!("Indexing file path: {}", path);
@@ -206,6 +208,14 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
         // if file path starts with a path in the ignored_folders AND ignore_indexing is true
         if ignored_folders.iter().any(|item| file_item.path.starts_with(&item.path) && item.ignore_indexing) {
           // if file is not in allowed_files AND file path does not start with a path in allowed_folders, skip this file
+          if !allowed_files.iter().any(|item| item.path == file_item.path) && !allowed_folders.iter().any(|item| file_item.path.starts_with(&item.path)) {
+            // skip this file
+            continue;
+          }
+        }
+
+        // if user is running a manual_setup, then skip all files that are not in allowed_files or allowed_folders
+        if user_preferences.manual_setup {
           if !allowed_files.iter().any(|item| item.path == file_item.path) && !allowed_folders.iter().any(|item| file_item.path.starts_with(&item.path)) {
             // skip this file
             continue;
@@ -559,16 +569,45 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
 }
 
 fn add_body_to_database(body_items: &Vec<BodyItem>, connection: &mut SqliteConnection) {
-  // using transaction
-  if body_items.len() > 0 {
+  // check that metadata_ids in body_items don't already exist in body::table
+  let metadata_ids = body_items.iter().map(|item| item.metadata_id).collect::<Vec<i32>>();
+  let existing_metadata_ids = body::table
+    .select(body::metadata_id)
+    .filter(body::metadata_id.eq_any(metadata_ids))
+    .load::<i32>(connection)
+    .unwrap();
+  let new_body_items: Vec<BodyItem> = body_items.clone()
+    .into_iter()
+    .filter(|item| !existing_metadata_ids.contains(&item.metadata_id))
+    .collect();
+
+  // add unique body_items using a transaction
+  if new_body_items.len() > 0 {
     connection
       .transaction::<_, diesel::result::Error, _>(|connection| {
         diesel::insert_into(body::table)
-          .values(body_items)
+          .values(new_body_items)
           .execute(connection)
       })
       .unwrap();
   }
+
+  // update the last_parsed date in body::table for all the existing_metadata_ids
+  // use the last_parsed date as in the body_items
+  let existing_body_items: Vec<BodyItem> = body_items.clone()
+    .into_iter()
+    .filter(|item| existing_metadata_ids.contains(&item.metadata_id))
+    .collect();
+  // use a transaction to update the last_parsed date in body::table for all the existing_metadata_ids
+  connection.transaction::<_, diesel::result::Error, _>(|connection| {
+    for item in existing_body_items {
+      diesel::update(body::table.filter(body::metadata_id.eq(item.metadata_id)))
+        .set(body::last_parsed.eq(item.last_parsed))
+        .execute(connection)
+        .unwrap();
+    }
+    Ok(())
+  }).unwrap();
 }
 
 pub fn update_last_parsed_in_document_table(conn: &mut SqliteConnection, body_tantivy_source_ids: Vec<i32>) {
@@ -714,6 +753,12 @@ fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut Sqli
     .load::<i32>(conn)
     .unwrap();
 
+  // first delete from Body table using metadata_ids because depends on metadata_id as foreign key
+  conn.transaction::<_, diesel::result::Error, _>(|connection| {
+    diesel::delete(body::table.filter(body::metadata_id.eq_any(metadata_ids.clone())))
+      .execute(connection)
+  }).unwrap();
+
   if !remove_from_index_only {
     // delete from Metadata_fts table using metadata_ids
     conn.transaction::<_, diesel::result::Error, _>(|connection| {
@@ -725,18 +770,12 @@ fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut Sqli
       diesel::delete(metadata::table.filter(metadata::id.eq_any(metadata_ids.clone())))
         .execute(connection)
     }).unwrap();
-    // delete from Document table using file_paths
+    // lastly delete from Document table using file_paths because metadata depends on document_id as foreign key
     conn.transaction::<_, diesel::result::Error, _>(|connection| {
       diesel::delete(document::table.filter(document::path.eq_any(file_paths)))
         .execute(connection)
     }).unwrap();
   }
-
-  // delete from Body table using metadata_ids
-  conn.transaction::<_, diesel::result::Error, _>(|connection| {
-    diesel::delete(body::table.filter(body::metadata_id.eq_any(metadata_ids.clone())))
-      .execute(connection)
-  }).unwrap();
 
   // delete from the Tantivy Index using document_ids
   let file_paths_clone = file_paths.clone();
@@ -872,4 +911,17 @@ pub fn get_all_allowed_paths(conn: &mut SqliteConnection) -> Vec<AllowList> {
     ))
     .load::<AllowList>(conn)
     .unwrap()
+}
+
+pub fn clear_last_parsed_dates_from_db(conn: &mut SqliteConnection) {
+  // set last_parsed to 0 for all files in the document table
+  diesel::update(document::table)
+    .set(document::last_parsed.eq(0))
+    .execute(conn)
+    .unwrap();
+  // set last_parsed to 0 for all files in the body table
+  diesel::update(body::table)
+    .set(body::last_parsed.eq(0))
+    .execute(conn)
+    .unwrap();
 }

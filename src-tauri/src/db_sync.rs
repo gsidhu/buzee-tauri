@@ -44,7 +44,7 @@ pub async fn run_sync_operation(window: tauri::WebviewWindow, app: AppHandle, sw
         file_paths.push(home_directory.clone());
       }
       let mut new_conn = establish_connection(&app);
-      let _files_added = walk_directory(&mut new_conn, &window, file_paths);
+      let _files_added = walk_directory(&mut new_conn, &window, file_paths, app.clone());
 
       if detailed_scan_allowed {
         // Then start parsing the content of all files and add it to the body table
@@ -75,7 +75,7 @@ pub fn sync_status(app: &AppHandle) -> (String, i64) {
   }
 }
 
-pub async fn add_specific_folders(window: &tauri::WebviewWindow, file_paths: Vec<String>, is_folder: bool) {
+pub async fn add_specific_folders(window: &tauri::WebviewWindow, file_paths: Vec<String>, is_folder: bool, app: AppHandle) {
   println!("file paths: {:?}", file_paths);
   println!("Adding specific folders...");
   let window = window.clone();
@@ -88,13 +88,13 @@ pub async fn add_specific_folders(window: &tauri::WebviewWindow, file_paths: Vec
       for path in file_paths {
         let _ = add_path_to_allow_list(path, is_folder, &mut conn);
       }
-      let _files_added = walk_directory(&mut conn, &window, file_paths_clone,);
+      let _files_added = walk_directory(&mut conn, &window, file_paths_clone, app);
     } else {
       // This is the onboarding run
       let mut file_paths = file_paths;
       let home_directory = get_home_directory().unwrap();
       file_paths.push(home_directory);
-      let _files_added = walk_directory(&mut conn, &window, file_paths);
+      let _files_added = walk_directory(&mut conn, &window, file_paths, app);
     }
   });
 }

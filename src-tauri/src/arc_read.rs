@@ -5,17 +5,17 @@ use std::collections::HashMap;
 use crate::custom_types::{HistoryResult, Error};
 use crate::database::models::DocumentSearchResult;
 
-const DEFAULT_CHROME_PROFILE_ID: &str = "Default";
+const DEFAULT_ARC_PROFILE_ID: &str = "Default";
 
 #[cfg(target_os = "macos")]
-const DEFAULT_CHROME_PROFILE_PATH: [&str; 3] = ["Application Support", "Google", "Chrome"];
+const DEFAULT_ARC_PROFILE_PATH: [&str; 3] = ["Application Support", "Arc", "User Data"];
 #[cfg(target_os = "macos")]
-const DEFAULT_CHROME_STATE_PATH: [&str; 4] = ["Application Support", "Google", "Chrome", "Local State"];
+const DEFAULT_ARC_STATE_PATH: [&str; 4] = ["Application Support", "Arc", "User Data", "Local State"];
 
 #[cfg(target_os = "windows")]
-const DEFAULT_CHROME_PROFILE_PATH: [&str; 3] = ["Google", "Chrome", "User Data"];
+const DEFAULT_ARC_PROFILE_PATH: [&str; 3] = ["Roaming", "Arc", "User Data"];
 #[cfg(target_os = "windows")]
-const DEFAULT_CHROME_STATE_PATH: [&str; 4] = ["Google", "Chrome", "User Data", "Local State"];
+const DEFAULT_ARC_STATE_PATH: [&str; 4] = ["Roaming", "Arc", "User Data", "Local State"];
 
 fn user_library_directory_path() -> PathBuf {
     let home_path = dirs::home_dir().expect("Could not find home directory");
@@ -24,14 +24,14 @@ fn user_library_directory_path() -> PathBuf {
 
 fn get_history_db_path(profile_name: Option<&str>) -> PathBuf {
   // get the profile id from the profile name
-  // let chrome_profiles = load_chrome_profiles();
-  // let profile_id = Some(chrome_profiles.iter().find(|profile| profile.get("name").unwrap() == profile_name.unwrap()).unwrap().get("id").unwrap());
-  // let binding = DEFAULT_CHROME_PROFILE_ID.to_string();
+  // let arc_profiles = load_arc_profiles();
+  // let profile_id = Some(arc_profiles.iter().find(|profile| profile.get("name").unwrap() == profile_name.unwrap()).unwrap().get("id").unwrap());
+  // let binding = DEFAULT_ARC_PROFILE_ID.to_string();
   // let profile = profile_id.unwrap_or(&binding);
 
-  let profile = profile_name.unwrap_or(DEFAULT_CHROME_PROFILE_ID);
+  let profile = profile_name.unwrap_or(DEFAULT_ARC_PROFILE_ID);
   let mut path = user_library_directory_path();
-  for p in DEFAULT_CHROME_PROFILE_PATH.iter() {
+  for p in DEFAULT_ARC_PROFILE_PATH.iter() {
       path = path.join(p);
   }
   path.join(profile).join("History")
@@ -39,22 +39,22 @@ fn get_history_db_path(profile_name: Option<&str>) -> PathBuf {
 
 fn get_local_state_path() -> PathBuf {
     let mut path = user_library_directory_path();
-    for p in DEFAULT_CHROME_STATE_PATH.iter() {
+    for p in DEFAULT_ARC_STATE_PATH.iter() {
         path = path.join(p);
     }
     path
 }
 
 fn _get_bookmarks_file_path(profile: Option<&str>) -> PathBuf {
-    let profile = profile.unwrap_or(DEFAULT_CHROME_PROFILE_ID);
+    let profile = profile.unwrap_or(DEFAULT_ARC_PROFILE_ID);
     let mut path = user_library_directory_path();
-    for p in DEFAULT_CHROME_PROFILE_PATH.iter() {
+    for p in DEFAULT_ARC_PROFILE_PATH.iter() {
         path = path.join(p);
     }
     path.join(profile).join("Bookmarks")
 }
 
-fn load_chrome_profiles() -> Vec<HashMap<String, String>> {
+fn load_arc_profiles() -> Vec<HashMap<String, String>> {
     let path = get_local_state_path();
     if !path.exists() {
         return vec![{
@@ -65,9 +65,9 @@ fn load_chrome_profiles() -> Vec<HashMap<String, String>> {
         }];
     }
 
-    let chrome_state = fs::read_to_string(path).expect("Could not read local state file");
-    let chrome_state: serde_json::Value = serde_json::from_str(&chrome_state).expect("Invalid JSON in local state file");
-    let profiles = &chrome_state["profile"]["info_cache"];
+    let arc_state = fs::read_to_string(path).expect("Could not read local state file");
+    let arc_state: serde_json::Value = serde_json::from_str(&arc_state).expect("Invalid JSON in local state file");
+    let profiles = &arc_state["profile"]["info_cache"];
     let mut result = Vec::new();
 
     if let serde_json::Value::Object(profiles) = profiles {
@@ -118,11 +118,11 @@ fn search_history(profile: &str, query: Option<&str>, limit: i64, offset: i64) -
     }
 
     // create a backup of the database
-    create_copy_of_chrome_history_database(profile).expect("Could not create a backup of the Chrome history database");
+    create_copy_of_arc_history_database(profile).expect("Could not create a backup of the Arc history database");
 
     // connect to the backup database
     let db_path = db_path.with_file_name("HistoryBackup");
-    
+
     let conn = match Connection::open(&db_path) {
         Ok(conn) => conn,
         Err(err) => {
@@ -172,15 +172,15 @@ fn search_history(profile: &str, query: Option<&str>, limit: i64, offset: i64) -
     }
 }
 
-pub fn get_chrome_profiles() -> Vec<String> {
-  let chrome_profiles = load_chrome_profiles();
-  println!("{:?}", chrome_profiles);
-  let profile_names = chrome_profiles.iter().map(|profile| {profile.get("name").unwrap().to_string()}).collect();
+pub fn get_arc_profiles() -> Vec<String> {
+  let arc_profiles = load_arc_profiles();
+  println!("{:?}", arc_profiles);
+  let profile_names = arc_profiles.iter().map(|profile| {profile.get("name").unwrap().to_string()}).collect();
 
   profile_names
 }
 
-fn create_copy_of_chrome_history_database(profile: &str) -> Result<(), Error> {
+fn create_copy_of_arc_history_database(profile: &str) -> Result<(), Error> {
   let db_path = get_history_db_path(Some(profile));
   // create a backup in the same directory
   let backup_path = db_path.with_file_name("HistoryBackup");
@@ -189,9 +189,9 @@ fn create_copy_of_chrome_history_database(profile: &str) -> Result<(), Error> {
   Ok(())
 }
 
-pub fn search_chrome(profile: String, user_query: String, limit: i64, page: i64) -> Result<Vec<DocumentSearchResult>, Error> {
+pub fn search_arc(profile: String, user_query: String, limit: i64, page: i64) -> Result<Vec<DocumentSearchResult>, Error> {
   let history_result = search_history(profile.as_str(), Some(user_query.as_str()), limit, limit*page);
-//   println!("{:?}", history_result);
+  println!("{:?}", history_result);
   let search_results: Vec<DocumentSearchResult> = history_result.data.iter().map(|(_id, url, title, last_visited)| {
     // convert last_visited to UNIX timestamp
     let last_opened = chrono::NaiveDateTime::parse_from_str(last_visited, "%Y-%m-%d %H:%M:%S").unwrap();
@@ -202,12 +202,12 @@ pub fn search_chrome(profile: String, user_query: String, limit: i64, page: i64)
     }
     DocumentSearchResult {
       id: 0,
-      source_domain: "Chrome".to_string(),
+      source_domain: "Arc".to_string(),
       created_at: 0,
       name: title.clone(),
       path: url.clone(),
       size: None,
-      file_type: "chrome-webpage".to_string(),
+      file_type: "arc-webpage".to_string(),
       last_modified: 0,
       last_opened: last_opened,
       last_parsed: 0,

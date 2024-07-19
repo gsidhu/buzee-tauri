@@ -96,7 +96,8 @@ table! {
     automatic_background_sync -> Bool,
     detailed_scan -> Bool,
     roadmap_survey_answered -> Bool,
-    skip_parsing_pdfs -> Bool
+    skip_parsing_pdfs -> Bool,
+    manual_setup -> Bool
   }
 }
 
