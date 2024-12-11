@@ -18,13 +18,13 @@ authors = ["Gurjot Sidhu"]
 license = "MIT"
 
 [build-dependencies]
-tauri-build = { version = "2.0.0-beta", features = [] }
+tauri-build = { version = "2.0.0-rc.0", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.0-beta", features = [] }
-tauri-plugin-shell = "2.0.0-beta"
-tauri-plugin-updater = { version = "2.0.0-beta", features = ["rustls-tls"] }
-tauri-plugin-dialog = "2.0.0-beta"
+tauri = { version = "2.0.0-rc.0", features = [] }
+tauri-plugin-shell = "2.0.0-rc.0"
+tauri-plugin-updater = { version = "2.0.0-rc.0", features = ["rustls-tls"] }
+tauri-plugin-dialog = "2.0.0-rc.0"
 drag = { path = "./crates/drag", version = "0.4.0", features = [ "serde" ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -41,7 +41,7 @@ log = "0.4.21"
 simple-logging = "2.0.2"
 regex = "1.10.3"
 lazy_static = "1.4.0"
-tauri-plugin-global-shortcut = "2.0.0-beta.3"
+tauri-plugin-global-shortcut = "2.0.0-rc.0"
 tokio = { version = "1.36.0", features = ["full"] }
 tokio-graceful-shutdown = "0.14.3"
 epub = "2.1.1"

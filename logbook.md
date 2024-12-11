@@ -1,6 +1,16 @@
 # Logbook
 Note: Adding both textra and winocr binaries as sidecar does not build. Need to provide only textra on Mac and only winocr, poppler and sqlite3.dll on Windows.
 
+## Phase Two - Buzee in Browser (BiB)
+Save anything from your browser in Buzee. Gmail, Notion, YouTube, Twitter, Reddit, Hacker News, etc. Buzee will index the text and metadata of the page and make it searchable. If you want to archive it, Buzee will also save the full page HTML.
+- On Gmail: Run `innerText` on the `AO` class element. Extract subject, sender, date, body, attachments similarly. Remove all unnecessary text like 'Reply', 'Forward' etc. For emails with images in them, look for an image with `tabindex` defined and extract the `src` attribute. (`$$(".AO img").forEach((el) => {if (el.getAttribute('tabindex')) console.log(el)})`)
+- On Notion: Run `innerText` on the `layout` class. For toggled elements, search for `triangle` class (which yields svg elements) and click the parent element to expand the content (recursively). Remove all unnecessary text like 'Share', 'Export', 'Duplicate' etc.
+- On YouTube: Run `innerText` on `#title h1` for video title, `#upload-info #channel-name a` for channel name, `description-inner` for description, and `ytd-transcript-renderer #content` for transcript.
+- On Twitter: Run `innerText` on `article` for tweet content. Get the `datetime` attribute on the `time` element for tweet time (convert to UNIX using `getTime()/1000`). Figure out threads later.
+- On Hacker News: Run `$$("#hnmain > tbody > tr")[2].innerText.replace('\t\n\t', ' ')` to get the complete post and comment text from page 1. Page 2 can go later.
+- For all other blogs and news websites, run Readability.js on the page and extract the text. Get metadata from the meta tags.
+- Launch a server that listens for POST requests from the browser extension. The server will parse the request and save the data to the database. The server will also send a response to the extension with the status of the operation.
+
 ## v0.2.0 updates
 - UI Redesign using shadcn-svelte components and Tailwind CSS. Keeping a few essential classes from Bootstrap.
 - Extracted triggerSearch function to synchronise it across filters.
@@ -17,6 +27,9 @@ Note: Adding both textra and winocr binaries as sidecar does not build. Need to 
 - Add firefox, chrome and arc history search.
 - Add option for manual setup instead of full automatic sync.
 - Add MIT license.
+- FIX Ignore Table open/close logic.
+- FIX Stats table flexbox.
+- FIX adding/ignoring files/folders should not quit the background sync process.
 
 ## v0.1.2 updates
 - Fix typo in Last Modified column header.
