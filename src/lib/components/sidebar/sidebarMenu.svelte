@@ -27,12 +27,12 @@
 			<img id="buzee-logo-img" class="h-6 w-6" src="/Buzee Logo.png" alt="No Results" />
 			<span class="">Buzee</span>
 		</a>
-		<Button href="/settings" variant="outline" size="icon" 
+		<!-- <Button href="/settings" variant="outline" size="icon" 
 			class={`ml-auto h-8 w-8 ${$pagePath === '/settings' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 		>
 			<Settings class="h-4 w-4" />
 			<span class="sr-only">Settings</span>
-		</Button>
+		</Button> -->
 	</div>
 	<div class="flex-1">
 		<nav class="grid items-start px-2 text-sm font-normal lg:px-4">
@@ -52,12 +52,19 @@
 				Search
 			</a>
 			<a
+				href="/settings"
+				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${$pagePath === '/settings' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
+			>
+				<Settings class="h-4 w-4" />
+				Settings
+			</a>
+			<!-- <a
 				href="##"
 				class={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:cursor-not-allowed ${$pagePath === '/pinboard' ? 'bg-[var(--very-light-purple)] text-primary' : 'text-muted-foreground'}`}
 			>
 				<Pin class="h-4 w-4" />
 				Pinned Items
-			</a>
+			</a> -->
 		</nav>
 	</div>
 

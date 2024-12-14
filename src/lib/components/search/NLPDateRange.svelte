@@ -4,7 +4,7 @@
   import * as Popover from "$lib/components/ui/popover/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import Label from "$lib/components/ui/label/label.svelte";
-  import { searchQuery, dateLimitUNIX } from "$lib/stores";
+  import { searchQuery, dateLimitUNIX, locationShown } from "$lib/stores";
   import { triggerSearch } from "$lib/utils/dbUtils";
 
   let inputValue = "";
@@ -75,6 +75,7 @@
           builders={[builder]}
           variant="outline"
           class="max-w-[250px] w-full justify-start flex flex-row items-start text-popover-foreground font-normal"
+          disabled={$locationShown === "browser history"}
         >
           {#if inputValue === "" && $dateLimitUNIX.start === "" && dateLimitHuman === null} Anytime
           {:else} {dateLimitHuman ? getDateLimitTextRange() : (inputValue.length > 0 ? inputValue : "Anytime")}
@@ -104,11 +105,12 @@
             <Command.Group heading="Suggestions">
               <Command.Item onSelect={(v) => {parseInput(""); open = false; triggerSearchLocal()}}>Anytime</Command.Item>
               <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>Last Week</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>Last Year</Command.Item>
               <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>This Month</Command.Item>
               <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>This Year</Command.Item>
-              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>From Jan to Aug 2023</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>March 2024</Command.Item>
               <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>Q1 2024</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>From Jan to Aug 2023</Command.Item>
+              <Command.Item onSelect={(v) => {parseInput(v); open = false; triggerSearchLocal()}}>From July 25 2024 to Aug 15 2024</Command.Item>
             </Command.Group>
           </Command.List>
         </Command.Root>

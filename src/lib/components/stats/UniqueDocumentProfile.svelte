@@ -105,11 +105,7 @@
       {#if stat.count > 0}
         <div class="columns-2">
           <div class="">
-            <FileTypeIcon filetype={
-              stat.file_type === "other"
-                  ? 'folder'
-                  : stat.file_type
-            }/>
+            <FileTypeIcon filetype={stat.file_type === "other" ? 'folder' : stat.file_type} onlyIcon={true}/>
             <small>{stat.file_type}</small>
           </div>
           <div class="text-end"><small>{stat.count}</small></div>

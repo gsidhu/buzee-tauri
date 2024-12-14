@@ -11,7 +11,7 @@
   import { searchFiltersOpen } from "$lib/stores";
 </script>
 
-<Collapsible.Root class="space-y-2" bind:open={$searchFiltersOpen}>
+<!-- <Collapsible.Root class="space-y-2" bind:open={$searchFiltersOpen}>
   <div class="flex items-center justify-start space-x-4 px-4">
     <Collapsible.Trigger asChild let:builder>
       <Button builders={[builder]} variant="link" class="gap-1 p-0">
@@ -23,11 +23,19 @@
   </div>
   <Collapsible.Content class="">
     <div class="flex flex-row overflow-x-auto gap-4 px-4 pb-2 justify-items-center">
-      <!-- <ResultsPerPageSelector /> -->
+      <ResultsPerPageSelector />
       <LocationSelector />
       <FiletypeSelector />
       <NlpDateRange />
       <ResultViewToggleBar />
     </div>
   </Collapsible.Content>
-</Collapsible.Root>
+</Collapsible.Root> -->
+
+<div class="flex flex-row overflow-x-auto gap-4 px-4 justify-items-center">
+  <!-- <ResultsPerPageSelector /> -->
+  <LocationSelector />
+  <FiletypeSelector />
+  <NlpDateRange />
+  <ResultViewToggleBar />
+</div>

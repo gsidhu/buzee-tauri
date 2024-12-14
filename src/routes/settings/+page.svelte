@@ -26,7 +26,7 @@
 	let globalShortcutCode: String = "Space";
 	let automaticBackgroundSyncEnabled: boolean;
 	let detailedScanEnabled: boolean;
-	let skipParsingPDF: boolean;
+	let parsePDF: boolean;
 	let manualSetupMode: boolean;
 	let clearIndexDialogOpen = false;
 
@@ -104,13 +104,13 @@
 		});
 	}
 
-	function toggleSkipParsingPDF() {
-		skipParsingPDF = !skipParsingPDF;
-		trackEvent('click:toggleSkipParsingPDF', { skipParsingPDF });
+	function toggleParsePDF() {
+		parsePDF = !parsePDF;
+		trackEvent('click:toggleParsePDF', { parsePDF });
 		$statusMessage = `Setting changed!`;
 		setTimeout(() => {$statusMessage = "";}, 3000);
-		invoke("set_user_preference", {key: "skip_parsing_pdfs", value: skipParsingPDF}).then(() => {
-			console.log("Set skipParsingPDF flag to: " + skipParsingPDF);
+		invoke("set_user_preference", {key: "parse_pdfs", value: parsePDF}).then(() => {
+			console.log("Set parsePDF flag to: " + parsePDF);
 		});
 	}
 
@@ -176,7 +176,7 @@
 			if (filePathObjects === null) {
 				return;
 			}
-			filePaths = filePathObjects.map((file) => file.path);
+			filePaths = filePathObjects.map((file) => file);
 			isFolder = false;
 		}
 		$statusMessage = "Adding documents to the database...";
@@ -296,7 +296,7 @@
 			console.log(globalShortcut);
 			automaticBackgroundSyncEnabled = $userPreferences.automatic_background_sync;
 			detailedScanEnabled = $userPreferences.detailed_scan;
-			skipParsingPDF = $userPreferences.skip_parsing_pdfs;
+			parsePDF = $userPreferences.parse_pdfs;
 			manualSetupMode = $userPreferences.manual_setup;
 		});
 	});
@@ -508,12 +508,12 @@
 		</tr>
 		<tr>
 			<td class="text-center px-2">
-				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={skipParsingPDF} on:click={() => toggleSkipParsingPDF()} />
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={parsePDF} on:click={() => toggleParsePDF()} />
 			</td>
 			<td class="py-2 skip-hover">
-				Skip Scanning Text from PDFs and Images
+				Scan Text from PDFs and Images
 				<div class="flex items-center small-explanation gap-1">
-					<div>PDFs and images take time to scan. Disable this if you don't have too many of them.</div>
+					<div>This feature uses OCR and may take a lot of time.</div>
 				</div>
 			</td>
 			<td>

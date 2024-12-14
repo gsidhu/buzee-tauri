@@ -15,7 +15,7 @@ export function createTableFromResults(resultsShown: DocumentSearchResult[]) {
   });
 
   let columnsArray:any = [];
-  if (get(locationShown) === 'computer') {
+  if (get(locationShown) === "my computer") {
     columnsArray = [
       table.column({
         header: 'Type',
@@ -91,7 +91,7 @@ export function createTableFromResults(resultsShown: DocumentSearchResult[]) {
         }
       })
     ];
-  } else if (get(locationShown) === 'browser') {
+  } else if (get(locationShown) === "browser history") {
     columnsArray = [
       table.column({
         header: 'Type',

@@ -1,11 +1,12 @@
 <script lang="ts">
   import { fly } from 'svelte/transition';
   import { createEventDispatcher } from 'svelte';
+  import { Slider } from "$lib/components/ui/slider/index.js";
 	import ConfettiButton from '../ui/confettiButton.svelte';
   const dispatch = createEventDispatcher();
 
   export let question:any;
-  let rangeValue = 30;
+  let rangeValue = [30];
   
   function sendUpdate() {
     if (question.type === "single-select") {
@@ -34,9 +35,11 @@
     </div>
     {/each}
   {:else if question.type === "range"}
-    <div class="text-center">
-      <label for="customRange" class="form-label">{rangeValue}%</label>
-      <input type="range" class="form-range" min="0" max="100" step="10" id="customRange" bind:value={rangeValue}>
+    <div class="flex flex-col items-center text-center">
+      <div class="w-[70%] py-4">
+        <label for="customRange" class="form-label">{rangeValue[0]}%</label>
+        <Slider bind:value={rangeValue} max={100} step={10} />
+      </div>
     </div>
   {/if}
   <div class="text-center my-3">

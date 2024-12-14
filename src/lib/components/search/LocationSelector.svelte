@@ -33,7 +33,7 @@
 	<Label class="mb-2 font-medium">Location</Label>
 	<Select.Root bind:selected={selectedLocationOption} onSelectedChange={(v) => v?.value ? showDocsForLocation(v.value) : showDocsForLocation("any")}>
 		<Select.Trigger class="">
-			<Select.Value placeholder="computer" />
+			<Select.Value placeholder="my computer" />
 		</Select.Trigger>
 		<Select.Content>
 			{#each $allowedLocations as category}

@@ -9,6 +9,7 @@
 		resultsPerPage,
 		allowedExtensions,
 		dateLimitUNIX,
+		locationShown,
 	} from '$lib/stores';
 	import { getDocumentsFromDB, triggerSearch } from '$lib/utils/dbUtils';
 	import { trackEvent } from '@aptabase/web';
@@ -35,7 +36,7 @@
 
 <div class="flex flex-col w-full">
 	<Label class="mb-2">Filetype</Label>
-	<Select.Root bind:selected={selectedFiletypeOption} onSelectedChange={(v) => v?.value ? showDocsForFiletype(v.value) : showDocsForFiletype("any")}>
+	<Select.Root bind:selected={selectedFiletypeOption} onSelectedChange={(v) => v?.value ? showDocsForFiletype(v.value) : showDocsForFiletype("any")} disabled={$locationShown === "browser history"}>
 		<Select.Trigger class="">
 			<Select.Value placeholder="All"/>
 		</Select.Trigger>

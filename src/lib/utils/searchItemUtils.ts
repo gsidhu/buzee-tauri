@@ -6,7 +6,7 @@ import moment from 'moment';
 
 export async function openFileFolder(url: string) {
   trackEvent('click:openFile');
-  if (get(locationShown) === 'computer') {
+  if (get(locationShown) === "my computer") {
     invoke('open_folder_containing_file', { filePath: url });
   } else {
     invoke('open_file_or_folder', { filePath: url });

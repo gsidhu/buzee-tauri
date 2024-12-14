@@ -255,7 +255,7 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
     automatic_background_sync BOOLEAN NOT NULL DEFAULT 1,
     detailed_scan BOOLEAN NOT NULL DEFAULT 1,
     roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0,
-    skip_parsing_pdfs BOOLEAN NOT NULL DEFAULT 1,
+    parse_pdfs BOOLEAN NOT NULL DEFAULT 0,
     manual_setup BOOLEAN NOT NULL DEFAULT 0
   );
 "#;

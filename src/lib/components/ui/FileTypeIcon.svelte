@@ -2,9 +2,10 @@
 	export let filetype: string;
 	export let color = true;
 	export let extraClasses = '';
+	export let onlyIcon = false;
 </script>
 
-<span class="w-full flex justify-center items-center">
+<span class={onlyIcon ? "" : "w-full flex justify-center items-center"}>
 {#if filetype === 'docx'}
 	<i class={`bi bi-file-earmark-word-fill ${color ? 'word-icon' : ''} ${extraClasses}`} title="MS Word (.docx)" />
 {:else if filetype === 'md'}

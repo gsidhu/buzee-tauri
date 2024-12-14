@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import Question from './question.svelte';
+	import * as Tooltip from "$lib/components/ui/tooltip";
+	import FileTypeIcon from "$lib/components/ui/FileTypeIcon.svelte";
 	import PopoverIcon from '../ui/popoverIcon.svelte';
 	import { invoke } from '@tauri-apps/api/core';
 	import { trackEvent } from '@aptabase/web';
@@ -114,12 +116,12 @@
 			<div in:fade={{ delay: 1000, duration: 1500 }}>
 				{#if showStats}
 					<p>
-						You have over <mark>{totalDocs} documents</mark> on your computer! Of these,
-						<mark>{Math.round((100 * officePDFCount) / totalDocs)} percent</mark> are MS Office documents
+						You have over <span class="underline underline-offset-4 decoration-2 decoration-purple">{totalDocs} documents</span> on your computer! Of these,
+						<span class="underline underline-offset-4 decoration-2 decoration-purple">{Math.round((100 * officePDFCount) / totalDocs)} percent</span> are MS Office documents
 						or PDFs.
 					</p>
 					<p>Here is your <strong>Unique Document Profile:</strong></p>
-					<div class="progress-stacked my-2 disable-pointer-events">
+					<!-- <div class="progress-stacked my-2 disable-pointer-events">
 						{#each docStats as stat, index}
 							<div
 								class="progress"
@@ -145,6 +147,24 @@
 										title={`${stat.count} ${stat.file_type} files`}
 									/>
 								</div>
+							</div>
+						{/each}
+					</div> -->
+					<div class="flex overflow-hidden w-90 mx-auto rounded my-8">
+						{#each docStats as stat, index}
+							<div style={`width: ${statPercentage[index].count}%`} class="bar-segment">
+								<Tooltip.Root>
+									<Tooltip.Trigger 
+										id={`${stat.file_type}-segment`}
+										class="text-white text-center w-full"
+										style={stat.file_type === "other"
+											? `background-color: #E15554;`
+											: `background-color: var(--${stat.file_type}-icon);`}
+									>
+										<FileTypeIcon filetype={stat.file_type === "other" ? 'other-file-folder' : stat.file_type} color={false}/>
+									</Tooltip.Trigger>
+									<Tooltip.Content>{`${stat.count} ${stat.file_type} files (${statPercentage[index].count}%)`}</Tooltip.Content>
+								</Tooltip.Root>
 							</div>
 						{/each}
 					</div>

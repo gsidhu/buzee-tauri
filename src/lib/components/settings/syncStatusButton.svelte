@@ -18,7 +18,7 @@
     invoke("run_file_sync", {switchOff: $syncStatus, filePaths: []});
     if ($syncStatus) {
       $statusMessage = "Stopping background scan...";
-      setTimeout(() => {$statusMessage = "";}, 3000);
+      setTimeout(() => {$statusMessage = ""; $dbCreationInProgress = false;}, 5000);
       userAskedToDisable = true;
     } else {
       $statusMessage = "Starting background scan...";
@@ -83,7 +83,7 @@
         `Click to ${$syncStatus ? 'stop' : 'start'} background scan`
       }
     >
-      {#if $dbCreationInProgress && $syncStatus}
+      {#if $dbCreationInProgress && !$syncStatus}
         <Check class="h-5 w-5" />
       {:else}
         <RefreshCw class={`h-5 w-5 ${$syncStatus ? 'spin-right' : ''}`} />

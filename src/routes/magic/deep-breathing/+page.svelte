@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { Circle } from "lucide-svelte";
+import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 
   const gradients = [

@@ -24,7 +24,7 @@ export async function searchDocuments(query:string, page:number, limit:number, t
   let results: DocumentSearchResult[] = [];
   console.log("searching documents with query", query, "page", page, "limit", limit, "type", type, "dateLimitUNIX", dateLimitUNIX);
 
-  if (get(locationShown) === "computer") {
+  if (get(locationShown) === "my computer") {
     let dateLimit: ParsedDatesUNIX | null = null;
     if (dateLimitUNIX) { dateLimit = dateLimitUNIX; }
     let parsedDates = extractDate(query);
@@ -57,7 +57,7 @@ export async function searchDocuments(query:string, page:number, limit:number, t
         results = await invoke("run_search", { query: JSON.stringify(querySegments), page: page, limit: limit, fileType: type});
       }
     }
-  } else if (get(locationShown) === "browser") {
+  } else if (get(locationShown) === "browser history") {
     results = await invoke("run_browser_history_search", { userProfile: "Default", userQuery: query, limit: limit, page: page});
   }
   return results;

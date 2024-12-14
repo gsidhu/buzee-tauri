@@ -17,11 +17,11 @@
   <Image class={className} />
 {:else if category === "video"}
   <Film class={className} />
-{:else if category === "computer"}
+{:else if category === "my computer"}
   <Laptop class={className} />
 {:else if category === "cloud"}
   <Cloud class={className} />
-{:else if category === "browser"}
+{:else if category === "browser history"}
   <Compass class={className} />
 {:else if category === "bookmarks"}
   <Bookmark class={className} />

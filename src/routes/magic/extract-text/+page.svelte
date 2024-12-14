@@ -26,9 +26,10 @@
         },
       ],
     });
-    if (result && result.path && result.name) {
-      filePath = result.path;
-      fileName = result.name;
+    console.log(result);
+    if (result) {
+      filePath = result;
+      fileName = result.split("/").pop() || "";
     }
     extractText();
   }

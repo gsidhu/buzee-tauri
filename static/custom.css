@@ -138,6 +138,14 @@ ol ol, ul ul, ol ul, ul ol {
   color: var(--purple) !important;
 }
 
+.bg-purple {
+  background-color: var(--purple) !important;
+}
+
+.decoration-purple {
+  text-decoration-color: var(--purple) !important;
+}
+
 .drag {
   -webkit-app-region: drag;
 }

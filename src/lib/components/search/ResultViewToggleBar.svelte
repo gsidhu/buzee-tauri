@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { FoldVertical, LayoutGrid, List, UnfoldVertical } from "lucide-svelte";
+  import { FoldVertical, Settings, LayoutGrid, List, UnfoldVertical } from "lucide-svelte";
   import Button from "../ui/button/button.svelte";
   import { Toggle } from "$lib/components/ui/toggle";
   import { Label } from "$lib/components/ui/label/index.js";
   import { compactViewMode, showIconGrid } from '$lib/stores';
   import { trackEvent } from '@aptabase/web';
 	import Separator from "../ui/separator/separator.svelte";
+  import { pagePath } from '$lib/stores';
 
   let toggleGroupValue: string[] = [];
 
@@ -44,9 +45,9 @@
 <div class="flex gap-4">
   <Separator class="hidden md:block w-[1px]" orientation="vertical" />
   <div class="flex flex-col">
-    <Label class="mb-2">Switch View</Label>
+    <Label class="mb-2">Layout</Label>
     <div class="flex items-center gap-2">
-        <Toggle
+        <!-- <Toggle
           variant="outline"
           class="gap-2 text-muted-foreground font-normal"
           title="Switch to Icon Grid"
@@ -54,15 +55,15 @@
           pressed={$showIconGrid}
         >
           <LayoutGrid class="h-4 w-4" />Icons
-      </Toggle>
+      </Toggle> -->
       <Toggle
         variant="outline"
         class="gap-2 text-muted-foreground font-normal"
-        title="Show results in compact view"
+        title="Show results in a compact view"
         on:click={() => toggleCompactViewMode()}
         pressed={$compactViewMode}
       >
-        <FoldVertical class="h-4 w-4" />Tight
+        <FoldVertical class="h-4 w-4" />Compact
       </Toggle>
     </div>
   </div>

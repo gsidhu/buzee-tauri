@@ -239,7 +239,7 @@ pub(crate) struct UserPreferencesState {
   pub automatic_background_sync: bool,
   pub detailed_scan: bool,
   pub roadmap_survey_answered: bool,
-  pub skip_parsing_pdfs: bool,
+  pub parse_pdfs: bool,
   pub manual_setup: bool,
 }
 
@@ -256,7 +256,7 @@ impl Default for UserPreferencesState {
           automatic_background_sync: true,
           detailed_scan: true,
           roadmap_survey_answered: false,
-          skip_parsing_pdfs: true,
+          parse_pdfs: false,
           manual_setup: false
         }
     }

@@ -17,7 +17,7 @@
 <div class="page" in:fade>
 	<SearchFilters />
 	<Separator class="my-2 "/>
-	<div class="flex flex-col justify-between h-full" style={`max-height: ${$searchFiltersOpen ? 'calc(100vh - 278px)' : 'calc(100vh - 200px)'}`}>
+	<div class="flex flex-col justify-between h-full" style={`max-height: ${$searchFiltersOpen ? 'calc(100vh - 278px)' : 'calc(100vh - 175px)'}`}>
 		<ResultsTable />
 	</div>
 </div>

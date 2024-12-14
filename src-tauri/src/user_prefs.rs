@@ -27,7 +27,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
         user_preferences::automatic_background_sync.eq(true),
         user_preferences::detailed_scan.eq(true),
         user_preferences::roadmap_survey_answered.eq(false),
-        user_preferences::skip_parsing_pdfs.eq(true),
+        user_preferences::parse_pdfs.eq(false),
         user_preferences::manual_setup.eq(false),
       ))
       .execute(conn)
@@ -52,7 +52,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
       automatic_background_sync: true,
       detailed_scan: true,
       roadmap_survey_answered: false,
-      skip_parsing_pdfs: true,
+      parse_pdfs: false,
       manual_setup: false,
     };
     // insert new_user_prefs into the user_prefs table
@@ -222,7 +222,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
       user_preferences::automatic_background_sync,
       user_preferences::detailed_scan,
       user_preferences::roadmap_survey_answered,
-      user_preferences::skip_parsing_pdfs,
+      user_preferences::parse_pdfs,
       user_preferences::manual_setup
     ))
     .first::<UserPrefs>(&mut conn)
@@ -239,7 +239,7 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
   state.automatic_background_sync = user_preferences_from_db.automatic_background_sync;
   state.detailed_scan = user_preferences_from_db.detailed_scan;
   state.roadmap_survey_answered = user_preferences_from_db.roadmap_survey_answered;
-  state.skip_parsing_pdfs = user_preferences_from_db.skip_parsing_pdfs;
+  state.parse_pdfs = user_preferences_from_db.parse_pdfs;
   state.manual_setup = user_preferences_from_db.manual_setup;
 }
 
@@ -314,10 +314,10 @@ pub fn set_roadmap_survey_answered_flag_in_db(flag: bool, app: &tauri::AppHandle
     .unwrap();
 }
 
-pub fn set_skip_parsing_pdfs_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+pub fn set_parse_pdfs_flag_in_db(flag: bool, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)
-    .set(user_preferences::skip_parsing_pdfs.eq(flag))
+    .set(user_preferences::parse_pdfs.eq(flag))
     .execute(&mut conn)
     .unwrap();
 }

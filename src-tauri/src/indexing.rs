@@ -370,7 +370,7 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   println!("Not PDF files: {}", not_pdf_files_data.len());
   let mut all_files_data = not_pdf_files_data.clone();
 
-  if !user_preferences.skip_parsing_pdfs {
+  if user_preferences.parse_pdfs {
     println!("Parsing PDFs and images");
     // Get the same for all PDF files
     let pdf_files_data = document::table

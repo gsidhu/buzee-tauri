@@ -48,7 +48,7 @@
 	// HACK: hide columns by default
 	// hideForId['size'] = true;
 	hideForId['lastModified'] = $preferLastOpened;
-	if ($locationShown === 'browser') {
+	if ($locationShown === "browser history") {
 		hideForId['lastOpened'] = true;
 		hideForId['lastModified'] = false;
 	} else {
@@ -64,7 +64,7 @@
 		({ table, columns, flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates, hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize, hiddenColumnIds, ids, labels, hideForId } = createTableVars($documentsShown));
 		
 		hideForId['lastModified'] = $preferLastOpened;
-		if ($locationShown === 'browser') {
+		if ($locationShown === "browser history") {
 			hideForId['lastOpened'] = false;
 			hideForId['lastModified'] = true;
 		} else {
@@ -328,7 +328,8 @@
 	</table>
 {/if}
 
-<div class="absolute w-full bottom-0 bg-white z-100 flex items-center justify-center space-x-4 p-2">
+<!-- Add `absolute` below -->
+<div class="w-full bottom-0 bg-white z-100 flex items-center justify-center space-x-4 p-2">
 	<Button
 		variant="outline"
 		size="sm"

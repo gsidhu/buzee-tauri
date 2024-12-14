@@ -36,7 +36,7 @@
 
 	async function getSearchSuggestions() {
 		// only get suggestions if locationShown is computer
-		if ($locationShown !== "computer") return;
+		if ($locationShown !== "my computer") return;
 		let removeSpecialChars = $searchQuery.replace(/[^a-zA-Z0-9 ]/g, '');
 		$searchSuggestions = await invoke('get_search_suggestions', { query: removeSpecialChars });
 		$searchSuggestions = [...new Set($searchSuggestions)]; // remove duplicates
@@ -187,7 +187,7 @@
 									</Command.Item>
 								</Command.Group>
 							{/if}
-							{#if ($searchQuery.length === 0 || $searchSuggestions.length === 0) && $locationShown === "computer"}
+							{#if ($searchQuery.length === 0 || $searchSuggestions.length === 0) && $locationShown === "my computer"}
 								<Command.Group heading="Suggestions">
 									{#each suggestionsList as suggestion, id}
 										<Command.Item data-result-shortcut="{id+1}" value={suggestion.value} onSelect={() => {triggerSearchLocal(suggestion.value);}}>

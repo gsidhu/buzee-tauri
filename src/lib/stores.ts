@@ -48,7 +48,7 @@ let storedAllowedExtensions: FileTypesDropdown = {
   items: []
 };
 
-let storedAllowedLocations = ["computer", "browser"];
+let storedAllowedLocations = ["my computer", "browser history"];
 
 let storedDateLimitUNIX: ParsedDatesUNIX = {
   start: '',
@@ -73,7 +73,7 @@ export const userPreferences = writable({
   "onboarding_done": false,
   "show_in_dock": true,
   "roadmap_survey_answered": false,
-  "skip_parsing_pdfs": true,
+  "parse_pdfs": false,
   "manual_setup": false,
 })
 export const pagePath = writable("")
@@ -89,11 +89,11 @@ export const searchQuery = writable(storedSearchQuery || '')
 export const searchSuggestions = writable(storedSearchSuggestions || [])
 export const documentsShown = writable(storedDocumentsShown || [])
 export const filetypeShown = writable('any')
-export const locationShown = writable('computer')
+export const locationShown = writable("my computer")
 export const allowedExtensions = writable(storedAllowedExtensions);
 export const allowedLocations = writable(storedAllowedLocations);
 export const resultsPageShown = writable(0)
-export const resultsPerPage = writable(25)
+export const resultsPerPage = writable(50)
 export const statusMessage = writable("")
 export const compactViewMode = writable(storedCompactViewMode || false)
 export const selectedResult = writable(storedSelectedResult || {})
