@@ -8,6 +8,8 @@ Download the latest release from the [Buzee website](https://buzee.co/).
 
 > ⚠️ I have _just_ open sourced Buzee. The documentation is lacking. Please open an issue and I'd be happy to help! ⚠️
 
+> The OCR capabilities in Buzee are built on top of [Textra on Mac](https://github.com/freedmand/textra) and [WinOCR on Windows](https://github.com/gsidhu/winocr_cli). Do check these repos out! I feel the native OCR capabilities of Mac and Windows are really good and should be used more!
+
 ## What is Buzee?
 
 Buzee (pronounced _boozey_) is a eight-year-old labrador retriever who can't play fetch but can love you like no other.
@@ -18,9 +20,13 @@ Download v0.2.0 from this [Releases](https://github.com/gsidhu/buzee-releases/re
 
 ## Screenshots
 
-![Screenshot 1](./static/Screenshot1.png)
-![Screenshot 2](./static/Screenshot2.png)
-![Screenshot 3](./static/Screenshot3.png)
+<div style="display:flex">
+  <img src="./static/Screenshot1.png" width=25% />
+  <img src="./static/Screenshot2.png" width=25% />
+  <img src="./static/Screenshot3.png" width=25% />
+  <img src="./static/Screenshot4.png" width=25% />
+</div>
+
 
 ## Features
 - Fast, full-text search for all your documents, images, audio, video, folders, and browser history.
@@ -51,6 +57,8 @@ Buzee works best on Mac. Windows may throw up some issues because I haven't had 
 4. Run `cargo install` in the `src-tauri` directory.
 5. Run `npm run tauri dev` in the root directory to run the app in development mode.
 6. Run `npm run tauri build` in the root directory to build the app for production.
+
+---
 
 ## TODO / Known Issues
 ```
