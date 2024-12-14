@@ -7,6 +7,7 @@
 	import {
 		locationShown,
 		allowedLocations,
+		isMac,
 	} from '$lib/stores';
 	import { getDocumentsFromDB, searchDocuments, triggerSearch } from '$lib/utils/dbUtils';
 	import { categoriseExtensions, setExtensionCategory } from '$lib/utils/miscUtils';
@@ -26,6 +27,9 @@
 	}
 
 	onMount(async () => {
+		if (!$isMac) {
+			$allowedLocations = ["my computer"];
+		}
 	});
 </script>
 

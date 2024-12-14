@@ -62,7 +62,7 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
       let poppler_exists = std::path::Path::new(&poppler_executable).exists();
       println!("poppler exists: {}", poppler_exists);
       if !poppler_exists {
-        let _ = install_poppler_from_github().await?;
+        let _ = install_poppler_from_github(app.clone()).await?;
       }
 
       // run winocr on the file

@@ -129,10 +129,10 @@ pub fn _install_textra_from_github() -> Result<String, Error> {
 }
 
 #[cfg(target_os = "windows")]
-pub async fn install_poppler_from_github() -> Result<String, Error> {
+pub async fn install_poppler_from_github(handle: tauri::AppHandle) -> Result<String, Error> {
   #[cfg(not(target_os = "windows"))]
   {
-    Ok("Textra is only supported on Windows".to_string())
+    Ok("WinOCR is only supported on Windows".to_string())
   }
   #[cfg(target_os = "windows")]
   {
@@ -149,10 +149,14 @@ pub async fn install_poppler_from_github() -> Result<String, Error> {
       println!("Downloading and installing Poppler");
       // download poppler using reqwest
       let app_directory_clone = app_directory.clone();
-      let response = reqwest::get(download_uri).await.unwrap();
-      let mut file = std::fs::File::create(format!("{}\\poppler.zip", &app_directory_clone)).unwrap();
-      let mut content =  std::io::Cursor::new(response.bytes().await.unwrap());
-      std::io::copy(&mut content, &mut file).unwrap();
+      // let response = reqwest::get(download_uri).await.unwrap();
+      // let mut file = std::fs::File::create(format!("{}\\poppler.zip", &app_directory_clone)).unwrap();
+      // let mut content =  std::io::Cursor::new(response.bytes().await.unwrap());
+      // std::io::copy(&mut content, &mut file).unwrap();
+
+      let zip_file_path = handle.path().resolve("poppler.zip", BaseDirectory::Resource)?;
+      // copy zip_file to app_directory
+      fs::copy(zip_file_path, format!("{}/poppler.zip", &app_directory)).unwrap();
 
       // unzip poppler.zip using zip crate
       let mut archive = zip::ZipArchive::new(fs::File::open(format!("{}/poppler.zip", &app_directory)).unwrap()).unwrap();

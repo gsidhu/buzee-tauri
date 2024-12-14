@@ -91,11 +91,6 @@ export const documentsShown = writable(storedDocumentsShown || [])
 export const filetypeShown = writable('any')
 export const locationShown = writable("my computer")
 export const allowedExtensions = writable(storedAllowedExtensions);
-
-if (!isMac) {
-  storedAllowedLocations = ["my computer"];
-}
-
 export const allowedLocations = writable(storedAllowedLocations);
 export const resultsPageShown = writable(0)
 export const resultsPerPage = writable(50)
