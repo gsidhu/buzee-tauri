@@ -14,7 +14,7 @@ Buzee (pronounced _boozey_) is a eight-year-old labrador retriever who can't pla
 
 Buzee is also a full-text search application for your life. It helps you find your files, effortlessly.
 
-Download v0.2.0 from this [Releases](/https://github.com/gsidhu/buzee-releases/releases) page.
+Download v0.2.0 from this [Releases](https://github.com/gsidhu/buzee-releases/releases) page.
 
 ## Screenshots
 
