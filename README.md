@@ -32,14 +32,16 @@ Download v0.2.0 from this [Releases](https://github.com/gsidhu/buzee-releases/re
 - Fast, full-text search for all your documents, images, audio, video, folders, and browser history.
 - Search all local documents and folders by keyword, time, type, or any combination of these.
 - Ignore specific files or folders from being indexed. Or ignore only their content.
-- View search results in a list or icon view.
-- View statistics about your files.
+- Global shortcut. Press `⎇ / Alt + Space` anywhere to show/hide the app. Modify it in the settings.
+- In the app, press `⌘ / Ctrl + F or K` to go to the search bar from any screen.
+- In the app, press `⌘ / Ctrl + Shift + S` to go to the scratchpad from any screen.
+- View statistics about your files and get your Unique Document Profile.
 - Sub-features:
   - Extract text from PDFs and Images using OCR.
   - Use a Scratch Pad to quickly jot down notes.
 - Automatically syncs with changes on your filesystem.
 - Lightweight installation package and low memory usage.
-- Supports these default file types: 
+- Supports these default file types:
 ```
 Documents: csv, docx, key, md, numbers, pages, pdf, pptx, txt, xlsx, xls
 Images: jpg, jpeg, png, gif
@@ -47,6 +49,24 @@ Books: epub, mobi, azw3, pdf
 Audio: mp3, wav, aac, flac, ogg
 Video: mp4, mkv, avi, mov, wmv
 ```
+
+### Semantic Search (somewhat)
+#### Include/Exclude from Search
+- Use the Filetype filter or simply type it in the search (like `invoice pdf`)
+- Put quotes around keyword(s) to search for the exact phrase (like `"annual report"`)
+- Put a hyphen in front of the keyword to exclude it from search (like `"annual report" -2022 -pdf`)
+
+#### Search using Time
+Use the Date Range filter or simply mention the date/time period that you are looking for in your search. For example:
+
+- <code><strong>last month</strong> pdf invoice</code>
+- <code>annual report ppt <strong>this year</strong></code>
+- <code><strong>q2 2023 to q3 2023</strong> retail report xlsx</code>
+- <code>prelim findings <strong>from 2017 to 2022</strong></code>
+- <code>cv docx <strong>from march 2 2020 to aug 15 2020</strong> -pdf</code>
+- <code>scope study <strong>14/02/2015 to 10/08/2015</strong></code>
+
+If you want to use a phrase as a keyword for search and not time, simply wrap it in quotes like this: `invoice "March 2022"`
 
 ## Building from Source
 Buzee works best on Mac. Windows may throw up some issues because I haven't had a change to properly test it. Linux is untested entirely, so you're on your own there.
@@ -57,6 +77,15 @@ Buzee works best on Mac. Windows may throw up some issues because I haven't had 
 4. Run `cargo install` in the `src-tauri` directory.
 5. Run `npm run tauri dev` in the root directory to run the app in development mode.
 6. Run `npm run tauri build` in the root directory to build the app for production.
+
+### Building on Windows
+Building on Windows requires a few changes. Follow these steps:
+
+1. Remove `drag = { path = "./crates/drag", version = "0.4.0", features = [ "serde" ] }` from [`Cargo.toml`](https://github.com/gsidhu/buzee-tauri/blob/main/src-tauri/Cargo.toml#L28C1-L28C77)
+2. Comment out `crate::drag::start_drag,` from [`ipc.rs`](https://github.com/gsidhu/buzee-tauri/blob/main/src-tauri/src/ipc.rs#L506C7-L506C31)
+3. Comment out `mod drag;` from [`main.rs`](https://github.com/gsidhu/buzee-tauri/blob/main/src-tauri/src/main.rs#L30)
+
+Finally, replace `binaries/textra` with `binaries/winocr` in [`tauri.conf.json`](https://github.com/gsidhu/buzee-tauri/blob/main/src-tauri/tauri.conf.json#L38).
 
 ---
 
