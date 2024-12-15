@@ -4,6 +4,14 @@
 <p align="center"><span>Full-text search app for Mac and Windows</span></p>
 
 Download the latest release from the [Buzee website](https://buzee.co/).
+
+![Static Badge](https://img.shields.io/badge/Svelte%20v4-framework-orange?logo=svelte)
+![Static Badge](https://img.shields.io/badge/Tauri%20v2-framework-blue?logo=tauri)
+![Rust](https://img.shields.io/badge/Rust-lang-black.svg?style=flat&logo=rust)
+
+![GitHub License](https://img.shields.io/github/license/gsidhu/buzee-tauri)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/gsidhu/buzee-releases/total)
+
 </div>
 
 > ⚠️ I have _just_ open sourced Buzee. The documentation is lacking. Please open an issue and I'd be happy to help! ⚠️
