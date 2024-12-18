@@ -218,6 +218,7 @@
 	async function checkForAppUpdates() {
 		// const update = { version: "v1.0.0", body: "buzee"};
 		const update = await check();
+		
 		if (update === null) {
 			if ($isMac) {
 				await message('Failed to check for updates.\nPlease try again later.', {

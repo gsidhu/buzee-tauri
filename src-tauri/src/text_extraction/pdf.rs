@@ -66,7 +66,7 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
       }
 
       // run winocr on the file
-      let sidecar_command = app.shell().sidecar("winocr").unwrap().args(["-i", file, "-o", output_path.as_str(), "--poppler-path", poppler_path.as_str()]);
+      let sidecar_command = app.shell().sidecar("winocr.exe").unwrap().args(["-i", file, "-o", output_path.as_str(), "--poppler-path", poppler_path.as_str()]);
       let (mut rx, mut _child) = sidecar_command.spawn().unwrap();
 
       while let Some(event) = rx.recv().await {

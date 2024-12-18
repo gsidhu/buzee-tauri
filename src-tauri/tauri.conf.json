@@ -1,6 +1,6 @@
 {
   "productName": "Buzee",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "identifier": "inc.buzilla.buzee",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -26,7 +26,7 @@
   "bundle": {
     "active": true,
     "copyright": "© 2024 Gurjot Sidhu",
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": "v1Compatible",
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -39,6 +39,8 @@
   },
   "plugins": {
     "updater": {
+      "active": true,
+      "dialog": true,
       "endpoints": [
         "https://raw.githubusercontent.com/gsidhu/buzee-releases/main/latest.json"
       ],

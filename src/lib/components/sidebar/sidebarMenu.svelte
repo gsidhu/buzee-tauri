@@ -140,7 +140,7 @@
 	<Separator />
   
 	<div class="mt-auto flex flex-col p-4 text-center space-y-1">
-    <p class="text-sm" id="app-version">Buzee v0.2.0</p>
+    <p class="text-sm" id="app-version">Buzee v0.2.1</p>
     <Button id="bmac-btn" class="animate__headShake" variant="outlinePurple" on:click={() => openInBrowser('bmac')}>
       <Coffee id="bmac-btn-coffee-icon" class="mr-2 h-4 w-4" />
       Buy me a coffee
