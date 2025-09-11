@@ -165,25 +165,25 @@ pub struct DocumentSearchResult {
     pub comment: Option<String>,
 }
 
-// This struct is for SELECTING from the document table via the metadata table when searching the body_fts table
-#[derive(Serialize, Queryable, Debug)]
-pub struct DocumentResponseModel {
-    pub metadata_id: i32,
-    pub source_table: String,
-    pub source_domain: String,
-    pub source_id: i32,
-    pub name: String,
-    pub path: String,
-    pub file_type: String,
-    pub created_at: i64,
-    pub last_modified: i64,
-    pub frecency_rank: f32,
-    pub frecency_last_accessed: i64,
-    pub comment: Option<String>,
-}
+// // This struct is for SELECTING from the document table via the metadata table when searching the body_fts table
+// #[derive(Serialize, Queryable, Debug)]
+// pub struct DocumentResponseModel {
+//     pub metadata_id: i32,
+//     pub source_table: String,
+//     pub source_domain: String,
+//     pub source_id: i32,
+//     pub name: String,
+//     pub path: String,
+//     pub file_type: String,
+//     pub created_at: i64,
+//     pub last_modified: i64,
+//     pub frecency_rank: f32,
+//     pub frecency_last_accessed: i64,
+//     pub comment: Option<String>,
+// }
 
-// This struct is for SELECTING titles from the metadata_fts table
-#[derive(Serialize, Queryable, Debug)]
-pub struct SearchSuggestionsModel {
-    pub title: String
-}
+// // This struct is for SELECTING titles from the metadata_fts table
+// #[derive(Serialize, Queryable, Debug)]
+// pub struct SearchSuggestionsModel {
+//     pub title: String
+// }

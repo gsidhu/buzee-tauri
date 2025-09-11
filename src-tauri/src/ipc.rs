@@ -503,7 +503,7 @@ pub fn initialize() {
       open_context_menu,
       set_user_preference,
       set_new_global_shortcut,
-      crate::drag::start_drag,
+      // crate::drag::start_drag,
       get_user_preferences_state,
       reset_user_preferences,
       ignore_file_or_folder,

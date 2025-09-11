@@ -18,44 +18,43 @@ authors = ["Gurjot Sidhu"]
 license = "MIT"
 
 [build-dependencies]
-tauri-build = { version = "2.0.3", features = [] }
+tauri-build = { version = "2.4.1", features = [] }
 
 [dependencies]
-tauri = { version = "2.1.1", features = [] }
-tauri-plugin-shell = "2.2.0"
-tauri-plugin-updater = { version = "2.3.0", features = ["rustls-tls"] }
-tauri-plugin-dialog = "2.2.0"
-drag = { path = "./crates/drag", version = "0.4.0", features = [ "serde" ] }
+tauri = { version = "2.8.5", features = [] }
+tauri-plugin-shell = "2.3.1"
+tauri-plugin-updater = { version = "2.9.0", features = ["rustls-tls"] }
+tauri-plugin-dialog = "2.4.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-thiserror = "1.0"
-open = "5.1.1"
+thiserror = "2.0"
+open = "5.3.2"
 dotenvy = "0.15.7"
-dirs = "5.0.1"
-diesel = { version = "2.1.4", features = ["sqlite", "r2d2", "chrono", "time"] }
-chrono = "0.4.26"
-notify = "4.0.17"
+dirs = "6.0.0"
+diesel = { version = "2.2.12", features = ["sqlite", "r2d2", "chrono", "time"] }
+chrono = "0.4.42"
+notify = "8.2.0"
 jwalk = "0.8.1"
 dotext = "0.1.1"
-log = "0.4.21"
+log = "0.4.28"
 simple-logging = "2.0.2"
-regex = "1.10.3"
-lazy_static = "1.4.0"
-tauri-plugin-global-shortcut = "2.2.0"
-tokio = { version = "1.36.0", features = ["full"] }
-tokio-graceful-shutdown = "0.14.3"
-epub = "2.1.1"
+regex = "1.11.2"
+lazy_static = "1.5.0"
+tauri-plugin-global-shortcut = "2.3.0"
+tokio = { version = "1.47.1", features = ["full"] }
+tokio-graceful-shutdown = "0.16.0"
+epub = "2.1.4"
 mobi = "0.8.0"
 schedule = "0.1.0"
-futures = "0.3.30"
-base64 = "0.21"
-serialize-to-javascript = "0.1.1"
+futures = "0.3.31"
+base64 = "0.22"
+serialize-to-javascript = "0.1.2"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
-zip = "0.6"
-pdf-extract = "0.7.7"
+zip = "5.1"
+pdf-extract = "0.9.0"
 jfs = "0.9.0"
-xml-rs = "0.8.20"
-tantivy = "0.22.0"
-csv = "1.3.0"
-rusqlite = "0.31.0"
-tauri-plugin-process = "2.2.0"
+xml-rs = "1.0.0"
+tantivy = "0.25.0"
+csv = "1.3.1"
+rusqlite = "0.37.0"
+tauri-plugin-process = "2.3.0"

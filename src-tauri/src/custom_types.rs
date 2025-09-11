@@ -211,20 +211,20 @@ impl Default for SyncRunningState {
 }
 
 // Struct for Global Shortcut String
-#[derive(Serialize, Clone)]
-pub(crate) struct GlobalShortcutState {
-  pub shortcut_string: String,
-  pub shortcut_enabled: bool
-}
+// #[derive(Serialize, Clone)]
+// pub(crate) struct GlobalShortcutState {
+//   pub shortcut_string: String,
+//   pub shortcut_enabled: bool
+// }
 
-impl Default for GlobalShortcutState {
-    fn default() -> Self {
-        Self {
-          shortcut_string: "Alt+Space".to_string(),
-          shortcut_enabled: false
-        }
-    }
-}
+// impl Default for GlobalShortcutState {
+//     fn default() -> Self {
+//         Self {
+//           shortcut_string: "Alt+Space".to_string(),
+//           shortcut_enabled: false
+//         }
+//     }
+// }
 
 // Struct for User Preference
 #[derive(Serialize, Deserialize, Clone, Debug)]
