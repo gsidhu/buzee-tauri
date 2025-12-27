@@ -3,7 +3,7 @@
 
 <p align="center"><span>Full-text search app for Mac and Windows</span></p>
 
-Download the latest release from the [Buzee website](https://buzee.co/).
+Download the latest release from the [Buzee website](https://buzee.thatgurjot.com/).
 
 ![Static Badge](https://img.shields.io/badge/Svelte%20v4-framework-orange?logo=svelte)
 ![Static Badge](https://img.shields.io/badge/Tauri%20v2-framework-blue?logo=tauri)
