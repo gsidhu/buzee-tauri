@@ -520,6 +520,7 @@ pub fn initialize() {
     ])
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_os::init())
     .setup(|app| {
         {
           // manage state(s)
