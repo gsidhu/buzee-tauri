@@ -1,8 +1,8 @@
 [package]
 name = "buzee"
-version = "0.2.0"
+version = "0.2.1"
 description = "Find your documents, effortlessly"
-authors = ["Gurjot Sidhu"]
+authors = ["Gurjot Sidhu, Guillaume Gielly"]
 license = "MIT"
 edition = "2021"
 
@@ -14,7 +14,7 @@ members = ["crates/*"]
 
 [workspace.package]
 edition = "2021"
-authors = ["Gurjot Sidhu"]
+authors = ["Gurjot Sidhu, Guillaume Gielly"]
 license = "MIT"
 
 # OCR sidecars (textra/winocr) are opt-in and disabled by default.

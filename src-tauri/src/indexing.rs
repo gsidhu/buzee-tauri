@@ -1,4 +1,4 @@
-use crate::custom_types::{Error, TantivyDocumentItem};
+use crate::custom_types::TantivyDocumentItem;
 use crate::database::schema::{document, metadata, metadata_fts, body, ignore_list, allow_list, file_types};
 use crate::database::models::{AllowList, BodyItem, DocumentItem, FileTypes, IgnoreList};
 use crate::db_sync::sync_status;
@@ -12,8 +12,27 @@ use diesel::connection::Connection;
 use diesel::{ExpressionMethods, QueryDsl, JoinOnDsl, RunQueryDsl, SqliteConnection};
 use jwalk::{WalkDir, WalkDirGeneric};
 // use log::{info, error};
-use std::path::PathBuf;
+use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ScanSkipReason {
+  /// The entry vanished between the directory listing and the stat call (NotFound).
+  Disappeared,
+  /// The OS denied access to the entry's metadata (PermissionDenied).
+  PermissionDenied,
+  /// The entry's metadata or timestamps could not be read for another reason.
+  MetadataUnavailable,
+  /// The entry does not match the indexing criteria (extension, name, symlink, folder...).
+  NotIndexable,
+}
+
+fn should_log_scan_skip(reason: ScanSkipReason) -> bool {
+  matches!(
+    reason,
+    ScanSkipReason::PermissionDenied | ScanSkipReason::MetadataUnavailable
+  )
+}
 
 pub fn all_allowed_filetypes(connection: &mut SqliteConnection, only_allowed: bool) -> Vec<FileTypes> {
   let filetypes = file_types::table
@@ -79,70 +98,67 @@ fn build_walk_dir(path: &String, skip_path: Vec<String>) -> WalkDirGeneric<((), 
     })
 }
 
-pub fn create_document_item(file_path: PathBuf, allowed_extensions: &Vec<String>) -> Result<DocumentItem, Error> {
-  // if the path does not exist or is not a file, continue
-  if !file_path.exists() || !file_path.is_file() {
-      // println!("Folder maybe?: {}", path.to_str().unwrap());
-      return Err(Error::new("Path does not exist or is not a file"));
-  }
-
+pub fn create_document_item(file_path: &Path, allowed_extensions: &Vec<String>) -> Result<DocumentItem, ScanSkipReason> {
   let filename = file_path.file_name().and_then(|s| s.to_str()).unwrap_or("");
-  let mut extension = file_path.extension().and_then(|s| s.to_str());
+  let extension = file_path.extension().and_then(|s| s.to_str());
 
   // if extension is not in allowed filetypes, continue
   if extension.is_none() || !allowed_extensions.contains(&extension.unwrap().to_string()) {
-      // println!("ignoring file");
-      return Err(Error::new("Extension is not in allowed filetypes"));
+      return Err(ScanSkipReason::NotIndexable);
   }
   // if filename starts with a dot or ~$, continue
   if filename.starts_with(".") || filename.starts_with("~$") {
-      // println!("ignoring file");
-      return Err(Error::new("Filename starts with a dot or ~$"));
+      return Err(ScanSkipReason::NotIndexable);
   }
 
-  let metadata = get_metadata(&file_path).unwrap();
+  // a single stat call; if it fails the file may have been moved/deleted mid-scan
+  // or access may be denied, so classify the failure instead of panicking
+  let metadata = match get_metadata(file_path) {
+    Ok(metadata) => metadata,
+    Err(e) => {
+      return Err(match e.kind() {
+        std::io::ErrorKind::NotFound => ScanSkipReason::Disappeared,
+        std::io::ErrorKind::PermissionDenied => ScanSkipReason::PermissionDenied,
+        _ => ScanSkipReason::MetadataUnavailable,
+      })
+    }
+  };
   // if metadata is a symlink or shortcut file, continue
   if metadata.file_type().is_symlink() {
-      // println!("ignoring shortcut");
-      return Err(Error::new("File is a symlink"));
+      return Err(ScanSkipReason::NotIndexable);
   }
 
-  let is_folder = metadata.is_dir();
-  if is_folder {
-      extension = Some("folder");
+  // non-regular entries (folders, devices...) are not handled here
+  if !metadata.is_file() {
+      return Err(ScanSkipReason::NotIndexable);
   }
   let filesize = metadata.len();
 
   // get UNIX timestamp for last_modified, last_opened and created_at and store it as text string
-  let last_modified_secs = metadata
-      .modified()
-      .unwrap()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_secs();
+  // last_modified drives the re-parse heuristic, so skip the file if it is unavailable;
+  // created/accessed are non-critical and fall back to 0
+  let last_modified_secs = match metadata.modified() {
+    Ok(t) => t.duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
+    Err(_) => return Err(ScanSkipReason::MetadataUnavailable),
+  };
   let created_at = metadata
       .created()
-      .unwrap()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_secs();
+      .ok()
+      .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+      .map(|d| d.as_secs())
+      .unwrap_or(0);
   let last_opened = metadata
       .accessed()
-      .unwrap()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_secs();
-
-  // If extension is None or is_folder is true, continue
-  if extension.is_none() || is_folder {
-    return Err(Error::new("Extension is None or is_folder is true"));
-  }
+      .ok()
+      .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+      .map(|d| d.as_secs())
+      .unwrap_or(0);
 
   let file_item = DocumentItem {
     source_domain: "local".to_string(),
     created_at: created_at as i64,
     name: filename.to_string(),
-    path: file_path.to_str().unwrap().to_string(),
+    path: file_path.to_str().unwrap_or("").to_string(),
     size: Some(filesize as f64),
     file_type: extension.unwrap().to_string(),
     last_modified: last_modified_secs as i64,
@@ -184,15 +200,37 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
       let walk_dir = build_walk_dir(&path, all_forbidden_directories.clone());
       
       for entry in walk_dir {
-        let entry = entry.unwrap();
+        // a directory may be deleted or renamed while walking; skip the entry
+        // instead of panicking, and only report genuine errors
+        let entry = match entry {
+          Ok(entry) => entry,
+          Err(e) => {
+            let is_not_found = e
+              .io_error()
+              .map(|ioe| ioe.kind() == std::io::ErrorKind::NotFound)
+              .unwrap_or(false);
+            if !is_not_found {
+              eprintln!("Error while walking directory: {} (path: {:?})", e, e.path());
+            }
+            continue;
+          }
+        };
         let entry_path = entry.path();
         // info!("Indexing: {}", path.to_str().unwrap());
 
-        let file_item = create_document_item(entry_path, &allowed_extensions);
+        let file_item = create_document_item(&entry_path, &allowed_extensions);
         let file_item = match file_item {
           Ok(file_item) => file_item,
-          Err(_e) => {
-            // error!("Error creating document item: {}", e);
+          Err(reason) => {
+            // files vanishing mid-scan (NotFound) and normal criteria skips are
+            // expected, so keep those quiet; log the rest with the path
+            if should_log_scan_skip(reason) {
+              eprintln!(
+                "Skipping {} during scan: {:?}",
+                entry_path.to_string_lossy(),
+                reason
+              );
+            }
             continue;
           }
         };
@@ -671,9 +709,19 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
   let mut files_to_remove: Vec<String> = vec![];
   let mut files_to_remove_from_index_only: Vec<String> = vec![];
   for path in all_file_paths {
-    // if path does not exist, add it to files_to_remove
-    if !std::path::Path::new(&path).exists() {
-      files_to_remove.push(path.clone());
+    // Only remove a file from the database when it is confirmed missing
+    // (NotFound). Permission denied or other transient stat errors must not
+    // delete the row, otherwise a file that is merely locked/moved mid-scan
+    // would disappear from the index.
+    match std::fs::metadata(&path) {
+      Ok(_) => {}
+      Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+        files_to_remove.push(path.clone());
+      }
+      Err(e) => {
+        eprintln!("Skipping removal of {} (metadata error: {})", path, e);
+        continue;
+      }
     }
     // if path is in the allowed_files list, continue
     if allowed_files.iter().any(|item| item.path == *path) {
@@ -803,7 +851,12 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
   // Get parent folders for all the files
   let all_folders: Vec<String> = all_files
     .iter()
-    .map(|file| std::path::Path::new(file).parent().unwrap().to_str().unwrap().to_string())
+    .filter_map(|file| {
+      std::path::Path::new(file)
+        .parent()
+        .and_then(|parent| parent.to_str())
+        .map(|parent| parent.to_string())
+    })
     .collect();
   
   println!("All folders (= Num files): {}", all_folders.len());
@@ -826,27 +879,47 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
   if unique_folders.len() == 0 {
     return;
   }
-  // Get metadata for each folder and add it to the document table
+  // Get metadata for each folder and add it to the document table.
+  // A folder can disappear between listing and stat; skip it instead of panicking.
+  let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
   let folder_items: Vec<DocumentItem> = unique_folders
     .iter()
-    .map(|folder| {
-      let folder_metadata = get_metadata(&std::path::Path::new(folder)).unwrap();
-      DocumentItem {
+    .filter_map(|folder| {
+      let folder_metadata = get_metadata(&std::path::Path::new(folder)).ok()?;
+      let created_at = folder_metadata
+        .created()
+        .ok()
+        .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(now);
+      let last_modified = folder_metadata
+        .modified()
+        .ok()
+        .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(now);
+      let last_opened = folder_metadata
+        .accessed()
+        .ok()
+        .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(now);
+      Some(DocumentItem {
         source_domain: "local".to_string(),
-        created_at: folder_metadata.created().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-        name: std::path::Path::new(folder).file_name().unwrap().to_str().unwrap().to_string(),
+        created_at,
+        name: std::path::Path::new(folder).file_name().unwrap_or_default().to_string_lossy().to_string(),
         path: folder.to_string(),
         size: None,
         file_type: "folder".to_string(),
-        last_modified: folder_metadata.modified().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-        last_opened: folder_metadata.accessed().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-        last_synced: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-        last_parsed: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        last_modified,
+        last_opened,
+        last_synced: now,
+        last_parsed: now,
         is_pinned: false,
         frecency_rank: 0.0,
         frecency_last_accessed: 0,
         comment: None,
-      }
+      })
     })
     .collect();
 
