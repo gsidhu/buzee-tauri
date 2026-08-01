@@ -10,6 +10,7 @@ pub mod pptx;
 pub mod txt;
 pub mod xlsx;
 pub mod image;
+pub mod win_ocr;
 
 pub struct Extractor;
 

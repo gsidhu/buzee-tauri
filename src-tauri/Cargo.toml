@@ -80,3 +80,16 @@ xml-rs = "0.8.20"
 tantivy = "0.22.0"
 csv = "1.3.0"
 rusqlite = {version ="0.31.0", features = ["bundled"] }
+
+# Native Windows OCR (Windows.Media.Ocr via WinRT). Only compiled on Windows.
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.58", features = [
+  "Foundation",
+  "Foundation_Collections",
+  "Globalization",
+  "Graphics_Imaging",
+  "Media_Ocr",
+  "Storage",
+  "Storage_Streams",
+  "Win32_System_Com"
+] }
