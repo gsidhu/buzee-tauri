@@ -1,9 +1,9 @@
 // Native Windows OCR via the Windows Runtime (Windows.Media.Ocr).
 //
 // This module replaces the external `winocr` sidecar + Poppler download on
-// Windows with an in-process WinRT implementation. It only ever operates on
-// images (PNG/JPEG/BMP/TIFF); scanned PDFs are deliberately NOT rasterized
-// here and surface as `OcrUnavailableForPdf` upstream.
+// Windows with an in-process WinRT implementation. It recognizes images
+// (PNG/JPEG/BMP/TIFF) directly and rasterizes scanned PDFs page by page with
+// Windows.Data.Pdf before OCR-ing each page.
 //
 // The WinRT code is compiled only on Windows. The public types, the trait and
 // the pure helpers are platform-neutral so routing and text normalization stay
@@ -55,6 +55,12 @@ pub trait ImageOcr {
     path: &Path,
     preferred_language: Option<&str>,
   ) -> Result<OcrResult, OcrError>;
+
+  fn recognize_pdf(
+    &self,
+    path: &Path,
+    preferred_language: Option<&str>,
+  ) -> Result<OcrResult, OcrError>;
 }
 
 // ---------------------------------------------------------------------------
@@ -63,6 +69,10 @@ pub trait ImageOcr {
 
 /// Minimum number of characters below which extraction falls back to OCR.
 pub const OCR_FALLBACK_MIN_CHARS: usize = 1;
+
+/// Upper bound on how many pages of a scanned PDF are OCR-ed. Rasterizing and
+/// OCR-ing a whole document is expensive, so very large scans are truncated.
+pub const PDF_OCR_MAX_PAGES: u32 = 50;
 
 /// Returns `true` when the extracted text is useful enough to skip OCR.
 pub fn has_usable_text(text: &str, min_chars: usize) -> bool {
@@ -73,6 +83,11 @@ pub fn has_usable_text(text: &str, min_chars: usize) -> bool {
 /// native extraction produced `extracted_text`.
 pub fn should_fallback_to_ocr(extracted_text: &str, min_chars: usize) -> bool {
   !has_usable_text(extracted_text, min_chars)
+}
+
+/// Clamps a PDF page count to `PDF_OCR_MAX_PAGES`.
+pub fn cap_page_count(page_count: u32, max: u32) -> u32 {
+  page_count.min(max)
 }
 
 /// Lowercased file extension, without the leading dot.
@@ -125,6 +140,14 @@ impl ImageOcr for WindowsOcr {
   ) -> Result<OcrResult, OcrError> {
     windows_ocr::recognize(path, preferred_language)
   }
+
+  fn recognize_pdf(
+    &self,
+    path: &Path,
+    preferred_language: Option<&str>,
+  ) -> Result<OcrResult, OcrError> {
+    windows_ocr::recognize_pdf(path, preferred_language)
+  }
 }
 
 // Non-Windows stub so the rest of the crate keeps compiling.
@@ -141,17 +164,27 @@ impl ImageOcr for WindowsOcr {
   ) -> Result<OcrResult, OcrError> {
     Err(OcrError::EngineUnavailable)
   }
+
+  fn recognize_pdf(
+    &self,
+    _path: &Path,
+    _preferred_language: Option<&str>,
+  ) -> Result<OcrResult, OcrError> {
+    Err(OcrError::EngineUnavailable)
+  }
 }
 
 #[cfg(target_os = "windows")]
 mod windows_ocr {
   use super::{OcrError, OcrResult};
   use std::path::Path;
-  use windows::core::HSTRING;
+  use windows::core::{HSTRING, Interface};
   use windows::Win32::System::Com::{CoInitializeEx, CoUninitialize, COINIT_MULTITHREADED};
+  use windows::Data::Pdf::{PdfDocument, PdfPage};
   use windows::Globalization::Language;
   use windows::Graphics::Imaging::{BitmapDecoder, BitmapPixelFormat, SoftwareBitmap};
   use windows::Media::Ocr::OcrEngine;
+  use windows::Storage::Streams::{InMemoryRandomAccessStream, IRandomAccessStream};
   use windows::Storage::{FileAccessMode, StorageFile};
 
   fn win_err(error: windows::core::Error) -> OcrError {
@@ -168,39 +201,46 @@ mod windows_ocr {
     }
   }
 
-  pub fn recognize(path: &Path, preferred_language: Option<&str>) -> Result<OcrResult, OcrError> {
-    // WinRT requires a COM apartment on the calling thread. The caller runs us
-    // on a blocking pool thread, so this never touches the UI thread.
-    let init = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
-    if let Err(error) = init.ok() {
-      return Err(win_err(error));
+  // COM apartment guard. WinRT requires an initialized COM apartment on the
+  // calling thread; the caller runs us on a blocking pool thread, so this
+  // never touches the UI thread.
+  struct MtaGuard(bool);
+  impl MtaGuard {
+    fn init() -> Result<Self, OcrError> {
+      let init = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
+      if let Err(error) = init.ok() {
+        return Err(win_err(error));
+      }
+      Ok(MtaGuard(init.0 == 0))
     }
-    let should_uninitialize = init.0 == 0;
-    struct MtaGuard(bool);
-    impl Drop for MtaGuard {
-      fn drop(&mut self) {
-        if self.0 {
-          unsafe {
-            CoUninitialize();
-          }
+  }
+  impl Drop for MtaGuard {
+    fn drop(&mut self) {
+      if self.0 {
+        unsafe {
+          CoUninitialize();
         }
       }
     }
-    let _guard = MtaGuard(should_uninitialize);
+  }
 
+  fn open_readable_stream(path: &Path) -> Result<IRandomAccessStream, OcrError> {
     let path_string = path.to_string_lossy();
     let file = StorageFile::GetFileFromPathAsync(&HSTRING::from(path_string.as_ref()))
       .map_err(win_err)?
       .get()
       .map_err(map_file_error)?;
 
-    let stream = file
+    file
       .OpenAsync(FileAccessMode::Read)
       .map_err(win_err)?
       .get()
-      .map_err(map_file_error)?;
+      .map_err(map_file_error)
+  }
 
-    let decoder = BitmapDecoder::CreateAsync(&stream)
+  // OCR is only allowed on a few pixel formats; BGRA8 premultiplied is safest.
+  fn to_bgra8(stream: &IRandomAccessStream) -> Result<SoftwareBitmap, OcrError> {
+    let decoder = BitmapDecoder::CreateAsync(stream)
       .map_err(|_error| OcrError::DecodeFailed)?
       .get()
       .map_err(|_error| OcrError::DecodeFailed)?;
@@ -211,14 +251,14 @@ mod windows_ocr {
       .get()
       .map_err(|_error| OcrError::DecodeFailed)?;
 
-    // OCR only accepts a few pixel formats; BGRA8 premultiplied is the safest.
-    let bitmap = SoftwareBitmap::Convert(&native_bitmap, BitmapPixelFormat::Bgra8)
-      .map_err(|_error| OcrError::DecodeFailed)?;
+    SoftwareBitmap::Convert(&native_bitmap, BitmapPixelFormat::Bgra8)
+      .map_err(|_error| OcrError::DecodeFailed)
+  }
 
-    let engine = select_engine(preferred_language)?;
-
+  // Runs the OCR engine on a single bitmap and returns (joined text, line count).
+  fn recognize_bitmap(engine: &OcrEngine, bitmap: &SoftwareBitmap) -> Result<(String, usize), OcrError> {
     let ocr = engine
-      .RecognizeAsync(&bitmap)
+      .RecognizeAsync(bitmap)
       .map_err(win_err)?
       .get()
       .map_err(win_err)?;
@@ -230,18 +270,88 @@ mod windows_ocr {
       let line = lines.GetAt(index as u32).map_err(win_err)?;
       parts.push(line.Text().map_err(win_err)?.to_string());
     }
+    Ok((parts.join("\n"), count))
+  }
 
-    let language_tag = engine
+  pub fn recognize(path: &Path, preferred_language: Option<&str>) -> Result<OcrResult, OcrError> {
+    let _guard = MtaGuard::init()?;
+    let stream = open_readable_stream(path)?;
+    let bitmap = to_bgra8(&stream)?;
+    let engine = select_engine(preferred_language)?;
+    let (text, lines_detected) = recognize_bitmap(&engine, &bitmap)?;
+
+    Ok(OcrResult {
+      text: super::normalize_ocr_text(&text),
+      language_tag: engine_language_tag(&engine),
+      lines_detected,
+    })
+  }
+
+  pub fn recognize_pdf(path: &Path, preferred_language: Option<&str>) -> Result<OcrResult, OcrError> {
+    let _guard = MtaGuard::init()?;
+    let stream = open_readable_stream(path)?;
+
+    let document = PdfDocument::LoadFromStreamAsync(&stream)
+      .map_err(win_err)?
+      .get()
+      .map_err(win_err)?;
+    let total_pages = document.PageCount().map_err(win_err)?;
+    let pages_to_ocr = super::cap_page_count(total_pages, super::PDF_OCR_MAX_PAGES);
+
+    let engine = select_engine(preferred_language)?;
+
+    let mut page_texts = Vec::with_capacity(pages_to_ocr as usize);
+    let mut lines_detected = 0usize;
+    let mut first_error: Option<OcrError> = None;
+
+    for index in 0..pages_to_ocr {
+      match ocr_page(&document, &engine, index) {
+        Ok((text, count)) => {
+          page_texts.push(text);
+          lines_detected += count;
+        }
+        Err(error) => {
+          // A single bad page should not discard the whole document.
+          if first_error.is_none() {
+            first_error = Some(error);
+          }
+        }
+      }
+    }
+
+    if page_texts.is_empty() {
+      return Err(first_error.unwrap_or(OcrError::DecodeFailed));
+    }
+
+    Ok(OcrResult {
+      text: super::normalize_ocr_text(&page_texts.join("\n\n")),
+      language_tag: engine_language_tag(&engine),
+      lines_detected,
+    })
+  }
+
+  // Rasterizes a single PDF page into a bitmap and OCRs it.
+  fn ocr_page(document: &PdfDocument, engine: &OcrEngine, index: u32) -> Result<(String, usize), OcrError> {
+    let page: PdfPage = document.GetPage(index).map_err(win_err)?;
+    let output = InMemoryRandomAccessStream::new().map_err(win_err)?;
+    page
+      .RenderToStreamAsync(&output)
+      .map_err(win_err)?
+      .get()
+      .map_err(win_err)?;
+    output.Seek(0).map_err(win_err)?;
+
+    let stream = output.cast::<IRandomAccessStream>().map_err(win_err)?;
+    let bitmap = to_bgra8(&stream)?;
+    recognize_bitmap(engine, &bitmap)
+  }
+
+  fn engine_language_tag(engine: &OcrEngine) -> Option<String> {
+    engine
       .RecognizerLanguage()
       .ok()
       .and_then(|language| language.LanguageTag().ok())
-      .map(|tag| tag.to_string());
-
-    Ok(OcrResult {
-      text: super::normalize_ocr_text(&parts.join("\n")),
-      language_tag,
-      lines_detected: count,
-    })
+      .map(|tag| tag.to_string())
   }
 
   fn select_engine(preferred_language: Option<&str>) -> Result<OcrEngine, OcrError> {
@@ -332,6 +442,15 @@ mod tests {
   #[test]
   fn normalize_preserves_inner_blanks_single() {
     assert_eq!(normalize_ocr_text("a\n\n\n\nb"), "a\n\nb");
+  }
+
+  #[test]
+  fn pdf_page_cap_is_bounded() {
+    assert_eq!(cap_page_count(0, PDF_OCR_MAX_PAGES), 0);
+    assert_eq!(cap_page_count(1, PDF_OCR_MAX_PAGES), 1);
+    assert_eq!(cap_page_count(10, PDF_OCR_MAX_PAGES), 10);
+    assert_eq!(cap_page_count(PDF_OCR_MAX_PAGES, PDF_OCR_MAX_PAGES), PDF_OCR_MAX_PAGES);
+    assert_eq!(cap_page_count(200, PDF_OCR_MAX_PAGES), PDF_OCR_MAX_PAGES);
   }
 
   #[cfg(target_os = "windows")]

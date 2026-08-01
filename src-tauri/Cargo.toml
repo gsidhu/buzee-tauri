@@ -76,6 +76,7 @@ tauri-plugin-os = "2.3.2"
 # Native Windows OCR (Windows.Media.Ocr via WinRT). Only compiled on Windows.
 [target.'cfg(target_os = "windows")'.dependencies]
 windows = { version = "0.58", features = [
+  "Data_Pdf",
   "Foundation",
   "Foundation_Collections",
   "Globalization",

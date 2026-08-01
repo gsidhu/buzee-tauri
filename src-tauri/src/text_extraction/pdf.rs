@@ -6,6 +6,8 @@ use pdf_extract::extract_text;
 // pdf-extract.
 #[cfg(feature = "ocr")]
 use crate::housekeeping::get_app_directory;
+#[cfg(all(target_os = "windows", feature = "ocr"))]
+use crate::text_extraction::win_ocr::ImageOcr;
 #[cfg(all(target_os = "macos", feature = "ocr"))]
 use crate::text_extraction::txt;
 #[cfg(all(target_os = "macos", feature = "ocr"))]
@@ -63,13 +65,15 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
 
     #[cfg(target_os = "windows")]
     {
-      // Native Windows OCR (Windows.Media.Ocr) only handles images, not PDFs.
-      // A scanned PDF without a text layer is deliberately left non-OCR'd: it
-      // stays indexed by name/path but is not full-text searchable. Non-fatal,
-      // so the general scan is not interrupted.
       let _ = app_directory;
-      println!("Scanned PDF without text layer is not OCR-able by native Windows OCR: {}", file);
-      Err("OcrUnavailableForPdf".into())
+      // Native Windows OCR rasterizes scanned PDFs page by page with
+      // Windows.Data.Pdf and OCRs each page with Windows.Media.Ocr.
+      let ocr_engine = crate::text_extraction::win_ocr::WindowsOcr;
+      let ocr_result = ocr_engine.recognize_pdf(Path::new(file), None)?;
+      if ocr_result.text.trim().is_empty() {
+        return Err("OcrUnavailableForPdf".into());
+      }
+      return Ok(ocr_result.text)
     }
 
     #[cfg(not(any(target_os = "macos", target_os = "windows")))]
