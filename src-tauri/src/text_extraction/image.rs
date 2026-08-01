@@ -1,15 +1,13 @@
 use std::{error::Error, fs::File, io::BufReader};
 
-// OCR sidecar (textra/winocr + Poppler) is opt-in via the `ocr` feature.
-// The default build only extracts text embedded in SVG files.
-#[cfg(feature = "ocr")]
+// OCR fallback (native WinRT on Windows, textra sidecar on macOS) is opt-in via
+// the `ocr` feature. The default build only extracts text embedded in SVG files.
+#[cfg(all(target_os = "macos", feature = "ocr"))]
 use crate::housekeeping::get_app_directory;
-#[cfg(feature = "ocr")]
+#[cfg(all(target_os = "macos", feature = "ocr"))]
 use crate::text_extraction::txt;
-#[cfg(feature = "ocr")]
+#[cfg(all(target_os = "macos", feature = "ocr"))]
 use tauri_plugin_shell::{ShellExt, process::CommandEvent};
-#[cfg(all(target_os = "windows", feature = "ocr"))]
-use crate::utils::install_poppler_from_github;
 
 pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
   // check if the file contains svg in its name
@@ -23,17 +21,33 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
     return Ok(text_based_content)
   }
 
-  // Fallback to OCR sidecars only when the `ocr` feature is enabled.
+  // Fallback to OCR only when the `ocr` feature is enabled.
   // With the default build, images without embedded text are not indexed
   // as full-text. This error is non-fatal: the scan continues and the document
   // stays searchable by name/path.
   #[cfg(feature = "ocr")]
   {
-    // run textra on the file and save the output to a temporary file
-    let app_directory = get_app_directory();
+    #[cfg(target_os = "windows")]
+    {
+      // Native Windows OCR (Windows.Media.Ocr). Runs on a blocking pool thread
+      // so the async runtime and the UI thread are never blocked.
+      use crate::text_extraction::win_ocr::{self, ImageOcr, OcrError, WindowsOcr};
+      let path = std::path::PathBuf::from(file);
+      let extension = win_ocr::image_extension(&path).unwrap_or_default();
+      if !win_ocr::is_supported_image(&extension) {
+        println!("Image format not supported by Windows OCR: {}", file);
+        return Err(Box::new(OcrError::UnsupportedFormat));
+      }
+      let ocr = WindowsOcr;
+      let result = tokio::task::spawn_blocking(move || ocr.recognize_image(&path, None))
+        .await
+        .map_err(|error| Box::new(error) as Box<dyn Error>)??;
+      return Ok(result.text);
+    }
 
     #[cfg(target_os = "macos")]
     {
+      let app_directory = get_app_directory();
       let output_path = format!("{}/temp_output.txt", app_directory);
 
       // run textra on the file
@@ -58,40 +72,8 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
       return Ok(text)
     }
 
-    #[cfg(target_os = "windows")]
-    {
-      let output_path = format!("{}\\temp_output.txt", app_directory);
-      let poppler_path = format!("{}\\poppler-24.02.0\\Library\\bin", app_directory);
-      let poppler_executable = format!("{}\\pdftoppm.exe", &poppler_path);
-
-      let poppler_exists = std::path::Path::new(&poppler_executable).exists();
-      println!("poppler exists: {}", poppler_exists);
-      if !poppler_exists {
-        let _ = install_poppler_from_github().await?;
-      }
-
-      // run winocr on the file
-      let sidecar_command = _app.shell().sidecar("winocr").unwrap().args(["-i", file, "-o", output_path.as_str(), "--poppler-path", poppler_path.as_str()]);
-      let (mut rx, mut _child) = sidecar_command.spawn().unwrap();
-
-      // LOGIC: so we just poll the stdout to keep the loop running till the extraction completes
-      while let Some(event) = rx.recv().await {
-        if let CommandEvent::Stdout(line) = event {
-          let _output_line = String::from_utf8(line).unwrap();
-        }
-      }
-
-      // read the temporary file
-      let temp_file_path = format!("{}\\temp_output.txt", app_directory);
-      let text = txt::extract(&temp_file_path, _app)?;
-
-      // return the extracted text
-      return Ok(text)
-    }
-
     #[cfg(not(any(target_os = "macos", target_os = "windows")))]
     {
-      let _ = app_directory;
       Err("OCR sidecars are not supported on this platform".into())
     }
   }
