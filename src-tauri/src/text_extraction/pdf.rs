@@ -1,13 +1,18 @@
 use std::{error::Error, path::Path};
-// use futures::TryFutureExt;
-use tauri_plugin_shell::{ShellExt, process::CommandEvent};
-use crate::housekeeping::get_app_directory;
-use crate::text_extraction::txt;
 use pdf_extract::extract_text;
-#[cfg(target_os = "windows")]
+
+// OCR sidecar (textra/winocr + Poppler) is opt-in via the `ocr` feature.
+// The default build only performs text-layer extraction with pdf-extract.
+#[cfg(feature = "ocr")]
+use crate::housekeeping::get_app_directory;
+#[cfg(feature = "ocr")]
+use crate::text_extraction::txt;
+#[cfg(feature = "ocr")]
+use tauri_plugin_shell::{ShellExt, process::CommandEvent};
+#[cfg(all(target_os = "windows", feature = "ocr"))]
 use crate::utils::install_poppler_from_github;
 
-pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
+pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
   println!("Extracting text from: {}", file);
   // check if the file contains pdf in its name
   let mut text_based_content = String::new();
@@ -20,7 +25,14 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
 
   if text_based_content != "false" && text_based_content.len() > 0 {
     return Ok(text_based_content)
-  } else {
+  }
+
+  // Fallback to OCR sidecars only when the `ocr` feature is enabled.
+  // With the default build, a scanned PDF without a text layer is not indexed
+  // as full-text. This error is non-fatal: the scan continues and the document
+  // stays searchable by name/path.
+  #[cfg(feature = "ocr")]
+  {
     println!("Running OCR based text extraction");
     // run textra on the file and save the output to a temporary file
     let app_directory = get_app_directory();
@@ -30,24 +42,22 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
       let output_path = format!("{}/temp_output.txt", app_directory);
 
       // run textra on the file
-      let sidecar_command = app.shell().sidecar("textra").unwrap().args([file, "-o", output_path.as_str()]);
+      let sidecar_command = _app.shell().sidecar("textra").unwrap().args([file, "-o", output_path.as_str()]);
       let (mut rx, mut _child) = sidecar_command.spawn().unwrap();
 
-      // let mut text = String::new();
+      // LOGIC:
+      // textra prints only the text to stdout, everything else goes to stderr
+      // but since we define an output file, there is no stdout
+      // so we just poll the stderr to keep the loop running till the extraction completes
       while let Some(event) = rx.recv().await {
-        // LOGIC:
-        // textra prints only the text to stdout, everything else goes to stderr
-        // but since we define an output file, there is no stdout
-        // so we just poll the stderr to keep the loop running till the extraction completes
         if let CommandEvent::Stderr(line) = event {
           let _output_line = String::from_utf8(line).unwrap();
-          // println!("textra stderr: {}", output_line);
         }
       }
 
       // read the temporary file
       let temp_file_path = format!("{}/temp_output.txt", app_directory);
-      let text = txt::extract(&temp_file_path, app)?;
+      let text = txt::extract(&temp_file_path, _app)?;
 
       // return the extracted text
       return Ok(text)
@@ -66,11 +76,11 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
       }
 
       // run winocr on the file
-      let sidecar_command = app.shell().sidecar("winocr").unwrap().args(["-i", file, "-o", output_path.as_str(), "--poppler-path", poppler_path.as_str()]);
+      let sidecar_command = _app.shell().sidecar("winocr").unwrap().args(["-i", file, "-o", output_path.as_str(), "--poppler-path", poppler_path.as_str()]);
       let (mut rx, mut _child) = sidecar_command.spawn().unwrap();
 
+      // LOGIC: so we just poll the stdout to keep the loop running till the extraction completes
       while let Some(event) = rx.recv().await {
-        // LOGIC: so we just poll the stdout to keep the loop running till the extraction completes
         if let CommandEvent::Stdout(line) = event {
           let _output_line = String::from_utf8(line).unwrap();
         }
@@ -78,21 +88,24 @@ pub async fn extract(file: &String, app: &tauri::AppHandle) -> Result<String, Bo
 
       // read the temporary file
       let temp_file_path = format!("{}\\temp_output.txt", app_directory);
-      let text = txt::extract(&temp_file_path, app)?;
+      let text = txt::extract(&temp_file_path, _app)?;
 
       // return the extracted text
       return Ok(text)
     }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+      let _ = app_directory;
+      Err("OCR sidecars are not supported on this platform".into())
+    }
+  }
+
+  #[cfg(not(feature = "ocr"))]
+  {
+    Err("OCR is disabled in this build; the PDF has no extractable text layer".into())
   }
 }
-
-// pub fn text_based_extraction(file: &String) -> Result<String, Box<dyn Error>> {
-//   let content = match extract_text(Path::new(file)) {
-//     Ok(content) => content,
-//     Err(e) => return Ok("false".to_string()),
-//   };
-//   Ok(content)
-// }
 
 use std::panic::{catch_unwind, AssertUnwindSafe};
 

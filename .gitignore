@@ -12,3 +12,7 @@ vite.config.ts.timestamp-*
 test.js
 .vs
 src-tauri/temp_output
+.tauri
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
+.aider*

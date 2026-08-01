@@ -12,10 +12,12 @@ extern crate mobi;
 extern crate epub;
 extern crate pdf_extract;
 extern crate regex;
+#[cfg(feature = "ocr")]
 extern crate reqwest;
 extern crate serde_json;
 extern crate tantivy;
 extern crate xml;
+#[cfg(feature = "ocr")]
 extern crate zip;
 extern crate csv;
 extern crate rusqlite;

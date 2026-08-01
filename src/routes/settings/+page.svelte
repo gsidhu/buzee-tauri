@@ -6,7 +6,6 @@
 	import { trackEvent } from '@aptabase/web';
 	import { invoke } from '@tauri-apps/api/core';
 	import { isMac, statusMessage, userPreferences, dbCreationInProgress, syncStatus } from '$lib/stores';
-	import { check } from '@tauri-apps/plugin-updater';
 	import { ask, open, message } from '@tauri-apps/plugin-dialog';
 	import * as Dialog from "$lib/components/ui/dialog";
   import Button from "$lib/components/ui/button/button.svelte";
@@ -216,41 +215,11 @@
 	}
 
 	async function checkForAppUpdates() {
-		// const update = { version: "v1.0.0", body: "buzee"};
-		const update = await check();
-		if (update === null) {
-			if ($isMac) {
-				await message('Failed to check for updates.\nPlease try again later.', {
-					title: 'Error',
-					kind: 'error',
-					okLabel: 'OK'
-				});
-				return;
-			} else {
-				await message('You are on the latest version. Stay awesome!', {
-					title: 'No Update Available',
-					kind: 'info',
-					okLabel: 'OK'
-				});
-			}
-		} else if (update.available) {
-			const yes = await ask(`Update to v${update.version} is available!\n\nRelease notes: ${update.body}`, {
-				title: 'Update Available',
-				kind: 'info',
-				okLabel: 'Update',
-				cancelLabel: 'Cancel'
-			});
-			if (yes) {
-				await update.downloadAndInstall();
-				await invoke("polite_restart");
-			}
-		} else {
-			await message('You are on the latest version. Stay awesome!', {
-				title: 'No Update Available',
-				kind: 'info',
-				okLabel: 'OK'
-			});
-		}
+		await message('Automatic updates are disabled in this build.', {
+			title: 'Updates Disabled',
+			kind: 'info',
+			okLabel: 'OK'
+		});
 	}
 
 	onMount(() => {
