@@ -2,43 +2,35 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 extern crate chrono;
-extern crate dotext;
+extern crate csv;
 extern crate diesel;
-extern crate futures;
-extern crate jfs;
-extern crate lazy_static;
+extern crate dirs;
+extern crate dotext;
+extern crate epub;
 extern crate log;
 extern crate mobi;
-extern crate epub;
 extern crate pdf_extract;
-extern crate regex;
-#[cfg(feature = "ocr")]
-extern crate reqwest;
+extern crate rusqlite;
 extern crate serde_json;
 extern crate tantivy;
 extern crate xml;
-#[cfg(feature = "ocr")]
-extern crate zip;
-extern crate csv;
-extern crate rusqlite;
-extern crate dirs;
 
-mod utils;
+mod arc_read;
+mod chrome_read;
+mod context_menu;
 mod custom_types;
-mod ipc;
-mod housekeeping;
 mod database;
 mod db_sync;
 mod drag;
-mod indexing;
-mod text_extraction;
-mod context_menu;
-mod user_prefs;
-mod tantivy_index;
-mod window;
 mod firefox_read;
-mod chrome_read;
-mod arc_read;
+mod housekeeping;
+mod indexing;
+mod ipc;
+mod tantivy_index;
+mod text_extraction;
+mod user_prefs;
+mod utils;
+mod window;
 
 fn main() {
   housekeeping::initialize();
