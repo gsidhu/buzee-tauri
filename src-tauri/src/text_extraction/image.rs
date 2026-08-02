@@ -11,12 +11,18 @@ use tauri_plugin_shell::{ShellExt, process::CommandEvent};
 
 use crate::text_extraction::win_ocr::{has_usable_text, OCR_FALLBACK_MIN_CHARS};
 
+#[cfg(all(target_os = "windows", feature = "ocr"))]
+const IMAGE_OCR_TIMEOUT_SECS: u64 = 60;
+
 pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
   // check if the file contains svg in its name
   let mut text_based_content = String::new();
 
   if file.to_lowercase().contains(".svg") {
-    text_based_content = extract_text_from_svg(file).unwrap_or_else(|_| String::new());
+    text_based_content = extract_text_from_svg(file).unwrap_or_else(|error| {
+      log::error!("Failed to extract text from SVG {}: {}", file, error);
+      String::new()
+    });
   }
 
   // If the SVG already yields usable text, skip OCR entirely.
@@ -42,12 +48,19 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
         return Err(Box::new(OcrError::UnsupportedFormat));
       }
       let ocr = WindowsOcr;
-      let result = tokio::task::spawn_blocking(move || ocr.recognize_image(&path, None))
-        .await
-        .map_err(|error| {
-          log::error!("OCR task panicked for {}: {}", file, error);
-          Box::new(error) as Box<dyn Error>
-        })??;
+      let result = tokio::time::timeout(
+        std::time::Duration::from_secs(IMAGE_OCR_TIMEOUT_SECS),
+        tokio::task::spawn_blocking(move || ocr.recognize_image(&path, None)),
+      )
+      .await
+      .map_err(|_elapsed| {
+        log::error!("Image OCR timed out after {}s: {}", IMAGE_OCR_TIMEOUT_SECS, file);
+        Box::new(std::io::Error::new(std::io::ErrorKind::TimedOut, "Image OCR timed out")) as Box<dyn Error>
+      })?
+      .map_err(|error| {
+        log::error!("OCR task panicked for {}: {}", file, error);
+        Box::new(error) as Box<dyn Error>
+      })??;
       if result.text.trim().is_empty() {
         log::info!("OCR produced no text for image: {}", file);
       }
@@ -96,7 +109,7 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
 fn extract_text_from_svg(file_path: &String) -> Result<String, Box<dyn Error>> {
   use xml::reader::{EventReader, XmlEvent};
   // Open the SVG file
-  let file = File::open(file_path).expect("Unable to open file");
+  let file = File::open(file_path)?;
   let file = BufReader::new(file);
 
   // Create an XML parser
@@ -124,15 +137,12 @@ fn extract_text_from_svg(file_path: &String) -> Result<String, Box<dyn Error>> {
               }
           }
           Err(e) => {
-              println!("Error: {}", e);
+              log::error!("Error parsing SVG {}: {}", file_path, e);
               break;
           }
           _ => {}
       }
   }
-
-  // Print the extracted text
-  println!("Extracted text: {}", extracted_text);
 
   Ok(extracted_text)
 }

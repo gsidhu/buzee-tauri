@@ -75,7 +75,7 @@ fn get_all_forbidden_directories() -> Vec<String> {
         ];
         all_forbidden_directories.extend(mac_forbidden_directories.iter().map(|&s| s.to_string()));
     }
-    println!("Forbidden directories: {:?}", all_forbidden_directories);
+    log::info!("Forbidden directories: {:?}", all_forbidden_directories);
     all_forbidden_directories
 }
 
@@ -196,7 +196,7 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
     let user_preferences = return_user_prefs_state(&app);
 
     for path in file_paths {
-      println!("Indexing file path: {}", path);
+      log::info!("Indexing file path: {}", path);
       let walk_dir = build_walk_dir(&path, all_forbidden_directories.clone());
       
       for entry in walk_dir {
@@ -210,7 +210,7 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
               .map(|ioe| ioe.kind() == std::io::ErrorKind::NotFound)
               .unwrap_or(false);
             if !is_not_found {
-              eprintln!("Error while walking directory: {} (path: {:?})", e, e.path());
+              log::error!("Error while walking directory: {} (path: {:?})", e, e.path());
             }
             continue;
           }
@@ -225,7 +225,7 @@ pub fn walk_directory(conn: &mut SqliteConnection, window: &tauri::WebviewWindow
             // files vanishing mid-scan (NotFound) and normal criteria skips are
             // expected, so keep those quiet; log the rest with the path
             if should_log_scan_skip(reason) {
-              eprintln!(
+              log::info!(
                 "Skipping {} during scan: {:?}",
                 entry_path.to_string_lossy(),
                 reason
@@ -360,7 +360,7 @@ pub fn add_file_metadata_to_database(files_array: &Vec<DocumentItem>, connection
 
     // handle existing files and update the database
     if files_to_update.len() > 0 {
-        println!(">>> Updating {} existing files", files_to_update.len());
+        log::info!(">>> Updating {} existing files", files_to_update.len());
         // for each file in existing_files only update the last_modified, last_opened and size fields
         for file in files_to_update {
             let _ = diesel::update(document::table.filter(document::path.eq(&file.path)))
@@ -379,11 +379,13 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   let mut files_parsed = 0;
 
   let document_filetypes = ["docx", "md", "pptx", "txt", "epub"];
-  let image_filetypes = ["png", "jpeg", "jpg"];
+  // Keep in sync with win_ocr::is_supported_image so every raster format that
+  // Windows OCR can decode is actually indexed.
+  let image_filetypes = ["png", "jpeg", "jpg", "bmp", "tif", "tiff"];
   let image_cutoff_size: f64 = 50_000.0;
 
-  println!("Document filetypes: {:?}", document_filetypes);
-  println!("Image filetypes: {:?}", image_filetypes);
+  log::info!("Document filetypes: {:?}", document_filetypes);
+  log::info!("Image filetypes: {:?}", image_filetypes);
 
   let ignored_items = get_all_ignored_paths(conn);
   let ignored_files: Vec<IgnoreList> = ignored_items.iter().filter(|item| !item.is_folder).cloned().collect();
@@ -405,11 +407,11 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     .load::<(i32, i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)>(conn)
     .unwrap();
   
-  println!("Not PDF files: {}", not_pdf_files_data.len());
+  log::info!("Not PDF files: {}", not_pdf_files_data.len());
   let mut all_files_data = not_pdf_files_data.clone();
 
   if user_preferences.parse_pdfs {
-    println!("Parsing PDFs and images");
+    log::info!("Parsing PDFs and images");
     // Get the same for all PDF files
     let pdf_files_data = document::table
       .inner_join(metadata::table.on(document::id.eq(metadata::source_id)))
@@ -428,8 +430,8 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
       .load::<(i32, i32, String, String, String, String, i64, i64, Option<String>, Option<f64>)>(conn)
       .unwrap();
     
-    println!("PDF files: {}", pdf_files_data.len());
-    println!("Image files: {}", image_files_data.len());
+    log::info!("PDF files: {}", pdf_files_data.len());
+    log::info!("Image files: {}", image_files_data.len());
     
     // Append the pdf_files_data to all_files_data
     all_files_data = all_files_data.into_iter().chain(pdf_files_data.into_iter()).collect();
@@ -472,6 +474,11 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
   let mut body_tantivy_source_ids: Vec<i32> = vec![];
   let mut body_file_chunk_cutoff = 500;
   let mut average_body_file_size = 0.0;
+  // Running sum/count used to compute the average over the files parsed since
+  // the last Tantivy commit. Dividing by the number of FILES (not the number of
+  // text chunks) keeps the average accurate regardless of how a file is chunked.
+  let mut body_file_size_sum = 0.0;
+  let mut body_file_size_count = 0f64;
 
   // Iterate over all_files_data and extract text from each file
   for file_item in all_files_data {
@@ -527,43 +534,44 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
       }
 
       body_tantivy_source_ids.push(source_id);
-      average_body_file_size += file_size.unwrap();
-      average_body_file_size = average_body_file_size / body_tantivy_items.len() as f64;
+      body_file_size_sum += file_size.unwrap_or(0.0);
+      body_file_size_count += 1.0;
+      average_body_file_size = body_file_size_sum / body_file_size_count;
       files_parsed += 1;
 
       if files_parsed % 50 == 0 {
-        println!(">>>>>>> {} files parsed <<<<<<<<<<", files_parsed);
+        log::info!("{} files parsed", files_parsed);
       }
 
       if files_parsed % 10 == 0 {
         if average_body_file_size >= 500_000.0 {
-          println!("Changing body_file_chunk_cutoff to 10");
+          log::info!("Changing body_file_chunk_cutoff to 10");
           body_file_chunk_cutoff = 10;
         } else if average_body_file_size >= 250_000.0 {
-          println!("Changing body_file_chunk_cutoff to 50");
+          log::info!("Changing body_file_chunk_cutoff to 50");
           body_file_chunk_cutoff = 50;
         } else {
-          println!("Changing body_file_chunk_cutoff to 500");
+          log::info!("Changing body_file_chunk_cutoff to 500");
           body_file_chunk_cutoff = 500;
         }
       }
 
       // if there are >= 500 items in body_tantivy_items, add them to the database and clear the array
       if body_tantivy_items.len() >= body_file_chunk_cutoff {
-        println!("Adding {} items to Tantivy Index", body_tantivy_items.len());
+        log::info!("Adding {} items to Tantivy Index", body_tantivy_items.len());
         // Delete all items from the Tantivy Index using source_ids
         let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&body_tantivy_source_ids);
         if indexing_commit_response.is_err() {
-          println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+          log::error!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
         } else {
-          println!("Successfully deleted files from Tantivy index");
+          log::info!("Successfully deleted files from Tantivy index");
         }
         // Add all body_tantivy_items to the Tantivy Index
         let indexing_commit_response = tantivy_index::add_docs_to_index(&body_tantivy_items);
         if indexing_commit_response.is_err() {
-          println!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
+          log::error!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
         } else {
-          println!("Successfully added files to Tantivy index");
+          log::info!("Successfully added files to Tantivy index");
         }
         // Add all body_items to the Body table
         add_body_to_database(&body_items, conn);
@@ -571,6 +579,8 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
         update_last_parsed_in_document_table(conn, body_tantivy_source_ids.clone());
         body_tantivy_items.clear();
         body_tantivy_source_ids.clear();
+        body_file_size_sum = 0.0;
+        body_file_size_count = 0.0;
         average_body_file_size = 0.0;
       }
     }
@@ -588,12 +598,12 @@ pub async fn parse_content_from_files(conn: &mut SqliteConnection, app: tauri::A
     // Delete all items from the Tantivy Index using source_ids
     let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&body_tantivy_source_ids);
     if indexing_commit_response.is_err() {
-      println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+      log::error!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
     }
     // Add all body_tantivy_items to the Tantivy Index
     let indexing_commit_response = tantivy_index::add_docs_to_index(&body_tantivy_items);
     if indexing_commit_response.is_err() {
-      println!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
+      log::error!("Error adding files to Tantivy Index: {:?}", indexing_commit_response);
     }
     // Add all body_items to the Body table
     add_body_to_database(&body_items, conn);
@@ -665,26 +675,43 @@ pub async fn extract_text_from_path(path: String, file_type: String, app: &tauri
   match extracted_text {
     Ok(text) => text,
     Err(e) => {
-      eprintln!("Error extracting text: {}", e);
+      log::error!("Error extracting text: {}", e);
       String::new()
     }
   }
 }
 
 fn chunk_text(text: String) -> Vec<String> {
-  // chunk the text into 2000 character chunks
+  const MAX_CHUNK_CHARS: usize = 2000;
+  // chunk the text into 2000 character chunks, never splitting a word across
+  // chunks so every word stays searchable in Tantivy. If a single word is
+  // longer than the limit it is kept intact on its own chunk rather than being
+  // cut in half.
   let mut chunks: Vec<String> = vec![];
   let mut chunk = String::new();
+
   for word in text.split_whitespace() {
-    if chunk.len() + word.len() < 2000 {
+    // +1 accounts for the space we append between words.
+    if chunk.is_empty() || chunk.len() + word.len() + 1 <= MAX_CHUNK_CHARS {
+      if !chunk.is_empty() {
+        chunk.push(' ');
+      }
       chunk.push_str(word);
-      chunk.push_str(" ");
     } else {
-      chunks.push(chunk);
-      chunk = String::new();
+      chunks.push(std::mem::take(&mut chunk));
+      if word.len() <= MAX_CHUNK_CHARS {
+        chunk.push_str(word);
+      } else {
+        // Oversized word: push it alone and keep the chunk empty for the next word.
+        chunks.push(word.to_string());
+      }
     }
   }
-  chunks.push(chunk);
+
+  if !chunk.is_empty() {
+    chunks.push(chunk);
+  }
+
   chunks
 }
 
@@ -704,7 +731,7 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
   let allowed_files: Vec<AllowList> = allowed_items.iter().filter(|item| !item.is_folder).cloned().collect();
   let allowed_folders: Vec<AllowList> = allowed_items.iter().filter(|item| item.is_folder).cloned().collect();
 
-  println!("All files: {}", &all_file_paths.len());
+  log::info!("All files: {}", &all_file_paths.len());
 
   let mut files_to_remove: Vec<String> = vec![];
   let mut files_to_remove_from_index_only: Vec<String> = vec![];
@@ -719,7 +746,7 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
         files_to_remove.push(path.clone());
       }
       Err(e) => {
-        eprintln!("Skipping removal of {} (metadata error: {})", path, e);
+        log::error!("Skipping removal of {} (metadata error: {})", path, e);
         continue;
       }
     }
@@ -749,8 +776,8 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
     }
   }
 
-  println!("Files to remove: {}", files_to_remove.len());
-  println!("Files to remove from index only: {}", files_to_remove_from_index_only.len());
+  log::info!("Files to remove: {}", files_to_remove.len());
+  log::info!("Files to remove from index only: {}", files_to_remove_from_index_only.len());
 
   if files_to_remove.len() > 0 {
     // create transactions of 500 files each
@@ -766,7 +793,7 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
     chunked_files_to_remove.push(chunk.clone());
     // remove files from the database
     for chunks_of_files_to_remove in chunked_files_to_remove {
-      println!("Removing {} files from chunk", chunks_of_files_to_remove.len());
+      log::info!("Removing {} files from chunk", chunks_of_files_to_remove.len());
       remove_vector_of_file_paths_from_db(&chunks_of_files_to_remove, conn, false);
     }
   }
@@ -785,7 +812,7 @@ pub fn remove_nonexistent_and_ignored_files(conn: &mut SqliteConnection) {
     chunked_files_to_remove.push(chunk.clone());
     // remove files from the database
     for chunks_of_files_to_remove in chunked_files_to_remove {
-      println!("Removing {} files from chunk", chunks_of_files_to_remove.len());
+      log::info!("Removing {} files from chunk", chunks_of_files_to_remove.len());
       remove_vector_of_file_paths_from_db(&chunks_of_files_to_remove, conn, true);
     }
   }
@@ -836,7 +863,7 @@ fn remove_vector_of_file_paths_from_db(file_paths: &Vec<String>, conn: &mut Sqli
   .unwrap();
   let indexing_commit_response = tantivy_index::delete_docs_from_index_with_ids(&document_ids);
   if indexing_commit_response.is_err() {
-    println!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
+    log::error!("Error deleting files from Tantivy Index: {:?}", indexing_commit_response);
   }  
 }
 
@@ -859,7 +886,7 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
     })
     .collect();
   
-  println!("All folders (= Num files): {}", all_folders.len());
+  log::info!("All folders (= Num files): {}", all_folders.len());
   // Get all existing folders from the database
   let existing_folders = document::table
     .select(document::path)
@@ -874,7 +901,7 @@ pub fn add_folders_to_db(conn: &mut SqliteConnection) {
       unique_folders.push(folder.to_string());
     }
   });
-  println!("Unique folders: {}", unique_folders.len());
+  log::info!("Unique folders: {}", unique_folders.len());
 
   if unique_folders.len() == 0 {
     return;
@@ -955,7 +982,7 @@ pub fn get_all_ignored_paths(conn: &mut SqliteConnection) -> Vec<IgnoreList> {
 }
 
 pub fn remove_paths_from_ignore_list(paths: Vec<String>, conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
-  println!("Removing {} paths from ignore_list", paths.len());
+  log::info!("Removing {} paths from ignore_list", paths.len());
   // remove paths from ignore_list
   conn.transaction::<_, diesel::result::Error, _>(|connection| {
     diesel::delete(ignore_list::table.filter(ignore_list::path.eq_any(paths)))
@@ -997,4 +1024,45 @@ pub fn clear_last_parsed_dates_from_db(conn: &mut SqliteConnection) {
     .set(body::last_parsed.eq(0))
     .execute(conn)
     .unwrap();
+}
+
+#[cfg(test)]
+mod chunk_tests {
+  use super::chunk_text;
+
+  #[test]
+  fn short_text_is_a_single_chunk() {
+    let chunks = chunk_text("the quick brown fox".to_string());
+    assert_eq!(chunks, vec!["the quick brown fox"]);
+  }
+
+  #[test]
+  fn long_text_is_split_into_bounded_chunks() {
+    // 100 words of 30 chars + spaces easily exceeds a 2000 char chunk.
+    let text = vec!["word"; 1000].join(" ");
+    let chunks = chunk_text(text);
+    assert!(chunks.len() > 1);
+    for chunk in &chunks {
+      assert!(chunk.chars().count() <= 2000, "chunk too long: {}", chunk.chars().count());
+    }
+  }
+
+  #[test]
+  fn words_are_never_split_across_chunks() {
+    // A single 5000-char word is placed on its own chunk untouched, not cut.
+    let long_word = "w".repeat(5000);
+    let text = format!("abc {} def", long_word);
+    let chunks = chunk_text(text);
+    assert!(chunks.iter().any(|chunk| chunk == &long_word));
+    // The other words must remain intact too.
+    let all: Vec<&str> = chunks.iter().map(|c| c.as_str()).collect();
+    assert!(all.iter().any(|c| c.contains("abc")));
+    assert!(all.iter().any(|c| c.contains("def")));
+  }
+
+  #[test]
+  fn empty_text_yields_no_chunks() {
+    assert!(chunk_text(String::new()).is_empty());
+    assert!(chunk_text("   \n\n  ".to_string()).is_empty());
+  }
 }

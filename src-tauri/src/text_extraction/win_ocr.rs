@@ -69,7 +69,9 @@ pub trait ImageOcr {
 // ---------------------------------------------------------------------------
 
 /// Minimum number of characters below which extraction falls back to OCR.
-pub const OCR_FALLBACK_MIN_CHARS: usize = 1;
+/// Set high enough to avoid treating a few residual characters from a corrupt
+/// text layer as "usable" and skipping OCR for an otherwise scanned document.
+pub const OCR_FALLBACK_MIN_CHARS: usize = 100;
 
 /// Returns `true` when the extracted text is useful enough to skip OCR.
 pub fn has_usable_text(text: &str, min_chars: usize) -> bool {
@@ -178,7 +180,7 @@ mod windows_ocr {
   use super::{OcrError, OcrResult};
   use std::path::Path;
   use windows::core::{HSTRING, Interface};
-  use windows::Win32::System::Com::{CoInitializeEx, CoUninitialize, COINIT_MULTITHREADED};
+  use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
   use windows::Data::Pdf::{PdfDocument, PdfPage};
   use windows::Globalization::Language;
   use windows::Graphics::Imaging::{BitmapDecoder, BitmapPixelFormat, SoftwareBitmap};
@@ -201,25 +203,30 @@ mod windows_ocr {
   }
 
   // COM apartment guard. WinRT requires an initialized COM apartment on the
-  // calling thread; the caller runs us on a blocking pool thread, so this
-  // never touches the UI thread.
-  struct MtaGuard(bool);
+  // calling thread; the caller runs us on blocking pool threads, so this never
+  // touches the UI thread. Because pool threads are long-lived and reused,
+  // COM is initialized lazily ONCE per thread (via `thread_local!`) instead of
+  // being torn down on every file, which removes the repeated init/teardown
+  // overhead without leaking apartments.
+  thread_local! {
+    // `true` once this thread has joined the MTA.
+    static COM_MTA_JOINED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+  }
+
+  struct MtaGuard;
   impl MtaGuard {
     fn init() -> Result<Self, OcrError> {
-      let init = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
-      if let Err(error) = init.ok() {
-        return Err(win_err(error));
-      }
-      Ok(MtaGuard(init.0 == 0))
-    }
-  }
-  impl Drop for MtaGuard {
-    fn drop(&mut self) {
-      if self.0 {
-        unsafe {
-          CoUninitialize();
+      if !COM_MTA_JOINED.with(|joined| joined.get()) {
+        let init = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
+        init.ok().map_err(win_err)?;
+        // S_OK(0) means this thread now joined the MTA; S_FALSE(1) means it was
+        // already in one (e.g. inherited). Only guard the teardown when we
+        // actually joined, so we never over-uninitialize.
+        if init.0 == 0 {
+          COM_MTA_JOINED.with(|joined| joined.set(true));
         }
       }
+      Ok(MtaGuard)
     }
   }
 
@@ -428,13 +435,17 @@ mod tests {
 
   #[test]
   fn ocr_fallback_threshold() {
-    assert!(!should_fallback_to_ocr("hello", OCR_FALLBACK_MIN_CHARS));
-    assert!(!should_fallback_to_ocr("  hello  ", OCR_FALLBACK_MIN_CHARS));
+    // "hello" is far below the 100-char threshold, so OCR fallback IS expected.
+    assert!(should_fallback_to_ocr("hello", OCR_FALLBACK_MIN_CHARS));
+    assert!(should_fallback_to_ocr("  hello  ", OCR_FALLBACK_MIN_CHARS));
+    assert!(!has_usable_text("hello", OCR_FALLBACK_MIN_CHARS));
     assert!(should_fallback_to_ocr("", OCR_FALLBACK_MIN_CHARS));
     assert!(should_fallback_to_ocr("   ", OCR_FALLBACK_MIN_CHARS));
     assert!(should_fallback_to_ocr("ab", 3));
+    assert!(!should_fallback_to_ocr("abcd", 3));
     assert!(!has_usable_text("", 1));
     assert!(has_usable_text("e", 1));
+    assert!(has_usable_text(&"x".repeat(100), OCR_FALLBACK_MIN_CHARS));
   }
 
   #[test]
