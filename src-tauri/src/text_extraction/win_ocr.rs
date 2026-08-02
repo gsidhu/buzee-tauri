@@ -313,9 +313,8 @@ mod windows_ocr {
       );
     }
 
-    let engine = select_engine(preferred_language)?;
-
     // Small PDFs: sequential (avoids spawn overhead).
+    let engine = select_engine(preferred_language)?;
     if pages_to_ocr <= 3 {
       let mut page_texts = Vec::with_capacity(pages_to_ocr as usize);
       let mut lines_detected = 0usize;
@@ -347,18 +346,23 @@ mod windows_ocr {
       });
     }
 
-    // Large PDFs: parallel OCR across pages.
-    // Each spawn_blocking task gets its own COM apartment, PdfDocument, and
-    // OcrEngine : no WinRT objects cross thread boundaries. The semaphore
-    // caps the number of concurrent OCR tasks to limit memory usage.
+    // Large PDFs: parallel OCR across pages, in batches.
+    // Each spawn_blocking batch task gets its own COM apartment, PdfDocument,
+    // and OcrEngine : no WinRT objects cross thread boundaries. The semaphore
+    // caps how many batches (and thus how many threads) run at once, and
+    // futures::join_all waits for all results. Page order is preserved because
+    // results are collected in the order the batches were spawned.
     recognize_pdf_parallel(path, preferred_language, pages_to_ocr)
   }
 
   // Maximum number of PDF pages to OCR concurrently. Each parallel task loads
   // the PDF and creates its own OcrEngine, so this bounds peak memory.
-  const MAX_PARALLEL_OCR_PAGES: usize = 4;
+  const MAX_PARALLEL_OCR_PAGES: usize = 8;
 
+  // OCRs `pages_to_ocr` PDF pages in small batches, each batch run on its own
+  // blocking-pool thread through `join_all`.
   fn recognize_pdf_parallel(path: &Path, preferred_language: Option<&str>, pages_to_ocr: u32) -> Result<OcrResult, OcrError> {
+    use futures::future::join_all;
     use tokio::sync::Semaphore;
 
     let semaphore = std::sync::Arc::new(Semaphore::new(MAX_PARALLEL_OCR_PAGES));
@@ -366,46 +370,61 @@ mod windows_ocr {
     let path_owned = path.to_path_buf();
     let rt = tokio::runtime::Handle::current();
 
-    // Acquire permits before spawning blocking tasks. Sequential acquisition
-    // ensures we never hold more than MAX_PARALLEL_OCR_PAGES permits, so the
-    // blocking pool is never saturated by waiting OCR tasks.
-    let mut handles: Vec<tokio::task::JoinHandle<Result<(String, usize), OcrError>>> =
-      Vec::with_capacity(pages_to_ocr as usize);
+    // Group pages into contiguous batches. Smaller PDFs get a single batch that
+    // runs sequentially on one thread; large PDFs fan out across many batches.
+    let batch_size = MAX_PARALLEL_OCR_PAGES as u32;
+    let batch_count = pages_to_ocr.div_ceil(batch_size);
+    let mut batches: Vec<(u32, u32)> = Vec::with_capacity(batch_count as usize);
+    for batch_index in 0..batch_count {
+      let start = batch_index * batch_size;
+      let end = (start + batch_size).min(pages_to_ocr);
+      batches.push((start, end));
+    }
 
-    for index in 0..pages_to_ocr {
-      let permit = rt.block_on(semaphore.clone().acquire_owned())
-        .map_err(|_| OcrError::WindowsApi("semaphore closed".into()))?;
+    // Spawn one blocking task per batch. The permit is acquired here (before
+    // spawning) so we never hold more than a bounded number of concurrent OCR
+    // tasks, keeping the blocking pool from being saturated.
+    let mut handles: Vec<tokio::task::JoinHandle<Result<(String, usize), OcrError>>> =
+      Vec::with_capacity(batch_count as usize);
+
+    for (start, end) in batches {
+      let permit = rt
+        .block_on(semaphore.clone().acquire_owned())
+        .map_err(|_| OcrError::WindowsApi("OCR semaphore closed".into()))?;
       let pref = preferred.clone();
       let p = path_owned.clone();
 
       handles.push(tokio::task::spawn_blocking(move || {
-        let _permit = permit; // held until task completes
-        ocr_page_task(&p, pref.as_deref(), index)
+        let _permit = permit; // held until the batch completes
+        ocr_page_batch_task(&p, pref.as_deref(), start, end)
       }));
     }
 
-    // We are on a blocking pool thread (caller used spawn_blocking), so
-    // blocking on JoinHandles is safe and expected.
+    // We are on a blocking pool thread (caller wrapped us in spawn_blocking), so
+    // blocking on join_all is safe and expected; it waits for every batch.
+    let batch_results: Vec<Result<Result<(String, usize), OcrError>, tokio::task::JoinError>> =
+      rt.block_on(join_all(handles));
+
     let mut page_texts = Vec::with_capacity(pages_to_ocr as usize);
     let mut lines_detected = 0usize;
     let mut first_error: Option<OcrError> = None;
 
-    for handle in handles {
-      match rt.block_on(handle) {
+    for result in batch_results {
+      match result {
         Ok(Ok((text, count))) => {
           page_texts.push(text);
           lines_detected += count;
         }
         Ok(Err(error)) => {
-          log::warn!("OCR page task failed for {}: {}", path.display(), error);
+          log::warn!("OCR batch failed for {}: {}", path.display(), error);
           if first_error.is_none() {
             first_error = Some(error);
           }
         }
         Err(join_error) => {
-          log::warn!("OCR page task panicked for {}: {}", path.display(), join_error);
+          log::warn!("OCR batch task panicked for {}: {}", path.display(), join_error);
           if first_error.is_none() {
-            first_error = Some(OcrError::WindowsApi("page task panicked".into()));
+            first_error = Some(OcrError::WindowsApi("batch task panicked".into()));
           }
         }
       }
@@ -422,9 +441,15 @@ mod windows_ocr {
     })
   }
 
-  // Self-contained page OCR: each task has its own COM, PdfDocument, OcrEngine.
-  // Safe to call from any thread : no WinRT objects are shared.
-  fn ocr_page_task(path: &Path, preferred_language: Option<&str>, index: u32) -> Result<(String, usize), OcrError> {
+  // OCRs a contiguous page range [start, end) sequentially on the calling
+  // thread, using its own COM handle, PdfDocument and OcrEngine. Safe to call
+  // from any thread : no WinRT objects are shared.
+  fn ocr_page_batch_task(
+    path: &Path,
+    preferred_language: Option<&str>,
+    start: u32,
+    end: u32,
+  ) -> Result<(String, usize), OcrError> {
     let _guard = MtaGuard::init()?;
     let stream = open_readable_stream(path)?;
     let document = PdfDocument::LoadFromStreamAsync(&stream)
@@ -432,7 +457,31 @@ mod windows_ocr {
       .get()
       .map_err(win_err)?;
     let engine = select_engine(preferred_language)?;
-    ocr_page(&document, &engine, index)
+
+    let mut page_texts = Vec::with_capacity((end - start) as usize);
+    let mut lines_detected = 0usize;
+    let mut first_error: Option<OcrError> = None;
+
+    for index in start..end {
+      match ocr_page(&document, &engine, index) {
+        Ok((text, count)) => {
+          page_texts.push(text);
+          lines_detected += count;
+        }
+        Err(error) => {
+          log::warn!("OCR failed for page {} of {}: {}", index + 1, path.display(), error);
+          if first_error.is_none() {
+            first_error = Some(error);
+          }
+        }
+      }
+    }
+
+    if page_texts.is_empty() {
+      return Err(first_error.unwrap_or(OcrError::DecodeFailed));
+    }
+
+    Ok((page_texts.join("\n\n"), lines_detected))
   }
 
   // Rasterizes a single PDF page into a bitmap and OCRs it.
