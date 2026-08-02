@@ -241,6 +241,8 @@ pub(crate) struct UserPreferencesState {
   pub roadmap_survey_answered: bool,
   pub parse_pdfs: bool,
   pub manual_setup: bool,
+  pub enable_logs: bool,
+  pub pdf_max_ocr_pages: i64,
 }
 
 impl Default for UserPreferencesState {
@@ -257,7 +259,9 @@ impl Default for UserPreferencesState {
           detailed_scan: true,
           roadmap_survey_answered: false,
           parse_pdfs: true,
-          manual_setup: false
+          manual_setup: false,
+          enable_logs: false,
+          pdf_max_ocr_pages: 150,
         }
     }
 }

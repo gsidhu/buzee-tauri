@@ -63,11 +63,11 @@ pub async fn extract_text_from_pdf(file_path: String, conn: &mut SqliteConnectio
   // check if file_path's text already exists in the tantivy index by calling get_parsed_text_for_file
   let mut text = vec![];
   // first, get the file's ID from the document table in the database
-  let file_id = get_file_id_from_path(&file_path, conn).unwrap();
+  let file_id = get_file_id_from_path(&file_path, conn).unwrap_or(0);
   if file_id > 0 {
-    text = get_parsed_text_for_file(file_id, conn).unwrap();
+    text = get_parsed_text_for_file(file_id, conn).unwrap_or_default();
   } 
-  
+
   if text.is_empty() {
     // otherwise call extract_text_from_path
     let extracted_text = extract_text_from_path(file_path, "pdf".to_string(), app).await;

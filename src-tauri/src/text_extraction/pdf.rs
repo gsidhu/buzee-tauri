@@ -1,13 +1,15 @@
 use std::{error::Error, path::Path};
 use pdf_extract::extract_text;
 
+use crate::text_extraction::win_ocr::{has_usable_text, should_fallback_to_ocr, OCR_FALLBACK_MIN_CHARS};
+
 // OCR fallback (native WinRT on Windows, textra sidecar on macOS) is opt-in via
 // the `ocr` feature. The default build only performs text-layer extraction with
 // pdf-extract.
 #[cfg(feature = "ocr")]
 use crate::housekeeping::get_app_directory;
 #[cfg(all(target_os = "windows", feature = "ocr"))]
-use crate::text_extraction::win_ocr::ImageOcr;
+use crate::user_prefs::get_pdf_max_ocr_pages;
 #[cfg(all(target_os = "macos", feature = "ocr"))]
 use crate::text_extraction::txt;
 #[cfg(all(target_os = "macos", feature = "ocr"))]
@@ -20,11 +22,16 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
   if file.to_lowercase().contains(".pdf") {
     text_based_content = match text_based_extraction(file) {
         Ok(content) => content,
-        Err(_) => "false".to_string(),
+        Err(_) => String::new(),
     };
   }
 
-  if text_based_content != "false" && text_based_content.len() > 0 {
+  // If the native text layer already yields usable text, skip OCR entirely.
+  if has_usable_text(&text_based_content, OCR_FALLBACK_MIN_CHARS) {
+    return Ok(text_based_content)
+  }
+
+  if !should_fallback_to_ocr(&text_based_content, OCR_FALLBACK_MIN_CHARS) {
     return Ok(text_based_content)
   }
 
@@ -67,13 +74,23 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
     {
       let _ = app_directory;
       // Native Windows OCR rasterizes scanned PDFs page by page with
-      // Windows.Data.Pdf and OCRs each page with Windows.Media.Ocr.
-      let ocr_engine = crate::text_extraction::win_ocr::WindowsOcr;
-      let ocr_result = ocr_engine.recognize_pdf(Path::new(file), None)?;
-      if ocr_result.text.trim().is_empty() {
+      // Windows.Data.Pdf and OCRs each page with Windows.Media.Ocr. The blocking
+      // WinRT calls run on a dedicated blocking thread so the async runtime and
+      // the UI thread are never blocked.
+      use crate::text_extraction::win_ocr::{self, ImageOcr};
+      let path_buf = std::path::PathBuf::from(file);
+      let max_pages = get_pdf_max_ocr_pages(_app) as u32;
+      let result = tokio::task::spawn_blocking(move || {
+        let ocr_engine = win_ocr::WindowsOcr;
+        ocr_engine.recognize_pdf(&path_buf, None, max_pages)
+      })
+      .await
+      .map_err(|error| Box::new(error) as Box<dyn Error>)??;
+
+      if result.text.trim().is_empty() {
         return Err("OcrUnavailableForPdf".into());
       }
-      return Ok(ocr_result.text)
+      return Ok(result.text)
     }
 
     #[cfg(not(any(target_os = "macos", target_os = "windows")))]

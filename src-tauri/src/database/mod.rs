@@ -14,6 +14,8 @@ use queries::{
   BODY_TABLE_CREATE_STATEMENT,
   TRIGGER_INSERT_DOCUMENT_METADATA, TRIGGER_UPDATE_DOCUMENT_METADATA,
   USER_PREFS_TABLE_CREATE_STATEMENT,
+  USER_PREFS_TABLE_ALTER_ADD_ENABLE_LOGS,
+  USER_PREFS_TABLE_ALTER_ADD_MAX_OCR_PAGES,
   APP_DATA_TABLE_CREATE_STATEMENT,
   IGNORE_LIST_TABLE_CREATE_STATEMENT,
   ALLOW_LIST_TABLE_CREATE_STATEMENT,
@@ -96,9 +98,12 @@ pub fn establish_direct_connection_to_db() -> SqliteConnection {
 pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize, diesel::result::Error> {
   // User Prefs and App Data Tables
   diesel::sql_query(USER_PREFS_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  // Best-effort migrations for pre-existing databases (no-op if the columns already exist)
+  let _ = diesel::sql_query(USER_PREFS_TABLE_ALTER_ADD_ENABLE_LOGS.to_string()).execute(conn);
+  let _ = diesel::sql_query(USER_PREFS_TABLE_ALTER_ADD_MAX_OCR_PAGES.to_string()).execute(conn);
   diesel::sql_query(APP_DATA_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
-  diesel::sql_query(ALLOW_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(IGNORE_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(ALLOW_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(FILE_TYPES_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   
   // Data Tables

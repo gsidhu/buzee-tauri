@@ -60,6 +60,7 @@ pub trait ImageOcr {
     &self,
     path: &Path,
     preferred_language: Option<&str>,
+    max_pages: u32,
   ) -> Result<OcrResult, OcrError>;
 }
 
@@ -69,10 +70,6 @@ pub trait ImageOcr {
 
 /// Minimum number of characters below which extraction falls back to OCR.
 pub const OCR_FALLBACK_MIN_CHARS: usize = 1;
-
-/// Upper bound on how many pages of a scanned PDF are OCR-ed. Rasterizing and
-/// OCR-ing a whole document is expensive, so very large scans are truncated.
-pub const PDF_OCR_MAX_PAGES: u32 = 50;
 
 /// Returns `true` when the extracted text is useful enough to skip OCR.
 pub fn has_usable_text(text: &str, min_chars: usize) -> bool {
@@ -85,7 +82,7 @@ pub fn should_fallback_to_ocr(extracted_text: &str, min_chars: usize) -> bool {
   !has_usable_text(extracted_text, min_chars)
 }
 
-/// Clamps a PDF page count to `PDF_OCR_MAX_PAGES`.
+/// Clamps a PDF page count to an upper bound.
 pub fn cap_page_count(page_count: u32, max: u32) -> u32 {
   page_count.min(max)
 }
@@ -145,8 +142,9 @@ impl ImageOcr for WindowsOcr {
     &self,
     path: &Path,
     preferred_language: Option<&str>,
+    max_pages: u32,
   ) -> Result<OcrResult, OcrError> {
-    windows_ocr::recognize_pdf(path, preferred_language)
+    windows_ocr::recognize_pdf(path, preferred_language, max_pages)
   }
 }
 
@@ -169,6 +167,7 @@ impl ImageOcr for WindowsOcr {
     &self,
     _path: &Path,
     _preferred_language: Option<&str>,
+    _max_pages: u32,
   ) -> Result<OcrResult, OcrError> {
     Err(OcrError::EngineUnavailable)
   }
@@ -287,7 +286,7 @@ mod windows_ocr {
     })
   }
 
-  pub fn recognize_pdf(path: &Path, preferred_language: Option<&str>) -> Result<OcrResult, OcrError> {
+  pub fn recognize_pdf(path: &Path, preferred_language: Option<&str>, max_pages: u32) -> Result<OcrResult, OcrError> {
     let _guard = MtaGuard::init()?;
     let stream = open_readable_stream(path)?;
 
@@ -296,7 +295,16 @@ mod windows_ocr {
       .get()
       .map_err(win_err)?;
     let total_pages = document.PageCount().map_err(win_err)?;
-    let pages_to_ocr = super::cap_page_count(total_pages, super::PDF_OCR_MAX_PAGES);
+    let pages_to_ocr = super::cap_page_count(total_pages, max_pages);
+
+    if pages_to_ocr < total_pages {
+      log::info!(
+        "PDF {} has {} pages; OCR will only process the first {} pages",
+        path.display(),
+        total_pages,
+        pages_to_ocr
+      );
+    }
 
     let engine = select_engine(preferred_language)?;
 
@@ -312,6 +320,12 @@ mod windows_ocr {
         }
         Err(error) => {
           // A single bad page should not discard the whole document.
+          log::warn!(
+            "OCR failed for page {} of {}: {}",
+            index + 1,
+            path.display(),
+            error
+          );
           if first_error.is_none() {
             first_error = Some(error);
           }
@@ -446,11 +460,11 @@ mod tests {
 
   #[test]
   fn pdf_page_cap_is_bounded() {
-    assert_eq!(cap_page_count(0, PDF_OCR_MAX_PAGES), 0);
-    assert_eq!(cap_page_count(1, PDF_OCR_MAX_PAGES), 1);
-    assert_eq!(cap_page_count(10, PDF_OCR_MAX_PAGES), 10);
-    assert_eq!(cap_page_count(PDF_OCR_MAX_PAGES, PDF_OCR_MAX_PAGES), PDF_OCR_MAX_PAGES);
-    assert_eq!(cap_page_count(200, PDF_OCR_MAX_PAGES), PDF_OCR_MAX_PAGES);
+    assert_eq!(cap_page_count(0, 150), 0);
+    assert_eq!(cap_page_count(1, 150), 1);
+    assert_eq!(cap_page_count(10, 150), 10);
+    assert_eq!(cap_page_count(150, 150), 150);
+    assert_eq!(cap_page_count(200, 150), 150);
   }
 
   #[cfg(target_os = "windows")]

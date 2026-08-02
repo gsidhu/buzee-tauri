@@ -29,6 +29,8 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
         user_preferences::roadmap_survey_answered.eq(false),
         user_preferences::parse_pdfs.eq(true),
         user_preferences::manual_setup.eq(false),
+        user_preferences::enable_logs.eq(false),
+        user_preferences::pdf_max_ocr_pages.eq(150),
       ))
       .execute(conn)
       .unwrap();
@@ -54,6 +56,8 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
       roadmap_survey_answered: false,
       parse_pdfs: true,
       manual_setup: false,
+      enable_logs: false,
+      pdf_max_ocr_pages: 150,
     };
     // insert new_user_prefs into the user_prefs table
     diesel::insert_into(user_preferences::table)
@@ -223,7 +227,9 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
       user_preferences::detailed_scan,
       user_preferences::roadmap_survey_answered,
       user_preferences::parse_pdfs,
-      user_preferences::manual_setup
+      user_preferences::manual_setup,
+      user_preferences::enable_logs,
+      user_preferences::pdf_max_ocr_pages
     ))
     .first::<UserPrefs>(&mut conn)
     .expect("Error loading user_prefs");
@@ -241,6 +247,8 @@ pub fn set_user_preferences_state_from_db_value(app: &tauri::AppHandle) {
   state.roadmap_survey_answered = user_preferences_from_db.roadmap_survey_answered;
   state.parse_pdfs = user_preferences_from_db.parse_pdfs;
   state.manual_setup = user_preferences_from_db.manual_setup;
+  state.enable_logs = user_preferences_from_db.enable_logs;
+  state.pdf_max_ocr_pages = user_preferences_from_db.pdf_max_ocr_pages;
 }
 
 pub fn fix_global_shortcut_string(new_shortcut_string: String) -> String {
@@ -326,6 +334,37 @@ pub fn set_manual_setup_flag_in_db(flag: bool, app: &tauri::AppHandle) {
   let mut conn = establish_connection(&app);
   let _ = diesel::update(user_preferences::table)
     .set(user_preferences::manual_setup.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn set_enable_logs_flag_in_db(flag: bool, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::enable_logs.eq(flag))
+    .execute(&mut conn)
+    .unwrap();
+}
+
+pub fn get_enable_logs_flag(conn: &mut SqliteConnection) -> bool {
+  use crate::database::schema::user_preferences as prefs;
+  match prefs::table
+    .select(prefs::enable_logs)
+    .first::<bool>(conn)
+  {
+    Ok(flag) => flag,
+    Err(_) => false,
+  }
+}
+
+pub fn get_pdf_max_ocr_pages(app: &tauri::AppHandle) -> i64 {
+  return_user_prefs_state(app).pdf_max_ocr_pages.max(1)
+}
+
+pub fn set_pdf_max_ocr_pages_in_db(pages: i64, app: &tauri::AppHandle) {
+  let mut conn = establish_connection(&app);
+  let _ = diesel::update(user_preferences::table)
+    .set(user_preferences::pdf_max_ocr_pages.eq(pages))
     .execute(&mut conn)
     .unwrap();
 }

@@ -30,6 +30,8 @@
 	let clearIndexDialogOpen = false;
 	let rescanDialogOpen = false;
 	let rescanInProgress = false;
+	let enableLogs: boolean;
+	let pdfMaxOcrPages: number;
 
 	function setKeydownHandlerOnGlobalShortuctInput(event: KeyboardEvent) {
 		console.log("~>>! pressed:", event.key);
@@ -112,6 +114,28 @@
 		setTimeout(() => {$statusMessage = "";}, 3000);
 		invoke("set_user_preference", {key: "parse_pdfs", value: parsePDF}).then(() => {
 			console.log("Set parsePDF flag to: " + parsePDF);
+		});
+	}
+
+	function toggleEnableLogs() {
+		enableLogs = !enableLogs;
+		trackEvent('click:toggleEnableLogs', { enableLogs });
+		$statusMessage = enableLogs
+			? `Logging enabled. Restart the app to start writing logs.`
+			: `Logging disabled. Restart the app to stop writing logs.`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
+		invoke("set_user_preference", {key: "enable_logs", value: enableLogs}).then(() => {
+			console.log("Set enable logs flag to: " + enableLogs);
+		});
+	}
+
+	function updatePdfMaxOcrPages() {
+		if (pdfMaxOcrPages < 1) pdfMaxOcrPages = 1;
+		trackEvent('click:updatePdfMaxOcrPages', { pdfMaxOcrPages });
+		$statusMessage = `Setting changed. Restart the app to take effect.`;
+		setTimeout(() => {$statusMessage = "";}, 3000);
+		invoke("set_pdf_max_ocr_pages", { pages: pdfMaxOcrPages }).then(() => {
+			console.log("Set PDF max OCR pages to: " + pdfMaxOcrPages);
 		});
 	}
 
@@ -294,6 +318,8 @@
 			detailedScanEnabled = $userPreferences.detailed_scan;
 			parsePDF = $userPreferences.parse_pdfs;
 			manualSetupMode = $userPreferences.manual_setup;
+			enableLogs = $userPreferences.enable_logs;
+			pdfMaxOcrPages = $userPreferences.pdf_max_ocr_pages;
 		});
 	});
 </script>
@@ -514,6 +540,39 @@
 			</td>
 			<td>
 				<PopoverIcon title="Disabling this setting may improve the quality of search results but make the app buggy"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<Switch class="hover:data-[state=checked]:bg-violet-500" bind:checked={enableLogs} on:click={() => toggleEnableLogs()} />
+			</td>
+			<td class="py-2 skip-hover">
+				Enable Logging
+				<div class="flex items-center small-explanation gap-1">
+					<div>Writes diagnostic logs to a file in the app data directory. Requires an app restart.</div>
+				</div>
+			</td>
+			<td>
+				<PopoverIcon title="Logs are stored as buzee.log in the app data folder and are useful for troubleshooting."/>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-center px-2">
+				<Button variant="outline" size="sm" type="button" on:click={() => updatePdfMaxOcrPages()}>Save</Button>
+			</td>
+			<td class="py-2 skip-hover">
+				Max OCR Pages per PDF
+				<div class="flex items-center small-explanation gap-1">
+					<div>Maximum number of pages of a scanned PDF that are OCR-ed. Larger values give better results but take longer.</div>
+				</div>
+			</td>
+			<td class="w-32">
+				<Input
+					type="number"
+					min="1"
+					bind:value={pdfMaxOcrPages}
+					class="h-9 w-full"
+				/>
 			</td>
 		</tr>
 		<tr class="hover:text-red-500">

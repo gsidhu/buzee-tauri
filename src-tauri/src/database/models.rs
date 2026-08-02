@@ -23,6 +23,8 @@ pub struct UserPrefs {
     pub roadmap_survey_answered: bool,
     pub parse_pdfs: bool,
     pub manual_setup: bool,
+    pub enable_logs: bool,
+    pub pdf_max_ocr_pages: i64,
 }
 
 // This struct is for CRUD on the app_data table

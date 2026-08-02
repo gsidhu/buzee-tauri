@@ -12,7 +12,7 @@ use crate::database::search::{
 use crate::db_sync::{run_sync_operation, sync_status, add_specific_folders};
 use crate::housekeeping::get_app_directory;
 use crate::indexing::{add_path_to_ignore_list, all_allowed_filetypes, clear_last_parsed_dates_from_db, get_all_ignored_paths, remove_nonexistent_and_ignored_files, remove_paths_from_ignore_list};
-use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_manual_setup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_roadmap_survey_answered_flag_in_db, set_show_search_suggestions_flag_in_db, set_parse_pdfs_flag_in_db, set_user_preferences_state_from_db_value};
+use crate::user_prefs::{fix_global_shortcut_string, get_global_shortcut, get_modifiers_and_code_from_global_shortcut, is_global_shortcut_enabled, return_user_prefs_state, set_automatic_background_sync_flag_in_db, set_default_user_prefs, set_detailed_scan_flag_in_db, set_global_shortcut_flag_in_db, set_launch_at_startup_flag_in_db, set_manual_setup_flag_in_db, set_new_global_shortcut_in_db, set_onboarding_done_flag_in_db, set_roadmap_survey_answered_flag_in_db, set_show_search_suggestions_flag_in_db, set_parse_pdfs_flag_in_db, set_enable_logs_flag_in_db, set_pdf_max_ocr_pages_in_db, set_user_preferences_state_from_db_value};
 use crate::utils::{extract_text_from_pdf, graceful_restart, read_image_to_base64, read_text_from_file, save_text_to_file};
 use crate::window::hide_or_show_window;
 use serde_json;
@@ -382,6 +382,10 @@ async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::Ap
       set_manual_setup_flag_in_db(value, &app_handle);
       set_user_preferences_state_from_db_value(&app_handle);
     }
+    "enable_logs" => {
+      set_enable_logs_flag_in_db(value, &app_handle);
+      set_user_preferences_state_from_db_value(&app_handle);
+    }
     "global_shortcut_enabled" => {
       set_global_shortcut_flag_in_db(value, &app_handle);
       set_user_preferences_state_from_db_value(&app_handle);
@@ -391,6 +395,15 @@ async fn set_user_preference(window: tauri::WebviewWindow, app_handle: tauri::Ap
       println!("Invalid key");
     } 
   }
+}
+
+// Set the maximum number of pages to OCR for scanned PDFs
+#[tauri::command]
+fn set_pdf_max_ocr_pages(app_handle: tauri::AppHandle, pages: i64) {
+  println!("Setting pdf max OCR pages to {}", pages);
+  let pages = pages.clamp(1, 5000);
+  set_pdf_max_ocr_pages_in_db(pages, &app_handle);
+  set_user_preferences_state_from_db_value(&app_handle);
 }
 
 // Set new global shortcut in DB and update the global shortcut
@@ -499,6 +512,7 @@ pub fn initialize() {
       open_quicklook,
       open_context_menu,
       set_user_preference,
+      set_pdf_max_ocr_pages,
       set_new_global_shortcut,
       crate::drag::start_drag,
       get_user_preferences_state,

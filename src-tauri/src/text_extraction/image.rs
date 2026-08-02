@@ -9,15 +9,18 @@ use crate::text_extraction::txt;
 #[cfg(all(target_os = "macos", feature = "ocr"))]
 use tauri_plugin_shell::{ShellExt, process::CommandEvent};
 
+use crate::text_extraction::win_ocr::{has_usable_text, OCR_FALLBACK_MIN_CHARS};
+
 pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, Box<dyn Error>> {
   // check if the file contains svg in its name
   let mut text_based_content = String::new();
 
   if file.to_lowercase().contains(".svg") {
-    text_based_content = extract_text_from_svg(file).unwrap_or_else(|_| "false".to_string());
+    text_based_content = extract_text_from_svg(file).unwrap_or_else(|_| String::new());
   }
 
-  if text_based_content != "false" && text_based_content.len() > 0 {
+  // If the SVG already yields usable text, skip OCR entirely.
+  if has_usable_text(&text_based_content, OCR_FALLBACK_MIN_CHARS) {
     return Ok(text_based_content)
   }
 
@@ -35,13 +38,19 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
       let path = std::path::PathBuf::from(file);
       let extension = win_ocr::image_extension(&path).unwrap_or_default();
       if !win_ocr::is_supported_image(&extension) {
-        println!("Image format not supported by Windows OCR: {}", file);
+        log::info!("Image format not supported by Windows OCR: {}", file);
         return Err(Box::new(OcrError::UnsupportedFormat));
       }
       let ocr = WindowsOcr;
       let result = tokio::task::spawn_blocking(move || ocr.recognize_image(&path, None))
         .await
-        .map_err(|error| Box::new(error) as Box<dyn Error>)??;
+        .map_err(|error| {
+          log::error!("OCR task panicked for {}: {}", file, error);
+          Box::new(error) as Box<dyn Error>
+        })??;
+      if result.text.trim().is_empty() {
+        log::info!("OCR produced no text for image: {}", file);
+      }
       return Ok(result.text);
     }
 

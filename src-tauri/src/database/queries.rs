@@ -256,13 +256,25 @@ pub const USER_PREFS_TABLE_CREATE_STATEMENT : &str = r#"
     detailed_scan BOOLEAN NOT NULL DEFAULT 1,
     roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0,
     parse_pdfs BOOLEAN NOT NULL DEFAULT 1,
-    manual_setup BOOLEAN NOT NULL DEFAULT 0
+    manual_setup BOOLEAN NOT NULL DEFAULT 0,
+    enable_logs BOOLEAN NOT NULL DEFAULT 0,
+    pdf_max_ocr_pages BIGINT NOT NULL DEFAULT 150
   );
 "#;
 
 pub const _USER_PREFS_TABLE_ALTER_STATEMENT_V_0_2_0 : &str = r#"
   ALTER TABLE user_preferences
   ADD COLUMN roadmap_survey_answered BOOLEAN NOT NULL DEFAULT 0;
+"#;
+
+pub const USER_PREFS_TABLE_ALTER_ADD_ENABLE_LOGS : &str = r#"
+  ALTER TABLE user_preferences
+  ADD COLUMN enable_logs BOOLEAN NOT NULL DEFAULT 0;
+"#;
+
+pub const USER_PREFS_TABLE_ALTER_ADD_MAX_OCR_PAGES : &str = r#"
+  ALTER TABLE user_preferences
+  ADD COLUMN pdf_max_ocr_pages BIGINT NOT NULL DEFAULT 150;
 "#;
 
 // APP_DATA stores basic app data and file type data

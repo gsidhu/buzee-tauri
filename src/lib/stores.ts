@@ -73,8 +73,10 @@ export const userPreferences = writable({
   "onboarding_done": false,
   "show_in_dock": true,
   "roadmap_survey_answered": false,
-  "parse_pdfs": false,
+  "parse_pdfs": true,
   "manual_setup": false,
+  "enable_logs": false,
+  "pdf_max_ocr_pages": 150,
 })
 export const pagePath = writable("")
 export const isMac = writable(false)

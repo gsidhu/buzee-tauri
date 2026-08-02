@@ -97,7 +97,9 @@ table! {
     detailed_scan -> Bool,
     roadmap_survey_answered -> Bool,
     parse_pdfs -> Bool,
-    manual_setup -> Bool
+    manual_setup -> Bool,
+    enable_logs -> Bool,
+    pdf_max_ocr_pages -> BigInt
   }
 }
 
