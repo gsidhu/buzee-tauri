@@ -155,10 +155,6 @@
       trackEvent('magic:stats');
       goto("/magic/stats");
     });
-    await listen<Payload>('deep-breathing', (event: any) => {
-      trackEvent('magic:deep-breathing');
-      goto("/magic/deep-breathing");
-    });
     await listen<Payload>('tips-and-shortcuts', (event: any) => {
       trackEvent('magic:tips');
       goto("/magic/tips");

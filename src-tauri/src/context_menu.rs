@@ -24,7 +24,6 @@ pub fn statusbar_context_menu(window: &WebviewWindow) -> Menu<Wry> {
         manager,
         &[
           &MenuItem::with_id(manager, "document_stats", "Document Stats", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(manager, "deep_breathing", "Deep Breathing", true, None::<&str>).unwrap(),
           &MenuItem::with_id(manager, "tips_and_shortcuts", "Tips && Shortcuts", true, None::<&str>).unwrap(),
           &MenuItem::with_id(manager, "app_folder", "Show App Folder", true, None::<&str>).unwrap()
         ],
@@ -68,9 +67,6 @@ pub fn contextmenu_receiver(app: &tauri::AppHandle, event: MenuEvent) {
     }
     "document_stats" => {
       app.emit("document-stats", Payload { message: "Document Stats".into(), data: "".into() }).unwrap();
-    }
-    "deep_breathing" => {
-      app.emit("deep-breathing", Payload { message: "Deep Breathing".into(), data: "".into() }).unwrap();
     }
     "tips_and_shortcuts" => {
       app.emit("tips-and-shortcuts", Payload { message: "Tips & Shortcuts".into(), data: "".into() }).unwrap();

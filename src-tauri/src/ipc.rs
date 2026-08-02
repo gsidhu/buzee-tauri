@@ -549,10 +549,13 @@ pub fn initialize() {
         {
           if is_global_shortcut_enabled(app.handle()) {
             println!("Global Shortcut is enabled");
-            use tauri_plugin_global_shortcut::ShortcutState;
-            app.handle().plugin(
-              tauri_plugin_global_shortcut::Builder::new()
-                .with_shortcut(get_global_shortcut(app.handle()))?
+            use tauri_plugin_global_shortcut::{Builder, ShortcutState};
+            // Registration of the global shortcut is best-effort: the hotkey may
+            // already be claimed by the OS or another application (e.g. Alt+Space).
+            // A failure must not prevent the app from starting, so log and carry on.
+            let registration = (|| -> Result<(), Box<dyn std::error::Error>> {
+              let builder = Builder::new().with_shortcut(get_global_shortcut(app.handle()))?;
+              let plugin = builder
                 .with_handler(|app_handle, shortcut, event| {
                   if event.state == ShortcutState::Pressed {
                     let (global_shortcut_modifiers, global_shortcut_code) = get_modifiers_and_code_from_global_shortcut(app_handle);
@@ -564,8 +567,13 @@ pub fn initialize() {
                     }
                   }
                 })
-                .build(),
-            )?;
+                .build();
+              app.handle().plugin(plugin)?;
+              Ok(())
+            })();
+            if let Err(error) = registration {
+              println!("Failed to register the global shortcut ({}); continuing without it.", error);
+            }
           } else {
             println!("Global Shortcut is disabled");
           }
