@@ -460,6 +460,18 @@ fn clear_index(app_handle: tauri::AppHandle) {
   clear_last_parsed_dates_from_db(&mut conn);
 }
 
+// Rescan documents: grab new/missing files (rescan_all == false) or force
+// a full re-index including text/OCR re-extraction (rescan_all == true).
+#[tauri::command]
+async fn rescan_documents(rescan_all: bool, window: tauri::WebviewWindow, app: tauri::AppHandle) {
+  if rescan_all {
+    let mut conn = establish_connection(&app);
+    let _ = delete_all_docs_from_index();
+    clear_last_parsed_dates_from_db(&mut conn);
+  }
+  run_sync_operation(window, app, false, Vec::new()).await;
+}
+
 #[tauri::command]
 fn get_chrome_user_profiles() -> Result<Vec<String>, Error> {
   let user_profiles = get_chrome_profiles();
@@ -514,6 +526,7 @@ pub fn initialize() {
       search_tantivy_bookmarks_index,
       create_csv_dump,
       clear_index,
+      rescan_documents,
       get_chrome_user_profiles,
       get_arc_user_profiles,
       run_browser_history_search

@@ -256,7 +256,7 @@ impl Default for UserPreferencesState {
           automatic_background_sync: true,
           detailed_scan: true,
           roadmap_survey_answered: false,
-          parse_pdfs: false,
+          parse_pdfs: true,
           manual_setup: false
         }
     }

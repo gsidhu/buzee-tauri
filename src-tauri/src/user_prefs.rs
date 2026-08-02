@@ -27,7 +27,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
         user_preferences::automatic_background_sync.eq(true),
         user_preferences::detailed_scan.eq(true),
         user_preferences::roadmap_survey_answered.eq(false),
-        user_preferences::parse_pdfs.eq(false),
+        user_preferences::parse_pdfs.eq(true),
         user_preferences::manual_setup.eq(false),
       ))
       .execute(conn)
@@ -52,7 +52,7 @@ pub fn set_default_user_prefs(conn: &mut SqliteConnection, reset_settings_flag: 
       automatic_background_sync: true,
       detailed_scan: true,
       roadmap_survey_answered: false,
-      parse_pdfs: false,
+      parse_pdfs: true,
       manual_setup: false,
     };
     // insert new_user_prefs into the user_prefs table

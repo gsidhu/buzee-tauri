@@ -13,10 +13,12 @@
 
 </div>
 
+Note : this version is a fork from the original unmaintained [Buzee](https://github.com/gsidhu/buzee-tauri) v0.2.0 project. Many thanks to the original author for the original idea and the original code.
+
 ## What is Buzee?
 
 Buzee (pronounced _boozey_) is a eight-year-old labrador retriever who can't play fetch but can love you like no other.
-This version is a fork from the original unmaintained [Buzee](https://github.com/gsidhu/buzee-tauri) v0.2.0 project. Many thanks to the original author for the original idea and the original code.
+
 
 Buzee is also a full-text search application for your life. It helps you find your files, effortlessly.
 
@@ -43,7 +45,7 @@ Also, download the forked v0.2.1 from [Releases](https://github.com/ggielly/buze
   - Extract text from PDFs and Images using OCR.
 - Automatically syncs with changes on your filesystem.
 - Lightweight installation package and low memory usage.
-- Supports these default file types:
+- Supports these default file types :
 
 ```bash
 Documents: csv, docx, key, md, numbers, pages, pdf, pptx, txt, xlsx, xls
@@ -55,7 +57,7 @@ Video: mp4, mkv, avi, mov, wmv
 
 ### Semantic search (somewhat)
 
-#### Include/Exclude from Search
+#### Include/exclude from search
 
 - Use the Filetype filter or simply type it in the search (like `invoice pdf`)
 - Put quotes around keyword(s) to search for the exact phrase (like `"annual report"`)
@@ -74,9 +76,10 @@ Use the Date Range filter or simply mention the date/time period that you are lo
 
 If you want to use a phrase as a keyword for search and not time, simply wrap it in quotes like this: `invoice "March 2022"`
 
-## Building from Source
+## Building from source
 
-Buzee works best on Mac. Windows may throw up some issues because I haven't had a change to properly test it. Linux is untested entirely, so you're on your own there.
+Buzee works Windows, Linux, and Max but may throw up some issues because I haven't a mac :P
+Android is also supported ATM via tauri
 
 1. Clone the repository.
 2. Install Rust and NodeJS.
@@ -97,7 +100,7 @@ Finally, replace `binaries/textra` with `binaries/winocr` in [`tauri.conf.json`]
 
 ---
 
-## TODO / Known issues
+## TODO / known issues
 
 ```bash
 Index:
@@ -122,14 +125,14 @@ Index:
 
 ## Tech stack
 
-### Dependencies
+### Dependencies on the v0.2.0
 
 Back-end:
 
-- Rust 
+- Rust
 - Tauri v2
 - SQLite
-- Tantivy
+
 
 Front-end:
 
@@ -138,6 +141,15 @@ Front-end:
 - TailwindCSS
 
 See all dependencies in the [Cargo.toml](/src-tauri/Cargo.toml) and [package.json](/package.json) files.
+
+### Dependencies on the v0.2.1
+
+Back-end:
+
+- Rust 
+- Tauri v2
+- SQLite/
+- Tantivy
 
 ### Architecture
 
@@ -148,7 +160,7 @@ See all dependencies in the [Cargo.toml](/src-tauri/Cargo.toml) and [package.jso
 - The Firefox, Chrome and Arc history is searched using their respective history databases directly.
 - All front-end code is in the `src` directory. All back-end code is in the `src-tauri` directory.
 
-## Contributing / Way Forward
+## Contributing / way forward
 
 Read the [Vision and Roadmap](./VISION&ROADMAP).
 
@@ -162,4 +174,6 @@ If you do do something with this project, please let me know. I would love to se
 
 ## License
 
-MIT
+Original code from is licenced under the MIT licence.
+
+The rest of the code since the fork is licensed under the AGPL.

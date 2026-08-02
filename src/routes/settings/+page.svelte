@@ -11,7 +11,7 @@
   import Button from "$lib/components/ui/button/button.svelte";
 	import * as Select from "$lib/components/ui/select";
 	import { Switch } from "$lib/components/ui/switch";
-	import {PencilLine, TriangleAlert} from "lucide-svelte";
+	import {PencilLine, TriangleAlert, RefreshCw} from "lucide-svelte";
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
 
@@ -28,6 +28,8 @@
 	let parsePDF: boolean;
 	let manualSetupMode: boolean;
 	let clearIndexDialogOpen = false;
+	let rescanDialogOpen = false;
+	let rescanInProgress = false;
 
 	function setKeydownHandlerOnGlobalShortuctInput(event: KeyboardEvent) {
 		console.log("~>>! pressed:", event.key);
@@ -136,6 +138,31 @@
     trackEvent('click:clearIndex');
 		await invoke("clear_index");
 		$statusMessage = `Cleared!`;
+	}
+
+	async function rescanDocuments(rescanAll: boolean) {
+		trackEvent('click:rescanDocuments', { rescanAll });
+		rescanInProgress = true;
+		$statusMessage = rescanAll
+			? "Rescanning all documents..."
+			: "Rescanning for missing documents...";
+		$syncStatus = true;
+		try {
+			await invoke("rescan_documents", { rescanAll });
+			$statusMessage = rescanAll
+				? "Rescan complete! All documents re-indexed."
+				: "Rescan complete! Missing documents indexed.";
+		} catch (error) {
+			$statusMessage = "Rescan failed. Please try again.";
+			console.error(error);
+		} finally {
+			setTimeout(() => {
+				$statusMessage = "";
+				$syncStatus = false;
+				rescanInProgress = false;
+				rescanDialogOpen = false;
+			}, 3000);
+		}
 	}
 
 	function uninstallApp() {
@@ -487,6 +514,54 @@
 			</td>
 			<td>
 				<PopoverIcon title="Disabling this setting may improve the quality of search results but make the app buggy"/>
+			</td>
+		</tr>
+		<tr class="hover:text-red-500">
+			<td class="text-center px-2">
+				<Dialog.Root bind:open={rescanDialogOpen}>
+					<Dialog.Trigger class="flex justify-center items-center w-full">
+						<RefreshCw class="h-6 w-6" />
+					</Dialog.Trigger>
+					<Dialog.Content>
+						<Dialog.Header>
+							<Dialog.Title>Rescan Documents</Dialog.Title>
+							<Dialog.Description>Choose what to rescan</Dialog.Description>
+						</Dialog.Header>
+						{#if rescanInProgress}
+							<p class="mb-0">Rescan in progress...</p>
+						{:else}
+							<p class="mb-0">
+								Buzee can rescan your files now to pick up documents that are missing from
+								the database, or force a full re-index of every document (including OCR of
+								PDFs and images).<br/><br/>
+								<strong>Rescan new documents</strong> only indexes files that are missing or
+								changed.<br/>
+								<strong>Rescan all documents</strong> re-extracts text and OCR from every file,
+								which can take a long time.
+							</p>
+						{/if}
+						<Dialog.Footer>
+							<Dialog.Close asChild let:builder>
+								<Button variant="secondary" aria-label="Close" builders={[builder]}>Close</Button>
+							</Dialog.Close>
+							<Button variant="secondary" on:click={() => rescanDocuments(false)} disabled={rescanInProgress}>
+								Rescan new documents
+							</Button>
+							<Button on:click={() => rescanDocuments(true)} disabled={rescanInProgress}>
+								Rescan all documents
+							</Button>
+						</Dialog.Footer>
+					</Dialog.Content>
+				</Dialog.Root>
+			</td>
+			<td class="py-2 skip-hover" role="button" on:click={() => {rescanDialogOpen = true;}}>
+				Rescan Documents
+				<div class="flex items-center small-explanation gap-1">
+					<div>Find missing documents or force a full re-index.</div>
+				</div>
+			</td>
+			<td>
+
 			</td>
 		</tr>
 		<tr>

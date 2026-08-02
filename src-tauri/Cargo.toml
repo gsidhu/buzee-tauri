@@ -17,10 +17,12 @@ edition = "2021"
 authors = ["Gurjot Sidhu, Guillaume Gielly"]
 license = "MIT"
 
-# OCR (native WinRT on Windows, textra sidecar on macOS) is opt-in and disabled
-# by default. The default build never downloads or executes any OCR tooling.
+# OCR is enabled by default. On Windows it uses the in-process native WinRT
+# OCR (Windows.Media.Ocr) with Windows.Data.Pdf rasterization for scanned PDFs.
+# On macOS it uses the bundled `textra` sidecar. No external tooling is
+# downloaded at runtime.
 [features]
-default = []
+default = ["ocr"]
 ocr = []
 
 [build-dependencies]
