@@ -304,6 +304,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serialize-to-javascript",
+ "sha2",
  "tantivy",
  "tauri",
  "tauri-build",

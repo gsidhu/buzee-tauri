@@ -77,6 +77,18 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
       // WinRT calls run on a dedicated blocking thread so the async runtime and
       // the UI thread are never blocked.
       use crate::text_extraction::win_ocr::{self, ImageOcr};
+      use crate::text_extraction::ocr_cache;
+      use crate::database::establish_connection;
+
+      let mut conn = establish_connection(_app);
+
+      // Check the OCR cache before running expensive recognition.
+      let file_hash = ocr_cache::compute_file_hash(std::path::Path::new(file))
+        .unwrap_or_default();
+      if let Some(cached) = ocr_cache::get_cached_ocr(&file_hash, &mut conn) {
+        return Ok(cached);
+      }
+
       let path_buf = std::path::PathBuf::from(file);
       let max_pages = get_pdf_max_ocr_pages(_app) as u32;
       let result = tokio::time::timeout(
@@ -96,6 +108,16 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
       if result.text.trim().is_empty() {
         return Err("OcrUnavailableForPdf".into());
       }
+
+      // Store the result in the OCR cache for subsequent runs.
+      ocr_cache::store_ocr_result(
+        &file_hash,
+        &result.text,
+        result.lines_detected as i32,
+        result.language_tag.as_deref(),
+        &mut conn,
+      );
+
       return Ok(result.text)
     }
 

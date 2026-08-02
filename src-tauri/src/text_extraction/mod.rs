@@ -10,6 +10,8 @@ pub mod pptx;
 pub mod txt;
 pub mod xlsx;
 pub mod image;
+#[cfg(all(target_os = "windows", feature = "ocr"))]
+pub mod ocr_cache;
 pub mod win_ocr;
 
 pub struct Extractor;

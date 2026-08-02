@@ -41,12 +41,24 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
       // Native Windows OCR (Windows.Media.Ocr). Runs on a blocking pool thread
       // so the async runtime and the UI thread are never blocked.
       use crate::text_extraction::win_ocr::{self, ImageOcr, OcrError, WindowsOcr};
+      use crate::text_extraction::ocr_cache;
+      use crate::database::establish_connection;
+
       let path = std::path::PathBuf::from(file);
       let extension = win_ocr::image_extension(&path).unwrap_or_default();
       if !win_ocr::is_supported_image(&extension) {
         log::info!("Image format not supported by Windows OCR: {}", file);
         return Err(Box::new(OcrError::UnsupportedFormat));
       }
+
+      let mut conn = establish_connection(_app);
+
+      // Check the OCR cache before running expensive recognition.
+      let file_hash = ocr_cache::compute_file_hash(&path).unwrap_or_default();
+      if let Some(cached) = ocr_cache::get_cached_ocr(&file_hash, &mut conn) {
+        return Ok(cached);
+      }
+
       let ocr = WindowsOcr;
       let result = tokio::time::timeout(
         std::time::Duration::from_secs(IMAGE_OCR_TIMEOUT_SECS),
@@ -64,6 +76,16 @@ pub async fn extract(file: &String, _app: &tauri::AppHandle) -> Result<String, B
       if result.text.trim().is_empty() {
         log::info!("OCR produced no text for image: {}", file);
       }
+
+      // Store the result in the OCR cache for subsequent runs.
+      ocr_cache::store_ocr_result(
+        &file_hash,
+        &result.text,
+        result.lines_detected as i32,
+        result.language_tag.as_deref(),
+        &mut conn,
+      );
+
       return Ok(result.text);
     }
 

@@ -325,6 +325,18 @@ pub const FILE_TYPES_TABLE_CREATE_STATEMENT : &str = r#"
   );
 "#;
 
+// OCR_CACHE stores pre-computed OCR results keyed by a fast content hash.
+pub const OCR_CACHE_TABLE_CREATE_STATEMENT : &str = r#"
+  CREATE TABLE IF NOT EXISTS "ocr_cache"
+  (
+    file_hash TEXT PRIMARY KEY NOT NULL,
+    text TEXT NOT NULL,
+    page_count INTEGER NOT NULL DEFAULT 0,
+    language_tag TEXT,
+    created_at BIGINT NOT NULL DEFAULT 0
+  );
+"#;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// OTHER DOMAINS /////////////////////////////////////////

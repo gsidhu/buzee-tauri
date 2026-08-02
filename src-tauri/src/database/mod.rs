@@ -19,7 +19,8 @@ use queries::{
   APP_DATA_TABLE_CREATE_STATEMENT,
   IGNORE_LIST_TABLE_CREATE_STATEMENT,
   ALLOW_LIST_TABLE_CREATE_STATEMENT,
-  FILE_TYPES_TABLE_CREATE_STATEMENT
+  FILE_TYPES_TABLE_CREATE_STATEMENT,
+  OCR_CACHE_TABLE_CREATE_STATEMENT,
 };
 
 const DB_NAME: &str = r#"buzee.db"#;
@@ -105,6 +106,7 @@ pub fn create_tables_if_not_exists(conn: &mut SqliteConnection) -> Result<usize,
   diesel::sql_query(IGNORE_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(ALLOW_LIST_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   diesel::sql_query(FILE_TYPES_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
+  diesel::sql_query(OCR_CACHE_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
   
   // Data Tables
   diesel::sql_query(DOCUMENT_TABLE_CREATE_STATEMENT.to_string()).execute(conn)?;
