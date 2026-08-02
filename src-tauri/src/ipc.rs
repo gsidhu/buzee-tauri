@@ -407,21 +407,6 @@ async fn set_new_global_shortcut(app_handle: tauri::AppHandle, new_shortcut_stri
   // app_handle.restart();
 }
 
-// #[tauri::command]
-// async fn run_sidecar(app: tauri::AppHandle) {
-//   use tauri_plugin_shell::{ShellExt, process::CommandEvent};
-//   let sidecar_command = app.shell().sidecar("test").unwrap().args(["buzeeeeee"]);
-//   let (mut rx, mut _child) = sidecar_command.spawn().unwrap();
-//   let mut text = String::new();
-//   while let Some(event) = rx.recv().await {
-//     if let CommandEvent::Stdout(line) = event {
-//       let output_line = String::from_utf8(line).unwrap();
-//       text += &output_line;
-//       println!("sidecaaar text: {}", text);
-//     }
-//   }
-// }
-
 #[tauri::command]
 fn search_tantivy_files_index(app_handle: tauri::AppHandle, user_query: String, limit: i32, page: i32) -> Result<Vec<TantivyDocumentSearchResult>, Error> {
   println!("Searching Tantivy index...");

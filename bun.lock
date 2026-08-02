@@ -12,7 +12,6 @@
         "@tauri-apps/plugin-os": "^2.3.2",
         "@tauri-apps/plugin-shell": ">=2.2.0",
         "@tauri-apps/plugin-updater": "^2.3.0",
-        "@tauri-controls/svelte": "^0.4.0",
         "clsx": "^2.1.1",
         "cmdk-sv": "^0.0.18",
         "compromise": "^14.14.3",
@@ -304,7 +303,6 @@
 
     "@tauri-apps/plugin-updater": ["@tauri-apps/plugin-updater@2.3.0", "", { "dependencies": { "@tauri-apps/api": "^2.0.0" } }, "sha512-qdzyZEUN69FZQ/nRx51fBub10tT6wffJl3DLVo9q922Gvw8Wk++rZhoD9eethPlZYbog/7RGgT8JkrfLh5BKAg=="],
 
-    "@tauri-controls/svelte": ["@tauri-controls/svelte@0.4.0", "", { "peerDependencies": { "clsx": "^2.0.0", "svelte": "^4.1.2", "tailwind-merge": "^1.14.0" } }, "sha512-5zSLCz/l90+mQt/6lDZHzbJdTOt4Qbe1Mv0DCzCnNcaDy0Bbl8gqSWDps6SrIF4oq1sZkJno0GFjwHnol/wKSw=="],
 
     "@types/cookie": ["@types/cookie@0.6.0", "", {}, "sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA=="],
 

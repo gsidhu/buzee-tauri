@@ -4,8 +4,7 @@ import type { Config } from "tailwindcss";
 const config: Config = {
 	darkMode: ["class"],
 	content: [
-		"./src/**/*.{html,js,svelte,ts}",
-		"./node_modules/@tauri-controls/svelte/**/*.{js,svelte,ts}"
+		"./src/**/*.{html,js,svelte,ts}"
 	],
 	safelist: ["dark"],
 	theme: {

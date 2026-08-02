@@ -22,7 +22,6 @@
 		"@tauri-apps/plugin-os": "^2.3.2",
 		"@tauri-apps/plugin-shell": "^2.3.5",
 		"@tauri-apps/plugin-updater": "^2.10.1",
-		"@tauri-controls/svelte": "^0.4.0",
 		"clsx": "^2.1.1",
 		"cmdk-sv": "^0.0.18",
 		"compromise": "^14.14.3",

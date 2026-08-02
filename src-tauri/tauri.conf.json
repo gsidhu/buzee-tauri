@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Buzee",
-        "width": 800,
-        "height": 600,
+        "width": 1100,
+        "height": 850,
         "decorations": false,
         "visibleOnAllWorkspaces": false
       }
