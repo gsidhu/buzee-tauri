@@ -17,7 +17,6 @@
 		'KeyK',
 		'KeyP',
 		'KeyN',
-		'KeyS',
 		'ShiftLeft',
 		'ShiftRight',
 		'Tab',
@@ -53,14 +52,6 @@
 		}
 		if (document.activeElement instanceof HTMLInputElement) return;
 		if (allowedKeys.indexOf(e.code) < 0) return;
-
-		// Easter Egg: Go straight to Scratch Pad
-		if ($metaKeyPressed && $shiftKeyPressed && e.code === 'KeyS') {
-			e.preventDefault();
-			trackEvent(eventPrefix + 'goToScratchPad');
-			goto('/magic/scratchpad');
-			return;
-		}
 
 		// if on search page
 		if ($page.route.id === '/search' ) {

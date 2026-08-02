@@ -76,19 +76,6 @@
 			</tr>
 			<tr>
 				<td class="text-center px-2">
-					<button class="btn" on:click={() => gotoMagicPage('scratchpad')}>
-            <i class="bi bi-journal-text" />
-					</button>
-				</td>
-				<td class="py-2" role="button" on:click={() => gotoMagicPage('scratchpad')}>
-					Scratch Pad
-					<div class="flex items-center small-explanation gap-1">
-						<div>A place to keep copied text, notes, and thoughts</div>
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td class="text-center px-2">
 					<button class="btn" on:click={() => gotoMagicPage('tips')}>
             <i class="bi bi-lightbulb" />
 					</button>
